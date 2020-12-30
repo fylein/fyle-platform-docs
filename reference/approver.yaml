@@ -24,399 +24,399 @@ tags:
     description: |
       These API gives you access to Expense Reports data which are submitted to you.
 paths:
-  /approver/report_approvals:
-    post:
-      tags:
-        - Reports
-      summary: Approve reports
-      description: |
-        It approves expense reports.
-      operationId: post-report-approvals
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      description: |
-                        Id of a report which is to be approved.
-                      example: rphs782hj245
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    example: /approver/report_approvals
-                  data:
-                    type: object
-                    properties:
-                      report_id:
-                        type: string
-                        maxLength: 255
-                        description: |
-                          This id provided by Fyle to uniquely identify a report.
-                          This id is always prefixed with `rp`.
-                        readOnly: true
-                        example: rptGt9ju6qP
-                      created_at:
-                        type: string
-                        format: date-time
-                        description: |
-                          <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
-                          Signifies when this object was created.
-                        readOnly: true
-                        example: '2020-06-01T13:14:54.804Z'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        description: |
-                          <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
-                          Signifies when this object was updated.
-                        readOnly: true
-                        example: '2020-06-11T13:14:55.201598Z'
-                      approver_id:
-                        allOf:
-                          - type: string
-                            maxLength: 255
-                            description: |
-                              This id provided by Fyle to uniquely identify an employee within an organization.
-                              This id is always prefixed with `ou`.
-                            readOnly: true
-                            example: outGt9ju6qP
-                      state:
-                        type: string
-                        enum:
-                          - APPROVAL_PENDING
-                          - APPROVAL_DONE
-                          - APPROVAL_DISABLED
-                        readOnly: true
-                        example: APPROVAL_PENDING
-                      last_updater_id:
-                        type: string
-                        readOnly: true
-                        description: |
-                          This represents the id of employee who updated this expense.
-                        example: ouGgsdfdq
-                      last_updater:
-                        allOf:
-                          - type: object
-                            description: Details of the employee to whom this object belongs to.
-                            readOnly: true
-                            properties:
-                              user_id:
-                                type: string
-                                maxLength: 255
-                                description: |
-                                  This id helps to identify employees in other organisations.
-                                  It is always prefixed with the string `us`.
-                                  It is unique per email.
-                                example: usIYTLwzlaGu
-                              email:
-                                type: string
-                                format: email
-                                maxLength: 127
-                                example: john.doe@example.com
-                                description: |
-                                  An immutable field that represents the email address.
-                                  Must be compliant with <a href="https://www.ietf.org/rfc/rfc822.txt">RFC 822.</a>
-                              code:
-                                type: string
-                                maxLength: 255
-                                example: E84122
-                                description: |
-                                  This field refers to any string that the client programs can use to refer to an employee's unique id.
-                                  This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
-                              location:
-                                type: string
-                                maxLength: 255
-                                example: Bangalore Ofc
-                              level_id:
-                                type: string
-                                maxLength: 255
-                                example: lvlnvJUe9k6Vx
-                              department_id:
-                                type: string
-                                maxLength: 255
-                                example: dept9in4oIHpdR
-                              business_unit:
-                                type: string
-                                maxLength: 255
-                                example: Finance ops
-                                description: Represents the business unit of the organization to which of the employee belongs.
-                              title:
-                                type: string
-                                maxLength: 255
-                                example: Branch Manager
-                                description: Represents the title/desgination of the employee.
-                              mobile:
-                                type: string
-                                description: |
-                                  Mobile number of the employee.
-                                  `Given example is a fake number. We don't know who might answer your call.`
-                                example: +1-202-555-0167
-                              joined_at:
-                                type: string
-                                format: date
-                                example: '2018-10-31'
-                                description: Date string in YYYY-MM-DD format
-                              full_name:
-                                type: string
-                                maxLength: 255
-                                example: John Doe
-                                description: Represents the full name of the employee. Must be at least 3 characters.
-                        description: |
-                          Details of employee who updated this expense.
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    enum:
-                      - invalid token
-                    type: string
-                    description: |
-                      This error means that the input access token is either not issued by Fyle or has expired.
-                      You need to generate a new access token.
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    enum:
-                      - Forbidden
-                    type: string
-                    description: |
-                      This error means current user does not have enough permissions to perform this operation.
-    get:
-      tags:
-        - Reports
-      summary: List report approvals
-      operationId: GetReportApprovals
-      parameters:
-        - in: query
-          name: report_id
-          description: |
-            Filters the objects by report id. For single value use `report_id=eq.<value>`.
-            For multiple values, use `report_id=in.(value1,value2,value3)`.
-          schema:
-            type: string
-            example: eq.rptqwds24
-        - in: query
-          name: state
-          description: |
-            Accepted states are DRAFT, APPROVER_INQUIRY, APPROVER_PENDING, APPROVED, PAYMENT_PENDING, PAYMENT_PROCESSING, PAID.<br>
-            Supported operators are `eq`, `like`, `in`.<br>
-          schema:
-            type: string
-            example: in.(COMPLETE)
-        - in: query
-          name: order
-          description: |
-            use comma separated column names for sorting the results.
-            For sorting in descending order, use `column_name.desc`
-          schema:
-            type: string
-            example: 'updated_at.desc,id'
-            default: 'updated_at.desc,id'
-        - in: query
-          name: offest
-          description: |
-            offset is used to skip that many number of objects before counting. <br>
-          schema:
-            type: integer
-            example: 10
-        - in: query
-          name: limit
-          description: |
-            A limit on the number of objects to be returned. Allowed values are from 1 to 200.
-          schema:
-            type: integer
-            example: 100
-            default: 200
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    description: |
-                      The total number of objects that can be requested.
-                    type: integer
-                    example: 10000
-                  offset:
-                    description: |
-                      offset is used to skip that many number of objects before counting. <br>
-                      For example, if there are 2000 objects, <br>
-                      The first request will have offset as 0 and limit as 1000 to return first 1000 objects. <br>
-                      The second request will have offset as 1000 and limit as 1000 to return next 1000 objects. <br>
-                    type: integer
-                    example: 10
-                    default: 200
-                  limit:
-                    description: |
-                      The actual number of objects that are returned in the response.
-                    type: integer
-                    example: 100
-                  url:
-                    type: string
-                    example: /approver/report_approvals
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        report_id:
-                          type: string
-                          maxLength: 255
-                          description: |
-                            This id provided by Fyle to uniquely identify a report.
-                            This id is always prefixed with `rp`.
-                          readOnly: true
-                          example: rptGt9ju6qP
-                        created_at:
-                          type: string
-                          format: date-time
-                          description: |
-                            <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
-                            Signifies when this object was created.
-                          readOnly: true
-                          example: '2020-06-01T13:14:54.804Z'
-                        updated_at:
-                          type: string
-                          format: date-time
-                          description: |
-                            <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
-                            Signifies when this object was updated.
-                          readOnly: true
-                          example: '2020-06-11T13:14:55.201598Z'
-                        approver_id:
-                          allOf:
-                            - type: string
-                              maxLength: 255
-                              description: |
-                                This id provided by Fyle to uniquely identify an employee within an organization.
-                                This id is always prefixed with `ou`.
-                              readOnly: true
-                              example: outGt9ju6qP
-                        state:
-                          type: string
-                          enum:
-                            - APPROVAL_PENDING
-                            - APPROVAL_DONE
-                            - APPROVAL_DISABLED
-                          readOnly: true
-                          example: APPROVAL_PENDING
-                        last_updater_id:
-                          type: string
-                          readOnly: true
-                          description: |
-                            This represents the id of employee who updated this expense.
-                          example: ouGgsdfdq
-                        last_updater:
-                          allOf:
-                            - type: object
-                              description: Details of the employee to whom this object belongs to.
-                              readOnly: true
-                              properties:
-                                user_id:
-                                  type: string
-                                  maxLength: 255
-                                  description: |
-                                    This id helps to identify employees in other organisations.
-                                    It is always prefixed with the string `us`.
-                                    It is unique per email.
-                                  example: usIYTLwzlaGu
-                                email:
-                                  type: string
-                                  format: email
-                                  maxLength: 127
-                                  example: john.doe@example.com
-                                  description: |
-                                    An immutable field that represents the email address.
-                                    Must be compliant with <a href="https://www.ietf.org/rfc/rfc822.txt">RFC 822.</a>
-                                code:
-                                  type: string
-                                  maxLength: 255
-                                  example: E84122
-                                  description: |
-                                    This field refers to any string that the client programs can use to refer to an employee's unique id.
-                                    This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
-                                location:
-                                  type: string
-                                  maxLength: 255
-                                  example: Bangalore Ofc
-                                level_id:
-                                  type: string
-                                  maxLength: 255
-                                  example: lvlnvJUe9k6Vx
-                                department_id:
-                                  type: string
-                                  maxLength: 255
-                                  example: dept9in4oIHpdR
-                                business_unit:
-                                  type: string
-                                  maxLength: 255
-                                  example: Finance ops
-                                  description: Represents the business unit of the organization to which of the employee belongs.
-                                title:
-                                  type: string
-                                  maxLength: 255
-                                  example: Branch Manager
-                                  description: Represents the title/desgination of the employee.
-                                mobile:
-                                  type: string
-                                  description: |
-                                    Mobile number of the employee.
-                                    `Given example is a fake number. We don't know who might answer your call.`
-                                  example: +1-202-555-0167
-                                joined_at:
-                                  type: string
-                                  format: date
-                                  example: '2018-10-31'
-                                  description: Date string in YYYY-MM-DD format
-                                full_name:
-                                  type: string
-                                  maxLength: 255
-                                  example: John Doe
-                                  description: Represents the full name of the employee. Must be at least 3 characters.
-                          description: |
-                            Details of employee who updated this expense.
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    enum:
-                      - invalid token
-                    type: string
-                    description: |
-                      This error means that the input access token is either not issued by Fyle or has expired.
-                      You need to generate a new access token.
+  # /approver/report_approvals:
+  #   post:
+  #     tags:
+  #       - Reports
+  #     summary: Approve reports
+  #     description: |
+  #       It approves expense reports.
+  #     operationId: post-report-approvals
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               data:
+  #                 type: object
+  #                 properties:
+  #                   id:
+  #                     type: string
+  #                     description: |
+  #                       Id of a report which is to be approved.
+  #                     example: rphs782hj245
+  #             required:
+  #               - data
+  #     responses:
+  #       '200':
+  #         description: OK
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 url:
+  #                   type: string
+  #                   example: /approver/report_approvals
+  #                 data:
+  #                   type: object
+  #                   properties:
+  #                     report_id:
+  #                       type: string
+  #                       maxLength: 255
+  #                       description: |
+  #                         This id provided by Fyle to uniquely identify a report.
+  #                         This id is always prefixed with `rp`.
+  #                       readOnly: true
+  #                       example: rptGt9ju6qP
+  #                     created_at:
+  #                       type: string
+  #                       format: date-time
+  #                       description: |
+  #                         <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
+  #                         Signifies when this object was created.
+  #                       readOnly: true
+  #                       example: '2020-06-01T13:14:54.804Z'
+  #                     updated_at:
+  #                       type: string
+  #                       format: date-time
+  #                       description: |
+  #                         <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
+  #                         Signifies when this object was updated.
+  #                       readOnly: true
+  #                       example: '2020-06-11T13:14:55.201598Z'
+  #                     approver_id:
+  #                       allOf:
+  #                         - type: string
+  #                           maxLength: 255
+  #                           description: |
+  #                             This id provided by Fyle to uniquely identify an employee within an organization.
+  #                             This id is always prefixed with `ou`.
+  #                           readOnly: true
+  #                           example: outGt9ju6qP
+  #                     state:
+  #                       type: string
+  #                       enum:
+  #                         - APPROVAL_PENDING
+  #                         - APPROVAL_DONE
+  #                         - APPROVAL_DISABLED
+  #                       readOnly: true
+  #                       example: APPROVAL_PENDING
+  #                     last_updater_id:
+  #                       type: string
+  #                       readOnly: true
+  #                       description: |
+  #                         This represents the id of employee who updated this expense.
+  #                       example: ouGgsdfdq
+  #                     last_updater:
+  #                       allOf:
+  #                         - type: object
+  #                           description: Details of the employee to whom this object belongs to.
+  #                           readOnly: true
+  #                           properties:
+  #                             user_id:
+  #                               type: string
+  #                               maxLength: 255
+  #                               description: |
+  #                                 This id helps to identify employees in other organisations.
+  #                                 It is always prefixed with the string `us`.
+  #                                 It is unique per email.
+  #                               example: usIYTLwzlaGu
+  #                             email:
+  #                               type: string
+  #                               format: email
+  #                               maxLength: 127
+  #                               example: john.doe@example.com
+  #                               description: |
+  #                                 An immutable field that represents the email address.
+  #                                 Must be compliant with <a href="https://www.ietf.org/rfc/rfc822.txt">RFC 822.</a>
+  #                             code:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: E84122
+  #                               description: |
+  #                                 This field refers to any string that the client programs can use to refer to an employee's unique id.
+  #                                 This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+  #                             location:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: Bangalore Ofc
+  #                             level_id:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: lvlnvJUe9k6Vx
+  #                             department_id:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: dept9in4oIHpdR
+  #                             business_unit:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: Finance ops
+  #                               description: Represents the business unit of the organization to which of the employee belongs.
+  #                             title:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: Branch Manager
+  #                               description: Represents the title/desgination of the employee.
+  #                             mobile:
+  #                               type: string
+  #                               description: |
+  #                                 Mobile number of the employee.
+  #                                 `Given example is a fake number. We don't know who might answer your call.`
+  #                               example: +1-202-555-0167
+  #                             joined_at:
+  #                               type: string
+  #                               format: date
+  #                               example: '2018-10-31'
+  #                               description: Date string in YYYY-MM-DD format
+  #                             full_name:
+  #                               type: string
+  #                               maxLength: 255
+  #                               example: John Doe
+  #                               description: Represents the full name of the employee. Must be at least 3 characters.
+  #                       description: |
+  #                         Details of employee who updated this expense.
+  #       '401':
+  #         description: Unauthorised request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   enum:
+  #                     - invalid token
+  #                   type: string
+  #                   description: |
+  #                     This error means that the input access token is either not issued by Fyle or has expired.
+  #                     You need to generate a new access token.
+  #       '403':
+  #         description: Forbidden
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   enum:
+  #                     - Forbidden
+  #                   type: string
+  #                   description: |
+  #                     This error means current user does not have enough permissions to perform this operation.
+  #   get:
+  #     tags:
+  #       - Reports
+  #     summary: List report approvals
+  #     operationId: GetReportApprovals
+  #     parameters:
+  #       - in: query
+  #         name: report_id
+  #         description: |
+  #           Filters the objects by report id. For single value use `report_id=eq.<value>`.
+  #           For multiple values, use `report_id=in.(value1,value2,value3)`.
+  #         schema:
+  #           type: string
+  #           example: eq.rptqwds24
+  #       - in: query
+  #         name: state
+  #         description: |
+  #           Accepted states are DRAFT, APPROVER_INQUIRY, APPROVER_PENDING, APPROVED, PAYMENT_PENDING, PAYMENT_PROCESSING, PAID.<br>
+  #           Supported operators are `eq`, `like`, `in`.<br>
+  #         schema:
+  #           type: string
+  #           example: in.(COMPLETE)
+  #       - in: query
+  #         name: order
+  #         description: |
+  #           use comma separated column names for sorting the results.
+  #           For sorting in descending order, use `column_name.desc`
+  #         schema:
+  #           type: string
+  #           example: 'updated_at.desc,id'
+  #           default: 'updated_at.desc,id'
+  #       - in: query
+  #         name: offest
+  #         description: |
+  #           offset is used to skip that many number of objects before counting. <br>
+  #         schema:
+  #           type: integer
+  #           example: 10
+  #       - in: query
+  #         name: limit
+  #         description: |
+  #           A limit on the number of objects to be returned. Allowed values are from 1 to 200.
+  #         schema:
+  #           type: integer
+  #           example: 100
+  #           default: 200
+  #     responses:
+  #       '200':
+  #         description: OK
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 count:
+  #                   description: |
+  #                     The total number of objects that can be requested.
+  #                   type: integer
+  #                   example: 10000
+  #                 offset:
+  #                   description: |
+  #                     offset is used to skip that many number of objects before counting. <br>
+  #                     For example, if there are 2000 objects, <br>
+  #                     The first request will have offset as 0 and limit as 1000 to return first 1000 objects. <br>
+  #                     The second request will have offset as 1000 and limit as 1000 to return next 1000 objects. <br>
+  #                   type: integer
+  #                   example: 10
+  #                   default: 200
+  #                 limit:
+  #                   description: |
+  #                     The actual number of objects that are returned in the response.
+  #                   type: integer
+  #                   example: 100
+  #                 url:
+  #                   type: string
+  #                   example: /approver/report_approvals
+  #                 data:
+  #                   type: array
+  #                   items:
+  #                     type: object
+  #                     properties:
+  #                       report_id:
+  #                         type: string
+  #                         maxLength: 255
+  #                         description: |
+  #                           This id provided by Fyle to uniquely identify a report.
+  #                           This id is always prefixed with `rp`.
+  #                         readOnly: true
+  #                         example: rptGt9ju6qP
+  #                       created_at:
+  #                         type: string
+  #                         format: date-time
+  #                         description: |
+  #                           <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
+  #                           Signifies when this object was created.
+  #                         readOnly: true
+  #                         example: '2020-06-01T13:14:54.804Z'
+  #                       updated_at:
+  #                         type: string
+  #                         format: date-time
+  #                         description: |
+  #                           <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339, section 5.6 compliant timestamp.</a>
+  #                           Signifies when this object was updated.
+  #                         readOnly: true
+  #                         example: '2020-06-11T13:14:55.201598Z'
+  #                       approver_id:
+  #                         allOf:
+  #                           - type: string
+  #                             maxLength: 255
+  #                             description: |
+  #                               This id provided by Fyle to uniquely identify an employee within an organization.
+  #                               This id is always prefixed with `ou`.
+  #                             readOnly: true
+  #                             example: outGt9ju6qP
+  #                       state:
+  #                         type: string
+  #                         enum:
+  #                           - APPROVAL_PENDING
+  #                           - APPROVAL_DONE
+  #                           - APPROVAL_DISABLED
+  #                         readOnly: true
+  #                         example: APPROVAL_PENDING
+  #                       last_updater_id:
+  #                         type: string
+  #                         readOnly: true
+  #                         description: |
+  #                           This represents the id of employee who updated this expense.
+  #                         example: ouGgsdfdq
+  #                       last_updater:
+  #                         allOf:
+  #                           - type: object
+  #                             description: Details of the employee to whom this object belongs to.
+  #                             readOnly: true
+  #                             properties:
+  #                               user_id:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 description: |
+  #                                   This id helps to identify employees in other organisations.
+  #                                   It is always prefixed with the string `us`.
+  #                                   It is unique per email.
+  #                                 example: usIYTLwzlaGu
+  #                               email:
+  #                                 type: string
+  #                                 format: email
+  #                                 maxLength: 127
+  #                                 example: john.doe@example.com
+  #                                 description: |
+  #                                   An immutable field that represents the email address.
+  #                                   Must be compliant with <a href="https://www.ietf.org/rfc/rfc822.txt">RFC 822.</a>
+  #                               code:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: E84122
+  #                                 description: |
+  #                                   This field refers to any string that the client programs can use to refer to an employee's unique id.
+  #                                   This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+  #                               location:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: Bangalore Ofc
+  #                               level_id:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: lvlnvJUe9k6Vx
+  #                               department_id:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: dept9in4oIHpdR
+  #                               business_unit:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: Finance ops
+  #                                 description: Represents the business unit of the organization to which of the employee belongs.
+  #                               title:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: Branch Manager
+  #                                 description: Represents the title/desgination of the employee.
+  #                               mobile:
+  #                                 type: string
+  #                                 description: |
+  #                                   Mobile number of the employee.
+  #                                   `Given example is a fake number. We don't know who might answer your call.`
+  #                                 example: +1-202-555-0167
+  #                               joined_at:
+  #                                 type: string
+  #                                 format: date
+  #                                 example: '2018-10-31'
+  #                                 description: Date string in YYYY-MM-DD format
+  #                               full_name:
+  #                                 type: string
+  #                                 maxLength: 255
+  #                                 example: John Doe
+  #                                 description: Represents the full name of the employee. Must be at least 3 characters.
+  #                         description: |
+  #                           Details of employee who updated this expense.
+  #       '401':
+  #         description: Unauthorized request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   enum:
+  #                     - invalid token
+  #                   type: string
+  #                   description: |
+  #                     This error means that the input access token is either not issued by Fyle or has expired.
+  #                     You need to generate a new access token.
   /approver/expenses:
     get:
       tags:
