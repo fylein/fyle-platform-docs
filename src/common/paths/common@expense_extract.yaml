@@ -1,0 +1,50 @@
+post:
+  tags:
+    - Data Extraction
+  summary: Retrieve expense data from receipt
+  description: |
+    Retrieve expense related data from the given receipt.
+  operationId: post-vision-extract
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: ../components/schemas/expense_extract.yaml
+          required:
+            - data
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/post_expense_extract.yaml
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Invalid content
+              - $ref: ../components/schemas/json_parsing_error.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/403.yaml

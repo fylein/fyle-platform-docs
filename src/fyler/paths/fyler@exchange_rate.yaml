@@ -1,0 +1,66 @@
+get:
+  tags:
+    - Exchange Rate
+  summary: Retrieve currency exchange rate
+  operationId: get-currency-exchange
+  parameters:
+    - in: query
+      name: date
+      description: |
+        Supported operators are `eq`.<br>
+        date=eq.(value)
+      schema:
+        type: string
+        example: eq.2020-10-26
+    - in: query
+      name: from_currency
+      description: |
+        Supported operators are `eq`.<br>
+        from_currency=eq.(value)
+      schema:
+        type: string
+        example: eq.USD
+    - in: query
+      name: to_currency
+      description: |
+        Supported operators are `eq`.<br>
+        to_currency=eq.(value)
+      schema:
+        type: string
+        example: eq.INR
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                example: /fyler/exchange_rate
+              data:
+                type: object
+                properties:
+                  exchange_rate:
+                    type: number
+                    description: >
+                      This represents the exchange rate between the given
+                      currencies.
+                    example: 64.12
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                enum:
+                  - invalid token
+                type: string
+                description: >
+                  This error means that the input access token is either not
+                  issued by Fyle or has expired.
+
+                  You need to generate a new access token.
