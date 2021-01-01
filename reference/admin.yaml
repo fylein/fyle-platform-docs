@@ -246,6 +246,13 @@ components:
         type: string
         example: like.Fast*
   schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            Message describing why the request is valid
     '401':
       type: object
       properties:
@@ -269,9 +276,9 @@ components:
             This error means current user does not have enough permissions to
             perform this operation.
     count:
+      type: integer
       description: |
         The total number of objects that can be requested.
-      type: integer
       example: 10000
     offset:
       description: >
@@ -391,46 +398,6 @@ components:
         rate:
           type: integer
           example: 40
-    project:
-      type: object
-      readOnly: true
-      properties:
-        id:
-          type: string
-          maxLength: 10
-          description: >
-            This id provided by Fyle to identify a project from this
-            organisation.
-
-            This id is unique within the organisation.
-          readOnly: true
-          example: '2391'
-        name:
-          type: string
-          maxLength: 255
-          description: Represents the name of the project.
-          example: Fast and Furious
-        sub_project:
-          type: string
-          maxLength: 255
-          description: Represents the name of the sub_project.
-          example: Formula One
-        display_name:
-          type: string
-          maxLength: 513
-          description: >
-            This is a combination of name and sub_project separated by a / and
-            spaces.
-
-            In case if no sub_project is present it is same as name of the
-            project.
-          example: Fast and Furious / Formula One
-        code:
-          type: string
-          maxLength: 255
-          description: |
-            This represents the code of project.
-          example: FF-032
     location:
       type: object
       properties:
@@ -880,12 +847,6 @@ components:
             type: string
           example:
             - '2391'
-        projects:
-          type: array
-          description: |
-            This list of projects that are available for this employee.
-          items:
-            $ref: '#/components/schemas/project'
         custom_properties:
           type: array
           items:
@@ -986,6 +947,101 @@ components:
         cannot be changed and is immutable.<br>
       example: ou12345Zdfx
       readOnly: true
+    org_id:
+      type: string
+      description: |
+        The unique id of the Organization to which the object is associated.
+      readOnly: true
+      example: orwruogwnngg
+    created_at:
+      type: string
+      format: date-time
+      description: >
+        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+        section 5.6 compliant timestamp.</a>
+
+        Signifies when this object was created.
+      readOnly: true
+      example: '2020-06-01T13:14:54.804Z'
+    updated_at:
+      type: string
+      format: date-time
+      description: >
+        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+        section 5.6 compliant timestamp.</a>
+
+        Signifies when this object was updated.
+      readOnly: true
+      example: '2020-06-11T13:14:55.201598Z'
+    project_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 10
+          description: >
+            This id provided by Fyle to identify a project from this
+            organisation.
+
+            This id is a numeric string.
+
+            This id is unique within the organisation.
+          readOnly: true
+          example: '2391'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the project.
+          example: Fast and Furious
+        sub_project:
+          type: string
+          maxLength: 255
+          description: Represents the name of the sub_project.
+          example: Formula One
+        display_name:
+          type: string
+          maxLength: 513
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
+          example: Fast and Furious / Formula One
+        code:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the code of project.
+          example: FF-032
+        description:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the description of project.
+          example: Win the trophy
+        is_enabled:
+          type: boolean
+          description: >
+            This indicates if the project is enabled for use within the
+            organisation.
+          default: true
+          example: true
+        category_ids:
+          type: array
+          description: >
+            Has the list of all category ids that are applicable for this
+            project.
+          items:
+            type: int
+          example:
+            - - 16570
     category:
       type: object
       readOnly: true
@@ -1042,26 +1098,6 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_ACCOUNT
-    created_at:
-      type: string
-      format: date-time
-      description: >
-        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
-        section 5.6 compliant timestamp.</a>
-
-        Signifies when this object was created.
-      readOnly: true
-      example: '2020-06-01T13:14:54.804Z'
-    updated_at:
-      type: string
-      format: date-time
-      description: >
-        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
-        section 5.6 compliant timestamp.</a>
-
-        Signifies when this object was updated.
-      readOnly: true
-      example: '2020-06-11T13:14:55.201598Z'
     report:
       type: object
       readOnly: true
@@ -1170,12 +1206,6 @@ components:
       example:
         approver_id: oueoblnegf
         state: APPROVED
-    org_id:
-      type: string
-      description: |
-        The unique id of the Organization to which the object is associated.
-      readOnly: true
-      example: orwruogwnngg
     expense:
       type: object
       properties:
@@ -1293,7 +1323,7 @@ components:
             the Expense belongs. <br>
           example: '1234'
         project:
-          $ref: '#/components/schemas/project'
+          $ref: '#/components/schemas/project_out'
         cost_center_id:
           type: string
           description: >
@@ -2084,7 +2114,7 @@ components:
         project_id:
           $ref: '#/components/schemas/project_id'
         project:
-          $ref: '#/components/schemas/project'
+          $ref: '#/components/schemas/project_out'
         custom_properties:
           type: array
           items:
@@ -2190,8 +2220,6 @@ components:
           example: onsite client meeting
         project_id:
           $ref: '#/components/schemas/project_id'
-        project:
-          $ref: '#/components/schemas/project'
         custom_properties:
           type: array
           items:
@@ -2614,7 +2642,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/balance_transfer'
-    objects_project:
+    url:
+      type: string
+    project_in:
       type: object
       properties:
         id:
@@ -2680,58 +2710,9 @@ components:
             Has the list of all category ids that are applicable for this
             project.
           items:
-            type: string
+            type: int
           example:
-            - '16570'
-        categories:
-          type: array
-          description: |
-            This list of categories that are applicable for this project.
-          items:
-            $ref: '#/components/schemas/category'
-        primary_approver_id:
-          type: string
-          maxLength: 255
-          description: |
-            Employee Id of the primary approver.
-          example: ou4b24ugv3vg
-        primary_approver:
-          allOf:
-            - $ref: '#/components/schemas/user'
-          description: >
-            Primary approver who will be added as an approver by default for all
-            the submitted reports and expenses.
-          example:
-            full_name: primary approver
-            email: primary_approver@example.com
-        secondary_approver_id:
-          type: string
-          maxLength: 255
-          description: |
-            Employee Id of the secondary approver.
-          example: ourjgeugv3vg
-        secondary_approver:
-          allOf:
-            - $ref: '#/components/schemas/user'
-          description: |
-            A secondary approver who can be added to reports via policies.
-          example:
-            full_name: secondary approver
-            email: secondary_approver@example.com
-    projects:
-      type: object
-      properties:
-        count:
-          $ref: '#/components/schemas/count'
-        offset:
-          $ref: '#/components/schemas/offset'
-        url:
-          type: string
-          example: /admin/projects
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/objects_project'
+            - - 16570
     categories:
       type: object
       properties:
@@ -3466,22 +3447,25 @@ paths:
         - $ref: '#/components/parameters/is_enabled'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
-        - in: query
-          name: order
-          description: |
-            use comma separated column names for sorting the results. <br>
-            For sorting in descending order, use `updated_at.desc`.<br>
-            Supported columns are `updated_at`, `id`.
-          schema:
-            type: string
-            example: 'updated_at.desc,id'
+        - $ref: '#/components/parameters/order'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/projects'
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  url:
+                    $ref: '#/components/schemas/url'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/project_out'
         '401':
           description: Unauthorized request
           content:
@@ -3503,7 +3487,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/objects_project'
+                  $ref: '#/components/schemas/project_in'
               required:
                 - data
       responses:
@@ -3518,20 +3502,13 @@ paths:
                     type: string
                     example: /admin/projects
                   data:
-                    $ref: '#/components/schemas/objects_project'
+                    $ref: '#/components/schemas/project_out'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      message:
-                        type: string
-                    example:
-                      message: Invalid or duplicate project code
-                  - $ref: '#/components/schemas/json_parsing_error'
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
