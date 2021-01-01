@@ -27,6 +27,9 @@ You can check the version by running
 ## Bundling ##
 
     openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
+    openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
+    openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
+    openapi bundle -o reference/common.yaml src/common/openapi.yaml
 
 ## Validating Proxy ##
 
