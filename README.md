@@ -4,6 +4,30 @@
 
 OpenAPI documentation of Fyle Platform APIs
 
+## Installing Nvm and Node ##
+
+Install nvm if you haven't already and use the latest node version (>= v14.15.3)
+
+    nvm install v14.15.3
+
+You can check the version by running these commands:
+
+    node -v
+
+## Installing openapi-cli ##
+
+You should get openapi-cli (>= 1.0.0-beta.25)
+
+    npm install -g @redocly/openapi-cli
+
+You can check the version by running
+
+    openapi --version
+
+## Bundling ##
+
+    openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
+
 ## Validating Proxy ##
 
 Setup a .env file with the following entry:
