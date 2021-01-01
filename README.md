@@ -20,6 +20,8 @@ You should get openapi-cli (>= 1.0.0-beta.25)
 
     npm install -g @redocly/openapi-cli
 
+    <!-- npm install -g swagger-cli -->
+
 You can check the version by running
 
     openapi --version
@@ -30,6 +32,8 @@ You can check the version by running
     openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
+
+    <!-- swagger-cli bundle -o reference/admin.yaml -t yaml -r src/admin/openapi.yaml  -->
 
 ## Validating Proxy ##
 
