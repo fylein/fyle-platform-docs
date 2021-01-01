@@ -1,0 +1,96 @@
+get:
+  tags:
+    - Employees
+  summary: List employees
+  operationId: get-employees
+  parameters:
+    - $ref: ../components/parameters/created_at.yaml
+    - $ref: ../components/parameters/updated_at.yaml
+    - $ref: ../components/parameters/offset.yaml
+    - $ref: ../components/parameters/limit.yaml
+    - in: query
+      name: email
+      description: |
+        This param is used to filter records based on employee email.
+        Supported operators are `in`,`eq`.<br>
+      schema:
+        type: string
+      example: eq.employee1@example.com
+    - in: query
+      name: order
+      description: |
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `updated_at.desc`.<br>
+        Supported columns are `updated_at`, `id`.
+      schema:
+        type: string
+        example: 'updated_at.desc,id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/employees.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/401.yaml
+post:
+  tags:
+    - Employees
+  summary: Create or update an employee
+  description: |
+    Create or update an employee.
+  operationId: post-employees
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: ../components/schemas/objects_employee.yaml
+          required:
+            - data
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                example: /admin/employees
+              data:
+                $ref: ../components/schemas/objects_employee.yaml
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Invalid or disabled approver 1 email
+              - $ref: ../components/schemas/json_parsing_error.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/403.yaml

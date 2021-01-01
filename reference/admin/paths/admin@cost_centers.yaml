@@ -1,0 +1,89 @@
+get:
+  tags:
+    - Cost Centers
+  summary: List cost centers
+  operationId: get-cost-centers
+  parameters:
+    - $ref: ../components/parameters/created_at.yaml
+    - $ref: ../components/parameters/updated_at.yaml
+    - $ref: ../components/parameters/is_enabled.yaml
+    - $ref: ../components/parameters/offset.yaml
+    - $ref: ../components/parameters/limit.yaml
+    - in: query
+      name: order
+      description: |
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `updated_at.desc`.<br>
+        Supported columns are `updated_at`, `id`.
+      schema:
+        type: string
+        example: 'updated_at.desc,id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/cost_centers.yaml
+    '401':
+      description: Unauthoried request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/401.yaml
+post:
+  tags:
+    - Cost Centers
+  summary: Create or update a cost center
+  description: |
+    Create or update a cost center.
+  operationId: post-cost-centers
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: ../components/schemas/objects_cost_center.yaml
+          required:
+            - data
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                example: /admin/cost_centers
+              data:
+                $ref: ../components/schemas/objects_cost_center.yaml
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Invalid or duplicate cost center code
+              - $ref: ../components/schemas/json_parsing_error.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/403.yaml
