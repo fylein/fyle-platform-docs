@@ -290,6 +290,75 @@ components:
           items:
             type: int
             example: 16570
+    id_integer:
+      type: integer
+      description: |
+        This id provided by Fyle to identify an object.
+      example: 1234
+    cost_center_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          type: integer
+          maxLength: 255
+          description: |
+            This represents the code of cost center.
+          example: sm-cc
+        description:
+          type: string
+          maxLength: 255
+          description: |
+            This field provides a decription about the cost center.
+          example: Initial Cost center
+        is_enabled:
+          type: boolean
+          description: |
+            This field specifies if the current cost center is enabled or not.
+          example: true
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    cost_center_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the code of cost center.
+          example: sm-cc
+        description:
+          type: string
+          maxLength: 255
+          description: |
+            This field provides a decription about the cost center.
+          example: Initial Cost center
+        is_enabled:
+          type: boolean
+          description: |
+            This field specifies if the current cost center is enabled or not.
+          example: true
+        org_id:
+          $ref: '#/components/schemas/org_id'
 tags:
   - name: Employees
     description: |
@@ -402,6 +471,101 @@ paths:
                     type: string
                   data:
                     $ref: '#/components/schemas/project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cost_centers:
+    get:
+      tags:
+        - Cost Centers
+      summary: List cost centers
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  url:
+                    $ref: '#/components/schemas/url'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Cost Centers
+      summary: Create or update a cost center
+      description: |
+        Create or update a cost center.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/cost_center_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/cost_center_out'
         '400':
           description: Bad request
           content:
