@@ -331,6 +331,72 @@ components:
           $ref: '#/components/schemas/is_enabled'
         org_id:
           $ref: '#/components/schemas/org_id'
+    category_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the category.
+        sub_category:
+          type: string
+          maxLength: 255
+          example: Turbo charged
+          description: Represents the name of the sub_category.
+        display_name:
+          type: string
+          maxLength: 255
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces.
+
+            In case if no sub_category is present it is same as name of the
+            category.
+        system_category:
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
+    category_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the category.
+        sub_category:
+          type: string
+          maxLength: 255
+          example: Turbo charged
+          description: Represents the name of the sub_category.
+        display_name:
+          type: string
+          maxLength: 255
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces.
+
+            In case if no sub_category is present it is same as name of the
+            category.
+        system_category:
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
 tags:
   - name: Employees
     description: |
@@ -535,6 +601,90 @@ paths:
                     type: string
                   data:
                     $ref: '#/components/schemas/cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/categories:
+    get:
+      tags:
+        - Categories
+      summary: List categories
+      operationId: categories_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  url:
+                    $ref: '#/components/schemas/url'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/category_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Categories
+      summary: Create or update a category
+      description: |
+        Create or update a category.
+      operationId: categories_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/category_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/category_out'
         '400':
           description: Bad request
           content:

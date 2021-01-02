@@ -2,7 +2,7 @@ get:
   tags:
     - Categories
   summary: List categories
-  operationId: get-categories
+  operationId: categories_list
   parameters:
     - $ref: ../../components/parameters/created_at.yaml
     - $ref: ../../components/parameters/updated_at.yaml
@@ -15,7 +15,18 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../../components/schemas/get_categories.yaml
+            type: object
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              url:
+                $ref: ../../components/schemas/url.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/category.yaml#/category_out
     '401':
       description: Unauthorized request
       content:
@@ -28,7 +39,7 @@ post:
   summary: Create or update a category
   description: |
     Create or update a category.
-  operationId: post-categories
+  operationId: categories_post
   requestBody:
     required: true
     content:
@@ -37,7 +48,7 @@ post:
           type: object
           properties:
             data:
-              $ref: ../../components/schemas/categories.yaml
+              $ref: ../../components/schemas/category.yaml#/category_in
           required:
             - data
   responses:
@@ -50,24 +61,16 @@ post:
             properties:
               url:
                 type: string
-                example: /admin/categories
               data:
-                $ref: ../../components/schemas/categories.yaml
+                $ref: ../../components/schemas/category.yaml#/category_out
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            oneOf:
-              - type: object
-                properties:
-                  message:
-                    type: string
-                example:
-                  message: Invalid or duplicate category code
-              - $ref: ../../components/schemas/json_parsing_error.yaml
+            $ref: ../../components/schemas/400.yaml
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
