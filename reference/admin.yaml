@@ -397,6 +397,142 @@ components:
           maxLength: 255
           example: Others
           description: Represents the name of the system_category.
+    category_ids:
+      type: array
+      description: |
+        List of category ids.
+      items:
+        type: integer
+        example: 16570
+    expense_field_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        seq:
+          type: integer
+          example: 1
+        field_name:
+          type: string
+          description: |
+            This specifies the name of the expense field.
+          example: Vendor desciption
+        column_name:
+          type: string
+          description: >
+            This specifies the name of column to which this expense field mapped
+            to.
+          example: text_column1
+        title:
+          type: string
+          description: |
+            This specifies the title of the expense field.
+          example: Vendor desciption
+        type:
+          type: string
+          description: |
+            This field specifies the type of the expense field.
+          example: TEXT
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the expense field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Chai
+            - Coffee
+        default_value:
+          type: string
+          description: |
+            This specifies the default value of the expense fields.
+          example: Coffee
+        placeholder:
+          type: string
+          description: |
+            This specifies the placeholder of the expense field.
+          example: Enter vendor
+        category_ids:
+          $ref: '#/components/schemas/category_ids'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_custom:
+          type: boolean
+          description: |
+            This field indicates if the expense field is custom or not.
+          example: false
+        mandatory:
+          type: boolean
+          description: |
+            This specifies if the expense field is mandatory or not.
+          example: true
+    expense_field_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        field_name:
+          type: string
+          description: |
+            This specifies the name of the expense field.
+          example: Vendor desciption
+        column_name:
+          type: string
+          description: >
+            This specifies the name of column to which this expense field mapped
+            to.
+          example: text_column1
+        title:
+          type: string
+          description: |
+            This specifies the title of the expense field.
+          example: Vendor desciption
+        type:
+          type: string
+          description: |
+            This field specifies the type of the expense field.
+          example: TEXT
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the expense field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Chai
+            - Coffee
+        default_value:
+          type: string
+          description: |
+            This specifies the default value of the expense fields.
+          example: Coffee
+        placeholder:
+          type: string
+          description: |
+            This specifies the placeholder of the expense field.
+          example: Enter vendor
+        category_ids:
+          $ref: '#/components/schemas/category_ids'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_custom:
+          type: boolean
+          description: |
+            This field indicates if the expense field is custom or not.
+          example: false
+        mandatory:
+          type: boolean
+          description: |
+            This specifies if the expense field is mandatory or not.
+          example: true
 tags:
   - name: Employees
     description: |
@@ -685,6 +821,91 @@ paths:
                     type: string
                   data:
                     $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/expense_fields:
+    get:
+      tags:
+        - Expenses
+      summary: List expense fields
+      description: |
+        Gives the list of all expense fields based on query parameters.
+      operationId: expense_fields_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  url:
+                    $ref: '#/components/schemas/url'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_field_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create or update an expense fields
+      operationId: expense_fields_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_field_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/expense_field_out'
         '400':
           description: Bad request
           content:
