@@ -2,42 +2,49 @@ get:
   tags:
     - Cost Centers
   summary: List cost centers
-  operationId: get-cost-centers
   parameters:
     - $ref: ../components/parameters/created_at.yaml
     - $ref: ../components/parameters/updated_at.yaml
     - $ref: ../components/parameters/is_enabled.yaml
     - $ref: ../components/parameters/offset.yaml
     - $ref: ../components/parameters/limit.yaml
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
+    - $ref: ../components/parameters/order.yaml
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/cost_centers.yaml
+            type: object
+            properties:
+              url:
+                type: string
+              data:
+                $ref: ../components/schemas/cost_center.yaml#/cost_center_out
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/400.yaml
     '401':
-      description: Unauthoried request
+      description: Unauthorized request
       content:
         application/json:
           schema:
             $ref: ../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/403.yaml
 post:
   tags:
     - Cost Centers
   summary: Create or update a cost center
   description: |
     Create or update a cost center.
-  operationId: post-cost-centers
   requestBody:
     required: true
     content:
@@ -46,7 +53,7 @@ post:
           type: object
           properties:
             data:
-              $ref: ../components/schemas/objects_cost_center.yaml
+              $ref: ../components/schemas/cost_center_in.yaml
           required:
             - data
   responses:
@@ -67,16 +74,9 @@ post:
       content:
         application/json:
           schema:
-            oneOf:
-              - type: object
-                properties:
-                  message:
-                    type: string
-                example:
-                  message: Invalid or duplicate cost center code
-              - $ref: ../components/schemas/json_parsing_error.yaml
+            $ref: ../components/schemas/400.yaml
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
