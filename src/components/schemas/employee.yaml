@@ -1,23 +1,305 @@
-type: object
-description: Details of the employee to whom this object belongs to.
-readOnly: true
-properties:
-  id:
-    $ref: ./employee_id.yaml
-  code:
-    type: string
-    maxLength: 255
-    example: E84122
-    description: >
-      This field refers to any string that the client programs can use to refer
-      to an employee's unique id.
+employee_out:
+  type: object
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    org_id:
+      $ref: ./fields.yaml#/org_id
+    created_at:
+      $ref: ./fields.yaml#/created_at
+    updated_at:
+      $ref: ./fields.yaml#/updated_at
+    user_id:
+      $ref: ./fields.yaml#/fk_string
+    user:
+      $ref: ./user.yaml#/user_out_embed
+    business_unit:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: Finance ops
+    code:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: E84122
+      description: >
+        This field refers to any string that the client programs can use to refer
+        to an employee's unique id.
 
-      This could be any field such as an UUID from an Active Directory server or
-      employee id in a HRMS system.
-  email:
-    $ref: ./email.yaml
-  full_name:
-    type: string
-    maxLength: 255
-    example: John Doe
-    description: Represents the full name of the employee. Must be at least 3 characters.
+        This could be any field such as an UUID from an Active Directory server or
+        employee id in a HRMS system.
+    department_id:
+      $ref: './fields.yaml#/fk_string'
+    department:
+      $ref: './department.yaml#/department_out'
+    is_active:
+      type: boolean
+      example: True
+    is_primary:
+      type: boolean
+      example: True
+    joined_at:
+      $ref: './fields.yaml#/timestamp'
+    level_id:
+      $ref: './fields.yaml#/fk_string'
+    level:
+      $ref: './level.yaml#/level_out'
+    location:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Bangalore Ofc
+    roles:
+      type: array
+      items:
+        $ref: ./fields.yaml#/role
+    special_email:
+      $ref: ./fields.yaml#/email
+      example: receipts+admin1_mb4w@fyle.ai
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+
+    # full_name:
+    #   type: string
+    #   maxLength: 255
+    #   example: John Doe
+    #   description: Represents the full name of the employee. Must be at least 3 characters.
+    # email_verified_at:
+    #   type: string
+    #   format: date-time
+    #   description: >
+    #     <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+    #     section 5.6 compliant timestamp.</a>
+
+    #     Shows when this email was verified in Fyle.
+    #   readOnly: true
+    #   example: '2020-06-01T16:19:00.000Z'
+    # is_onboarded:
+    #   type: boolean
+    #   description: >
+    #     This flag indicates whether an employee has completed the onboarding or
+    #     not.
+    #   example: true
+    # mobile:
+    #   type: string
+    #   description: >
+    #     Mobile number of the employee.
+
+    #     `Given example is a fake number. We don't know who might answer your
+    #     call.`
+    #   example: +1-202-555-0167
+    # is_mobile_verified:
+    #   type: boolean
+    #   description: ''
+    #   default: false
+    #   example: false
+    # mobile_verified_at:
+    #   type: string
+    #   format: date-time
+    #   description: >
+    #     <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+    #     section 5.6 compliant timestamp.</a>
+
+    #     Shows when the employee has verified his/her mobile number in Fyle.
+    #   readOnly: true
+    #   example: '2020-06-01T16:19:00.000Z'
+    # branch_ifsc:
+    #   type: string
+    #   maxLength: 11
+    #   description: |
+    #     IFSC code of the bank account of the employee.
+    #     Must be a 11 digit alphanumeric code. `branch_ifsc` is India specific.
+    #   example: SBIN0116569
+    # bank_name:
+    #   type: string
+    #   readOnly: true
+    #   example: Example bank
+    # branch_account:
+    #   type: string
+    #   maxLength: 63
+    #   description: >
+    #     The account number of the bank account of the employee. `branch_account`
+    #     is India specific.
+    #   example: XWWEW000024324493
+    # primary_approver_id:
+    #   type: string
+    #   maxLength: 255
+    #   description: |
+    #     Employee Id of the primary approver.
+    #   example: ou4b24ugv3vg
+    # primary_approver:
+    #   allOf:
+    #     - $ref: ./user.yaml
+    #   description: >
+    #     Primary approver who will be added as an approver by default for all the
+    #     submitted reports and expenses.
+    #   example:
+    #     full_name: primary approver
+    #     email: primary_approver@example.com
+    # secondary_approver_id:
+    #   type: string
+    #   maxLength: 255
+    #   description: |
+    #     Employee Id of the secondary approver.
+    #   example: ourjgeugv3vg
+    # secondary_approver:
+    #   allOf:
+    #     - $ref: ./user.yaml
+    #   description: |
+    #     A secondary approver who can be added to reports via policies.
+    #   example:
+    #     full_name: secondary approver
+    #     email: secondary_approver@example.com
+    # tertiary_approver_id:
+    #   type: string
+    #   maxLength: 255
+    #   description: |
+    #     Employee Id of the tertiary approver.
+    #   example: oueuroefkver
+    # tertiary_approver:
+    #   allOf:
+    #     - $ref: ./user.yaml
+    #   description: |
+    #     A tertiary approver who can be added to reports via policies.
+    #   example:
+    #     full_name: tertiary approver
+    #     email: tertiary_approver@example.com
+    # delegatee_id:
+    #   type: string
+    #   maxLength: 255
+    #   description: |
+    #     Employee Id of the delegatee.
+    #   example: ouvebjeasfj
+    # delegatee:
+    #   allOf:
+    #     - $ref: ./user.yaml
+    #   description: |
+    #     An employee who will be able to login on-behalf-of this employee.
+    #   example:
+    #     full_name: delegatee
+    #     email: delegatee@example.com
+    # delegation_start_at:
+    #   type: string
+    #   format: date-time
+    #   description: >
+    #     <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+    #     section 5.6 compliant timestamp.</a>
+
+    #     Shows when the employee was verified his/her mobile number in Fyle.
+    #   example: '2020-06-01T16:19:00.000Z'
+    # delegation_end_at:
+    #   type: string
+    #   format: date-time
+    #   description: >
+    #     <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+    #     section 5.6 compliant timestamp.</a>
+
+    #     Show when the employee has verified his/her mobile number in Fyle.
+    #   example: '2020-06-01T16:19:00.000Z'
+    # mileage_rate_labels:
+    #   type: array
+    #   description: |
+    #     The list of mileage labels that are applicable for this employee.
+    #   items:
+    #     type: string
+    #     enum:
+    #       - TWO_WHEELER
+    #       - FOUR_WHEELER
+    #       - FOUR_WHEELER1
+    #       - FOUR_WHEELER3
+    #       - FOUR_WHEELER4
+    #       - BICYCLE
+    #       - ELECTRIC_CAR
+    #   example:
+    #     - TWO_WHEELER
+    #     - FOUR_WHEELER
+    # cost_center_ids:
+    #   type: array
+    #   description: |
+    #     This list of cost center ids that are available for this employee.
+    #   items:
+    #     type: string
+    #   example:
+    #     - '11539'
+    # cost_centers:
+    #   type: array
+    #   description: |
+    #     This list of cost centers that are available for this employee.
+    #   items:
+    #     $ref: ./cost_center.yaml
+    # per_diem_rate_ids:
+    #   type: array
+    #   description: |
+    #     This list of per diem rate ids that are available for this employee.
+    #   items:
+    #     type: string
+    #   example:
+    #     - '1104'
+    # per_diem_rates:
+    #   type: array
+    #   description: This list of per diem rates that are available for this employee.
+    #   items:
+    #     $ref: ./perdiem.yaml
+    # project_ids:
+    #   type: array
+    #   description: |
+    #     This list of project ids that are available for this employee.
+    #   items:
+    #     type: string
+    #   example:
+    #     - '2391'
+    # custom_properties:
+    #   type: array
+    #   items:
+    #     $ref: ./custom_property.yaml
+    # status:
+    #   type: string
+    #   enum:
+    #     - PENDING_DETAILS
+    #     - ACTIVE
+    #     - DISABLED
+    #   example: ACTIVE
+    # is_enabled:
+    #   type: boolean
+    #   description: >
+    #     Indicates whether an employee is enabled or not in Fyle.
+
+    #     During POST call, If set to `FALSE`, an active employee account will be
+    #     disabled.
+
+    #     Setting to `TRUE` will NOT enable a employee.
+
+    #     This can only be accomplished from the web-app.
+    #   default: false
+    # special_email:
+    #   type: string
+    #   format: email
+    #   description: >
+    #     This is an auto-generated email to which an employee can forward a receipt
+    #     from any of their email inboxes.
+
+    #     A corresponding expense will be created in their Fyle app.
+    #   example: receipts+john_doe_ejtj@fyle.ai
+    # dwolla_customers_metadata:
+    #   $ref: ./dwolla_customers_metadata.yaml
+    # annual_mileage_of_user_before_joining_fyle:
+    #   $ref: ./annual_mileage.yaml
+    # is_primary:
+    #   type: boolean
+    #   description: >
+    #     This flag indicates whether this is primary account of this employee or
+    #     not.
+    #   readOnly: true
+    #   example: true
+
+employee_in:
+  type: object
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    user_id:
+      $ref: './fields.yaml#/id_string'
