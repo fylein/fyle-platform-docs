@@ -66,6 +66,13 @@ components:
         type: string
         example: '26.595889,85.4891037'
   schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            Message describing why the request is valid
     '401':
       type: object
       properties:
@@ -89,9 +96,9 @@ components:
             This error means current user does not have enough permissions to
             perform this operation.
     count:
+      type: integer
       description: |
         The total number of objects that can be requested.
-      type: integer
       example: 10000
     places:
       type: array
@@ -190,16 +197,12 @@ components:
               type: string
             spent_at:
               type: string
-    created_at:
+    timestamp:
       type: string
-      format: date-time
-      description: >
-        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
-        section 5.6 compliant timestamp.</a>
-
+      nullable: true
+      description: |
         Signifies when this object was created.
-      readOnly: true
-      example: '2020-06-01T13:14:54.804Z'
+      example: '2020-06-01T13:14:54.804'
     objects_expense_extract:
       type: object
       properties:
@@ -226,15 +229,9 @@ components:
 
             See "https://www.iban.com/currency-codes" for examples.
         date:
-          $ref: '#/components/schemas/created_at'
+          $ref: '#/components/schemas/timestamp'
         invoice_dt:
-          type: string
-          format: date-time
-          description: >
-            RFC 3339, section 5.6
-            "https://tools.ietf.org/html/rfc3339#section-5.6" compliant 
-
-            Extracted timestamp on which the Expense was made.
+          $ref: '#/components/schemas/timestamp'
         vendor_name:
           type: string
           example: Uber
@@ -255,20 +252,6 @@ components:
           example: /common/expense_extract
         data:
           $ref: '#/components/schemas/objects_expense_extract'
-    json_parsing_error:
-      type: object
-      properties:
-        message:
-          enum:
-            - Unable to process JSON
-          type: string
-          description: |
-            This error means that incoming json is not in right format.
-        code:
-          type: integer
-          default: 400
-          example: 400
-          deprecated: true
 tags:
   - name: Places
     description: |
@@ -360,16 +343,9 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      message:
-                        type: string
-                    example:
-                      message: Invalid content
-                  - $ref: '#/components/schemas/json_parsing_error'
+                $ref: '#/components/schemas/400'
         '401':
-          description: Unauthorised request
+          description: Unauthorized request
           content:
             application/json:
               schema:
