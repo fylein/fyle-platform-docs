@@ -38,16 +38,13 @@ You can check the version by running
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
 
-## Validating Proxy ##
+## Mock Server ##
 
-Setup a .env file with the following entry:
-
-    PLATFORM_URL=xxx
-
-If you want to point to development set of platform, you could use `http://host.docker.internal:8421`
-
-Bring up mock server that validates request and responses using
+Bring up mock server by running:
 
     docker compose up
 
 The admin APIs will be available at port 4011, fyler APIs in port 4012, approver APIs in port 4013 and common APIs in port 4014.
+
+Note that the mock server works off the bundled yaml files. So if you make some changes in development, please bundle
+the file. The mock server will reload automatically.
