@@ -42,7 +42,7 @@ You can check the version by running
 
 Bring up mock server by running:
 
-    docker compose up
+    docker-compose up
 
 The admin APIs will be available at port 4011, fyler APIs in port 4012, approver APIs in port 4013 and common APIs in port 4014.
 
