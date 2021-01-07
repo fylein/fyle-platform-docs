@@ -38,6 +38,10 @@ You can check the version by running
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
 
+## To preview changes ##
+
+    openapi preview-docs src/fyler/openapi.yaml
+
 ## Mock Server ##
 
 Bring up mock server by running:
