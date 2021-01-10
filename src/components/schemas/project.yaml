@@ -1,5 +1,6 @@
 project_out:
   type: object
+  additionalProperties: False
   properties:
     id:
       allOf:
@@ -25,9 +26,18 @@ project_out:
     code:
       type: string
       maxLength: 255
+      nullable: true
       description: |
         This represents the code of project.
       example: FF-032
+    display_name:
+      type: string
+      maxLength: 513
+      description: |
+        This is a combination of name and sub_project separated by a / and spaces.
+        In case if no sub_project is present it is same as name of the project.
+      example: Fast and Furious / Formula One
+
     description:
       $ref: ./fields.yaml#/description
     is_enabled:
@@ -41,6 +51,7 @@ project_out:
 
 project_out_embed:
   type: object
+  additionalProperties: False
   properties:
     id:
       $ref: './fields.yaml#/id_integer'
@@ -58,6 +69,7 @@ project_out_embed:
       example: Formula One
     code:
       type: string
+      nullable: true
       maxLength: 255
       description: |
         This represents the code of project.
@@ -65,15 +77,11 @@ project_out_embed:
 
 project_in:
   type: object
+  additionalProperties: False
+  required: ["name", "sub_project", "category_ids"]
   properties:
     id:
       $ref: './fields.yaml#/id_string'
-    org_id:
-      $ref: ./fields.yaml#/org_id
-    created_at:
-      $ref: ./fields.yaml#/created_at
-    updated_at:
-      $ref: ./fields.yaml#/updated_at
     name:
       type: string
       maxLength: 255
@@ -84,14 +92,8 @@ project_in:
       maxLength: 255
       description: Represents the name of the sub_project.
       example: Formula One
-    display_name:
-      type: string
-      maxLength: 513
-      description: |
-        This is a combination of name and sub_project separated by a / and spaces.
-        In case if no sub_project is present it is same as name of the project.
-      example: Fast and Furious / Formula One
     code:
+      nullable: true
       type: string
       maxLength: 255
       description: |

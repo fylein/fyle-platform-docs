@@ -92,6 +92,7 @@ components:
       properties:
         message:
           type: string
+          nullable: true
           description: |
             Message describing why the request is valid
     '401':
@@ -173,6 +174,7 @@ components:
       example: true
     project_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -198,9 +200,20 @@ components:
         code:
           type: string
           maxLength: 255
+          nullable: true
           description: |
             This represents the code of project.
           example: FF-032
+        display_name:
+          type: string
+          maxLength: 513
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
+          example: Fast and Furious / Formula One
         description:
           $ref: '#/components/schemas/description'
         is_enabled:
@@ -220,15 +233,14 @@ components:
       example: sdfd2391
     project_in:
       type: object
+      additionalProperties: false
+      required:
+        - name
+        - sub_project
+        - category_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
         name:
           type: string
           maxLength: 255
@@ -239,17 +251,8 @@ components:
           maxLength: 255
           description: Represents the name of the sub_project.
           example: Formula One
-        display_name:
-          type: string
-          maxLength: 513
-          description: >
-            This is a combination of name and sub_project separated by a / and
-            spaces.
-
-            In case if no sub_project is present it is same as name of the
-            project.
-          example: Fast and Furious / Formula One
         code:
+          nullable: true
           type: string
           maxLength: 255
           description: |
@@ -579,6 +582,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
