@@ -176,14 +176,6 @@ components:
       description: |
         Signifies when this object was updated.
       example: '2020-06-11T13:14:55.201598+00:00'
-    code:
-      type: string
-      nullable: true
-      maxLength: 255
-      description: >
-        This represents a code that is typically used for syncing with other
-        systems.
-      example: C1234
     description:
       type: string
       nullable: true
@@ -224,7 +216,12 @@ components:
           description: Represents the name of the sub_project.
           example: Formula One
         code:
-          $ref: '#/components/schemas/code'
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            This represents the code of project.
+          example: FF-032
         display_name:
           type: string
           maxLength: 513
@@ -259,7 +256,6 @@ components:
         - name
         - sub_project
         - category_ids
-        - is_enabled
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -274,7 +270,12 @@ components:
           description: Represents the name of the sub_project.
           example: Formula One
         code:
-          $ref: '#/components/schemas/code'
+          nullable: true
+          type: string
+          maxLength: 255
+          description: |
+            This represents the code of project.
+          example: FF-032
         description:
           $ref: '#/components/schemas/description'
         is_enabled:
@@ -289,7 +290,6 @@ components:
             example: 16570
     cost_center_out:
       type: object
-      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -300,7 +300,11 @@ components:
             This represents the name of the cost center.
           example: sales & marketing
         code:
-          $ref: '#/components/schemas/code'
+          type: string
+          maxLength: 255
+          description: |
+            This represents the code of cost center.
+          example: sm-cc
         description:
           $ref: '#/components/schemas/description'
         is_enabled:
@@ -313,10 +317,6 @@ components:
           $ref: '#/components/schemas/updated_at'
     cost_center_in:
       type: object
-      required:
-        - name
-        - is_enabled
-      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -327,13 +327,25 @@ components:
             This represents the name of the cost center.
           example: sales & marketing
         code:
-          $ref: '#/components/schemas/code'
+          type: string
+          maxLength: 255
+          description: |
+            This represents the code of cost center.
+          example: sm-cc
         description:
           $ref: '#/components/schemas/description'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         org_id:
           $ref: '#/components/schemas/org_id'
+    code:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: >
+        This represents a code that is typically used for syncing with other
+        systems.
+      example: C1234
     category_out:
       type: object
       properties:
@@ -575,7 +587,7 @@ components:
           example: USD
           description: Currency code (must be three letters only)
         rate:
-          type: number
+          type: integer
           example: 10
           description: Amount per night
     per_diem_rate_in:
@@ -605,7 +617,7 @@ components:
           example: USD
           description: Currency code (must be three letters only)
         rate:
-          type: number
+          type: integer
           example: 10
           description: Amount per night
     department_out:
@@ -639,7 +651,6 @@ components:
       required:
         - is_enabled
         - name
-      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -732,12 +743,11 @@ paths:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required:
-                - data
               properties:
                 data:
                   $ref: '#/components/schemas/project_in'
+              required:
+                - data
       responses:
         '200':
           description: OK
@@ -745,10 +755,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: false
-                required:
-                  - data
                 properties:
+                  url:
+                    type: string
                   data:
                     $ref: '#/components/schemas/project_out'
         '400':
@@ -789,11 +798,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
-                additionalProperties: false
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -834,12 +838,11 @@ paths:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required:
-                - data
               properties:
                 data:
                   $ref: '#/components/schemas/cost_center_in'
+              required:
+                - data
       responses:
         '200':
           description: OK
@@ -847,10 +850,9 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: false
-                required:
-                  - data
                 properties:
+                  url:
+                    type: string
                   data:
                     $ref: '#/components/schemas/cost_center_out'
         '400':
@@ -1091,12 +1093,11 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - data
-              additionalProperties: false
               properties:
                 data:
                   $ref: '#/components/schemas/per_diem_rate_in'
+              required:
+                - data
       responses:
         '200':
           description: OK
@@ -1104,9 +1105,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - data
-                additionalProperties: false
                 properties:
                   data:
                     $ref: '#/components/schemas/per_diem_rate_out'
@@ -1183,12 +1181,11 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - data
-              additionalProperties: false
               properties:
                 data:
                   $ref: '#/components/schemas/department_in'
+              required:
+                - data
       responses:
         '200':
           description: OK
@@ -1196,9 +1193,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - data
-                additionalProperties: false
                 properties:
                   data:
                     $ref: '#/components/schemas/department_out'
