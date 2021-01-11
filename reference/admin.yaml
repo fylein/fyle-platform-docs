@@ -238,6 +238,7 @@ components:
         - name
         - sub_project
         - category_ids
+        - is_enabled
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -282,6 +283,7 @@ components:
             This represents the name of the cost center.
           example: sales & marketing
         code:
+          nullable: true
           type: string
           maxLength: 255
           description: |
@@ -299,6 +301,10 @@ components:
           $ref: '#/components/schemas/updated_at'
     cost_center_in:
       type: object
+      required:
+        - name
+        - is_enabled
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -309,12 +315,14 @@ components:
             This represents the name of the cost center.
           example: sales & marketing
         code:
+          nullable: true
           type: string
           maxLength: 255
           description: |
             This represents the code of cost center.
           example: sm-cc
         description:
+          nullable: true
           $ref: '#/components/schemas/description'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
@@ -670,6 +678,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -723,8 +736,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  url:
-                    type: string
                   data:
                     $ref: '#/components/schemas/cost_center_out'
         '400':
