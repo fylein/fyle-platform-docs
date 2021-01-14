@@ -1,5 +1,6 @@
 employee_out:
   type: object
+  additionalProperties: False
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -32,19 +33,15 @@ employee_out:
     department_id:
       $ref: './fields.yaml#/fk_string'
     department:
-      $ref: './department.yaml#/department_out'
-    is_active:
-      type: boolean
-      example: True
-    is_primary:
-      type: boolean
-      example: True
+      $ref: './department.yaml#/department_out_embed'
+    is_enabled:
+      $ref: ./fields.yaml#/is_enabled
     joined_at:
       $ref: './fields.yaml#/timestamptz_utc'
     level_id:
       $ref: './fields.yaml#/fk_string'
     level:
-      $ref: './level.yaml#/level_out'
+      $ref: './level.yaml#/level_out_embed'
     location:
       type: string
       maxLength: 255
@@ -55,162 +52,199 @@ employee_out:
       items:
         $ref: ./fields.yaml#/role
     special_email:
-      $ref: ./fields.yaml#/email
+      type: string
+      format: email
+      maxLength: 127
       example: receipts+admin1_mb4w@fyle.ai
     title:
       type: string
       maxLength: 255
       nullable: True
       example: Branch Manager
+    project_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of project ids that this employee is allowed to access. If null, then there are no restrictions
+    projects:
+      type: array
+      nullable: True
+      items:
+        $ref: ./project.yaml#/project_out_embed
+      description: |
+        List of projects that this employee is allowed to access. If null, then there are no restrictions
 
-    # is_onboarded:
-    #   type: boolean
-    #   description: >
-    #     This flag indicates whether an employee has completed the onboarding or
-    #     not.
-    #   example: true
+    cost_center_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of cost center ids that this employee is allowed to access. If null, then there are no restrictions
+    cost_centers:
+      type: array
+      nullable: True
+      items:
+        $ref: ./cost_center.yaml#/cost_center_out_embed
+      description: |
+        List of cost_ enters that this employee is allowed to access. If null, then there are no restrictions
 
-    # branch_ifsc:
-    #   type: string
-    #   maxLength: 11
+    per_diem_rate_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of per diem rate ids that this employee is allowed to access. If null, then there are no restrictions
+    per_diem_rates:
+      type: array
+      nullable: True
+      items:
+        $ref: ./per_diem_rate.yaml#/per_diem_rate_out_embed
+      description: |
+        List of per diem rates that this employee is allowed to access. If null, then there are no restrictions
+
+# TODO: @siva - uncomment this once mileage_rate.yaml is checked in
+    # mileage_rate_ids:
+    #   type: array
+    #   nullable: True
+    #   items:
+    #     - $ref: './fields.yaml#/id_integer'
+    #   example: [2222, 1221]
     #   description: |
-    #     IFSC code of the bank account of the employee.
-    #     Must be a 11 digit alphanumeric code. `branch_ifsc` is India specific.
-    #   example: SBIN0116569
-    # bank_name:
-    #   type: string
-    #   readOnly: true
-    #   example: Example bank
-    # branch_account:
-    #   type: string
-    #   maxLength: 63
-    #   description: >
-    #     The account number of the bank account of the employee. `branch_account`
-    #     is India specific.
-    #   example: XWWEW000024324493
-
-    #     Show when the employee has verified his/her mobile number in Fyle.
-    #   example: '2020-06-01T16:19:00.000Z'
-    # mileage_rate_labels:
+    #     List of mileage rate ids that this employee is allowed to access. If null, then there are no restrictions
+    # mileage_rates:
     #   type: array
+    #   nullable: True
+    #   items:
+    #     $ref: ./mileage_rate.yaml#/mileage_rate_out_embed
     #   description: |
-    #     The list of mileage labels that are applicable for this employee.
-    #   items:
-    #     type: string
-    #     enum:
-    #       - TWO_WHEELER
-    #       - FOUR_WHEELER
-    #       - FOUR_WHEELER1
-    #       - FOUR_WHEELER3
-    #       - FOUR_WHEELER4
-    #       - BICYCLE
-    #       - ELECTRIC_CAR
-    #   example:
-    #     - TWO_WHEELER
-    #     - FOUR_WHEELER
-    # cost_center_ids:
-    #   type: array
-    #   description: |
-    #     This list of cost center ids that are available for this employee.
-    #   items:
-    #     type: string
-    #   example:
-    #     - '11539'
-    # cost_centers:
-    #   type: array
-    #   description: |
-    #     This list of cost centers that are available for this employee.
-    #   items:
-    #     $ref: ./cost_center.yaml
-    # per_diem_rate_ids:
-    #   type: array
-    #   description: |
-    #     This list of per diem rate ids that are available for this employee.
-    #   items:
-    #     type: string
-    #   example:
-    #     - '1104'
-    # per_diem_rates:
-    #   type: array
-    #   description: This list of per diem rates that are available for this employee.
-    #   items:
-    #     $ref: ./perdiem.yaml
-    # project_ids:
-    #   type: array
-    #   description: |
-    #     This list of project ids that are available for this employee.
-    #   items:
-    #     type: string
-    #   example:
-    #     - '2391'
-    # custom_properties:
-    #   type: array
-    #   items:
-    #     $ref: ./custom_property.yaml
-    # status:
-    #   type: string
-    #   enum:
-    #     - PENDING_DETAILS
-    #     - ACTIVE
-    #     - DISABLED
-    #   example: ACTIVE
-    # is_enabled:
-    #   type: boolean
-    #   description: >
-    #     Indicates whether an employee is enabled or not in Fyle.
+    #     List of mileage rates that this employee is allowed to access. If null, then there are no restrictions
 
-    #     During POST call, If set to `FALSE`, an active employee account will be
-    #     disabled.
 
-    #     Setting to `TRUE` will NOT enable a employee.
-
-    #     This can only be accomplished from the web-app.
-    #   default: false
-    # special_email:
-    #   type: string
-    #   format: email
-    #   description: >
-    #     This is an auto-generated email to which an employee can forward a receipt
-    #     from any of their email inboxes.
-
-    #     A corresponding expense will be created in their Fyle app.
-    #   example: receipts+john_doe_ejtj@fyle.ai
-    # dwolla_customers_metadata:
-    #   $ref: ./dwolla_customers_metadata.yaml
-    # annual_mileage_of_user_before_joining_fyle:
-    #   $ref: ./annual_mileage.yaml
-    # is_primary:
-    #   type: boolean
-    #   description: >
-    #     This flag indicates whether this is primary account of this employee or
-    #     not.
-    #   readOnly: true
-    #   example: true
-
-# TODO: need to fix this
-employee_in:
-  type: object
-  properties:
-    id:
-      $ref: './fields.yaml#/id_string'
-    user_id:
-      $ref: './fields.yaml#/id_string'
-    joined_at:
-      $ref: ./fields.yaml#/timestamptz_pst
-
-# TODO: need to fix this
 employee_out_embed:
   type: object
+  additionalProperties: False
   properties:
     id:
       $ref: './fields.yaml#/id_string'
-    org_id:
-      $ref: ./fields.yaml#/org_id
-    created_at:
-      $ref: ./fields.yaml#/created_at
-    updated_at:
-      $ref: ./fields.yaml#/updated_at
-    user_id:
-      $ref: ./fields.yaml#/fk_string
     user:
       $ref: ./user.yaml#/user_out_embed
+    business_unit:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: Finance ops
+    code:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: E84122
+      description: >
+        This field refers to any string that the client programs can use to refer
+        to an employee's unique id.
+
+        This could be any field such as an UUID from an Active Directory server or
+        employee id in a HRMS system.
+    department:
+      $ref: './department.yaml#/department_out_embed'
+    level:
+      $ref: './level.yaml#/level_out_embed'
+    location:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Bangalore Ofc
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+
+
+employee_in:
+  type: object
+  additionalProperties: False
+  required: ["user_email", "user_full_name", "roles"]
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    user_email:
+      $ref: ./fields.yaml#/email
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        Represents the full name of the Employee. Must be at least 3 characters.
+      example: John Doe
+    business_unit:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: Finance ops
+    code:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: E84122
+      description: >
+        This field refers to any string that the client programs can use to refer
+        to an employee's unique id.
+
+        This could be any field such as an UUID from an Active Directory server or
+        employee id in a HRMS system.
+    department_id:
+      $ref: './fields.yaml#/fk_string'
+    is_enabled:
+      $ref: ./fields.yaml#/is_enabled
+    joined_at:
+      $ref: './fields.yaml#/timestamptz_utc'
+    level_id:
+      $ref: './fields.yaml#/fk_string'
+    location:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Bangalore Ofc
+    roles:
+      type: array
+      items:
+        $ref: ./fields.yaml#/role
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+    project_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of project ids that this employee is allowed to access. If null, then there are no restrictions
+
+    cost_center_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of cost center ids that this employee is allowed to access. If null, then there are no restrictions
+
+    per_diem_rate_ids:
+      type: array
+      nullable: True
+      items:
+        - $ref: './fields.yaml#/id_integer'
+      example: [2222, 1221]
+      description: |
+        List of per diem rate ids that this employee is allowed to access. If null, then there are no restrictions
+
+
