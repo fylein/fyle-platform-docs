@@ -106,6 +106,14 @@ components:
       schema:
         type: string
         example: eq.c2344
+    employee_id:
+      in: query
+      name: employee_id
+      description: |
+        ID for an employee inside an organization
+      schema:
+        type: string
+        example: employee_id=eq.ouwruogwnngg
   schemas:
     '400':
       type: object
@@ -711,6 +719,453 @@ components:
           example: Associate
         code:
           $ref: '#/components/schemas/code'
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    email:
+      type: string
+      format: email
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+    timestamptz_utc:
+      type: string
+      nullable: true
+      example: '2020-06-01T13:14:54.804+00:00'
+    level_out_embed:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Level name of the employees
+          example: Associate I
+        band:
+          type: string
+          nullable: true
+          description: >
+            Band in which this level belongs to, you can group multiple levels
+            into a single band.
+          example: Associate
+    role:
+      type: string
+      enum:
+        - FYLER
+        - APPROVER
+        - TRAVEL_ADMIN
+        - VERIFIER
+        - PAYMENT_PROCESSOR
+        - FINANCE
+        - ADMIN
+        - TRAVEL_AGENT
+        - OWNER
+        - AUDITOR
+        - HOD
+        - HOP
+      description: |
+        Roles are assigned by Admin.
+      example: FYLER
+    project_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+          example: 3333
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the project.
+          example: Fast and Furious
+        sub_project:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: Represents the name of the sub_project.
+          example: Formula One
+        code:
+          $ref: '#/components/schemas/code'
+    cost_center_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+    per_diem_rate_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          $ref: '#/components/schemas/name'
+          example: Florida Rate
+        code:
+          $ref: '#/components/schemas/code'
+        currency:
+          type: string
+          maxLength: 3
+          example: USD
+          description: Currency code (must be three letters only)
+        rate:
+          type: number
+          example: 10
+          description: Amount per night
+    employee_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department_id:
+          $ref: '#/components/schemas/fk_string'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        joined_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        level_id:
+          $ref: '#/components/schemas/fk_string'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+        special_email:
+          type: string
+          format: email
+          maxLength: 127
+          example: receipts+admin1_mb4w@fyle.ai
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        project_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of project ids that this employee is allowed to access. If
+            null, then there are no restrictions
+        projects:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/project_out_embed'
+          description: >
+            List of projects that this employee is allowed to access. If null,
+            then there are no restrictions
+        cost_center_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of cost center ids that this employee is allowed to access. If
+            null, then there are no restrictions
+        cost_centers:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/cost_center_out_embed'
+          description: >
+            List of cost_ enters that this employee is allowed to access. If
+            null, then there are no restrictions
+        per_diem_rate_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of per diem rate ids that this employee is allowed to access.
+            If null, then there are no restrictions
+        per_diem_rates:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/per_diem_rate_out_embed'
+          description: >
+            List of per diem rates that this employee is allowed to access. If
+            null, then there are no restrictions
+    employee_in:
+      type: object
+      additionalProperties: false
+      required:
+        - user_email
+        - user_full_name
+        - roles
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_email:
+          $ref: '#/components/schemas/email'
+        user_full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department_id:
+          $ref: '#/components/schemas/fk_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        joined_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        level_id:
+          $ref: '#/components/schemas/fk_string'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        project_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of project ids that this employee is allowed to access. If
+            null, then there are no restrictions
+        cost_center_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of cost center ids that this employee is allowed to access. If
+            null, then there are no restrictions
+        per_diem_rate_ids:
+          type: array
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of per diem rate ids that this employee is allowed to access.
+            If null, then there are no restrictions
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department:
+          $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+    fk_integer:
+      type: integer
+      nullable: true
+      description: |
+        This id provided by Fyle to identify an object.
+      example: 1234
+    employee_approver_out:
+      type: object
+      additionalProperties: false
+      properties:
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        approver_ids:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/fk_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of IDs of employees that are approvers for this employee.
+            Maximum 3.
+        approvers:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/employee_out_embed'
+          description: |
+            List of approvers for this employee
+    employee_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - employee_id
+        - approver_ids
+      properties:
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+        approver_ids:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            - $ref: '#/components/schemas/fk_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of IDs of employees that are approvers for this employee.
+            Maximum 3.
 tags:
   - name: Projects
     description: |
@@ -731,6 +1186,9 @@ tags:
   - name: Levels
     description: |
       These APIs gives you access to manage your organisation's Employee levels.
+  - name: Employees
+    description: |
+      These APIs gives you access to manage your organisation's Employees
   - name: Expenses
     description: |
       This API gives you access to your organisation's Expenses
@@ -1354,6 +1812,186 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/level_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/employees:
+    get:
+      tags:
+        - Employees
+      summary: List employees
+      operationId: employees_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create or update an employee
+      description: |
+        Create or update an employee
+      operationId: employees_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/employee_approvers:
+    get:
+      tags:
+        - Employees
+      summary: List approvers of employees
+      description: List approvers of employees
+      operationId: employee_approvers_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/employee_id'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_approver_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create or update approvers for an employee
+      description: Create or update approvers for an employee
+      operationId: employee_approvers_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_approver_out'
         '400':
           description: Bad request
           content:
