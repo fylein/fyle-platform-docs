@@ -666,6 +666,100 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+    timestamptz_utc:
+      type: string
+      nullable: true
+      example: '2020-06-01T13:14:54.804+00:00'
+    mileage_rates_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        start_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        end_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        unit:
+          type: string
+          enum:
+            - KM
+            - Miles
+        vehicle_type:
+          type: string
+          enum:
+            - two_wheeler
+            - four_wheeler
+            - four_wheeler1
+            - four_wheeler3
+            - four_wheeler4
+            - bicycle
+            - electric_car
+          example: four_wheeler
+        rate:
+          type: number
+          example: 10
+          description: Amount (in Home currency) per unit.
+        slab_rates:
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                type: number
+              limit:
+                type: number
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+    timestamptz_pst:
+      type: string
+      nullable: true
+      example: '2020-06-01T01:18:19.292-08:00'
+    mileage_rates_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        start_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        end_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        unit:
+          type: string
+          enum:
+            - KM
+            - Miles
+        vehicle_type:
+          type: string
+          enum:
+            - two_wheeler
+            - four_wheeler
+            - four_wheeler1
+            - four_wheeler3
+            - four_wheeler4
+            - bicycle
+            - electric_car
+          example: four_wheeler
+        rate:
+          type: number
+          example: 10
+          description: Amount (in Home currency) per unit.
+        slab_rates:
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                type: number
+              limit:
+                type: number
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     level_out:
       type: object
       properties:
@@ -728,6 +822,9 @@ tags:
   - name: Categories
     description: |
       These APIs gives you access to manage your organisation's Categories
+  - name: Mileage Rates
+    description: |
+      These APIs gives you access to manage your organisation's Mileage Rates
   - name: Levels
     description: |
       These APIs gives you access to manage your organisation's Employee levels.
@@ -1266,6 +1363,86 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/department_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/mileage_rates:
+    get:
+      tags:
+        - Mileage Rates
+      summary: List mileage rates
+      operationId: mileage_rates_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/mileage_rates_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Mileage Rates
+      summary: Create or update a mileage rate
+      description: |
+        Create or update a mileage rate.
+      operationId: mileage_rates_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/mileage_rates_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/mileage_rates_out'
         '400':
           description: Bad request
           content:
