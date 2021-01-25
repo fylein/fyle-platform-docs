@@ -803,13 +803,6 @@ components:
           example: Associate
         code:
           $ref: '#/components/schemas/code'
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     email:
       type: string
       format: email
@@ -820,6 +813,121 @@ components:
 
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
+    timestamptz_pst:
+      type: string
+      nullable: true
+      example: '2020-06-01T01:18:19.292-08:00'
+    invitation_in:
+      type: object
+      additionalProperties: false
+      required:
+        - user_email
+      properties:
+        user_email:
+          $ref: '#/components/schemas/email'
+        user_full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department_name:
+          $ref: '#/components/schemas/name'
+        sub_department:
+          $ref: '#/components/schemas/name'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        joined_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        level:
+          $ref: '#/components/schemas/name'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        approver_emails:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            $ref: '#/components/schemas/email'
+          example:
+            - approver1@example.com
+            - approver2@example.com
+          description: |
+            List of emails of employees that are approvers for this employee.
+        project_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - Formula 1
+            - Dream work
+          description: >
+            List of project names that this employee is allowed to access. If
+            null, then there are no restrictions
+        cost_center_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - Sales
+          description: >
+            List of cost center names that this employee is allowed to access.
+            If null, then there are no restrictions
+        per_diem_rate_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - TA - USD
+          description: >
+            List of per diem rate names that this employee is allowed to access.
+            If null, then there are no restrictions
+        vechicle_types:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - two_wheeler
+            - four_wheeler_1
+          description: >
+            List of mileage rate's vehicle types that this employee is allowed
+            to access. If null, then there are no restrictions
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
     user_out_embed:
       type: object
       properties:
@@ -1036,7 +1144,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1055,7 +1163,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1074,7 +1182,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1093,7 +1201,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1112,21 +1220,10 @@ components:
       type: object
       additionalProperties: false
       required:
-        - user_email
-        - user_full_name
-        - roles
+        - id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-        user_email:
-          $ref: '#/components/schemas/email'
-        user_full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
         business_unit:
           type: string
           maxLength: 255
@@ -1156,10 +1253,6 @@ components:
           maxLength: 255
           nullable: true
           example: Bangalore Ofc
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/role'
         title:
           type: string
           maxLength: 255
@@ -1169,7 +1262,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1180,7 +1273,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1191,7 +1284,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1202,7 +1295,7 @@ components:
           type: array
           nullable: true
           items:
-            - $ref: '#/components/schemas/id_integer'
+            $ref: '#/components/schemas/id_integer'
           example:
             - 2222
             - 1221
@@ -1266,7 +1359,7 @@ components:
           maxLength: 3
           nullable: true
           items:
-            - $ref: '#/components/schemas/fk_string'
+            $ref: '#/components/schemas/fk_string'
           example:
             - 2222
             - 1221
@@ -1294,13 +1387,12 @@ components:
           maxLength: 3
           nullable: true
           items:
-            - $ref: '#/components/schemas/fk_string'
+            $ref: '#/components/schemas/fk_string'
           example:
             - 2222
             - 1221
-          description: >
+          description: |
             List of IDs of employees that are approvers for this employee.
-            Maximum 3.
 tags:
   - name: Projects
     description: |
@@ -2053,6 +2145,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/invitations/bulk:
+    post:
+      tags:
+        - Employees
+      summary: Create or update employees
+      description: |
+        Create or update an employee
+      operationId: employees_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/invitation_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/employees:
     get:
       tags:
@@ -2096,7 +2229,7 @@ paths:
     post:
       tags:
         - Employees
-      summary: Create or update an employee
+      summary: update an employee
       description: |
         Create or update an employee
       operationId: employees_post
@@ -2187,7 +2320,7 @@ paths:
     post:
       tags:
         - Employees
-      summary: Create or update approvers for an employee
+      summary: update approvers for an employee
       description: Create or update approvers for an employee
       operationId: employee_approvers_post
       requestBody:
