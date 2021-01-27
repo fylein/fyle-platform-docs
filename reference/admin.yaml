@@ -919,6 +919,21 @@ components:
           description: >
             List of mileage rate's vehicle types that this employee is allowed
             to access. If null, then there are no restrictions
+    bulk_error:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: |
+            This holds the info of which row contains bad data.
+        key:
+          type: string
+          description: |
+            This helps in identifying the error by unique key.
+        message:
+          type: string
+          description: |
+            This explains what the error is in `human readable` text
     fk_string:
       type: string
       nullable: true
@@ -2155,7 +2170,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/400'
+                type: array
+                items:
+                  $ref: '#/components/schemas/bulk_error'
+                example:
+                  - row: 0
+                    key: user1@example.com
+                    message: invalid / disabled approver found.
+                  - row: 0
+                    key: user2@example.com
+                    message: invalid / disabled department found.
         '401':
           description: Unauthorized request
           content:
