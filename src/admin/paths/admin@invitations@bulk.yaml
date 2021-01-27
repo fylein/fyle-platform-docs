@@ -1,0 +1,49 @@
+post:
+  tags:
+    - Employees
+  summary: Create or update employees
+  description: |
+    Create or update an employee
+  operationId: invitations_post_bulk
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data
+          additionalProperties: False
+          properties:
+            data:
+              $ref: ../../components/schemas/invitation.yaml#/invitation_in
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: ../../components/schemas/bulk_error.yaml
+            example:
+              - row: 0
+                key: user1@example.com
+                message: invalid / disabled approver found.
+              - row: 0
+                key: user2@example.com
+                message: invalid / disabled department found.
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
