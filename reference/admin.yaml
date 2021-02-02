@@ -922,18 +922,28 @@ components:
     bulk_error:
       type: object
       properties:
-        row:
-          type: integer
-          description: |
-            This holds the info of which row contains bad data.
-        key:
+        error:
           type: string
-          description: |
-            This helps in identifying the error by unique key.
+          example: BulkError
         message:
           type: string
-          description: |
-            This explains what the error is in `human readable` text
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                type: string
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     fk_string:
       type: string
       nullable: true
@@ -2170,16 +2180,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/bulk_error'
-                example:
-                  - row: 0
-                    key: user1@example.com
-                    message: invalid / disabled approver found.
-                  - row: 0
-                    key: user2@example.com
-                    message: invalid / disabled department found.
+                $ref: '#/components/schemas/bulk_error'
         '401':
           description: Unauthorized request
           content:
