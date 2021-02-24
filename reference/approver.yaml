@@ -41,17 +41,6 @@ components:
         example:
           - 'gte.2020-06-01T00:00:00.000-08:00'
           - 'lt.2020-07-01T00:00:00.000-08:00'
-    state:
-      in: query
-      name: state
-      description: >
-        Accepted states are DRAFT, COMPLETE, APPROVER_PENDING, APPROVED,
-        PAYMENT_PENDING, PAYMENT_PROCESSING, PAID.<br>
-
-        Supported operators are `eq`, `like`, `in`.<br>
-      schema:
-        type: string
-        example: in.(COMPLETE)
     submitted_at:
       in: query
       name: submitted_at
@@ -65,6 +54,17 @@ components:
         example:
           - 'gte.2020-06-01T00:00:00.000Z'
           - 'lt.2020-07-01T00:00:00.000Z'
+    state:
+      in: query
+      name: state
+      description: >
+        Accepted states are DRAFT, COMPLETE, APPROVER_PENDING, APPROVED,
+        PAYMENT_PENDING, PAYMENT_PROCESSING, PAID.<br>
+
+        Supported operators are `eq`, `like`, `in`.<br>
+      schema:
+        type: string
+        example: in.(COMPLETE)
     offset:
       in: query
       name: offset
@@ -84,7 +84,24 @@ components:
         example: 20
         default: 50
         maximum: 200
+    id:
+      in: query
+      name: id
+      description: |
+        A resource ID
+      schema:
+        type: string
+        example:
+          - eq.ouwruogwnngg
   schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is valid
     '401':
       type: object
       properties:
@@ -292,8 +309,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/state'
         - $ref: '#/components/parameters/submitted_at'
+        - $ref: '#/components/parameters/state'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
         - in: query
@@ -326,6 +343,51 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/reports/bulk/approve:
+    post:
+      tags:
+        - Reports
+      summary: Approve reports
+      operationId: approve-reports
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/submitted_at'
+        - $ref: '#/components/parameters/state'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: []
+                additionalProperties: false
+                properties: {}
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
