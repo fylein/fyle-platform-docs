@@ -84,15 +84,6 @@ components:
         example: 20
         default: 50
         maximum: 200
-    id:
-      in: query
-      name: id
-      description: |
-        A resource ID
-      schema:
-        type: string
-        example:
-          - eq.ouwruogwnngg
   schemas:
     '400':
       type: object
@@ -351,29 +342,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /approver/reports/bulk/approve:
+  /approver/reports/<report_id>/approve:
     post:
       tags:
         - Reports
       summary: Approve reports
       operationId: approve-reports
-      parameters:
-        - $ref: '#/components/parameters/id'
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/submitted_at'
-        - $ref: '#/components/parameters/state'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - in: query
-          name: order
-          description: |
-            use comma separated column names for sorting the results. <br>
-            For sorting in descending order, use `updated_at.desc`.<br>
-            Supported columns are `updated_at`, `id`.
-          schema:
-            type: string
-            example: 'updated_at.desc,id'
       requestBody:
         required: true
         content:
@@ -390,9 +364,12 @@ paths:
             application/json:
               schema:
                 type: object
-                required: []
                 additionalProperties: false
-                properties: {}
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
         '400':
           description: Unauthorised request
           content:
