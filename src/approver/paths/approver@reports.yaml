@@ -4,14 +4,15 @@ get:
   summary: List reports
   operationId: get-reports
   parameters:
-    - $ref: ../components/parameters/created_at.yaml
-    - $ref: ../components/parameters/updated_at.yaml
-    - $ref: ../components/parameters/approved_at.yaml
-    - $ref: ../components/parameters/state.yaml
-    - $ref: ../components/parameters/settled_at.yaml
-    - $ref: ../components/parameters/reimbursed_at.yaml
-    - $ref: ../components/parameters/offset.yaml
-    - $ref: ../components/parameters/limit.yaml
+    - $ref: ../../components/parameters/created_at.yaml
+    - $ref: ../../components/parameters/updated_at.yaml
+#    - $ref: ../../components/parameters/approved_at.yaml
+#    - $ref: ../../components/parameters/settled_at.yaml
+#    - $ref: ../../components/parameters/reimbursed_at.yaml
+    - $ref: ../../components/parameters/submitted_at.yaml
+    - $ref: ../../components/parameters/state.yaml
+    - $ref: ../../components/parameters/offset.yaml
+    - $ref: ../../components/parameters/limit.yaml
     - in: query
       name: order
       description: |
@@ -21,16 +22,38 @@ get:
       schema:
         type: string
         example: 'updated_at.desc,id'
+    - in: query
+      name: approvals
+      description: |
+        the approvals can be queried upon, for eg. to get reports which a certain approver still has to approve
+      schema:
+        type: string
+        example:
+          - cs.[{"approver_id":"oulkAsh23","state":"APPROVAL_PENDING"}]
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/get_reports.yaml
+            type: object
+            required:
+            - count
+            - offset
+            - data
+            additionalProperties: False
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/report.yaml#/report_out
     '401':
       description: Unauthorised request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: ../../components/schemas/401.yaml

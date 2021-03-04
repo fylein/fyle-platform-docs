@@ -19,14 +19,6 @@ components:
           scopes:
             '*': Grant all actions
   parameters:
-    org_id:
-      in: query
-      name: org_id
-      description: |
-        The unique id of the organization to which the object is associated.
-      schema:
-        type: string
-        example: org_id=eq.orwruogwnngg
     created_at:
       in: query
       name: created_at
@@ -49,24 +41,30 @@ components:
         example:
           - 'gte.2020-06-01T00:00:00.000-08:00'
           - 'lt.2020-07-01T00:00:00.000-08:00'
-    is_enabled:
+    submitted_at:
       in: query
-      name: is_enabled
-      description: |
-        This param is used to filer records by
-        Supported operators are `eq`.<br>
+      name: submitted_at
+      description: >
+        Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
+        RHS dot pattern.<br>
+
+        Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: eq.true
-    order:
+        example:
+          - 'gte.2020-06-01T00:00:00.000Z'
+          - 'lt.2020-07-01T00:00:00.000Z'
+    state:
       in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `column_name.desc`
+      name: state
+      description: >
+        Accepted states are DRAFT, COMPLETE, APPROVER_PENDING, APPROVED,
+        PAYMENT_PENDING, PAYMENT_PROCESSING, PAID.<br>
+
+        Supported operators are `eq`, `like`, `in`.<br>
       schema:
         type: string
-        example: 'updated_at.desc,id'
+        example: in.(COMPLETE)
     offset:
       in: query
       name: offset
@@ -87,6 +85,14 @@ components:
         default: 50
         maximum: 200
   schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is valid
     '401':
       type: object
       properties:
@@ -117,11 +123,12 @@ components:
         next 1000 objects. <br>
       type: integer
       example: 10
-    id_integer:
-      type: integer
+    id_string:
+      type: string
+      maxLength: 15
       description: |
         This id provided by Fyle to identify an object.
-      example: 1234
+      example: sdfd2391
     org_id:
       type: string
       description: |
@@ -140,124 +147,178 @@ components:
       description: |
         Signifies when this object was updated.
       example: '2020-06-11T13:14:55.201598+00:00'
-    category_ids:
-      type: array
-      description: |
-        List of category ids.
-      items:
-        type: integer
-        example: 16570
-    is_enabled:
-      type: boolean
-      description: >
-        This indicates if the resource is enabled for use within the
-        organisation.
-      default: true
-      example: true
-    code:
+    email:
       type: string
-      nullable: true
-      maxLength: 255
+      maxLength: 127
+      example: john.doe@example.com
       description: >
-        This represents a code that is typically used for syncing with other
-        systems.
-      example: C1234
-    expense_field_out:
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/id_integer'
+          $ref: '#/components/schemas/id_string'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+    currency:
+      type: string
+      description: >
+        The three-letter currency code following ISO standard <a
+        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+
+        Original currency signifies the currency in which the object
+        (expense/advance/refund/etc.) was originally created.
+      example: INR
+      pattern: '([A-Z]{3}'
+    amount:
+      type: decimal
+      description: |
+        amount of money
+      example: 47.99
+    report_approval_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        approver_id:
+          $ref: '#/components/schemas/id_string'
+        approver:
+          $ref: '#/components/schemas/employee_out_embed'
+        state:
+          type: string
+          enum:
+            - APPROVAL_PENDING
+            - APPROVAL_DISABLED
+            - APPROVAL_DONE
+          description: |
+            State of this report_approval
+    report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        seq:
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          $ref: '#/components/schemas/amount'
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
           type: integer
-          example: 1
-        field_name:
+          description: |
+            Number of expenses part of this report
+          example: 3
+        submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies when this report was submitted.
+        claim_number:
           type: string
           description: |
-            This specifies the name of the expense field.
-          example: Vendor desciption
-        column_name:
-          type: string
-          description: >
-            This specifies the name of column to which this expense field mapped
-            to.
-          example: text_column1
-        title:
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
           type: string
           description: |
-            This specifies the title of the expense field.
-          example: Vendor desciption
-        type:
-          type: string
-          description: |
-            This field specifies the type of the expense field.
-          example: TEXT
-        options:
+            where was this report object created from
+        approvals:
           type: array
           items:
-            type: string
-          description: >
-            This specifies the option values of the expense field in case on
-            SELECT or MULTI_SELECT type.
-          example:
-            - Chai
-            - Coffee
-        default_value:
-          type: string
+            $ref: '#/components/schemas/report_approval_out_embed'
           description: |
-            This specifies the default value of the expense fields.
-          example: Coffee
-        placeholder:
-          type: string
-          description: |
-            This specifies the placeholder of the expense field.
-          example: Enter vendor
-        category_ids:
-          $ref: '#/components/schemas/category_ids'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        is_custom:
-          type: boolean
-          description: |
-            This field indicates if the expense field is custom or not.
-          example: false
-        mandatory:
-          type: boolean
-          description: |
-            This specifies if the expense field is mandatory or not.
-          example: true
-        code:
-          $ref: '#/components/schemas/code'
+            List of report_approval objects
 tags:
-  - name: Expenses
-    description: |
-      This API gives you access to Expenses data which are reported to you.
   - name: Reports
     description: >
       These API gives you access to Expense Reports data which are submitted to
       you.
 paths:
-  /approver/expense_fields:
+  /approver/reports:
     get:
       tags:
-        - Expenses
-      summary: List expense fields
-      description: |
-        Gives the list of all expense fields based on query parameters.
-      operationId: expense_fields_list
+        - Reports
+      summary: List reports
+      operationId: get-reports
       parameters:
-        - $ref: '#/components/parameters/org_id'
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/submitted_at'
+        - $ref: '#/components/parameters/state'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+        - in: query
+          name: approvals
+          description: >
+            the approvals can be queried upon, for eg. to get reports which a
+            certain approver still has to approve
+          schema:
+            type: string
+            example:
+              - 'cs.[{"approver_id":"oulkAsh23","state":"APPROVAL_PENDING"}]'
       responses:
         '200':
           description: OK
@@ -265,6 +326,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -273,9 +339,57 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/expense_field_out'
+                      $ref: '#/components/schemas/report_out'
         '401':
-          description: Unauthorized request
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/reports/<report_id>/approve:
+    post:
+      tags:
+        - Reports
+      summary: Approve reports
+      operationId: approve-reports
+      parameters:
+        - in: path
+          name: report_id
+          description: |
+            the id of report that is to be approved
+          schema:
+            type: string
+            example: rpa21Adj2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: []
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
