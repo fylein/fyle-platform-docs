@@ -1,7 +1,8 @@
 openapi: 3.0.3
 info:
-  version: '3.0'
+  version: '1.0'
   title: Approver APIs
+  description: Fyle Platform Approver APIs
   contact:
     name: Integrations
     email: support@fylehq.com
@@ -41,6 +42,30 @@ components:
         example:
           - 'gte.2020-06-01T00:00:00.000-08:00'
           - 'lt.2020-07-01T00:00:00.000-08:00'
+    approved_at:
+      in: query
+      name: approved_at
+      description: >
+        Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
+        RHS dot pattern.<br>
+
+        Supported operators are `gte`,`lte`,`gt`,`lt`.
+      schema:
+        type: string
+        example: >-
+          approved_at=gte.2020-06-01T00:00:00.000Z&approved_at=lt.2020-07-01T00:00:00.000Z
+    reimbursed_at:
+      in: query
+      name: reimbursed_at
+      description: >
+        Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
+        RHS dot pattern.<br>
+
+        Supported operators are `gte`,`lte`,`gt`,`lt`.
+      schema:
+        type: string
+        example: >-
+          reimbursed_at=gte.2020-06-01T00:00:00.000Z&reimbursed_at=lt.2020-07-01T00:00:00.000Z
     submitted_at:
       in: query
       name: submitted_at
@@ -192,13 +217,12 @@ components:
       description: >
         The three-letter currency code following ISO standard <a
         href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
-
         Original currency signifies the currency in which the object
         (expense/advance/refund/etc.) was originally created.
       example: INR
-      pattern: '([A-Z]{3}'
+      pattern: '([A-Z]{3})'
     amount:
-      type: decimal
+      type: number
       description: |
         amount of money
       example: 47.99
@@ -263,7 +287,7 @@ components:
           type: boolean
           description: |
             Determines whether this report was flagged manually
-        is_policy_flaged:
+        is_policy_flagged:
           type: boolean
           description: |
             Determines whether this report was flagged from a policy
@@ -302,9 +326,8 @@ components:
             List of report_approval objects
 tags:
   - name: Reports
-    description: >
-      These API gives you access to Expense Reports data which are submitted to
-      you.
+    description: |
+      This API gives you access to your organisation's Expense Reports
 paths:
   /approver/reports:
     get:
@@ -315,6 +338,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/approved_at'
+        - $ref: '#/components/parameters/reimbursed_at'
         - $ref: '#/components/parameters/submitted_at'
         - $ref: '#/components/parameters/state'
         - $ref: '#/components/parameters/offset'
@@ -364,11 +389,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /approver/reports/<report_id>/approve:
+  '/approver/reports/{report_id}/approve':
     post:
       tags:
         - Reports
       summary: Approve reports
+      description: Approve a report
       operationId: approve-reports
       parameters:
         - in: path
