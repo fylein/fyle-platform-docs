@@ -664,6 +664,14 @@ components:
 
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
+    name_nullable:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: >
+        This represents the name of the resource. This should be unique in an
+        organization
+      example: foo123
     timestamptz_pst:
       type: string
       nullable: true
@@ -700,15 +708,15 @@ components:
             This could be any field such as an UUID from an Active Directory
             server or employee id in a HRMS system.
         department_name:
-          $ref: '#/components/schemas/name'
+          $ref: '#/components/schemas/name_nullable'
         sub_department:
-          $ref: '#/components/schemas/name'
+          $ref: '#/components/schemas/name_nullable'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
           $ref: '#/components/schemas/timestamptz_pst'
         level:
-          $ref: '#/components/schemas/name'
+          $ref: '#/components/schemas/name_nullable'
         location:
           type: string
           maxLength: 255
@@ -820,6 +828,7 @@ components:
     department_out_embed:
       type: object
       additionalProperties: false
+      nullable: true
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -839,6 +848,8 @@ components:
       example: '2020-06-01T13:14:54.804+00:00'
     level_out_embed:
       type: object
+      additionalProperties: false
+      nullable: true
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1005,9 +1016,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          allOf:
-            - $ref: '#/components/schemas/department_out_embed'
-          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
@@ -1015,9 +1024,7 @@ components:
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/level_out_embed'
+          $ref: '#/components/schemas/level_out_embed'
         location:
           type: string
           maxLength: 255
@@ -1819,7 +1826,9 @@ paths:
               additionalProperties: false
               properties:
                 data:
-                  $ref: '#/components/schemas/invitation_in'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/invitation_in'
       responses:
         '200':
           description: OK
