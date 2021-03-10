@@ -19,6 +19,19 @@ components:
           tokenUrl: 'https://accounts.fylehq.com/oauth/token'
           scopes:
             '*': Grant all actions
+  schemas:
+    '401':
+      type: object
+      properties:
+        message:
+          enum:
+            - invalid token
+          type: string
+          description: >
+            This error means that the input access token is either not issued by
+            Fyle or has expired.
+
+            You need to generate a new access token.
 tags:
   - name: My Profile
     description: |
@@ -49,18 +62,8 @@ paths:
                         example: ouHXboARkbAB
                     additionalProperties: false
         '401':
-          description: Unauthorized request
+          description: Unauthorised request
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    enum:
-                      - invalid token
-                    type: string
-                    description: >
-                      This error means that the input access token is either not
-                      issued by Fyle or has expired.
-
-                      You need to generate a new access token.
+                $ref: '#/components/schemas/401'
