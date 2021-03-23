@@ -675,6 +675,70 @@ components:
       type: string
       nullable: true
       example: '2020-06-01T01:18:19.292-08:00'
+    location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        display_name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: true
+          example: '221 Baker St, Marylebone, London, United Kingdom'
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    custom_field:
+      type: object
+      description: |
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          oneOf:
+            - type: string
+              nullable: true
+              example: string1
+            - type: boolean
+              nullable: true
+              example: true
+            - type: integer
+              nullable: true
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              nullable: true
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
     invitation_in:
       type: object
       additionalProperties: false
@@ -695,6 +759,7 @@ components:
         - cost_center_names
         - per_diem_rate_names
         - vehicle_types
+        - custom_fields
       properties:
         user_email:
           $ref: '#/components/schemas/email'
@@ -741,6 +806,8 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
         approver_emails:
           type: array
           maxLength: 3
@@ -1043,6 +1110,8 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
         project_ids:
           type: array
           nullable: true
