@@ -1206,6 +1206,209 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are approvers for this employee.
+    file_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: INTEGRATION
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          type: string
+          description: |
+            Link to download this file
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: INTEGRATION
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    admin_file_in:
+      required:
+        - user_id
+        - name
+        - type
+      allOf:
+        - $ref: '#/components/schemas/file_in'
+        - type: object
+          properties:
+            user_id:
+              allOf:
+                - $ref: '#/components/schemas/fk_string'
+    accounting_export_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ae2froib22i0
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_ids:
+          type: array
+          minItems: 1
+          maxItems: 1
+          description: List of file ids which holds reference to export files
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - fi123819sa
+        exported_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        description:
+          $ref: '#/components/schemas/description'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+    accounting_export_in:
+      type: object
+      required:
+        - file_ids
+        - exported_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ae2froib22i0
+        file_ids:
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - fi123819sa
+          description: List of file ids which holds reference to export files
+        exported_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        description:
+          $ref: '#/components/schemas/description'
+    accounting_export_lineitem_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        object_id:
+          $ref: '#/components/schemas/fk_string'
+        object_type:
+          type: string
+          enum:
+            - ADVANCE_REQUEST
+            - ADVANCE
+            - BALANCE_TRANSFER
+            - REFUND
+            - REIMBURSEMENT
+            - REPORT
+            - EXPENSE
+            - CCC_EXPENSE
+            - SETTLEMENT
+        reference:
+          type: string
+          maxLength: 255
+          description: >
+            Optional metadata about the Export operation. For example, newly
+            created Accounting Entry numbers in Quickbooks.
+        url:
+          type: string
+          maxLength: 255
+          format: uri
+          description: An optional URL where the exported data could be accessed
+        accounting_export_id:
+          $ref: '#/components/schemas/fk_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+    accounting_export_lineitem_in:
+      type: object
+      required:
+        - object_id
+        - object_type
+        - accounting_export_id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        object_id:
+          $ref: '#/components/schemas/fk_string'
+        object_type:
+          type: string
+          enum:
+            - ADVANCE
+            - BALANCE_TRANSFER
+            - REFUND
+            - REIMBURSEMENT
+            - REPORT
+            - EXPENSE
+            - CCC_EXPENSE
+            - SETTLEMENT
+        reference:
+          type: string
+          maxLength: 255
+          description: >
+            Optional metadata about the Export operation. For example, newly
+            created Accounting Entry numbers in Quickbooks.
+        url:
+          type: string
+          maxLength: 255
+          format: uri
+          description: An optional URL where the exported data could be accessed
+        accounting_export_id:
+          $ref: '#/components/schemas/fk_string'
 tags:
   - name: Projects
     description: |
@@ -1235,6 +1438,13 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your organisation's Expenses
+  - name: Files
+    description: |
+      This API gives you access to creates a file in Fyle
+  - name: Accounting Exports
+    description: >
+      This API allows you to record export of Fyle resources to an external
+      accounting exports
 paths:
   /admin/projects:
     get:
@@ -1970,3 +2180,270 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/files:
+    get:
+      tags:
+        - Files
+      summary: List files
+      operationId: files_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      operationId: files_post
+      tags:
+        - Files
+      summary: Create a file
+      description: |
+        Create a file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_file_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/accounting_exports:
+    get:
+      tags:
+        - Accounting Exports
+      summary: List accounting exports
+      operationId: accounting_exports_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/accounting_export_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Accounting Exports
+      summary: Create an accounting export
+      operationId: accounting_export_post
+      description: |
+        Create an accounting export.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/accounting_export_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/accounting_export_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/accounting_export_lineitems:
+    get:
+      tags:
+        - Accounting Exports
+      summary: List accounting exports lineitems
+      operationId: accounting_export_lineitems_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/accounting_export_lineitem_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      operationId: accounting_export_lineitems_post
+      tags:
+        - Accounting Exports
+      summary: Create or update an accounting export lineitem
+      description: |
+        Create or update a project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/accounting_export_lineitem_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/accounting_export_lineitem_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'

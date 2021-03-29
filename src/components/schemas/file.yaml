@@ -4,31 +4,39 @@ file_out:
     id:
       $ref: './fields.yaml#/id_string'
     org_id:
-      $ref: ./fields.yaml#/org_id
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      $ref: './fields.yaml#/fk_string'
     created_at:
-      $ref: ./fields.yaml#/created_at
+      $ref: './fields.yaml#/created_at'
     updated_at:
-      $ref: ./fields.yaml#/updated_at
+      $ref: './fields.yaml#/updated_at'
     name:
       type: string
       description: |
         Name of the uploaded file.
       example: uber_expenses_vmrpw.pdf
+    password:
+      type: string
+      description: |
+        Password which required to unlock the file.
+      example: SuperSecretPassword
     type:
       type: string
       enum:
-        - THUMBNAILx200x200
-        - ORIGINAL
-        - ENCRYPTED
+        - INTEGRATION
       description: >
         Indicates whether this file original size or encrypted or its thumbnail
         image.
-      example: ORIGINAL
-    download_path:
+      example: INTEGRATION
+    content_type:
+      type: string
+      example: 'text/csv'
+    download_url:
       type: string
       description: |
         Link to download this file
-    upload_path:
+    upload_url:
       type: string
       description: |
         Link to download this file
@@ -47,24 +55,15 @@ file_out_embed:
     type:
       type: string
       enum:
-        - THUMBNAILx200x200
-        - ORIGINAL
-        - ENCRYPTED
+        - INTEGRATION
       description: >
         Indicates whether this file original size or encrypted or its thumbnail
         image.
-      example: ORIGINAL
-    download_path:
-      type: string
-      description: |
-        Link to download this file
-    upload_path:
-      type: string
-      description: |
-        Link to download this file
+      example: INTEGRATION
 
 file_in:
   type: object
+  required: [ name, type ]
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -76,15 +75,23 @@ file_in:
     type:
       type: string
       enum:
-        - THUMBNAILx200x200
-        - ORIGINAL
-        - ENCRYPTED
+        - INTEGRATION
       description: >
         Indicates whether this file original size or encrypted or its thumbnail
         image.
-      example: ORIGINAL
+      example: INTEGRATION
     password:
       type: string
       description: |
         Password which required to unlock the file.
       example: SuperSecretPassword
+
+admin_file_in:
+  required: [ user_id, name, type ]
+  allOf:
+    - $ref: '#/file_in'
+    - type: object
+      properties:
+        user_id:
+          allOf:
+            - $ref: './fields.yaml#/fk_string'
