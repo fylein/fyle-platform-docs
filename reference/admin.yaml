@@ -675,11 +675,91 @@ components:
       type: string
       nullable: true
       example: '2020-06-01T01:18:19.292-08:00'
+    location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        display_name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: true
+          example: '221 Baker St, Marylebone, London, United Kingdom'
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    custom_field:
+      type: object
+      description: |
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          oneOf:
+            - type: string
+              nullable: true
+              example: string1
+            - type: boolean
+              nullable: true
+              example: true
+            - type: integer
+              nullable: true
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              nullable: true
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
     invitation_in:
       type: object
       additionalProperties: false
       required:
         - user_email
+        - user_full_name
+        - business_unit
+        - code
+        - department_name
+        - sub_department
+        - is_enabled
+        - joined_at
+        - level
+        - location
+        - title
+        - approver_emails
+        - project_names
+        - cost_center_names
+        - per_diem_rate_names
+        - vehicle_types
+        - custom_fields
       properties:
         user_email:
           $ref: '#/components/schemas/email'
@@ -726,6 +806,8 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
         approver_emails:
           type: array
           maxLength: 3
@@ -805,10 +887,19 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
     user_out_embed:
       type: object
       additionalProperties: false
       properties:
+        id:
+          $ref: '#/components/schemas/id_string'
         email:
           $ref: '#/components/schemas/email'
         full_name:
@@ -818,13 +909,6 @@ components:
             Represents the full name of the Employee. Must be at least 3
             characters.
           example: John Doe
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     department_out_embed:
       type: object
       additionalProperties: false
@@ -964,25 +1048,6 @@ components:
           example: 10
           nullable: true
           description: Amount (in Home currency) per unit.
-    employee_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
-        code:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
     employee_out:
       type: object
       additionalProperties: false
@@ -995,6 +1060,8 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
         user:
           $ref: '#/components/schemas/user_out_embed'
         business_unit:
@@ -1043,6 +1110,8 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
         project_ids:
           type: array
           nullable: true
@@ -1119,23 +1188,22 @@ components:
           description: >
             List of mileage rates that this employee is allowed to access. If
             null, then there are no restrictions
-        approver_ids:
+        approver_user_ids:
           type: array
           maxLength: 3
           nullable: true
           items:
             $ref: '#/components/schemas/fk_string'
           example:
-            - ousfwogehgb
-            - ousjbsjbaraj
-          description: >
-            List of IDs of employees that are approvers for this employee.
-            Maximum 3.
-        approvers:
+            - uswoirwlwwg
+            - uswlgwkgw42
+          description: |
+            List of IDs of users who are approvers for this employee. Maximum 3.
+        approver_users:
           type: array
           nullable: true
           items:
-            $ref: '#/components/schemas/employee_out_embed'
+            $ref: '#/components/schemas/user_out_embed'
           description: |
             List of approvers for this employee
     file_out:
