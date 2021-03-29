@@ -42,9 +42,9 @@ components:
         example:
           - 'gte.2020-06-01T00:00:00.000-08:00'
           - 'lt.2020-07-01T00:00:00.000-08:00'
-    approved_at:
+    last_approved_at:
       in: query
-      name: approved_at
+      name: last_approved_at
       description: >
         Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
         RHS dot pattern.<br>
@@ -54,9 +54,9 @@ components:
         type: string
         example: >-
           approved_at=gte.2020-06-01T00:00:00.000Z&approved_at=lt.2020-07-01T00:00:00.000Z
-    reimbursed_at:
+    last_reimbursed_at:
       in: query
-      name: reimbursed_at
+      name: last_reimbursed_at
       description: >
         Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
         RHS dot pattern.<br>
@@ -66,9 +66,9 @@ components:
         type: string
         example: >-
           reimbursed_at=gte.2020-06-01T00:00:00.000Z&reimbursed_at=lt.2020-07-01T00:00:00.000Z
-    submitted_at:
+    last_submitted_at:
       in: query
-      name: submitted_at
+      name: last_submitted_at
       description: >
         Date string in yyyy-MM-ddTHH:mm:ss.SSSZ format along with operator in
         RHS dot pattern.<br>
@@ -196,25 +196,6 @@ components:
             Represents the full name of the Employee. Must be at least 3
             characters.
           example: John Doe
-    employee_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
-        code:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
     currency:
       type: string
       description: >
@@ -233,10 +214,10 @@ components:
       type: object
       additionalProperties: false
       properties:
-        approver_id:
+        approver_user_id:
           $ref: '#/components/schemas/id_string'
-        approver:
-          $ref: '#/components/schemas/employee_out_embed'
+        approver_user:
+          $ref: '#/components/schemas/user_out_embed'
         state:
           type: string
           enum:
@@ -257,10 +238,10 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        employee_id:
+        user_id:
           $ref: '#/components/schemas/id_string'
-        employee:
-          $ref: '#/components/schemas/employee_out_embed'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
         purpose:
           type: string
           description: purpose for creating the report
@@ -299,21 +280,21 @@ components:
           type: boolean
           description: |
             Determines whether this report was flagged from a policy
-        reimbursed_at:
+        last_reimbursed_at:
           type: string
           format: date-time
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was reimbursed.
           nullable: true
-        approved_at:
+        last_approved_at:
           type: string
           format: date-time
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was approved.
           nullable: true
-        submitted_at:
+        last_submitted_at:
           type: string
           format: date-time
           example: '2020-06-11T13:14:55.201598+00:00'
@@ -336,6 +317,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        approver_user_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
 tags:
   - name: Reports
     description: |
@@ -350,9 +335,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/approved_at'
-        - $ref: '#/components/parameters/reimbursed_at'
-        - $ref: '#/components/parameters/submitted_at'
+        - $ref: '#/components/parameters/last_approved_at'
+        - $ref: '#/components/parameters/last_reimbursed_at'
+        - $ref: '#/components/parameters/last_submitted_at'
         - $ref: '#/components/parameters/state'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
