@@ -135,6 +135,12 @@ components:
           type: number
         org_id:
           $ref: '#/components/schemas/org_id'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
     email:
       type: string
       maxLength: 127
@@ -171,7 +177,7 @@ components:
 
         Original currency signifies the currency in which the object
         (expense/advance/refund/etc.) was originally created.
-      example: INR
+      example: GBP
     foreign_amount:
       type: number
       description: >
@@ -249,7 +255,7 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
-    account_out_embbed:
+    account_out_embed:
       type: object
       properties:
         id:
@@ -364,6 +370,10 @@ components:
         Custom fields
       items:
         $ref: '#/components/schemas/custom_field'
+    timestamptz_utc:
+      type: string
+      nullable: true
+      example: '2020-06-01T13:14:54.804+00:00'
     report_out_embed:
       type: object
       properties:
@@ -418,10 +428,6 @@ components:
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was settled.
-    timestamptz_utc:
-      type: string
-      nullable: true
-      example: '2020-06-01T13:14:54.804+00:00'
     file_out_embed:
       type: object
       properties:
@@ -466,7 +472,7 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
         user_id:
-          $ref: '#/components/schemas/fk_string'
+          $ref: '#/components/schemas/user_id'
         user:
           $ref: '#/components/schemas/user_out_embed'
         org_id:
@@ -476,7 +482,11 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
         spent_at:
-          $ref: '#/components/schemas/timestamptz_pst'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: |
+            siginfies when this expense was made.
+            This date cannot be in future.
         source:
           type: string
           description: >
@@ -564,7 +574,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
         source_account:
-          $ref: '#/components/schemas/account_out_embbed'
+          $ref: '#/components/schemas/account_out_embed'
         tax_amount:
           type: number
           description: Tax amount as setup by your organisation.
@@ -679,22 +689,11 @@ components:
           description: |
             Unique id given by Fyle to identify an Expense Report.
         added_to_report_at:
-          type: string
-          format: date-time
-          readOnly: true
-          description: >
-            RFC 3339, section 5.6
-            "https://tools.ietf.org/html/rfc3339#section-5.6"
-
-            compliant timestamp on which the Expense was submitted via a Report
-            to the
-
-            Approvers.
-
-            If the Expense is not added to a Report yet or if the Report is not
-            yet
-
-            submitted, this could be null.
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies when this expense was added to a report.
+            If this expense is not added to a report, then this could be null.
         report:
           $ref: '#/components/schemas/report_out_embed'
         is_verified:
@@ -704,6 +703,8 @@ components:
         last_verified_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies when this expense was verified.
         is_exported:
           type: boolean
           description: >
@@ -712,6 +713,9 @@ components:
         last_exported_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
+          description: >-
+            signifies when this expense was exported to an external accounting
+            system.
         file_ids:
           type: array
           items:
@@ -734,7 +738,11 @@ components:
       type: object
       properties:
         spent_at:
-          $ref: '#/components/schemas/timestamptz_pst'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: |
+            siginfies when this expense was made.
+            This date cannot be in future.
         source:
           type: string
           description: >
@@ -778,8 +786,6 @@ components:
         source_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
-        source_account:
-          type: object
         tax_amount:
           type: number
           description: Tax amount as setup by your organisation.
