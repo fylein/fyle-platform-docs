@@ -17,7 +17,7 @@ expense_out:
       $ref: './fields.yaml#/updated_at'
     spent_at:
       allOf:
-        - $ref: './fields.yaml#/timestamptz_pst'
+        - $ref: './fields.yaml#/timestamptz_utc'
       description: |
         siginfies when this expense was made.
         This date cannot be in future.
@@ -93,6 +93,7 @@ expense_out:
     source_account_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
     source_account:
       $ref: './account.yaml#/account_out_embed'
     tax_amount:
@@ -146,9 +147,9 @@ expense_out:
         Specific to per diem related expenses, number of days ofr which per diem claim is made.
       example: 2
     started_at:
-      $ref: './fields.yaml#/timestamptz_pst'
+      $ref: './fields.yaml#/timestamptz_utc'
     ended_at:
-      $ref: './fields.yaml#/timestamptz_pst'
+      $ref: './fields.yaml#/timestamptz_utc'
     travel_classes:
       description: |
         This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
@@ -182,6 +183,7 @@ expense_out:
       description: |
         Id given by external systems like Gmail. To identify whether that entity
         has been already added to Fyle or not.
+      example: 'wgjwgo3ihwljnlsww'
     state:
       type: string
       enum:
@@ -201,9 +203,11 @@ expense_out:
         This field can be used as reference in UI.
       example: E/2020/10/T/95
     report_id:
-      type: string
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
       description: |
         Unique id given by Fyle to identify an Expense Report.
+      example: rpvgnwlgw34
     added_to_report_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -234,6 +238,7 @@ expense_out:
       type: array
       items:
         $ref: './fields.yaml#/id_string'
+      example: ["figwiwpjww"]
     files:
       type: array
       items:
@@ -296,6 +301,7 @@ expense_in:
     source_account_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
     tax_amount:
       type: number
       description: Tax amount as setup by your organisation.
