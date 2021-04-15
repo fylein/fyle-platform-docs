@@ -4,7 +4,7 @@ expense_out:
     id:
       $ref: './fields.yaml#/id_string'
     user_id:
-      $ref: './fields.yaml#/fk_string'
+      $ref: './fields.yaml#/user_id'
     user:
       $ref: './user.yaml#/user_out_embed'
     org_id:
@@ -14,7 +14,11 @@ expense_out:
     updated_at:
       $ref: './fields.yaml#/updated_at'
     spent_at:
-      $ref: './fields.yaml#/timestamptz_pst'
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      description: |
+        siginfies when this expense was made.
+        This date cannot be in future.
     source:
       type: string
       description: |
@@ -88,7 +92,7 @@ expense_out:
       allOf:
         - $ref: './fields.yaml#/fk_string'
     source_account:
-      $ref: './account.yaml#/account_out_embbed'
+      $ref: './account.yaml#/account_out_embed'
     tax_amount:
       type: number
       description: Tax amount as setup by your organisation.
@@ -194,15 +198,11 @@ expense_out:
       description: |
         Unique id given by Fyle to identify an Expense Report.
     added_to_report_at:
-      type: string
-      format: date-time
-      readOnly: true
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
       description: |
-        RFC 3339, section 5.6 "https://tools.ietf.org/html/rfc3339#section-5.6"
-        compliant timestamp on which the Expense was submitted via a Report to the
-        Approvers.
-        If the Expense is not added to a Report yet or if the Report is not yet
-        submitted, this could be null.
+        signifies when this expense was added to a report.
+        If this expense is not added to a report, then this could be null.
     report:
       $ref: './report.yaml#/report_out_embed'
     is_verified:
@@ -212,6 +212,8 @@ expense_out:
     last_verified_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        signifies when this expense was verified.
     is_exported:
       type: boolean
       description: |
@@ -219,6 +221,8 @@ expense_out:
     last_exported_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      description:
+        signifies when this expense was exported to an external accounting system.
     file_ids:
       type: array
       items:
@@ -242,7 +246,11 @@ expense_in:
   type: object
   properties:
     spent_at:
-      $ref: './fields.yaml#/timestamptz_pst'
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      description: |
+        siginfies when this expense was made.
+        This date cannot be in future.
     source:
       type: string
       description: |
@@ -281,8 +289,6 @@ expense_in:
     source_account_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
-    source_account:
-      type: object
     tax_amount:
       type: number
       description: Tax amount as setup by your organisation.
