@@ -180,12 +180,6 @@ components:
         Amount value of the object, in original currency i.e the currency in
         which the object was initially created.
       example: 3768
-    fk_integer:
-      type: integer
-      nullable: true
-      description: |
-        This id provided by Fyle to identify an object.
-      example: 1234
     id_integer:
       type: integer
       description: |
@@ -546,25 +540,42 @@ components:
           example: Team lunch
         cost_center_id:
           allOf:
-            $ref: '#/components/schemas/fk_integer'
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an object.
+            example: 1234
           example: 1049
         cost_center:
           $ref: '#/components/schemas/cost_center_out_embed'
         category_id:
           allOf:
-            $ref: '#/components/schemas/fk_integer'
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an object.
+            example: 1234
           example: 49058
         category:
           $ref: '#/components/schemas/category_out_embed'
         project_id:
           allOf:
-            $ref: '#/components/schemas/fk_integer'
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an object.
+            example: 1234
           example: 92895
         project:
           $ref: '#/components/schemas/project_out_embed'
         source_account_id:
           allOf:
-            $ref: '#/components/schemas/fk_string'
+            type: string
+            nullable: true
+            maxLength: 15
+            description: |
+              This id provided by Fyle to identify an object.
+            example: sdfd2391
         source_account:
           $ref: '#/components/schemas/account_out_embbed'
         tax_amount:
@@ -572,7 +583,12 @@ components:
           description: Tax amount as setup by your organisation.
         tax_group_id:
           allOf:
-            $ref: '#/components/schemas/fk_string'
+            type: string
+            nullable: true
+            maxLength: 15
+            description: |
+              This id provided by Fyle to identify an object.
+            example: sdfd2391
         is_billable:
           type: boolean
           example: true
@@ -596,7 +612,11 @@ components:
           description: Amount compluted by Fyle in mileage expenses.
         mileage_rate_id:
           allOf:
-            $ref: '#/components/schemas/fk_integer'
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an object.
+            example: 1234
           example: 9080
         mileage_rate:
           $ref: '#/components/schemas/mileage_rate_out_embed'
@@ -605,7 +625,11 @@ components:
           description: Flag stating whether this was a round trip or not.
         per_diem_rate_id:
           allOf:
-            $ref: '#/components/schemas/fk_integer'
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an object.
+            example: 1234
           example: 583
         per_diem_rate:
           $ref: '#/components/schemas/per_diem_rate_out_embed'
@@ -732,152 +756,17 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
-    expense_in:
-      type: object
-      properties:
-        spent_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        source:
-          type: string
-          description: >
-            The name of the client app which is creating the expense.
-
-            if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: SLACK_APP
-        merchant:
-          type: string
-          maxLength: 255
-          description: >
-            String denoting the name of the vendor to which the Expense was
-            made.
-          example: Uber
-        currency:
-          $ref: '#/components/schemas/currency'
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        purpose:
-          type: string
-          example: Team lunch
-        cost_center_id:
-          allOf:
-            $ref: '#/components/schemas/fk_integer'
-          example: 1049
-        category_id:
-          allOf:
-            $ref: '#/components/schemas/fk_integer'
-          example: 49058
-        project_id:
-          allOf:
-            $ref: '#/components/schemas/fk_integer'
-          example: 92895
-        source_account_id:
-          allOf:
-            $ref: '#/components/schemas/fk_string'
-        source_account:
-          type: object
-        tax_amount:
-          type: number
-          description: Tax amount as setup by your organisation.
-        tax_group_id:
-          allOf:
-            $ref: '#/components/schemas/fk_string'
-        is_billable:
-          type: boolean
-          example: true
-          description: This fields marks whether a given expense is billable a not.
-        is_reimbursable:
-          type: boolean
-          example: true
-        distance:
-          type: number
-          description: Actual distance travelled by employee in travel related expenses.
-        distance_unit:
-          type: string
-          enum:
-            - KM
-            - MILES
-        mileage_calculated_distance:
-          type: number
-          description: Distance compluted by Fyle in mileage expenses.
-        mileage_calculated_amount:
-          type: number
-          description: Amount compluted by Fyle in mileage expenses.
-        mileage_rate_id:
-          allOf:
-            $ref: '#/components/schemas/fk_integer'
-          example: 9080
-        mileage_is_round_trip:
-          type: boolean
-          description: Flag stating whether this was a round trip or not.
-        per_diem_rate_id:
-          allOf:
-            $ref: '#/components/schemas/fk_integer'
-          example: 583
-        num_days:
-          type: integer
-          example: 2
-        started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        travel_classes:
-          description: >
-            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-            category.
-
-            index 0 holds onward journey class, index 1 holds return journey
-            travel class.
-          type: array
-          minItems: 2
-          maxItems: 2
-          items:
-            type: string
-          example:
-            - ECONOMY
-            - BUSINESS
-        hotel_is_breakfast_provided:
-          type: boolean
-          description: |
-            This field is applicable for only `Hotel` category.
-        locations:
-          description: >
-            This field will be present for travel related categories.
-
-            For travel between Place A to Place B, this array will contain two
-            items, From location at array index 0 and To location at array index
-            1.
-
-            For travel between Place A to Place c and stopping at Place B, this
-          type: array
-          minItems: 2
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/location'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
     fyler_expense_in:
       type: object
       properties:
         allOf:
-          - $ref: '#/components/schemas/expense_in'
+          - $ref: '#/expense_in'
           - type: object
             required:
               - amount
             properties:
               claim_amount:
-                $ref: '#/components/schemas/amount'
+                $ref: ./fields.yaml#/amount
   parameters:
     created_at:
       in: query
