@@ -167,10 +167,10 @@ components:
             Represents the full name of the Employee. Must be at least 3
             characters.
           example: John Doe
-    timestamptz_pst:
+    timestamptz_utc:
       type: string
       nullable: true
-      example: '2020-06-01T01:18:19.292-08:00'
+      example: '2020-06-01T13:14:54.804+00:00'
     foreign_currency:
       type: string
       description: >
@@ -372,15 +372,13 @@ components:
         Custom fields
       items:
         $ref: '#/components/schemas/custom_field'
-    timestamptz_utc:
-      type: string
-      nullable: true
-      example: '2020-06-01T13:14:54.804+00:00'
     report_out_embed:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          allOf:
+            '-$ref': ./fields.yaml#/id_string
+          example: rpvgnwlgw34
         last_approved_at:
           type: string
           format: date-time
@@ -434,7 +432,9 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: figwiwpjww
         name:
           type: string
           description: |
@@ -457,7 +457,9 @@ components:
       additionalProperties: false
       properties:
         approver_user_id:
-          $ref: '#/components/schemas/id_string'
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
         approver_user:
           $ref: '#/components/schemas/user_out_embed'
         state:
@@ -487,7 +489,7 @@ components:
           $ref: '#/components/schemas/updated_at'
         spent_at:
           allOf:
-            - $ref: '#/components/schemas/timestamptz_pst'
+            - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             siginfies when this expense was made.
             This date cannot be in future.
@@ -577,6 +579,7 @@ components:
         source_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
         source_account:
           $ref: '#/components/schemas/account_out_embed'
         tax_amount:
@@ -631,9 +634,9 @@ components:
             diem claim is made.
           example: 2
         started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
+          $ref: '#/components/schemas/timestamptz_utc'
         ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
+          $ref: '#/components/schemas/timestamptz_utc'
         travel_classes:
           description: >
             This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
@@ -676,6 +679,7 @@ components:
             entity
 
             has been already added to Fyle or not.
+          example: wgjwgo3ihwljnlsww
         state:
           type: string
           enum:
@@ -695,9 +699,11 @@ components:
             This field can be used as reference in UI.
           example: E/2020/10/T/95
         report_id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
           description: |
             Unique id given by Fyle to identify an Expense Report.
+          example: rpvgnwlgw34
         added_to_report_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -730,6 +736,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
         files:
           type: array
           items:
@@ -744,6 +752,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+    timestamptz_pst:
+      type: string
+      nullable: true
+      example: '2020-06-01T01:18:19.292-08:00'
     expense_in:
       type: object
       properties:
@@ -796,6 +808,7 @@ components:
         source_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
         tax_amount:
           type: number
           description: Tax amount as setup by your organisation.
