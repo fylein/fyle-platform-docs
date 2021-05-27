@@ -18,6 +18,7 @@ expense_out:
     spent_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
       description: |
         siginfies when this expense was made.
         This date cannot be in future.
@@ -32,6 +33,7 @@ expense_out:
     merchant:
       type: string
       maxLength: 255
+      nullable: true
       description: |
         String denoting the name of the merchant to which the Expense was made.
       example: Uber
@@ -39,6 +41,7 @@ expense_out:
       $ref: './fields.yaml#/currency'
     amount:
       type: number
+      nullable: true
       description: |
         The amount for which the expense was/will-be fyled.
         The amount will be in the currency that the organization's home currency.<br>
@@ -51,16 +54,19 @@ expense_out:
       example: 1500
     claim_amount:
       type: number
+      nullable: true
       description: |
         The expense amount as claimed by user.
       example: 1984.18
     policy_amount:
       type: number
+      nullable: true
       description: |
         The expense amount set by policy.
       example: 1500
     admin_amount:
       type: number
+      nullable: true
       description: |
         The expense amount which is modified by admin or approver.
         This could be null if admin or approver has not edited your expense.
@@ -71,22 +77,26 @@ expense_out:
       $ref: './fields.yaml#/foreign_amount'
     purpose:
       type: string
+      nullable: true
       example: Team lunch
     cost_center_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 1049
     cost_center:
       $ref: './cost_center.yaml#/cost_center_out_embed'
     category_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 49058
     category:
       $ref: './category.yaml#/category_out_embed'
     project_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 92895
     project:
       $ref: './project.yaml#/project_out_embed'
@@ -98,12 +108,15 @@ expense_out:
       $ref: './account.yaml#/account_out_embed'
     tax_amount:
       type: number
+      nullable: true
       description: Tax amount as setup by your organisation.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
+      nullable: true
     is_billable:
       type: boolean
+      nullable: true
       example: true
       description: This fields marks whether a given expense is billable a not.
     is_reimbursable:
@@ -112,37 +125,46 @@ expense_out:
       example: true
     distance:
       type: number
+      nullable: true
       description: Actual distance travelled by employee in travel related expenses.
     distance_unit:
       type: string
+      nullable: true
       description: Unit of distance travelled.
       enum:
         - KM
         - MILES
+        - null
       example: MILES
     mileage_calculated_distance:
       type: number
+      nullable: true
       description: Distance compluted by Fyle in mileage expenses.
     mileage_calculated_amount:
       type: number
+      nullable: true
       description: Amount compluted by Fyle in mileage expenses.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 9080
     mileage_rate:
       $ref: './mileage_rate.yaml#/mileage_rate_out_embed'
     mileage_is_round_trip:
       type: boolean
+      nullable: true
       description: Flag stating whether this was a round trip or not.
     per_diem_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 583
     per_diem_rate:
       $ref: './per_diem_rate.yaml#/per_diem_rate_out_embed'
     num_days:
       type: integer
+      nullable: true
       description: |
         Specific to per diem related expenses, number of days ofr which per diem claim is made.
       example: 2
@@ -155,7 +177,7 @@ expense_out:
         This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
         index 0 holds onward journey class, index 1 holds return journey travel class.
       type: array
-      minItems: 2
+      minItems: 0
       maxItems: 2
       items:
         type: string
@@ -164,6 +186,7 @@ expense_out:
         - BUSINESS
     hotel_is_breakfast_provided:
       type: boolean
+      nullable: true
       description: |
         This field is applicable for only `Hotel` category.
     locations:
@@ -172,7 +195,7 @@ expense_out:
         For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
         For travel between Place A to Place c and stopping at Place B, this
       type: array
-      minItems: 2
+      minItems: 0
       maxItems: 10
       items:
         $ref: './fields.yaml#/location'
@@ -180,6 +203,7 @@ expense_out:
       $ref: './fields.yaml#/custom_fields'
     code:
       type: string
+      nullable: true
       description: |
         Id given by external systems like Gmail. To identify whether that entity
         has been already added to Fyle or not.
@@ -205,12 +229,14 @@ expense_out:
     report_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
+      nullable: true
       description: |
         Unique id given by Fyle to identify an Expense Report.
       example: rpvgnwlgw34
     added_to_report_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
       description: |
         signifies when this expense was added to a report.
         If this expense is not added to a report, then this could be null.
@@ -218,20 +244,24 @@ expense_out:
       $ref: './report.yaml#/report_out_embed'
     is_verified:
       type: boolean
+      nullable: true
       description: |
         Determines whether this expense has been verified by a verifier.
     last_verified_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
       description: |
         signifies when this expense was verified.
     is_exported:
       type: boolean
+      nullable: true
       description: |
         Determines whether this expense has been exported to external accounting system or not.
     last_exported_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
       description:
         signifies when this expense was exported to an external accounting system.
     file_ids:
@@ -277,6 +307,7 @@ expense_in:
     merchant:
       type: string
       maxLength: 255
+      nullable: true
       description: |
         String denoting the name of the vendor to which the Expense was made.
       example: Uber
@@ -292,14 +323,17 @@ expense_in:
     cost_center_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 1049
     category_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 49058
     project_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 92895
     source_account_id:
       allOf:
@@ -307,47 +341,60 @@ expense_in:
       example: acwbl222wlg
     tax_amount:
       type: number
+      nullable: true
       description: Tax amount as setup by your organisation.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
+      nullable: true
     is_billable:
       type: boolean
+      nullable: true
       example: true
       description: This fields marks whether a given expense is billable a not.
     is_reimbursable:
       type: boolean
+      nullable: true
       description: This fields marks whether a given expense is reimbursable a not.
       example: true
     distance:
       type: number
+      nullable: true
       description: Actual distance travelled by employee in travel related expenses.
     distance_unit:
       type: string
+      nullable: true
       description: Unit of distance travelled.
       enum:
         - KM
         - MILES
+        - null
       example: MILES
     mileage_calculated_distance:
       type: number
+      nullable: true
       description: Distance compluted by Fyle in mileage expenses.
     mileage_calculated_amount:
       type: number
+      nullable: true
       description: Amount compluted by Fyle in mileage expenses.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 9080
     mileage_is_round_trip:
       type: boolean
+      nullable: true
       description: Flag stating whether this was a round trip or not.
     per_diem_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
+      nullable: true
       example: 583
     num_days:
       type: integer
+      nullable: true
       description: |
         Specific to per diem related expenses, number of days ofr which per diem claim is made.
       example: 2
@@ -360,7 +407,7 @@ expense_in:
         This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
         index 0 holds onward journey class, index 1 holds return journey travel class.
       type: array
-      minItems: 2
+      minItems: 0
       maxItems: 2
       items:
         type: string
@@ -369,6 +416,7 @@ expense_in:
         - BUSINESS
     hotel_is_breakfast_provided:
       type: boolean
+      nullable: true
       description: |
         This field is applicable for only `Hotel` category.
     locations:
@@ -377,7 +425,7 @@ expense_in:
         For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
         For travel between Place A to Place c and stopping at Place B, this
       type: array
-      minItems: 2
+      minItems: 0
       maxItems: 10
       items:
         $ref: './fields.yaml#/location'
