@@ -2140,6 +2140,70 @@ components:
           example: Monthly payouts
         code:
           $ref: '#/components/schemas/code'
+    user_account_summary_out:
+      type: object
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        cash_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        cash_account:
+          type: object
+          properties:
+            id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: acwbl222wlg
+            balance:
+              type: number
+              example: 50
+            currency:
+              $ref: '#/components/schemas/currency'
+        advance_account_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - acwbl222wlg
+        advance_accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: acwbl222wlg
+              balance:
+                type: number
+                example: 10
+              currency:
+                $ref: '#/components/schemas/currency'
+        corporate_credit_card_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        corporate_credit_card_account:
+          type: object
+          properties:
+            id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: acwbl222wlg
+            balance:
+              type: number
+              example: 50
+            currency:
+              $ref: '#/components/schemas/currency'
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/account_out_embed'
 tags:
   - name: Projects
     description: |
@@ -2176,6 +2240,9 @@ tags:
     description: >
       These APIs gives you access to manage your organisation's Reimbursements
       data
+  - name: Accounts
+    description: |
+      This APIs gives access to your Employees's accounts data.
   - name: Accounting Exports
     description: >
       This API allows you to record export of Fyle resources to an external
@@ -3385,6 +3452,59 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/user_account_summaries:
+    get:
+      tags:
+        - Account
+      summary: List User Accounts Summaries
+      operationId: list-user-account-summaries
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user_account_summary_out'
         '401':
           description: Unauthorised request
           content:
