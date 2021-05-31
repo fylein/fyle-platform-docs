@@ -2060,6 +2060,152 @@ components:
                 - $ref: '#/components/schemas/user_id'
               readOnly: false
         - $ref: '#/components/schemas/expense_in'
+    settlement_id:
+      type: string
+      maxLength: 255
+      description: |
+        Unique identifier of settlement object linked to this object.
+      example: setd8Ywn4n0H
+    reimbursement_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          readOnly: true
+          example: reimntGt9ju6qP
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        mode:
+          type: string
+          enum:
+            - ACH
+            - OFFLINE
+          description: |
+            Mode of creation of this reimbursement.
+          example: OFFLINE
+        ach_state:
+          type: string
+          enum:
+            - ACH_INITIATED
+            - ACH_COMPLETE
+            - ACH_FAILED
+            - ACH_RETRY
+          description: |
+            Status of ACH if this reimbursment is processed via ACH.
+          example: ACH_COMPLETE
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - PENDING
+          description: |
+            State of the reimbursement.
+          example: COMPLETE
+        unique_id:
+          type: string
+          description: >
+            A unique, organization wide identifier for a particular
+            reimbursement.<br>
+
+            This id is always prefixed with `P/`.
+          example: P/2020/11/29
+        settlement_id:
+          $ref: '#/components/schemas/settlement_id'
+    reimbursement_in_minimal:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          example: reimntGt9ju6qP
+        comment:
+          type: string
+          example: Monthly payouts
+        code:
+          $ref: '#/components/schemas/code'
+    user_account_summary_out:
+      type: object
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        cash_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        cash_account:
+          type: object
+          properties:
+            id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: acwbl222wlg
+            balance:
+              type: number
+              example: 50
+            currency:
+              $ref: '#/components/schemas/currency'
+        advance_account_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - acwbl222wlg
+        advance_accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: acwbl222wlg
+              balance:
+                type: number
+                example: 10
+              currency:
+                $ref: '#/components/schemas/currency'
+        corporate_credit_card_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        corporate_credit_card_account:
+          type: object
+          properties:
+            id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: acwbl222wlg
+            balance:
+              type: number
+              example: 50
+            currency:
+              $ref: '#/components/schemas/currency'
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/account_out_embed'
 tags:
   - name: Projects
     description: |
@@ -2092,6 +2238,13 @@ tags:
   - name: Files
     description: |
       This API gives you access to creates a file in Fyle
+  - name: Reimbursements
+    description: >
+      These APIs gives you access to manage your organisation's Reimbursements
+      data
+  - name: Accounts
+    description: |
+      This APIs gives access to your Employees's accounts data.
   - name: Accounting Exports
     description: >
       This API allows you to record export of Fyle resources to an external
@@ -3168,6 +3321,194 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reimbursements:
+    get:
+      tags:
+        - Reimbursements
+      summary: List reimbursement
+      operationId: list-reimbursements
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reimbursement_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reimbursements/complete:
+    post:
+      tags:
+        - Reimbursements
+      summary: Complete reimbursement
+      operationId: complete-reimbursements
+      description: |
+        Marks reimbursement as complete and move reports to paid state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reimbursement_in_minimal'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reimbursement_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reimbursements/complete@bulk:
+    post:
+      tags:
+        - Reimbursements
+      summary: Complete reimbursement bulk
+      operationId: complete-reimbursements-bulk
+      description: |
+        Marks reimbursement as complete and move reports to paid state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/reimbursement_in_minimal'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/user_account_summaries:
+    get:
+      tags:
+        - Accounts
+      summary: List User Accounts Summaries
+      operationId: list-user-account-summaries
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user_account_summary_out'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
