@@ -2306,6 +2306,51 @@ components:
           example: reimd8Ywn4n0H
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_embed'
+    settlement_in:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a settlement.
+            This id is always prefixed with `set`.
+          example: setmntGt9ju6qP
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        cash_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        advance_account_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - acwbl222wlg
+        corporate_credit_card_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        balance_transfers:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: acwbl222wlg
+              amount:
+                $ref: '#/components/schemas/amount'
+        reimbursement:
+          type: object
+          properties:
+            amount:
+              $ref: '#/components/schemas/amount'
     settlement_id:
       type: string
       maxLength: 255
@@ -3623,6 +3668,56 @@ paths:
                       $ref: '#/components/schemas/settlement_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Settlements
+      summary: Create or update a settlement
+      description: |
+        Create or update a settlement
+      operationId: post-settlements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/settlement_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/settlement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:
