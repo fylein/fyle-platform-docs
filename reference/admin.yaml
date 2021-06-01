@@ -2060,7 +2060,101 @@ components:
                 - $ref: '#/components/schemas/user_id'
               readOnly: false
         - $ref: '#/components/schemas/expense_in'
-    settlements_out:
+    account_snapshot_out_embed:
+      type: object
+      properties:
+        account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        type:
+          type: string
+          enum:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+            - PERSONAL_ADVANCE_ACCOUNT
+          example: PERSONAL_CASH_ACCOUNT
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance:
+          $ref: '#/components/schemas/amount'
+    expense_out_embed:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    advance_out_embed:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a balance transfer.
+            This id is always prefixed with `bt`.
+          readOnly: true
+          example: advkvnwrnpwi
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    corporate_credit_card_expense_out_embed:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a balance transfer.
+            This id is always prefixed with `bt`.
+          readOnly: true
+          example: cccewjbwglwlng
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    balance_transfer_out_embed:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a balance transfer.
+            This id is always prefixed with `bt`.
+          readOnly: true
+          example: btLL7YJKZHMz
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        account:
+          $ref: '#/components/schemas/account_out_embed'
+    reimbursement_out_embed:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          example: reimntGt9ju6qP
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    settlement_out:
       type: object
       properties:
         id:
@@ -2136,26 +2230,82 @@ components:
               example: 50
             currency:
               $ref: '#/components/schemas/currency'
-        account_shapshot_ids: null
-        account_shapshots: null
-        report_ids: null
-        reports: null
-        expense_ids: null
-        expenses: null
-        advance_ids: null
-        advances: null
-        corporate_credit_card_expense_ids: null
-        corporate_credit_card_expenses: null
-        balance_transfer_ids: null
-        balance_transfers: null
+        account_shapshot_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_integer'
+          example:
+            - 1904
+            - 1905
+        account_shapshots:
+          type: array
+          items:
+            $ref: '#/components/schemas/account_snapshot_out_embed'
+        report_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - rpwirgnwblk
+        reports:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/report_out_embed'
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_out_embed'
+        advance_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - advjgbwlgwng
+        advances:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_out_embed'
+        corporate_credit_card_expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - cccelsgnwlgw
+        corporate_credit_card_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
+        balance_transfer_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - bfwljgwglgw
+        balance_transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/balance_transfer_out_embed'
         reimbursement_id:
           type: string
           maxLength: 255
           description: |
             Unique identifier of reimbursement object linked to this settlement.
           example: reimd8Ywn4n0H
-        reimbursement: null
-        closed: null
+        reimbursement:
+          $ref: '#/components/schemas/reimbursement_out_embed'
     settlement_id:
       type: string
       maxLength: 255
@@ -3435,7 +3585,7 @@ paths:
       tags:
         - Settlements
       summary: List settlement
-      operationId: settlements_list
+      operationId: list-settlements
       parameters:
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
@@ -3470,7 +3620,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/settlements_out'
+                      $ref: '#/components/schemas/settlement_out'
         '401':
           description: Unauthorised request
           content:
