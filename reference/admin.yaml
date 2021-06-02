@@ -2354,12 +2354,6 @@ components:
           properties:
             amount:
               $ref: '#/components/schemas/amount'
-    settlement_id:
-      type: string
-      maxLength: 255
-      description: |
-        Unique identifier of settlement object linked to this object.
-      example: setd8Ywn4n0H
     reimbursement_out:
       type: object
       properties:
@@ -2409,7 +2403,7 @@ components:
           description: |
             State of the reimbursement.
           example: COMPLETE
-        unique_id:
+        seq_num:
           type: string
           description: >
             A unique, organization wide identifier for a particular
@@ -2417,8 +2411,12 @@ components:
 
             This id is always prefixed with `P/`.
           example: P/2020/11/29
+        code:
+          $ref: '#/components/schemas/code'
         settlement_id:
-          $ref: '#/components/schemas/settlement_id'
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: set5nlgnwgwl
     reimbursement_in_minimal:
       type: object
       properties:
@@ -3833,7 +3831,7 @@ paths:
     post:
       tags:
         - Reimbursements
-      summary: Complete reimbursement bulk
+      summary: Bulk complete reimbursements
       operationId: complete-reimbursements-bulk
       description: |
         Marks reimbursement as complete and move reports to paid state.
