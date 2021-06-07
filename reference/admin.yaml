@@ -2369,6 +2369,95 @@ components:
           example: Monthly payouts
         code:
           $ref: '#/components/schemas/code'
+    user_account_summary_out:
+      type: object
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        account_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - acwbl222wlg
+            - accg30nel335
+        accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: acwbl222wlg
+              type:
+                type: string
+                enum:
+                  - PERSONAL_CASH_ACCOUNT
+                  - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+                  - PERSONAL_ADVANCE_ACCOUNT
+                example: PERSONAL_CASH_ACCOUNT
+              currency:
+                $ref: '#/components/schemas/currency'
+              opening_balance:
+                type: number
+                example: 50
+              current_balance:
+                type: number
+                example: 100
+              closing_balance:
+                type: number
+                example: 150
+        report_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - rpwirgnwblk
+        reports:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/report_out_embed'
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_out_embed'
+        advance_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - advjgbwlgwng
+        advances:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_out_embed'
+        corporate_credit_card_expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - cccelsgnwlgw
+        corporate_credit_card_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
 tags:
   - name: Projects
     description: |
@@ -3723,6 +3812,59 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/user_account_summaries:
+    get:
+      tags:
+        - Settlements
+      summary: List User Accounts Summaries
+      operationId: list-user-account-summaries
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/user_account_summary_out'
         '401':
           description: Unauthorised request
           content:
