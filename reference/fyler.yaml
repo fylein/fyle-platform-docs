@@ -229,6 +229,51 @@ components:
             project.
           items:
             type: integer
+    mileage_rate_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        unit:
+          type: string
+          enum:
+            - KM
+            - MILES
+        vehicle_type:
+          type: string
+          enum:
+            - two_wheeler
+            - four_wheeler
+            - four_wheeler1
+            - four_wheeler3
+            - four_wheeler4
+            - bicycle
+            - electric_car
+          example: four_wheeler
+        rate:
+          type: number
+          example: 10
+          nullable: true
+          description: Amount (in Home currency) per unit.
+        slab_rates:
+          type: array
+          items:
+            type: object
+            properties:
+              rate:
+                type: number
+                nullable: true
+              limit:
+                type: number
+                nullable: true
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     role:
       type: string
       enum:
@@ -1132,6 +1177,9 @@ tags:
   - name: Projects
     description: |
       These APIs gives you access to Projects data.
+  - name: Mileage Rates
+    description: |
+      These APIs gives access to your organisation's Mileage Rates
 paths:
   /fyler/projects:
     get:
@@ -1163,6 +1211,40 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/project_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/mileage_rates:
+    get:
+      tags:
+        - Mileage Rates
+      summary: List mileage rates
+      operationId: mileage_rates_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/mileage_rate_out'
         '401':
           description: Unauthorized request
           content:
