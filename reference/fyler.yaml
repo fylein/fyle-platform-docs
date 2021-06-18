@@ -229,6 +229,30 @@ components:
             project.
           items:
             type: integer
+    cost_center_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     mileage_rate_out:
       type: object
       properties:
@@ -1177,6 +1201,9 @@ tags:
   - name: Projects
     description: |
       These APIs gives you access to Projects data.
+  - name: Cost Centers
+    description: |
+      These APIs gives you access to Cost Centers data.
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
@@ -1217,6 +1244,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/cost_centers:
+    get:
+      operationId: cost_centers_list
+      tags:
+        - Cost Centers
+      summary: List cost centers
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/mileage_rates:
     get:
       tags:
