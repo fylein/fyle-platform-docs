@@ -1182,15 +1182,6 @@ components:
             $ref: '#/components/schemas/location'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
-    fyler_expense_in:
-      allOf:
-        - type: object
-          required:
-            - claim_amount
-          properties:
-            claim_amount:
-              $ref: '#/components/schemas/amount'
-        - $ref: '#/components/schemas/expense_in'
     department_out:
       type: object
       additionalProperties: false
@@ -1217,6 +1208,16 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+    fyler_expense_in:
+      allOf:
+        - type: object
+          required:
+            - claim_amount
+          properties:
+            claim_amount:
+              $ref: '#/components/schemas/amount'
+        - $ref: '#/components/schemas/expense_in'
+    
 tags:
   - name: My Profile
     description: |
@@ -1372,6 +1373,49 @@ paths:
                       $ref: '#/components/schemas/account_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/departments:
+    get:
+      tags:
+        - Departments
+      summary: List departments
+      operationId: departments
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/code'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/sub_department'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/department_out'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:
@@ -1543,46 +1587,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /fyler/departments:
-    get:
-      tags:
-        - Departments
-      summary: List departments
-      operationId: departments
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/name'
-        - $ref: '#/components/parameters/code'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/sub_department'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - count
-                  - offset
-                  - data
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/department_out'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
