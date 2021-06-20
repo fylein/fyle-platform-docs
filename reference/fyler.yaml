@@ -1217,7 +1217,37 @@ components:
             claim_amount:
               $ref: '#/components/schemas/amount'
         - $ref: '#/components/schemas/expense_in'
-    
+    per_diem_rate_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Florida Rate
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        currency:
+          type: string
+          maxLength: 3
+          example: USD
+          description: Currency code (must be three letters only)
+        rate:
+          type: number
+          example: 10
+          description: Amount per night
 tags:
   - name: My Profile
     description: |
@@ -1234,6 +1264,9 @@ tags:
   - name: Departments
     description: |
       These APIs gives you access to Departments data.
+  - name: Per Diem Rates
+    description: |
+      These APIs gives you access to your Per Diem Rates
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
@@ -1587,3 +1620,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/per_diem_rates:
+    get:
+      tags:
+        - Per Diem Rates
+      summary: List per diem rates
+      operationId: per_diem_rates_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/code'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/per_diem_rate_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
