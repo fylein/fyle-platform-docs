@@ -88,6 +88,33 @@ components:
       schema:
         type: string
         example: 'updated_at.desc,id'
+    name:
+      in: query
+      name: name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        name=in.(value1,value2)
+      schema:
+        type: string
+        example: eq.c2344
+    code:
+      in: query
+      name: code
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        name=in.(value1,value2)
+      schema:
+        type: string
+        example: eq.c2344
+    sub_department:
+      in: query
+      name: sub_department
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        sub_department=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Outbound*
   schemas:
     '400':
       type: object
@@ -229,6 +256,30 @@ components:
             project.
           items:
             type: integer
+    cost_center_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     mileage_rate_out:
       type: object
       properties:
@@ -342,6 +393,39 @@ components:
           example: 43.8
         org_id:
           $ref: '#/components/schemas/org_id'
+    name:
+      type: string
+      maxLength: 255
+      description: >
+        This represents the name of the resource. This should be unique in an
+        organization
+      example: foo123
+    department_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
     user_id:
       type: string
       description: |
@@ -490,13 +574,6 @@ components:
           example: 10
           nullable: true
           description: Amount (in Home currency) per unit.
-    name:
-      type: string
-      maxLength: 255
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
-      example: foo123
     per_diem_rate_out_embed:
       type: object
       nullable: true
@@ -1164,6 +1241,37 @@ components:
             claim_amount:
               $ref: '#/components/schemas/amount'
         - $ref: '#/components/schemas/expense_in'
+    per_diem_rate_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Florida Rate
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        currency:
+          type: string
+          maxLength: 3
+          example: USD
+          description: Currency code (must be three letters only)
+        rate:
+          type: number
+          example: 10
+          description: Amount per night
 tags:
   - name: My Profile
     description: |
@@ -1174,9 +1282,18 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your Expenses data.
+  - name: Departments
+    description: |
+      These APIs gives you access to Departments data.
   - name: Projects
     description: |
       These APIs gives you access to Projects data.
+  - name: Cost Centers
+    description: |
+      These APIs gives you access to Cost Centers data.
+  - name: Per Diem Rates
+    description: |
+      These APIs gives you access to your Per Diem Rates
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
@@ -1217,6 +1334,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/cost_centers:
+    get:
+      operationId: cost_centers_list
+      tags:
+        - Cost Centers
+      summary: List cost centers
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/mileage_rates:
     get:
       tags:
@@ -1316,6 +1480,49 @@ paths:
                       $ref: '#/components/schemas/account_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/departments:
+    get:
+      tags:
+        - Departments
+      summary: List departments
+      operationId: departments
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/code'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/sub_department'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/department_out'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:
@@ -1487,3 +1694,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/per_diem_rates:
+    get:
+      tags:
+        - Per Diem Rates
+      summary: List per diem rates
+      operationId: per_diem_rates_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/code'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/per_diem_rate_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
