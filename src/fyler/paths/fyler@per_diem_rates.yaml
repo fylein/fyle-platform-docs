@@ -1,22 +1,17 @@
 get:
   tags:
-    - Reimbursements
-  summary: List reimbursements
-  operationId: list-reimbursements
+    - Per Diem Rates
+  summary: List per diem rates
+  operationId: per_diem_rates_list
   parameters:
     - $ref: ../../components/parameters/created_at.yaml
     - $ref: ../../components/parameters/updated_at.yaml
+    - $ref: ../../components/parameters/name.yaml
+    - $ref: ../../components/parameters/code.yaml
+    - $ref: ../../components/parameters/is_enabled.yaml
+    - $ref: ../../components/parameters/order.yaml
     - $ref: ../../components/parameters/offset.yaml
     - $ref: ../../components/parameters/limit.yaml
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
   responses:
     '200':
       description: OK
@@ -24,11 +19,11 @@ get:
         application/json:
           schema:
             type: object
-            additionalProperties: False
             required:
               - count
               - offset
               - data
+            additionalProperties: False
             properties:
               count:
                 $ref: ../../components/schemas/count.yaml
@@ -37,16 +32,10 @@ get:
               data:
                 type: array
                 items:
-                  $ref: ../../components/schemas/reimbursement.yaml#/reimbursement_out
+                  $ref: ../../components/schemas/per_diem_rate.yaml#/per_diem_rate_out
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
             $ref: ../../components/schemas/401.yaml
-    '403':
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: ../../components/schemas/403.yaml

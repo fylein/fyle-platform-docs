@@ -303,7 +303,7 @@ components:
           description: |
             Signifies if and when this report was submitted.
           nullable: true
-        claim_number:
+        seq_num:
           type: string
           description: |
             A unique human readable identifier for the report
@@ -323,6 +323,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
+<<<<<<< HEAD
     is_enabled:
       type: boolean
       description: >
@@ -370,6 +371,19 @@ components:
           $ref: '#/components/schemas/created_at'
         approver_user_id:
           $ref: '#/components/schemas/fk_string'
+=======
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
+>>>>>>> main
 tags:
   - name: Reports
     description: |
@@ -435,22 +449,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  '/approver/reports/{report_id}/partially_approve':
+  /approver/reports/partially_approve:
     post:
       tags:
         - Reports
       summary: Approve reports
       description: Approve a report
       operationId: approve-reports
-      parameters:
-        - in: path
-          name: report_id
-          required: true
-          description: |
-            the id of report that is to be approved
-          schema:
-            type: string
-            example: rpa21Adj2
       requestBody:
         required: true
         content:
@@ -458,7 +463,11 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              properties: {}
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_in'
       responses:
         '200':
           description: OK
