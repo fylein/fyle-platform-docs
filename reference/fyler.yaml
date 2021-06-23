@@ -256,6 +256,30 @@ components:
             project.
           items:
             type: integer
+    cost_center_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     mileage_rate_out:
       type: object
       properties:
@@ -301,6 +325,8 @@ components:
                 nullable: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        code:
+          $ref: '#/components/schemas/code'
     role:
       type: string
       enum:
@@ -545,11 +571,8 @@ components:
             - bicycle
             - electric_car
           example: four_wheeler
-        rate:
-          type: number
-          example: 10
-          nullable: true
-          description: Amount (in Home currency) per unit.
+        code:
+          $ref: '#/components/schemas/code'
     per_diem_rate_out_embed:
       type: object
       nullable: true
@@ -1264,6 +1287,9 @@ tags:
   - name: Projects
     description: |
       These APIs gives you access to Projects data.
+  - name: Cost Centers
+    description: |
+      These APIs gives you access to Cost Centers data.
   - name: Per Diem Rates
     description: |
       These APIs gives you access to your Per Diem Rates
@@ -1307,6 +1333,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/cost_centers:
+    get:
+      operationId: cost_centers_list
+      tags:
+        - Cost Centers
+      summary: List cost centers
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/mileage_rates:
     get:
       tags:
@@ -1540,74 +1613,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  '/fyler/expenses/{id}':
-    get:
-      tags:
-        - Expenses
-      summary: Retrieve an expense
-      operationId: retrive-expense
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: |
-            Id of the expense to be retrieved.
-          schema:
-            type: string
-            example: tx43545dds
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-    delete:
-      tags:
-        - Expenses
-      summary: Delete an expense
-      description: |
-        It delete's a single expense at a time only.
-      operationId: delete-expense
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: |
-            Id of the expense to be deleted.<br>
-          schema:
-            type: string
-            example: txhfw8d920k
-      responses:
-        '200':
-          description: OK
         '401':
           description: Unauthorized request
           content:
