@@ -1271,6 +1271,27 @@ components:
           type: number
           example: 10
           description: Amount per night
+    merchant_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        display_name:
+          type: string
+          description: |
+            Merchant name
+          example: Uber
+        default_category:
+          type: string
+          description: |
+            Merchant Category
+          example: Food
     report_out:
       type: object
       additionalProperties: false
@@ -1755,6 +1776,40 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/merchants:
+    get:
+      tags:
+        - Merchants
+      summary: List merchants
+      operationId: get-merchants
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/merchant_out'
         '401':
           description: Unauthorized request
           content:
