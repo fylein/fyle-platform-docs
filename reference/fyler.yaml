@@ -1271,6 +1271,97 @@ components:
           type: number
           example: 10
           description: Amount per night
+    report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        last_reimbursed_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
 tags:
   - name: My Profile
     description: |
@@ -1296,6 +1387,9 @@ tags:
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
+  - name: Reports
+    description: |
+      This API gives you access to your Expense Reports data.
 paths:
   /fyler/projects:
     get:
@@ -1667,3 +1761,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/reports:
+    get:
+      operationId: reports_list
+      tags:
+        - Reports
+      summary: List expense reports
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
