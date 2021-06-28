@@ -28,9 +28,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example:
-          - 'gte.2020-06-01T00:00:00.000-08:00'
-          - 'lt.2020-07-01T00:00:00.000-08:00'
+        example: 'gte.2020-06-01T00:00:00.000-08:00'
     updated_at:
       in: query
       name: updated_at
@@ -39,9 +37,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example:
-          - 'gte.2020-06-01T00:00:00.000-08:00'
-          - 'lt.2020-07-01T00:00:00.000-08:00'
+        example: 'gte.2020-06-01T00:00:00.000-08:00'
     display_name:
       in: query
       name: display_name
@@ -1276,8 +1272,6 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
-        org_id:
-          $ref: '#/components/schemas/org_id'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -1287,6 +1281,38 @@ components:
           description: |
             Merchant name
           example: Uber
+    webhook_url:
+      type: string
+      description: |
+        URL Endpoint for webhook
+      example: 'https://api.custom.com/webhook1'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+    fyler_subscriptions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
     report_out:
       type: object
       additionalProperties: false
@@ -1406,6 +1432,9 @@ tags:
   - name: Reports
     description: |
       This API gives you access to your Expense Reports data.
+  - name: Subscriptions
+    description: |
+      This API allows you to subscribe to different events.
 paths:
   /fyler/projects:
     get:
@@ -1807,6 +1836,42 @@ paths:
                       $ref: '#/components/schemas/merchant_out'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: create a subscription
+      description: subscribe to different events using this API
+      operationId: fyler-subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/subscriptions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/fyler_subscriptions_out'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:

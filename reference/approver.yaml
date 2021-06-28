@@ -28,9 +28,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example:
-          - 'gte.2020-06-01T00:00:00.000-08:00'
-          - 'lt.2020-07-01T00:00:00.000-08:00'
+        example: 'gte.2020-06-01T00:00:00.000-08:00'
     updated_at:
       in: query
       name: updated_at
@@ -39,9 +37,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example:
-          - 'gte.2020-06-01T00:00:00.000-08:00'
-          - 'lt.2020-07-01T00:00:00.000-08:00'
+        example: 'gte.2020-06-01T00:00:00.000-08:00'
     last_approved_at:
       in: query
       name: last_approved_at
@@ -52,8 +48,7 @@ components:
         Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: >-
-          approved_at=gte.2020-06-01T00:00:00.000Z&approved_at=lt.2020-07-01T00:00:00.000Z
+        example: 'gte.2020-06-01T00:00:00.000Z'
     last_reimbursed_at:
       in: query
       name: last_reimbursed_at
@@ -64,8 +59,7 @@ components:
         Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: >-
-          reimbursed_at=gte.2020-06-01T00:00:00.000Z&reimbursed_at=lt.2020-07-01T00:00:00.000Z
+        example: 'gte.2020-06-01T00:00:00.000Z'
     last_submitted_at:
       in: query
       name: last_submitted_at
@@ -76,9 +70,7 @@ components:
         Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example:
-          - 'gte.2020-06-01T00:00:00.000Z'
-          - 'lt.2020-07-01T00:00:00.000Z'
+        example: 'gte.2020-06-01T00:00:00.000Z'
     state:
       in: query
       name: state
@@ -335,10 +327,59 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    is_enabled:
+      type: boolean
+      description: >
+        This indicates if the resource is enabled for use within the
+        organisation.
+      default: true
+      example: true
+    webhook_url:
+      type: string
+      description: |
+        URL Endpoint for webhook
+      example: 'https://api.custom.com/webhook1'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    approver_subscriptions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        approver_user_id:
+          $ref: '#/components/schemas/fk_string'
 tags:
   - name: Reports
     description: |
       This API gives you access to your organisation's Expense Reports
+  - name: Subscriptions
+    description: |
+      This API allows you to subscribe to different events.
 paths:
   /approver/reports:
     get:
@@ -371,8 +412,7 @@ paths:
             certain approver still has to approve
           schema:
             type: string
-            example:
-              - 'cs.[{"approver_id":"oulkAsh23","state":"APPROVAL_PENDING"}]'
+            example: 'cs.[{"approver_id":"oulkAsh23","state":"APPROVAL_PENDING"}]'
       responses:
         '200':
           description: OK
@@ -440,6 +480,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: create a subscription
+      description: subscribe to different events using this API
+      operationId: approver-subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/subscriptions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/approver_subscriptions_out'
         '401':
           description: Unauthorised request
           content:
