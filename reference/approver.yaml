@@ -319,10 +319,6 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
-        approver_user_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
     report_action_in:
       type: object
       additionalProperties: false
@@ -334,53 +330,11 @@ components:
           description: |
             id of report that is to be approved
           example: rpa21A2rdj2
-    is_enabled:
-      type: boolean
-      description: >
-        This indicates if the resource is enabled for use within the
-        organisation.
-      default: true
-      example: true
-    webhook_url:
+    reason:
       type: string
       description: |
-        URL Endpoint for webhook
-      default: true
-      example: 'https://api.custom.com/webhook1'
-    subscriptions_in:
-      type: object
-      additionalProperties: false
-      required:
-        - is_enabled
-        - webhook_url
-      properties:
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        webhook_url:
-          $ref: '#/components/schemas/webhook_url'
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
-    approver_subscriptions_out:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        webhook_url:
-          $ref: '#/components/schemas/webhook_url'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        approver_user_id:
-          $ref: '#/components/schemas/fk_string'
+        Explanation to the action if provided by the user
+      example: All bills are in order
 tags:
   - name: Reports
     description: |
@@ -465,6 +419,8 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/report_action_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
       responses:
         '200':
           description: OK
@@ -484,42 +440,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-  /approver/subscriptions:
-    post:
-      tags:
-        - Subscriptions
-      summary: Webhook Subscribtions
-      description: Webhook for different events can be subscribed using this API
-      operationId: approver-webhook-subscriptions
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                data:
-                  $ref: '#/components/schemas/subscriptions_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/approver_subscriptions_out'
         '401':
           description: Unauthorised request
           content:
