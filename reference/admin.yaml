@@ -55,7 +55,7 @@ components:
       in: query
       name: is_enabled
       description: |
-        This param is used to filer records by
+        This param is used to filter records by
         Supported operators are `eq`.<br>
       schema:
         type: string
@@ -88,6 +88,53 @@ components:
         example: 20
         default: 50
         maximum: 200
+    is_mandatory:
+      in: query
+      name: is_mandatory
+      description: |
+        This param is used to filter records by
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    is_custom:
+      in: query
+      name: is_custom
+      description: |
+        This param is used to filter records by
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.false
+    expense_field_types:
+      in: query
+      name: type
+      description: |
+        The type of the expense field
+
+        Supported operators are `eq`, `like`, `in`.<br>
+        field_name=eq.SELECT
+      schema:
+        type: string
+        example: eq.NUMBER
+        enum:
+          - TEXT
+          - NUMBER
+          - SELECT
+          - BOOLEAN
+          - MULTI_SELECT
+          - LOCATION
+          - USER_LIST
+          - DATE
+    field_name:
+      in: query
+      name: field_name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        field_name=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Vendor*
     code:
       in: query
       name: code
@@ -443,18 +490,18 @@ components:
           type: string
           description: |
             This specifies the name of the expense field.
-          example: Vendor desciption
+          example: Vendor description
         column_name:
           type: string
           description: >
             This specifies the name of column to which this expense field mapped
             to.
-          example: purpose
+          example: Purpose
         type:
           type: string
           description: |
             This field specifies the type of the expense field.
-          example: TEXT
+          example: SELECT
         options:
           type: array
           items:
@@ -500,18 +547,43 @@ components:
           type: string
           description: |
             This specifies the name of the expense field.
-          example: Vendor desciption
+          example: Vendor description
         column_name:
           type: string
+          enum:
+            - purpose
+            - txn_dt
+            - vendor_id
+            - cost_center_id
+            - distance
+            - distance_unit
+            - location1
+            - location2
+            - from_dt
+            - to_dt
+            - num_days
+            - flight_journey_travel_class
+            - flight_return_travel_class
+            - train_travel_class
+            - bus_travel_class
           description: >
             This specifies the name of column to which this expense field mapped
             to.
           example: purpose
         type:
           type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
           description: |
             This field specifies the type of the expense field.
-          example: TEXT
+          example: SELECT
         options:
           type: array
           items:
@@ -2880,6 +2952,10 @@ paths:
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
         - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/is_mandatory'
+        - $ref: '#/components/parameters/is_custom'
+        - $ref: '#/components/parameters/expense_field_types'
+        - $ref: '#/components/parameters/field_name'
         - $ref: '#/components/parameters/code'
         - $ref: '#/components/parameters/order'
         - $ref: '#/components/parameters/offset'
