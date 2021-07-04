@@ -1870,6 +1870,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        resource:
+                          type: string
+                          example: REPORT
+                        action:
+                          type: string
+                          enum:
+                            - DRAFT
+                            - APPROVER_PENDING
+                            - APPROVED
+                            - APPROVER_INQUIRY
+                            - PAYMENT_PENDING
+                            - PAYMENT_PROCESSING
+                            - PAID
+                          example: APPROVED
+                        data:
+                          $ref: '#/components/schemas/report_out'
+                        reason:
+                          type: string
+                          example: >-
+                            comment given by Approver while approving the
+                            report.
+              responses:
+                '200':
+                  description: OK
   /fyler/reports:
     get:
       operationId: reports_list
