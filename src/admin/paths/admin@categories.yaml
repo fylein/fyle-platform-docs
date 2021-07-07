@@ -2,44 +2,13 @@ get:
   tags:
     - Categories
   summary: List categories
-  operationId: get-categories
+  operationId: categories_list
   parameters:
-    - $ref: ../components/parameters/created_at.yaml
-    - $ref: ../components/parameters/updated_at.yaml
-    - $ref: ../components/parameters/is_enabled.yaml
-    - $ref: ../components/parameters/offset.yaml
-    - $ref: ../components/parameters/limit.yaml
-  responses:
-    '200':
-      description: OK
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/get_categories.yaml
-    '401':
-      description: Unauthorized request
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/401.yaml
-post:
-  tags:
-    - Categories
-  summary: Create or update a category
-  description: |
-    Create or update a category.
-  operationId: post-categories
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            data:
-              $ref: ../components/schemas/categories.yaml
-          required:
-            - data
+    - $ref: ../../components/parameters/created_at.yaml
+    - $ref: ../../components/parameters/updated_at.yaml
+    - $ref: ../../components/parameters/is_enabled.yaml
+    - $ref: ../../components/parameters/offset.yaml
+    - $ref: ../../components/parameters/limit.yaml
   responses:
     '200':
       description: OK
@@ -47,34 +16,73 @@ post:
         application/json:
           schema:
             type: object
+            additionalProperties: False
+            required:
+              - count
+              - offset
+              - data
             properties:
-              url:
-                type: string
-                example: /admin/categories
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
               data:
-                $ref: ../components/schemas/categories.yaml
+                type: array
+                items:
+                  $ref: ../../components/schemas/category.yaml#/category_out
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+post:
+  tags:
+    - Categories
+  summary: Create or update a category
+  description: |
+    Create or update a category.
+  operationId: categories_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: ../../components/schemas/category.yaml#/category_in
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: ../../components/schemas/category.yaml#/category_out
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            oneOf:
-              - type: object
-                properties:
-                  message:
-                    type: string
-                example:
-                  message: Invalid or duplicate category code
-              - $ref: ../components/schemas/json_parsing_error.yaml
+            $ref: ../../components/schemas/400.yaml
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: ../../components/schemas/401.yaml
     '403':
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/403.yaml
+            $ref: ../../components/schemas/403.yaml

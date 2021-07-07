@@ -1,0 +1,102 @@
+type: object
+properties:
+  id:
+    type: string
+    maxLength: 255
+    description: |
+      This id provided by Fyle to uniquely identify a refund.
+      This id is always prefixed with `ref`.
+    readOnly: true
+    example: refDml2wrWqk1
+  collector_id:
+    type: string
+    maxLength: 255
+    description: >
+      Employee ID of collector of the refund.
+
+      This ID provided by Fyle to uniquely identify an employee within an
+      organization.
+
+      This ID is always prefixed with `ou`.
+    example: outGt9ju6qP
+  collector:
+    allOf:
+      - $ref: ./employee.yaml
+    description: |
+      Details of employee who is the collector of this refund.
+  returnee_id:
+    type: string
+    maxLength: 255
+    description: >
+      Employee ID of returnee of the refund.
+
+      This ID provided by Fyle to uniquely identify an employee within an
+      organization.
+
+      This ID is always prefixed with `ou`.
+    example: oul8zTHMnTjp
+  returnee:
+    allOf:
+      - $ref: ./employee.yaml
+    description: |
+      Details of employee who is the returnee of this refund.
+  org_id:
+    $ref: ./fields.yaml#/org_id
+  payment_mode:
+    type: string
+    enum:
+      - CASH
+      - BANK_TRANSFER
+      - FOREX
+      - CHEQUE_DD
+    maxLength: 255
+    description: |
+      Mode of payment for a refund object.
+    example: BANK_TRANSFER
+  foreign_currency:
+    $ref: ./foreign_currency.yaml
+  foreign_amount:
+    $ref: ./foreign_amount.yaml
+  reference:
+    type: string
+    description: |
+      Reference code of a refund object.
+    example: 6t2uygfhjdhs
+  amount:
+    $ref: ./amount.yaml
+  currency:
+    $ref: ./currency.yaml
+  note:
+    type: string
+    description: |
+      Optional descriptive note which can be added to a refund.
+    example: august's pending amount refund
+  settlement_id:
+    $ref: ./settlement_id.yaml
+  created_at:
+    $ref: ./fields.yaml#/created_at
+  updated_at:
+    $ref: ./fields.yaml#/updated_at
+  returned_at:
+    type: string
+    format: date-time
+    description: >
+      <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
+      section 5.6 compliant timestamp.</a>
+
+      Signifies when this refund was returned by returnee.
+    example: '2020-06-01T13:14:54.804Z'
+  card_number:
+    type: string
+    description: |
+      Last 4 or 6 digits of the card used for payment of this refund.
+    example: '2838'
+  source:
+    type: string
+    enum:
+      - WEBAPP
+      - WEBAPP_BULK_EXCEL
+    description: >
+      Enum value signifying the client method from which this refund was
+      initiated.
+    example: WEBAPP_BULK_EXCEL

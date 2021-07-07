@@ -1,0 +1,49 @@
+# This is a basic workflow to help you get started with Actions
+
+name: bundle openAPI yaml file
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs: 
+  run:
+    name: openapi bundler
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    
+    - name: Install dependencies
+      run: npm install -g @redocly/openapi-cli@1.0.0-beta.25
+
+    - name: Update fyler docs
+      run: openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
+
+    - name: Update approver docs
+      run: openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
+
+    - name: Update common docs
+      run: openapi bundle -o reference/common.yaml src/common/openapi.yaml
+
+    - name: Update admin docs
+      run: openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
+
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v6
+      with:
+        author_name: Siva
+        author_email: siva@fylehq.com
+        message: "Auto generate API docs"
+        add: "./reference"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIHUB_ACCESS_TOKEN }}

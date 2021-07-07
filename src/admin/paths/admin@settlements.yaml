@@ -1,13 +1,13 @@
 get:
   tags:
     - Settlements
-  summary: List settlement
-  operationId: get-settlements
+  summary: List settlements
+  operationId: list-settlements
   parameters:
-    - $ref: ../components/parameters/created_at.yaml
-    - $ref: ../components/parameters/updated_at.yaml
-    - $ref: ../components/parameters/offset.yaml
-    - $ref: ../components/parameters/limit.yaml
+    - $ref: '../../components/parameters/created_at.yaml'
+    - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+    - $ref: '../../components/parameters/limit.yaml'
     - in: query
       name: order
       description: |
@@ -23,16 +23,81 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/get_settlements.yaml
+            type: object
+            additionalProperties: False
+            required:
+              - count
+              - offset
+              - data
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/settlement.yaml#/settlement_out'
     '401':
       description: Unauthorised request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: '../../components/schemas/401.yaml'
     '403':
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/403.yaml
+            $ref: '../../components/schemas/403.yaml'
+
+post:
+  tags:
+    - Settlements
+  summary: Create or update a settlement
+  description: |
+    Create or update a settlement
+  operationId: post-settlements
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/settlement.yaml#/settlement_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/settlement.yaml#/settlement_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'

@@ -4,32 +4,46 @@ get:
   summary: List expense fields
   description: |
     Gives the list of all expense fields based on query parameters.
-  operationId: get-expense-fields
+  operationId: expense_fields_list
   parameters:
-    - $ref: ../components/parameters/created_at.yaml
-    - $ref: ../components/parameters/updated_at.yaml
-    - $ref: ../components/parameters/is_enabled.yaml
-    - $ref: ../components/parameters/order.yaml
-    - $ref: ../components/parameters/offset.yaml
-    - $ref: ../components/parameters/limit.yaml
+    - $ref: ../../components/parameters/created_at.yaml
+    - $ref: ../../components/parameters/updated_at.yaml
+    - $ref: ../../components/parameters/is_enabled.yaml
+    - $ref: ../../components/parameters/is_mandatory.yaml
+    - $ref: ../../components/parameters/is_custom.yaml
+    - $ref: ../../components/parameters/expense_field_type.yaml
+    - $ref: ../../components/parameters/field_name.yaml
+    - $ref: ../../components/parameters/code.yaml
+    - $ref: ../../components/parameters/order.yaml
+    - $ref: ../../components/parameters/offset.yaml
+    - $ref: ../../components/parameters/limit.yaml
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/get_expense_fields.yaml
+            type: object
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/expense_field.yaml#/expense_field_out
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: ../../components/schemas/401.yaml
 post:
   tags:
-    - Expense Fields
+      - Expense Fields
   summary: Create or update an expense fields
-  operationId: post-expense-fields
+  operationId: expense_fields_post
   requestBody:
     required: true
     content:
@@ -38,7 +52,7 @@ post:
           type: object
           properties:
             data:
-              $ref: ../components/schemas/expense_fields.yaml
+              $ref: ../../components/schemas/expense_field.yaml#/expense_field_in
           required:
             - data
   responses:
@@ -51,12 +65,23 @@ post:
             properties:
               url:
                 type: string
-                example: /admin/expense_fields
               data:
-                $ref: ../components/schemas/expense_fields.yaml
-    '401':
-      description: Unauthorised request
+                $ref: ../../components/schemas/expense_field.yaml#/expense_field_out
+    '400':
+      description: Bad request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml

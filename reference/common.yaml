@@ -6,8 +6,8 @@ info:
     name: Integrations
     email: support@fylehq.com
 servers:
-  - url: 'https://accounts.fylehq.com'
-    description: Live Server
+  - url: 'https://hulk.fyle.tech/platform/v1'
+    description: Staging Server
 components:
   securitySchemes:
     oauth2:
@@ -17,7 +17,7 @@ components:
           authorizationUrl: 'https://accounts.fylehq.com/app/developers/#/oauth/authorize'
           tokenUrl: 'https://accounts.fylehq.com/oauth/token'
           scopes:
-            common.*: Grant all COMMON actions
+            '*': Grant all actions
   parameters:
     q:
       in: query
@@ -66,6 +66,14 @@ components:
         type: string
         example: '26.595889,85.4891037'
   schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is valid
     '401':
       type: object
       properties:
@@ -89,40 +97,24 @@ components:
             This error means current user does not have enough permissions to
             perform this operation.
     count:
+      type: integer
       description: |
         The total number of objects that can be requested.
-      type: integer
       example: 10000
-    places:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            type: string
-            maxLength: 255
-            description: >-
-              It containes a textual identifier that uniquely identifies a
-              place.
-            example: ChIJify3BTzI5zsR2q86fwXrh74
-          formatted_address:
-            type: string
-            maxLength: 255
-            description: |
-              Contains the human-readable name for the returned result.
-            readOnly: true
-            example: 'Andheri, Maharashtra, India'
-    get_places:
-      type: object
-      properties:
-        count:
-          $ref: '#/components/schemas/count'
-        url:
-          type: string
-          example: /common/places
-        data:
-          $ref: '#/components/schemas/places'
-    'places@{id}':
+    offset:
+      description: >
+        offset is used to skip that many number of objects before counting. <br>
+
+        For example, if there are 2000 objects, <br>
+
+        The first request will have offset as 0 and limit as 1000 to return
+        first 1000 objects. <br>
+
+        The second request will have offset as 1000 and limit as 1000 to return
+        next 1000 objects. <br>
+      type: integer
+      example: 10
+    place_out_minimal:
       type: object
       properties:
         id:
@@ -130,33 +122,10 @@ components:
           maxLength: 255
           description: It containes a textual identifier that uniquely identifies a place.
           example: ChIJify3BTzI5zsR2q86fwXrh74
-        city:
-          type: string
-          example: London
-        state:
-          type: string
-          example: London
-        country:
-          type: string
-          example: United Kingdom
         formatted_address:
           type: string
           example: '221 Baker St, Marylebone, London, United Kingdom'
-        latitude:
-          type: number
-          example: 12.971599
-        longitude:
-          type: number
-          example: 77.594566
-    'get_places@{id}':
-      type: object
-      properties:
-        url:
-          type: string
-          example: /common/places
-        data:
-          $ref: '#/components/schemas/places@{id}'
-    expense_extract:
+    expense_extract_in:
       type: object
       properties:
         client:
@@ -190,17 +159,11 @@ components:
               type: string
             spent_at:
               type: string
-    created_at:
+    timestamptz_utc:
       type: string
-      format: date-time
-      description: >
-        <a href='https://tools.ietf.org/html/rfc3339#section-5.6'>RFC 3339,
-        section 5.6 compliant timestamp.</a>
-
-        Signifies when this object was created.
-      readOnly: true
-      example: '2020-06-01T13:14:54.804Z'
-    objects_expense_extract:
+      nullable: true
+      example: '2020-06-01T13:14:54.804+00:00'
+    expense_extract_out:
       type: object
       properties:
         amount:
@@ -226,15 +189,9 @@ components:
 
             See "https://www.iban.com/currency-codes" for examples.
         date:
-          $ref: '#/components/schemas/created_at'
+          $ref: '#/components/schemas/timestamptz_utc'
         invoice_dt:
-          type: string
-          format: date-time
-          description: >
-            RFC 3339, section 5.6
-            "https://tools.ietf.org/html/rfc3339#section-5.6" compliant 
-
-            Extracted timestamp on which the Expense was made.
+          $ref: '#/components/schemas/timestamptz_utc'
         vendor_name:
           type: string
           example: Uber
@@ -247,28 +204,6 @@ components:
           example: ROBOT
           description: |
             The name of the client which is extracting the data.
-    post_expense_extract:
-      type: object
-      properties:
-        url:
-          type: string
-          example: /common/expense_extract
-        data:
-          $ref: '#/components/schemas/objects_expense_extract'
-    json_parsing_error:
-      type: object
-      properties:
-        message:
-          enum:
-            - Unable to process JSON
-          type: string
-          description: |
-            This error means that incoming json is not in right format.
-        code:
-          type: integer
-          default: 400
-          example: 400
-          deprecated: true
 tags:
   - name: Places
     description: |
@@ -284,7 +219,7 @@ paths:
       summary: List places
       description: |
         Lists all the place suggestions based on given query.
-      operationId: get-places
+      operationId: places_list
       parameters:
         - $ref: '#/components/parameters/q'
         - $ref: '#/components/parameters/types'
@@ -295,40 +230,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_places'
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/place_out_minimal'
         '401':
           description: Unauthorized request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  '/common/places/{id}':
-    get:
-      tags:
-        - Places
-      summary: Retrieve place details
-      description: |
-        Gives the exact geographic data for the given place id.
-      operationId: get-place-details
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: >
-            It contains a textual identifier that uniquely identifies a
-            place.<br>
-
-            id=ChIJify3BTzI5zsR2q86fwXrh74
-          schema:
-            type: string
-            example: ChIJify3BTzI5zsR2q86fwXrh74
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/get_places@{id}'
   /common/expense_extract:
     post:
       tags:
@@ -345,7 +262,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/expense_extract'
+                  $ref: '#/components/schemas/expense_extract_in'
               required:
                 - data
       responses:
@@ -354,22 +271,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/post_expense_extract'
+                $ref: '#/components/schemas/expense_extract_out'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      message:
-                        type: string
-                    example:
-                      message: Invalid content
-                  - $ref: '#/components/schemas/json_parsing_error'
+                $ref: '#/components/schemas/400'
         '401':
-          description: Unauthorised request
+          description: Unauthorized request
           content:
             application/json:
               schema:

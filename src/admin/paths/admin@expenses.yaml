@@ -2,45 +2,42 @@ get:
   tags:
     - Expenses
   summary: List expenses
-  operationId: get-expenses
+  operationId: expenses_list
   parameters:
-    - $ref: ../components/parameters/created_at.yaml
-    - $ref: ../components/parameters/updated_at.yaml
-    - $ref: ../components/parameters/employee_email.yaml
-    - $ref: ../components/parameters/approved_at.yaml
-    - $ref: ../components/parameters/state.yaml
-    - $ref: ../components/parameters/verified.yaml
-    - $ref: ../components/parameters/offset.yaml
-    - $ref: ../components/parameters/limit.yaml
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
+    - $ref: '../../components/parameters/created_at.yaml'
+    - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/order.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+    - $ref: '../../components/parameters/limit.yaml'
   responses:
     '200':
       description: OK
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/expenses.yaml
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/expense.yaml#/expense_out'
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: '../../components/schemas/401.yaml'
 post:
   tags:
     - Expenses
   summary: Create or update an expense
   description: |
     Create or update an expense.
-  operationId: post-expense
+  operationId: expenses_post
   requestBody:
     required: true
     content:
@@ -49,7 +46,7 @@ post:
           type: object
           properties:
             data:
-              $ref: ../components/schemas/expense.yaml
+              $ref: '../../components/schemas/expense.yaml#/admin_expense_in'
           required:
             - data
   responses:
@@ -60,33 +57,23 @@ post:
           schema:
             type: object
             properties:
-              url:
-                type: string
-                example: /admin/expense
               data:
-                $ref: ../components/schemas/expense.yaml
+                $ref: '../../components/schemas/expense.yaml#/expense_out'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            oneOf:
-              - type: object
-                properties:
-                  message:
-                    type: string
-                example:
-                  message: Invalid or disabled project id
-              - $ref: ../components/schemas/json_parsing_error.yaml
+            $ref: '../../components/schemas/400.yaml'
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/401.yaml
+            $ref: '../../components/schemas/401.yaml'
     '403':
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/403.yaml
+            $ref: '../../components/schemas/403.yaml'
