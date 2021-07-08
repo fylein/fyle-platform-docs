@@ -1,29 +1,36 @@
 type: object
 properties:
   id:
-    $ref: ./advance_request_id.yaml
-  employee_id:
-    $ref: ./employee_id.yaml
-  employee:
-    $ref: ./employee.yaml
-  amount:
-    $ref: ./amount.yaml
-  currency:
-    $ref: ./currency.yaml
-  advance_id:
-    $ref: ./advance_id.yaml
-  advance:
-    $ref: ./advance.yaml
-  advance_request_number:
-    $ref: ./advance_request_number.yaml
-  trip_request_id:
-    $ref: ./trip_request_id.yaml
+    allOf:
+      - $ref: './fields.yaml#/id_string'
+    example: 'areqiwr3Wwirr'
+  user_id:
+    $ref: './fields.yaml#/user_id'
+  user:
+    $ref: './user.yaml#/user_out_embed'
+  org_id:
+    $ref: './fields.yaml#/org_id'
   created_at:
-    $ref: ./fields.yaml#/created_at
-  approved_at:
-    $ref: ./approved_at.yaml
+    $ref: './fields.yaml#/created_at'
   updated_at:
-    $ref: ./fields.yaml#/updated_at
+    $ref: './fields.yaml#/updated_at'
+  amount:
+    $ref: './fields.yaml#/amount'
+  currency:
+    $ref: './fields.yaml#/currency'
+  advance_id:
+    allOf:
+      - $ref: './fields.yaml#/fk_string'
+    example: 'advjrgwlk2Q'
+  advance:
+    $ref: './advance.yaml#/advance_out_embed'
+  seq_num:
+    type: string
+    readOnly: true
+    description: |
+      This is user visible identifier for an advance request.
+      This field can be used as reference in UI.
+    example: 'AR/2020/10/T/95'
   notes:
     type: string
     description: |
@@ -34,40 +41,6 @@ properties:
     description: |
       Descriptive purpose which is added to an advance request.
     example: onsite client meeting
-  state:
-    type: string
-    enum:
-      - DRAFT
-      - APPROVAL_PENDING
-      - APPROVED
-      - REJECTED
-      - PAID
-    description: |
-      State of the advance request.
-    example: PAID
-  project_id:
-    $ref: ./project_id.yaml
-  project:
-    $ref: ./project.yaml#/project_out
-  custom_properties:
-    type: array
-    items:
-      $ref: ./custom_property.yaml
-  policy_amount:
-    allOf:
-      - $ref: ./amount.yaml
-    description: |
-      Amount set by policy
-  policy_state:
-    $ref: ./policy_state.yaml
-  is_policy_flagged:
-    $ref: ./policy_flag.yaml
-  is_sent_back:
-    $ref: ./is_sent_back.yaml
-  is_pulled_back:
-    $ref: ./is_pulled_back.yaml
-  org_id:
-    $ref: ./fields.yaml#/org_id
   source:
     type: string
     enum:
@@ -77,17 +50,44 @@ properties:
       Enum value signifying the client method from which this advance_request
       was initiated.
     example: WEBAPP
-  advance_request_approvals:
+  state:
+    type: string
+    enum:
+      - DRAFT
+      - APPROVAL_PENDING
+      - APPROVED
+      - SENT_BACK
+      - PULLED_BACK
+      - REJECTED
+      - PAID
+    description: |
+      State of the advance request.
+    example: PAID
+  project_id:
+    $ref: './fields.yaml#/fk_integer'
+  project:
+    $ref: './project.yaml#/project_out_embed'
+  custom_fields:
+    $ref: './fields.yaml#/custom_fields'
+  policy_amount:
+    type: number
+    nullable: true
+    description: |
+      The expense amount set by policy.
+    example: 1500
+  is_policy_flagged:
+    type: boolean
+    description: |
+      Determines whether this report was flagged from a policy
+  last_approved_at:
+    allOf:
+      - $ref: './fields.yaml#/timestamptz_utc'
+    description: |
+      Signifies if and when this advance request was approved.
+    nullable: True
+  approvals:
     type: array
     items:
-      $ref: ./approvals.yaml
-  last_updater_id:
-    type: string
+      $ref: './advance_request_approval.yaml#/advance_request_approval_out_embed'
     description: |
-      This represents the id of employee who updated this advance request.
-    example: ouGgsdfdq
-  last_updater:
-    allOf:
-      - $ref: ./employee.yaml
-    description: |
-      Details of employee who updated this advance request.
+      List of advance request approval objects
