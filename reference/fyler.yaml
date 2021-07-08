@@ -1398,6 +1398,180 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+    advance_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a balance transfer.
+            This id is always prefixed with `bt`.
+          readOnly: true
+          example: advkvnwrnpwi
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    advance_request_approval_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        approver_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        approver_user:
+          $ref: '#/components/schemas/user_out_embed'
+        state:
+          type: string
+          enum:
+            - APPROVAL_PENDING
+            - APPROVAL_DISABLED
+            - APPROVAL_DONE
+          description: |
+            State of this advance request approval
+    advance_request_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        policy_amount:
+          type: number
+          nullable: true
+          description: |
+            The advance request amount set by policy.
+          example: 1500
+        advance_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        advance:
+          $ref: '#/components/schemas/advance_out_embed'
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advance request.
+            This field can be used as reference in UI.
+          example: AR/2020/10/T/95
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          enum:
+            - WEBAPP
+            - MOBILE
+          description: >
+            Enum value signifying the client method from which this
+            advance_request was initiated.
+          example: WEBAPP
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVAL_PENDING
+            - APPROVED
+            - SENT_BACK
+            - PULLED_BACK
+            - REJECTED
+            - PAID
+          description: |
+            State of the advance request.
+          example: PAID
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report was flagged from a policy
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_request_approval_out_embed'
+          description: |
+            List of advance request approval objects
+    advance_request_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        advance_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          enum:
+            - WEBAPP
+            - MOBILE
+          description: >
+            Enum value signifying the client method from which this
+            advance_request was initiated.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
 tags:
   - name: My Profile
     description: |
@@ -1901,6 +2075,104 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /fyler/advance_requests:
+    get:
+      tags:
+        - Advance Requests
+      summary: List advance requests
+      operationId: list-advance-requests
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_request_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advance Requests
+      summary: Create or update an advance requests
+      description: |
+        Create or update an advance requests.
+      operationId: advance_requests_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
         '400':
           description: Bad request
           content:
