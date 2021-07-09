@@ -2272,8 +2272,8 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify a balance transfer.
-            This id is always prefixed with `bt`.
+            This id provided by Fyle to uniquely identify an advances.
+            This id is always prefixed with `adv`.
           readOnly: true
           example: advkvnwrnpwi
         currency:
@@ -2398,6 +2398,149 @@ components:
             $ref: '#/components/schemas/advance_request_approval_out_embed'
           description: |
             List of advance request approval objects
+    advance_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+          example: CASH
+        advance_request_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advances.
+            This field can be used as reference in UI.
+          example: A/2020/10/T/95
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          enum:
+            - WEBAPP
+            - MOBILE
+          description: >
+            Enum value signifying the client method from which this advance. was
+            initiated.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        code:
+          $ref: '#/components/schemas/code'
+        issued_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance was issued.
+          nullable: true
+        card_number:
+          type: string
+          example: XXXXXXXXXXXX1234
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: set5nlgnwgwl
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this advance has been exported to external
+            accounting system or not.
+        last_exported_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: >-
+            signifies when this advance was exported to an external accounting
+            system.
+    advance_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+          example: CASH
+        advance_request_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advances.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          enum:
+            - WEBAPP
+            - MOBILE
+          description: >
+            Enum value signifying the client method from which this advance. was
+            initiated.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        code:
+          $ref: '#/components/schemas/code'
+        card_number:
+          type: string
+          example: XXXXXXXXXXXX1234
     expense_out_embed:
       type: object
       properties:
@@ -2789,6 +2932,9 @@ tags:
     description: >
       This API gives you access to manage your organisation's Advance Requests
       data.
+  - name: Advances
+    description: |
+      This API gives you access to manage your organisation's Advances data.
 paths:
   /admin/projects:
     get:
@@ -3998,6 +4144,104 @@ paths:
                       $ref: '#/components/schemas/advance_request_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/advances:
+    get:
+      tags:
+        - Advances
+      summary: List advances
+      operationId: list-advances
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advances
+      summary: Create or update an advances
+      description: |
+        Create or update an advances.
+      operationId: advances_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:
