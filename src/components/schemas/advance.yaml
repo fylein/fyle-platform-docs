@@ -1,15 +1,163 @@
+advance_out:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: 'advwrlAGwjr2'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    user:
+      $ref: './user.yaml#/user_out_embed'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    currency:
+      $ref: './fields.yaml#/currency'
+    amount:
+      $ref: './fields.yaml#/amount'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    payment_mode:
+      type: string
+      enum:
+        - CARD
+        - BANK_TRANSFER
+        - CHEQUE_DD
+        - FOREX
+      example: CASH
+    advance_request_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      example: 'advjrgwlk2Q'
+    seq_num:
+      type: string
+      description: |
+        This is user visible identifier for an advances.
+        This field can be used as reference in UI.
+      example: 'A/2020/10/T/95'
+    purpose:
+      type: string
+      nullable: true
+      description: |
+        Descriptive purpose which is added to an advance.
+      example: onsite client meeting
+    source:
+      type: string
+      nullable: true
+      enum:
+        - WEBAPP
+        - MOBILE
+      description: >
+        Enum value signifying the client method from which this advance.
+        was initiated.
+      example: WEBAPP
+    project_id:
+      $ref: './fields.yaml#/fk_integer'
+    project:
+      $ref: './project.yaml#/project_out_embed'
+    code:
+      $ref: './fields.yaml#/code'
+    issued_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies if and when this advance was issued.
+      nullable: True
+    card_number:
+      type: string
+      example: 'XXXXXXXXXXXX1234'
+    settlement_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      example: 'set5nlgnwgwl'
+    is_exported:
+      type: boolean
+      nullable: true
+      description: |
+        Determines whether this advance has been exported to external accounting system or not.
+    last_exported_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description:
+        signifies when this advance was exported to an external accounting system.
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+
 advance_out_embed:
   type: object
+  nullable: true
   properties:
     id:
       type: string
       maxLength: 255
       description: |
-        This id provided by Fyle to uniquely identify a balance transfer.
-        This id is always prefixed with `bt`.
+        This id provided by Fyle to uniquely identify an advances.
+        This id is always prefixed with `adv`.
       readOnly: true
       example: advkvnwrnpwi
     currency:
       $ref: './fields.yaml#/currency'
     amount:
       $ref: './fields.yaml#/amount'
+
+advance_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: 'advwrlAGwjr2'
+    currency:
+      $ref: './fields.yaml#/currency'
+    amount:
+      $ref: './fields.yaml#/amount'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    payment_mode:
+      type: string
+      enum:
+        - CARD
+        - BANK_TRANSFER
+        - CHEQUE_DD
+        - FOREX
+      example: CASH
+    advance_request_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      example: 'advjrgwlk2Q'
+    purpose:
+      type: string
+      nullable: true
+      description: |
+        Descriptive purpose which is added to an advances.
+      example: onsite client meeting
+    source:
+      type: string
+      nullable: true
+      enum:
+        - WEBAPP
+        - MOBILE
+      description: >
+        Enum value signifying the client method from which this advance.
+        was initiated.
+      example: WEBAPP
+    project_id:
+      $ref: './fields.yaml#/fk_integer'
+    code:
+      $ref: './fields.yaml#/code'
+    card_number:
+      type: string
+      example: 'XXXXXXXXXXXX1234'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
