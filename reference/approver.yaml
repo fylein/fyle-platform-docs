@@ -122,6 +122,16 @@ components:
             Fyle or has expired.
 
             You need to generate a new access token.
+    '403':
+      type: object
+      properties:
+        message:
+          enum:
+            - Forbidden
+          type: string
+          description: >
+            This error means current user does not have enough permissions to
+            perform this operation.
     count:
       type: integer
       description: |
@@ -373,6 +383,250 @@ components:
           $ref: '#/components/schemas/created_at'
         approver_user_id:
           $ref: '#/components/schemas/fk_string'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    advance_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an advances.
+            This id is always prefixed with `adv`.
+          readOnly: true
+          example: advkvnwrnpwi
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+    code:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: >
+        This represents a code that is typically used for syncing with other
+        systems.
+      example: C1234
+    fk_integer:
+      type: integer
+      nullable: true
+      description: |
+        This id provided by Fyle to identify an object.
+      example: 1234
+    id_integer:
+      type: integer
+      description: |
+        This id provided by Fyle to identify an object.
+      example: 1234
+    project_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the project.
+          example: Fast and Furious
+        sub_project:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: Represents the name of the sub_project.
+          example: Formula One
+        code:
+          $ref: '#/components/schemas/code'
+    location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        display_name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: true
+          example: '221 Baker St, Marylebone, London, United Kingdom'
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    custom_field:
+      type: object
+      description: |
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
+    timestamptz_utc:
+      type: string
+      nullable: true
+      example: '2020-06-01T13:14:54.804+00:00'
+    advance_request_approval_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        approver_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        approver_user:
+          $ref: '#/components/schemas/user_out_embed'
+        state:
+          type: string
+          enum:
+            - APPROVAL_PENDING
+            - APPROVAL_DISABLED
+            - APPROVAL_DONE
+          description: |
+            State of this advance request approval
+    advance_request_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        policy_amount:
+          type: number
+          nullable: true
+          description: |
+            The advance request amount set by policy.
+          example: 1500
+        advance_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        advance:
+          $ref: '#/components/schemas/advance_out_embed'
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advance request.
+            This field can be used as reference in UI.
+          example: AR/2020/10/T/95
+        code:
+          $ref: '#/components/schemas/code'
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          enum:
+            - WEBAPP
+            - MOBILE
+          description: >
+            Enum value signifying the client method from which this
+            advance_request was initiated.
+          example: WEBAPP
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVAL_PENDING
+            - APPROVED
+            - SENT_BACK
+            - PULLED_BACK
+            - REJECTED
+            - PAID
+          description: |
+            State of the advance request.
+          example: PAID
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report was flagged from a policy
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_request_approval_out_embed'
+          description: |
+            List of advance request approval objects
 tags:
   - name: Reports
     description: |
@@ -380,6 +634,9 @@ tags:
   - name: Subscriptions
     description: |
       This API allows you to subscribe to different events.
+  - name: Advances
+    description: |
+      This API gives you access to view your Issued Advances data.
 paths:
   /approver/reports:
     get:
@@ -522,3 +779,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/advance_requests:
+    get:
+      tags:
+        - Advances
+      summary: List advance requests
+      operationId: list-advance-requests
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_request_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
