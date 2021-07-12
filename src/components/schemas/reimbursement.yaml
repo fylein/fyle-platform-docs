@@ -13,22 +13,64 @@ reimbursement_out:
       $ref: './fields.yaml#/created_at'
     updated_at:
       $ref: './fields.yaml#/updated_at'
+    
+    reimbursement_number:
+      type: string
+      description: |
+        A unique, organization wide identifier for a particular reimbursement.<br>
+        This id is always prefixed with `P/`.
+      example: P/2020/11/29
+
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
     user_id:
-      $ref: './user.yaml#/user_out_embed'
+      $ref: './fields.yaml#/user_id'
     org_id:
       $ref: './fields.yaml#/org_id'
+    
     currency:
       $ref: './fields.yaml#/currency'
     amount:
       $ref: './fields.yaml#/amount'
-#    mode:
-#      type: string
-#      enum:
-#        - ACH
-#        - OFFLINE
-#      description: |
-#        Mode of creation of this reimbursement.
-#      example: OFFLINE
+
+    is_paid:
+      type: boolean
+      example: true
+    paid_at:
+      $ref: './fields.yaml#/timestamptz_utc'
+
+    mode:
+      type: string
+      enum:
+        - ACH
+        - OFFLINE
+      description: |
+        Mode of creation of this reimbursement.
+      example: OFFLINE
+
+    purpose:
+      type: string
+      description: |
+        Details about purpose of this reimbursement.
+      example: End of month settlement
+
+    is_exported:
+      type: boolean
+      nullable: true
+      description: |
+        Determines whether this reimbursement has been exported to external
+        accounting system or not.
+
+    settlement_id:
+      $ref: './fields.yaml#/id_string'
+    payment_id:
+      $ref: './fields.yaml#/id_string'
+    code:
+      $ref: './fields.yaml#/code'
+      description: |
+        Optional field for external acounting system reference and linking
+
+# not adding ACH related fields now
 #    ach_state:
 #      type: string
 #      enum:
@@ -39,39 +81,12 @@ reimbursement_out:
 #      description: |
 #        Status of ACH if this reimbursment is processed via ACH.
 #      example: ACH_COMPLETE
-    state:
-      type: string
-      enum:
-        - COMPLETE
-        - PENDING
-      description: |
-        State of the reimbursement.
-      example: COMPLETE
-    seq_num:
-      type: string
-      description: |
-        A unique, organization wide identifier for a particular reimbursement.<br>
-        This id is always prefixed with `P/`.
-      example: P/2020/11/29
-    code:
-      $ref: './fields.yaml#/code'
-    settlement_id:
-      allOf:
-        - $ref: './fields.yaml#/fk_string'
-      example: 'set5nlgnwgwl'
 
-reimbursement_out_embed:
+reimbursement_in:
   type: object
   properties:
-    id:
-      type: string
-      maxLength: 255
-      description: |
-        This id provided by Fyle to uniquely identify a reimbursement.
-        This id is always prefixed with `reim`.
-      example: reimntGt9ju6qP
-    currency:
-      $ref: './fields.yaml#/currency'
+    settlement_id:
+      $ref: './fields.yaml#/id_string'
     amount:
       $ref: './fields.yaml#/amount'
 
@@ -85,8 +100,5 @@ reimbursement_in_minimal:
         This id provided by Fyle to uniquely identify a reimbursement.
         This id is always prefixed with `reim`.
       example: reimntGt9ju6qP
-    comment:
-      type: string
-      example: 'Monthly payouts'
     code:
       $ref: './fields.yaml#/code'

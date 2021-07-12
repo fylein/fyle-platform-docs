@@ -13,13 +13,62 @@ settlement_out:
       $ref: './fields.yaml#/created_at'
     updated_at:
       $ref: './fields.yaml#/updated_at'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    org_id:
+      $ref: './fields.yaml#/org_id'
     opened_at:
       $ref: './fields.yaml#/timestamptz_utc'
-    closed:
+    is_locked:
       type: boolean
       example: true
-    closed_at:
+    locked_at:
       $ref: './fields.yaml#/timestamptz_utc'
+    is_paid:
+      type: boolean
+      example: true
+    paid_at:
+      $ref: './fields.yaml#/timestamptz_utc'
+    settlement_number:
+      type: integer
+      example: 2
+    total_opening_balance:
+      type: number
+      example: 100.10
+    total_closing_balance:
+      type: number
+      example: 10.20
+    user_account_snapshots:
+      type: array
+      items:
+        type: object
+        properties:
+          account_id:
+            $ref: './fields.yaml#/id_string'
+            example: 'acwbl222wlg'
+          type:
+            type: string
+            enum:
+              - PERSONAL_CASH_ACCOUNT
+              - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+              - PERSONAL_ADVANCE_ACCOUNT
+            example: PERSONAL_CASH_ACCOUNT
+          current_balance_amount:
+            type: number
+            example: 50.0
+          tentative_balance_amount:
+            type: number
+            example: 150.0
+          created_at:
+            $ref: './fields.yaml#/created_at'
+          user_id:
+            $ref: './fields.yaml#/user_id'
+          org_id:
+            $ref: './fields.yaml#/org_id'    
+   
+settlement_in:
+  type: object
+  properties:
     user_id:
       $ref: './fields.yaml#/user_id'
     org_id:
@@ -29,108 +78,4 @@ settlement_out:
       items:
         allOf:
           - $ref: './fields.yaml#/id_string'
-      example: [ 'acwbl222wlg', 'accg30nel335' ]
-    accounts:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
-            allOf:
-              - $ref: './fields.yaml#/id_string'
-            example: 'acwbl222wlg'
-          type:
-            type: string
-            enum:
-              - PERSONAL_CASH_ACCOUNT
-              - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-              - PERSONAL_ADVANCE_ACCOUNT
-            example: PERSONAL_CASH_ACCOUNT
-          currency:
-            $ref: './fields.yaml#/currency'
-          opening_balance:
-            type: number
-            example: 50.0
-          closing_balance:
-            type: number
-            example: 150.0
-    report_ids:
-      type: array
-      items:
-        allOf:
-          - $ref: './fields.yaml#/id_string'
-      example: [ 'rpwirgnwblk' ]
-    reports:
-      type: array
-      items:
-        allOf:
-          - $ref: './report.yaml#/report_out_embed'
-    expense_ids:
-      type: array
-      items:
-        allOf:
-          - $ref: './fields.yaml#/id_string'
-      example: [ 'txelntgwgwll' ]
-    expenses:
-      type: array
-      items:
-        $ref: './expense.yaml#/expense_out_embed'
-    corporate_credit_card_expense_ids:
-      type: array
-      items:
-        allOf:
-          - $ref: './fields.yaml#/id_string'
-      example: [ 'cccelsgnwlgw' ]
-    corporate_credit_card_expenses:
-      type: array
-      items:
-        $ref: './corporate_credit_card_expense.yaml#/corporate_credit_card_expense_out_embed'
-    balance_transfer_ids:
-      type: array
-      items:
-        allOf:
-          - $ref: './fields.yaml#/id_string'
-      example: [ 'bfwljgwglgw' ]
-    balance_transfers:
-      type: array
-      items:
-        $ref: './balance_transfer.yaml#/balance_transfer_out_embed'
-    reimbursement_id:
-      type: string
-      maxLength: 255
-      description: |
-        Unique identifier of reimbursement object linked to this settlement.
-      example: reimd8Ywn4n0H
-    reimbursement:
-      $ref: './reimbursement.yaml#/reimbursement_out_embed'
-
-settlement_in:
-  type: object
-  properties:
-    id:
-      type: string
-      maxLength: 255
-      description: |
-        This id provided by Fyle to uniquely identify a settlement.
-        This id is always prefixed with `set`.
-      example: setmntGt9ju6qP
-    user_id:
-      $ref: './fields.yaml#/user_id'
-    org_id:
-      $ref: './fields.yaml#/org_id'
-    balance_transfers:
-      type: array
-      items:
-        type: object
-        properties:
-          account_id:
-            allOf:
-              - $ref: './fields.yaml#/id_string'
-            example: 'acwbl222wlg'
-          amount:
-            $ref: './fields.yaml#/amount'
-    reimbursement:
-      type: object
-      properties:
-        amount:
-          $ref: './fields.yaml#/amount'
+      example: [ 'accpwirgnwblk' ]
