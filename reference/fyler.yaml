@@ -1307,6 +1307,66 @@ components:
           $ref: '#/components/schemas/created_at'
         user_id:
           $ref: '#/components/schemas/fk_string'
+    config:
+      type: object
+      nullable: false
+      properties:
+        type: object
+        nullable: false
+        properties:
+          oneOf:
+            - type: string
+              example: string1
+            - type: number
+              example: 123
+    schedule_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        apscheduler_job_id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        event_payload:
+          $ref: '#/components/schemas/config'
+        config:
+          $ref: '#/components/schemas/config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+    schedule_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        apscheduler_job_id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        event_payload:
+          type: object
+          description: |
+            Merchant name
+          example: Uber
+        config:
+          type: object
+          description: |
+            Merchant name
+          example: Uber
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     report_out:
       type: object
       additionalProperties: false
@@ -2143,6 +2203,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/schedules:
+    post:
+      tags:
+        - Schedules
+      summary: Create or update a Schedule
+      description: |
+        Create or update a Schedule.
+      operationId: schedules_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/schedule_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/schedule_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/reports:
     get:
       operationId: reports_list
