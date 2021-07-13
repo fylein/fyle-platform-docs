@@ -2700,8 +2700,6 @@ components:
           description: |
             Unique ID of settlement linked to this adjustment
           example: settGsjr5183g4
-        user_id:
-          $ref: '#/components/schemas/user_id'
         from_account_id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -4392,6 +4390,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/settlements/bulk:
+    post:
+      tags:
+        - Settlements
+      summary: Create settlements in bulk
+      description: |
+        Create settlements in bulk, for multiple users
+      operationId: settlements_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/settlement_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/adjustments:
     get:
       tags:
@@ -4483,6 +4536,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/adjustments/bulk:
+    post:
+      tags:
+        - Adjustments
+      summary: Create adjustments in bulk
+      description: |
+        Create adjustments in bulk, for multiple users
+      operationId: adjustments_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/adjustment_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
@@ -4643,12 +4751,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/reimbursements/complete@bulk:
+  /admin/reimbursements/mark_complete/bulk:
     post:
       tags:
         - Reimbursements
       summary: Bulk complete reimbursements
-      operationId: complete-reimbursements-bulk
+      operationId: complete_reimbursements_bulk
       description: |
         Marks reimbursement as complete and move reports to paid state.
       requestBody:
