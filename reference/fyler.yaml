@@ -1307,6 +1307,18 @@ components:
           $ref: '#/components/schemas/created_at'
         user_id:
           $ref: '#/components/schemas/fk_string'
+    event_payload:
+      nullable: true
+      type: object
+      properties:
+        resource_id:
+          nullable: true
+          type: string
+          example: tx123TRew12
+        resource_name:
+          nullable: true
+          type: string
+          example: TRANSACTION
     schedule_config:
       nullable: false
       oneOf:
@@ -1368,27 +1380,6 @@ components:
                   nullable: true
                   type: string
                   example: 2021-05-12T10:16:50.410Z
-    schedule_in:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        apscheduler_job_id:
-          $ref: '#/components/schemas/id_string'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        event_payload:
-          $ref: '#/components/schemas/schedule_config'
-        config:
-          $ref: '#/components/schemas/schedule_config'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
     schedule_out:
       type: object
       properties:
@@ -1401,7 +1392,28 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
         event_payload:
+          $ref: '#/components/schemas/event_payload'
+        config:
           $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+    schedule_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        apscheduler_job_id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        event_payload:
+          $ref: '#/components/schemas/event_payload'
         config:
           $ref: '#/components/schemas/schedule_config'
         org_id:
@@ -1805,6 +1817,9 @@ tags:
   - name: Subscriptions
     description: |
       This API allows you to subscribe to different events.
+  - name: Schedules
+    description: |
+      This API let you create Scheduled jobs. 
 paths:
   /fyler/projects:
     get:
@@ -2297,6 +2312,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Schedules
+      summary: List Schedule
+      operationId: get-schedule
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/schedule_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /fyler/reports:
     get:
       operationId: reports_list
