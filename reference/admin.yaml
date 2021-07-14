@@ -2545,6 +2545,270 @@ components:
           example: XXXXXXXXXXXX1234
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    settlement_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a settlement.
+            This id is always prefixed with `set`.
+          readOnly: true
+          example: setmntGt9ju6qP
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        opened_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        is_locked:
+          type: boolean
+          example: true
+        locked_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        is_paid:
+          type: boolean
+          example: true
+        paid_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        settlement_number:
+          type: integer
+          example: 2
+        total_opening_balance:
+          type: number
+          example: 100.1
+        total_closing_balance:
+          type: number
+          example: 10.2
+        user_account_snapshots:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: acwbl222wlg
+              type:
+                type: string
+                enum:
+                  - PERSONAL_CASH_ACCOUNT
+                  - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+                  - PERSONAL_ADVANCE_ACCOUNT
+                example: PERSONAL_CASH_ACCOUNT
+              current_balance_amount:
+                type: number
+                example: 50
+              tentative_balance_amount:
+                type: number
+                example: 150
+              created_at:
+                $ref: '#/components/schemas/created_at'
+              user_id:
+                $ref: '#/components/schemas/user_id'
+              org_id:
+                $ref: '#/components/schemas/org_id'
+    settlement_in:
+      type: object
+      properties:
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/user_id'
+          readOnly: false
+        org_id:
+          allOf:
+            - $ref: '#/components/schemas/org_id'
+          readOnly: false
+        account_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - accpwirgnwblk
+    adjustment_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an adjustment.
+            This id is always prefixed with `adj`.
+          readOnly: true
+          example: adjmntGt9ju6qP
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        issuer_user_id:
+          allOf:
+            - $ref: '#/components/schemas/user_id'
+          description: |
+            Unique id of the user who is the issuer of adjustment.
+        from_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accGdjd52nsk8
+        to_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accdfbh236gn3
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique ID of settlement linked to this adjustment
+          example: settGsjr5183g4
+        amount:
+          type: number
+          description: >
+            Amount transferred from source account to destination account in a
+            particular adjustment.
+          example: 50
+        type:
+          type: string
+          description: |
+            Type of adjustment
+          enum:
+            - RECOVER_CCC
+            - FORGET_CCC
+            - RECOVER_ADV
+            - FORGET_ADV
+            - null
+          example: RECOVER_CCC
+        note:
+          type: string
+          description: |
+            Optional description for a particular adjustment.
+          example: Adjusting pending amount of CCC account with personal account
+    adjustment_in:
+      type: object
+      properties:
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique ID of settlement linked to this adjustment
+          example: settGsjr5183g4
+        from_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accGdjd52nsk8
+        to_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accdfbh236gn3
+        type:
+          type: string
+          description: |
+            Type of adjustment
+          enum:
+            - RECOVER_CCC
+            - FORGET_CCC
+            - RECOVER_ADV
+            - FORGET_ADV
+            - null
+          example: RECOVER_CCC
+        amount:
+          type: number
+          description: >
+            Amount transferred from source account to destination account in a
+            particular adjustment.
+          example: 50
+    reimbursement_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          readOnly: true
+          example: reimntGt9ju6qP
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        reimbursement_number:
+          type: string
+          description: >
+            A unique, organization wide identifier for a particular
+            reimbursement.<br>
+
+            This id is always prefixed with `P/`.
+          example: P/2020/11/29
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        is_paid:
+          type: boolean
+          example: true
+        paid_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        mode:
+          type: string
+          enum:
+            - ACH
+            - OFFLINE
+          description: |
+            Mode of creation of this reimbursement.
+          example: OFFLINE
+        purpose:
+          type: string
+          description: |
+            Details about purpose of this reimbursement.
+          example: End of month settlement
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this reimbursement has been exported to external
+            accounting system or not.
+        settlement_id:
+          $ref: '#/components/schemas/id_string'
+        payment_id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+          description: |
+            Optional field for external acounting system reference and linking
+    reimbursement_in:
+      type: object
+      properties:
+        settlement_id:
+          $ref: '#/components/schemas/id_string'
+        amount:
+          $ref: '#/components/schemas/amount'
+    reimbursement_in_minimal:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          example: reimntGt9ju6qP
+        code:
+          $ref: '#/components/schemas/code'
     expense_out_embed:
       type: object
       properties:
@@ -2571,242 +2835,6 @@ components:
           $ref: '#/components/schemas/currency'
         amount:
           $ref: '#/components/schemas/amount'
-    balance_transfer_out_embed:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a balance transfer.
-            This id is always prefixed with `bt`.
-          readOnly: true
-          example: btLL7YJKZHMz
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        account_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: acwbl222wlg
-        account:
-          $ref: '#/components/schemas/account_out_embed'
-    reimbursement_out_embed:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
-            This id is always prefixed with `reim`.
-          example: reimntGt9ju6qP
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-    settlement_out:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a settlement.
-            This id is always prefixed with `set`.
-          readOnly: true
-          example: setmntGt9ju6qP
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        opened_at:
-          $ref: '#/components/schemas/timestamptz_utc'
-        closed:
-          type: boolean
-          example: true
-        closed_at:
-          $ref: '#/components/schemas/timestamptz_utc'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        account_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - acwbl222wlg
-            - accg30nel335
-        accounts:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                allOf:
-                  - $ref: '#/components/schemas/id_string'
-                example: acwbl222wlg
-              type:
-                type: string
-                enum:
-                  - PERSONAL_CASH_ACCOUNT
-                  - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-                  - PERSONAL_ADVANCE_ACCOUNT
-                example: PERSONAL_CASH_ACCOUNT
-              currency:
-                $ref: '#/components/schemas/currency'
-              opening_balance:
-                type: number
-                example: 50
-              closing_balance:
-                type: number
-                example: 150
-        report_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - rpwirgnwblk
-        reports:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/report_out_embed'
-        expense_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - txelntgwgwll
-        expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/expense_out_embed'
-        corporate_credit_card_expense_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - cccelsgnwlgw
-        corporate_credit_card_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
-        balance_transfer_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - bfwljgwglgw
-        balance_transfers:
-          type: array
-          items:
-            $ref: '#/components/schemas/balance_transfer_out_embed'
-        reimbursement_id:
-          type: string
-          maxLength: 255
-          description: |
-            Unique identifier of reimbursement object linked to this settlement.
-          example: reimd8Ywn4n0H
-        reimbursement:
-          $ref: '#/components/schemas/reimbursement_out_embed'
-    settlement_in:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a settlement.
-            This id is always prefixed with `set`.
-          example: setmntGt9ju6qP
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        balance_transfers:
-          type: array
-          items:
-            type: object
-            properties:
-              account_id:
-                allOf:
-                  - $ref: '#/components/schemas/id_string'
-                example: acwbl222wlg
-              amount:
-                $ref: '#/components/schemas/amount'
-        reimbursement:
-          type: object
-          properties:
-            amount:
-              $ref: '#/components/schemas/amount'
-    reimbursement_out:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
-            This id is always prefixed with `reim`.
-          readOnly: true
-          example: reimntGt9ju6qP
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        user_id:
-          $ref: '#/components/schemas/user_out_embed'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        state:
-          type: string
-          enum:
-            - COMPLETE
-            - PENDING
-          description: |
-            State of the reimbursement.
-          example: COMPLETE
-        seq_num:
-          type: string
-          description: >
-            A unique, organization wide identifier for a particular
-            reimbursement.<br>
-
-            This id is always prefixed with `P/`.
-          example: P/2020/11/29
-        code:
-          $ref: '#/components/schemas/code'
-        settlement_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          example: set5nlgnwgwl
-    reimbursement_in_minimal:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
-            This id is always prefixed with `reim`.
-          example: reimntGt9ju6qP
-        comment:
-          type: string
-          example: Monthly payouts
-        code:
-          $ref: '#/components/schemas/code'
     user_account_summary_out:
       type: object
       properties:
@@ -2928,6 +2956,9 @@ tags:
   - name: Settlements
     description: |
       This API gives you access to manage your organisation's Settlements data.
+  - name: Adjustments
+    description: |
+      This API gives you access to manage your organisation's Adjustments data.
   - name: Expense Fields
     description: >
       This API gives you access to manage your organisation's Expense Fields
@@ -4312,9 +4343,9 @@ paths:
     post:
       tags:
         - Settlements
-      summary: Create or update a settlement
+      summary: Create a settlement
       description: |
-        Create or update a settlement
+        Create a settlement
       operationId: post-settlements
       requestBody:
         required: true
@@ -4347,6 +4378,219 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/settlements/bulk:
+    post:
+      tags:
+        - Settlements
+      summary: Create settlements in bulk
+      description: |
+        Create settlements in bulk, for multiple users
+      operationId: settlements_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/settlement_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/adjustments:
+    get:
+      tags:
+        - Adjustments
+      summary: List adjustments
+      operationId: list-adjustments
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: order
+          description: |
+            use comma separated column names for sorting the results. <br>
+            For sorting in descending order, use `updated_at.desc`.<br>
+            Supported columns are `updated_at`, `id`.
+          schema:
+            type: string
+            example: 'updated_at.desc,id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/adjustment_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Adjustments
+      summary: Create an adjustment
+      description: |
+        Create an adjustment
+      operationId: post-adjustments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/adjustment_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/adjustment_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/adjustments/bulk:
+    post:
+      tags:
+        - Adjustments
+      summary: Create adjustments in bulk
+      description: |
+        Create adjustments in bulk, for multiple users
+      operationId: adjustments_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/adjustment_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
@@ -4412,7 +4656,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/reimbursements/complete:
+    post:
+      tags:
+        - Reimbursements
+      summary: Create a reimbursement
+      description: |
+        Create a reimbursement
+      operationId: post-reimbursements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reimbursement_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reimbursement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reimbursements/mark_complete:
     post:
       tags:
         - Reimbursements
@@ -4457,12 +4751,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/reimbursements/complete@bulk:
+  /admin/reimbursements/mark_complete/bulk:
     post:
       tags:
         - Reimbursements
       summary: Bulk complete reimbursements
-      operationId: complete-reimbursements-bulk
+      operationId: complete_reimbursements_bulk
       description: |
         Marks reimbursement as complete and move reports to paid state.
       requestBody:
