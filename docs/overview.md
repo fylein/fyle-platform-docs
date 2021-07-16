@@ -11,25 +11,21 @@ Let's set the stage first. We have two characters, John and Amy.
 * John is a Fyle user. He has a Fyle login. 
 * John is part of one or more organizations, let's call it Acme Inc. Most users are only part of one organization, btw.
 * John plays one or more roles in the organization. John may be an admin, but not a spender. John may be a spender and an approver. You get the picture.
-* John wants to access his Fyle data (e.g. expenses) and do something with it. Maybe create a CSV or something.
-* John asks Amy who is a coding ninja warrior for help.
+* John wants to access his Fyle data (e.g. expenses) and do something with it. Maybe create a CSV or push the data to another system
+* John asks Amy who is a coding ninja warrior for help
 
-![The stage](../assets/images/overview.png)
+![The stage](../assets/images/overview/overview1.png)
 
 
-If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. She then proceeds to write the code in the language of her choice to do something with John's Fyle data.
+If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. 
 
-Amy has to consider a few things to get the job done. 
-* She needs to create an application (code)
+If John's requirements are straightforward, Amy could skip a few steps and use Fyle's [Zapier integration](../integrations/zapier.md) to get the job done. 
+
+If the requirements are complex, she'll need to write an application for John.
+
+* Amy should have a Fyle account. If she doesn't, she can be invited to join Fyle by an admin (this could be John or someone else)
+* She needs to create an application by going to Fyle's developer page
 * Her code needs be authorized by John
 * Her code has to make the right REST API calls to either read data that John can read or perform some modifications on behalf of John
 * She can also register callback URLs that can get called by Fyle when certain events occur
 
-
-If you're super comfortable with the concepts, you can just jump to the API reference section.
-
-<!-- theme: success -->
-
-> ### Congratulations!
->
-> You are now a Fyle platform expert. Send your comments to support@fylehq.com for a free cookie.
