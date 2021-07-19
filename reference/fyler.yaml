@@ -1398,6 +1398,39 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+    report_out_subscriptions:
+      type: object
+      additionalProperties: false
+      properties:
+        resource:
+          type: string
+          example: REPORT
+        action:
+          type: string
+          enum:
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
+            - APPROVED
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
+          example: APPROVED
+        data:
+          allOf:
+            - $ref: '#/components/schemas/report_out'
+            - type: object
+              additionalProperties: false
+              properties:
+                updated_by_user:
+                  $ref: '#/components/schemas/user_out_embed'
+        reason:
+          type: string
+          example: comment given by Approver while approving the report.
     advance_out_embed:
       type: object
       nullable: true
@@ -2143,6 +2176,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/report_out_subscriptions'
+              responses:
+                '200':
+                  description: OK
   /fyler/reports:
     get:
       operationId: reports_list
