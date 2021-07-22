@@ -2590,15 +2590,27 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+            Add only masked card-numbers, last four digits of the card.
+          example: xxxx-4543
+        cardholder_name:
+          type: string
+          maxLength: 255
           nullable: true
           description: |
-            Signifies when this expense was made.
-            This date cannot be in future.
+            String denoting the card holder's name
+          example: John Cena
         source:
           type: string
+          nullable: true
           description: >
             signifies the source of how card is added and further card
             transactions would be synced
@@ -2610,13 +2622,6 @@ components:
           description: |
             String denoting the card type
           example: Savings
-        cardholder_name:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: |
-            String denoting the card holder's name
-          example: John Cena
         code:
           type: string
           nullable: true
@@ -2630,29 +2635,16 @@ components:
           type: boolean
           description: |
             Determines whether this card is a corporate card.
-        bank_name:
-          type: string
-          description: |
-            Specifies the name of bank who issued the card.
-          example: Bank of America
-        card_number:
-          type: string
-          description: |
-            Specifies the masked number of the card.
-            Add only masked card-numbers, last four digits of the card.
-          example: xxxx-4543
         last_synced_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
-          readOnly: true
           description: |
             Signifies when this card was last synced.
         last_assigned_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
-          readOnly: true
           description: |
             Signifies when this card was last assigned.
         assignor_user_id:
@@ -2660,7 +2652,6 @@ components:
           description: |
             The unique id of an user who assigned the card.
           nullable: true
-          readOnly: true
           example: uswjwgnwwgo
     card_in:
       type: object
@@ -2673,13 +2664,6 @@ components:
           $ref: '#/components/schemas/org_id'
         user_id:
           $ref: '#/components/schemas/user_id'
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this expense was made.
-            This date cannot be in future.
         bank_name:
           type: string
           description: |
@@ -2698,12 +2682,6 @@ components:
           description: |
             String denoting the card holder's name
           example: John Cena
-        source:
-          type: string
-          description: >
-            signifies the source of how card is added and further card
-            transactions would be synced
-          example: BANK FEED - CDF
         card_type:
           type: string
           maxLength: 255
@@ -2724,13 +2702,6 @@ components:
           type: boolean
           description: |
             Determines whether this card is a corporate card.
-        last_synced_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          readOnly: true
-          description: |
-            Signifies when this card was last synced.
     card_assign_in:
       type: object
       properties:
