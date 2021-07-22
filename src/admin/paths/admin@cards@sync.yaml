@@ -1,0 +1,60 @@
+post:
+  tags:
+    - Cards
+  summary: Sync transactions of a card
+  description: |
+    Sync transactions of a card
+  operationId: cards_sync
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: ../../components/schemas/card.yaml#/card_sync_in
+          required:
+            - data
+          additionalProperties: False
+
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../components/schemas/card.yaml#/card_sync_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: ../../components/schemas/bulk_error.yaml
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  message:
+                    type: string
+                    nullable: true
+                  data:
+                    type: object
+                    nullable: true
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
