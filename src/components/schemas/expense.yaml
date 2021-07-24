@@ -20,7 +20,7 @@ expense_out:
         - $ref: './fields.yaml#/timestamptz_utc'
       nullable: true
       description: |
-        siginfies when this expense was made.
+        signifies when this expense was made.
         This date cannot be in future.
     source:
       type: string
@@ -294,7 +294,7 @@ expense_in:
       allOf:
         - $ref: './fields.yaml#/timestamptz_pst'
       description: |
-        siginfies when this expense was made.
+        signifies when this expense was made.
         This date cannot be in future.
     source:
       type: string
@@ -465,3 +465,69 @@ expense_out_embed:
       $ref: './fields.yaml#/currency'
     amount:
       $ref: './fields.yaml#/amount'
+
+matched_expense_out_embed:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: txwownwrng
+    currency:
+      $ref: './fields.yaml#/currency'
+    amount:
+      $ref: './fields.yaml#/amount'
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: |
+        signifies when this expense was made.
+        This date cannot be in future.
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the merchant to which the Expense was made.
+      example: Uber
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+      description: The state of the Expense.
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+    seq_num:
+      type: string
+      readOnly: true
+      description: |
+        This is user visible identifier for an expense.
+        This field can be used as reference in UI.
+      example: E/2020/10/T/95
+    matched_by_user_id:
+      $ref: './fields.yaml#/user_id'
+    matched_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: |
+        signifies when this expense was matched.
