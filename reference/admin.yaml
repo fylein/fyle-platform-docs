@@ -3127,6 +3127,41 @@ components:
             $ref: '#/components/schemas/id_string'
           example:
             - txwownwrn2
+    suggestions_in:
+      type: object
+      properties:
+        org_id:
+          allOf:
+            - $ref: '#/components/schemas/org_id'
+          readOnly: false
+          example: orwruogwnngg
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/user_id'
+          readOnly: false
+          example: uswjwgnwwgo
+        amount:
+          $ref: '#/components/schemas/amount'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies when this card transaction was made.
+            This date cannot be in future.
+    suggestions_expense_in:
+      allOf:
+        - $ref: '#/components/schemas/suggestions_in'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: >
+                This helps in getting expenses for personal/corporate card
+                transactions
+              enum:
+                - PERSONAL_CARD
+                - CORPORATE_CARD
+              example: CORPORATE_CARD
     settlement_out:
       type: object
       properties:
@@ -3556,6 +3591,9 @@ tags:
     description: >
       This API gives you access to manage your organisation's Card Transactions
       data.
+  - name: Suggestions
+    description: |
+      This API gives you access to Expense/Card Transactions Suggestions
 paths:
   /admin/projects:
     get:
@@ -5837,6 +5875,145 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/card_transaction_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/suggestions/expenses:
+    post:
+      tags:
+        - Suggestions
+      summary: Get expense suggestions
+      description: |
+        Get expense suggestions to match with card transactions
+      operationId: suggestions_expenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  allOf:
+                    - $ref: '#/components/schemas/suggestions_expense_in'
+                  required:
+                    - org_id
+                    - user_id
+                    - amount
+                    - spent_at
+                    - type
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/suggestions/card_transactions:
+    post:
+      tags:
+        - Suggestions
+      summary: Get card transaction suggestions
+      description: |
+        Get card transaction suggestions to match with expenses
+      operationId: suggestions_card_transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  allOf:
+                    - $ref: '#/components/schemas/suggestions_in'
+                  required:
+                    - org_id
+                    - user_id
+                    - amount
+                    - spent_at
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/card_transaction_out'
         '400':
           description: Bad request
           content:
