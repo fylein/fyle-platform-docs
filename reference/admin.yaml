@@ -3101,6 +3101,32 @@ components:
             $ref: '#/components/schemas/id_string'
           example:
             - btxnwownwrng
+    card_transaction_match_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwownwrn2
+    card_transaction_unmatch_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwownwrn2
     settlement_out:
       type: object
       properties:
@@ -5681,6 +5707,136 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/card_transactions/match:
+    post:
+      tags:
+        - Card Transactions
+      summary: Match card transaction
+      description: |
+        Match card transaction to expenses
+      operationId: card_transactions_match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  allOf:
+                    - $ref: '#/components/schemas/card_transaction_match_in'
+                  required:
+                    - id
+                    - expense_ids
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_transaction_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/card_transactions/unmatch:
+    post:
+      tags:
+        - Card Transactions
+      summary: Unmatch card transaction
+      description: |
+        Unmatch a matched card transaction
+      operationId: card_transactions_unmatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  allOf:
+                    - $ref: '#/components/schemas/card_transaction_unmatch_in'
+                  required:
+                    - id
+                    - expense_ids
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_transaction_out'
         '400':
           description: Bad request
           content:
