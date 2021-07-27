@@ -24,7 +24,7 @@ The first step to creating integration would be to create your application on Fy
 
 Click on the ‘Developers’ tab & hit "Create New App" button
 
-![Create new app](../assets/images/concepts/application/application2.png)
+![Create new app](../../assets/images/concepts/application/application2.png)
 
 You will then be redirected ‘Create Application’ Page. You can choose “Internal” or “OAuth 2”.
 
@@ -32,11 +32,11 @@ You will then be redirected ‘Create Application’ Page. You can choose “Int
 
 These applications are to be used only by the specific user / organization and is generally highly customised.
 
-![Create internal app](../assets/images/concepts/application/application3.png)
+![Create internal app](../../assets/images/concepts/application/application3.png)
 
 When we click on Save the following screen will pop up:
 
-![Create internal app 2](../assets/images/concepts/application/application4.png)
+![Create internal app 2](../../assets/images/concepts/application/application4.png)
 
 Please copy the client Secret on this screen as you won’t be able to get that later on. Refresh token and Client Id will be available later on too.
 
@@ -44,7 +44,7 @@ Please copy the client Secret on this screen as you won’t be able to get that 
 
 These applications are for public use by multiple organizations. Usually when building integrations that can be used by any Fyle user irrespective of the organization. 
 
-![Create OAuth 2.0 app](../assets/images/concepts/application/application5.png)
+![Create OAuth 2.0 app](../../assets/images/concepts/application/application5.png)
 
 You can provide us with all the redirect URIs that you want Fyle to allow in OAuth 2. After clicking on ‘save’ you will be able to copy the Client Id, Client Secret.
 
