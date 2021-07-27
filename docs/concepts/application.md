@@ -16,7 +16,7 @@ Never share your client secret or refresh token with anyone - this can be used t
 
 The high-level steps for a functioning application are:
 
-![High level steps](../assets/images/concepts/application/application1.png)
+![High level steps](../../assets/images/concepts/application/application1.png)
 
 ## Create an Application
 
