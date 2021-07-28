@@ -14,9 +14,6 @@ Let's set the stage first. We have two characters, John and Amy.
 * John wants to access his Fyle data (e.g. expenses) and do something with it. Maybe create a CSV or push the data to another system
 * John asks Amy who is a coding ninja warrior for help
 
-![The stage](../assets/images/overview/overview1.png)
-
-
 If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. 
 
 If John's requirements are straightforward, Amy could skip a few steps and use Fyle's [Zapier integration](../integrations/zapier.md) to get the job done. 
@@ -29,3 +26,8 @@ If the requirements are complex, she'll need to write an application for John.
 * Her code has to make the right REST API calls to either read data that John can read or perform some modifications on behalf of John
 * She can also register callback URLs that can get called by Fyle when certain events occur
 
+![The stage](../assets/images/overview/overview1.png)
+
+The application she writes will have to talk to an authorization server to refresh tokens, log out etc. The authorization server also tells the application which data server hosts the actual data for John. Subsequent calls to read or write data via REST APIs have to hit the right data server.
+
+First things first, let's find out how to [create an application](./concepts/application.md) in Fyle.
