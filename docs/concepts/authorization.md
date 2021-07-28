@@ -1,5 +1,13 @@
 # Authorization
 
+Authorization typically involves two steps:
+
+1. Getting a refresh token - this represents the fact that a end-user has authorized this piece of code to act on their behalf. The refresh token is long-lived ~1 yr
+2. Using the refresh token, the application should get an access token which is short-lived (~1 hr). All data operation API calls should only include the access token
+
+
+Step 1 differs based on whether your app is an internal app or an OAuth 2.0 app. Step 2 is identical for both types of apps.
+
 ## Internal app
 
 For internal apps, you will get the refresh token, client id and client secret when creating the application. You can get the access token using an HTTP POST to the token URL. This returns a new access token.
