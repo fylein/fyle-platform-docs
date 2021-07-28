@@ -2575,6 +2575,189 @@ components:
           example: XXXXXXXXXXXX1234
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+            Add only masked card-numbers, last four digits of the card.
+          example: xxxx-4543
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        data_feed_source:
+          type: string
+          nullable: true
+          description: >
+            signifies the source of how card is added and how further card
+            transactions could be synced
+          example: BANK FEED - CDF
+        card_account_type:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card account type like rewards, credit, savings
+          example: rewards
+        code:
+          type: string
+          nullable: true
+          description: >
+            Id given by external systems like Gmail. To identify whether that
+            entity
+
+            has been already added to Fyle or not.
+          example: wgjwgo3ihwljnlsww
+        is_corporate_card:
+          type: boolean
+          description: |
+            Determines whether this card is a corporate card.
+        last_synced_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last synced.
+        last_assigned_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last assigned.
+        assignor_user_id:
+          type: string
+          description: |
+            The unique id of an user who assigned the card.
+          nullable: true
+          example: uswjwgnwwgo
+      required:
+        - id
+        - org_id
+        - user_id
+        - created_at
+        - updated_at
+        - bank_name
+        - card_number
+        - cardholder_name
+        - data_feed_source
+        - card_account_type
+        - code
+        - is_corporate_card
+        - last_synced_at
+        - last_assigned_at
+        - assignor_user_id
+    card_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+            Add only masked card-numbers, last four digits of the card.
+          example: xxxx-4543
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        data_feed_source:
+          type: string
+          nullable: true
+          description: >
+            signifies the source of how card is added and how further card
+            transactions could be synced
+          example: BANK FEED - CDF
+        card_account_type:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card account type like rewards, credit, savings
+          example: rewards
+        code:
+          type: string
+          nullable: true
+          description: >
+            Id given by external systems like Gmail. To identify whether that
+            entity
+
+            has been already added to Fyle or not.
+          example: wgjwgo3ihwljnlsww
+        is_corporate_card:
+          type: boolean
+          description: |
+            Determines whether this card is a corporate card.
+      required:
+        - bank_name
+        - card_number
+    card_assign_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+          required: true
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to whom the card should be assigned.
+          example: uswjwgnwwgo
+          required: true
+      required:
+        - id
+        - user_id
+    card_unassign_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+          required: true
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to whom the card is assigned.
+          example: uswjwgnwwgo
+          required: true
+      required:
+        - id
+        - user_id
     settlement_out:
       type: object
       properties:
@@ -3000,6 +3183,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to manage your organisation's Advances data.
+  - name: Cards
+    description: |
+      This API gives you access to manage your organisation's Cards data.
 paths:
   /admin/projects:
     get:
@@ -4299,6 +4485,247 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cards:
+    get:
+      tags:
+        - Cards
+      summary: List cards
+      operationId: cards_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/card_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Cards
+      summary: Create or update an card
+      description: |
+        Create or update an card.
+      operationId: cards_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cards/bulk:
+    post:
+      tags:
+        - Cards
+      summary: Create or update cards in bulk
+      description: |
+        Create or update cards in bulk
+      operationId: cards_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/card_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cards/assign:
+    post:
+      tags:
+        - Cards
+      summary: Assign card to user
+      description: |
+        Assign a card to a user
+      operationId: cards_assign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_assign_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cards/unassign:
+    post:
+      tags:
+        - Cards
+      summary: Unassign card from user
+      description: |
+        Unassign a card from a user
+      operationId: cards_unassign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_unassign_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_out'
         '400':
           description: Bad request
           content:
