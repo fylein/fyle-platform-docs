@@ -1731,18 +1731,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: bawownwrng
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: |
-            The unique id of an user to whom the card is assigned
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
         bank_name:
           type: string
           description: |
@@ -1988,7 +1976,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
-        auto_matched_at:
+        last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
@@ -2034,7 +2022,7 @@ components:
           $ref: '#/components/schemas/string_detail'
         flight_total_fare:
           $ref: '#/components/schemas/double_precision_detail'
-        flight_travel_date:
+        flight_scheduled_at:
           $ref: '#/components/schemas/timestamp_detail'
         flight_service_class:
           $ref: '#/components/schemas/string_detail'
@@ -2048,11 +2036,11 @@ components:
           $ref: '#/components/schemas/string_detail'
         hotel_supplier_name:
           $ref: '#/components/schemas/string_detail'
-        hotel_check_in_date:
+        hotel_checked_in_at:
           $ref: '#/components/schemas/timestamp_detail'
         hotel_nights:
           $ref: '#/components/schemas/integer_detail'
-        hotel_checkout_date:
+        hotel_checked_out_at:
           $ref: '#/components/schemas/timestamp_detail'
         hotel_country:
           $ref: '#/components/schemas/string_detail'
@@ -2072,13 +2060,13 @@ components:
           $ref: '#/components/schemas/string_detail'
         car_rental_supplier_name:
           $ref: '#/components/schemas/string_detail'
-        car_rental_date:
+        car_rental_started_at:
           $ref: '#/components/schemas/timestamp_detail'
         car_rental_days:
           $ref: '#/components/schemas/integer_detail'
-        car_return_date:
+        car_rental_ended_at:
           $ref: '#/components/schemas/timestamp_detail'
-        general_ticket_issue_date:
+        general_ticket_issued_at:
           $ref: '#/components/schemas/timestamp_detail'
         general_ticket_number:
           $ref: '#/components/schemas/string_detail'
@@ -2136,16 +2124,16 @@ components:
         - flight_travel_agency_name
         - flight_ticket_number
         - flight_total_fare
-        - flight_travel_date
+        - flight_scheduled_at
         - flight_service_class
         - flight_carrier_code
         - flight_fare_base_code
         - flight_trip_leg_number
         - hotel_merchant_category_code
         - hotel_supplier_name
-        - hotel_check_in_date
+        - hotel_checked_in_at
         - hotel_nights
-        - hotel_checkout_date
+        - hotel_checked_out_at
         - hotel_country
         - hotel_city
         - hotel_total_fare
@@ -2155,10 +2143,10 @@ components:
         - fleet_service_supplier_name
         - car_rental_merchant_category_code
         - car_rental_supplier_name
-        - car_rental_date
+        - car_rental_started_at
         - car_rental_days
-        - car_return_date
-        - general_ticket_issue_date
+        - car_rental_ended_at
+        - general_ticket_issued_at
         - general_ticket_number
         - general_issuing_carrier
         - general_travel_agency_name
@@ -2175,17 +2163,6 @@ components:
           example: btxnwownwrng
       required:
         - id
-    card_transaction_ids_bulk_in:
-      type: object
-      properties:
-        ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - btxnwownwrng
-      required:
-        - ids
     bulk_error:
       type: object
       properties:
@@ -2280,7 +2257,11 @@ components:
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
-          $ref: '#/components/schemas/user_id'
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -2371,7 +2352,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: bawownwrng
-          required: true
       required:
         - id
     card_sync_out:
@@ -3185,7 +3165,9 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/card_transaction_ids_bulk_in'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/card_transaction_id_in'
               required:
                 - data
       responses:
@@ -3286,7 +3268,9 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/card_transaction_ids_bulk_in'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/card_transaction_id_in'
               required:
                 - data
       responses:
@@ -3387,7 +3371,9 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/card_transaction_ids_bulk_in'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/card_transaction_id_in'
               required:
                 - data
       responses:
@@ -3488,7 +3474,9 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/card_transaction_ids_bulk_in'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/card_transaction_id_in'
               required:
                 - data
       responses:
