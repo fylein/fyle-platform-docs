@@ -1307,6 +1307,130 @@ components:
           $ref: '#/components/schemas/created_at'
         user_id:
           $ref: '#/components/schemas/fk_string'
+    report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        last_reimbursed_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+    report_out_subscriptions:
+      type: object
+      additionalProperties: false
+      properties:
+        resource:
+          type: string
+          example: REPORT
+        action:
+          type: string
+          enum:
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
+            - APPROVED
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
+          example: APPROVED
+        data:
+          allOf:
+            - $ref: '#/components/schemas/report_out'
+            - type: object
+              additionalProperties: false
+              properties:
+                updated_by_user:
+                  $ref: '#/components/schemas/user_out_embed'
+        reason:
+          type: string
+          example: comment given by Approver while approving the report.
     event_payload:
       nullable: true
       type: object
@@ -1404,7 +1528,7 @@ components:
         event_name:
           type: string
           nullable: true
-          example: report.create
+          example: report.created
     schedule_in:
       type: object
       properties:
@@ -1429,98 +1553,7 @@ components:
         event_name:
           type: string
           nullable: true
-          example: report.create
-    report_out:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        user_id:
-          $ref: '#/components/schemas/id_string'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
-        purpose:
-          type: string
-          description: purpose for creating the report
-          example: Business trip to London
-          nullable: true
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        tax:
-          type: number
-          description: |
-            Tax value of the object.
-          example: 18.23
-          nullable: true
-        state:
-          type: string
-          enum:
-            - DRAFT
-            - APPROVER_PENDING
-            - APPROVER_INQUIRY
-            - PAYMENT_PROCESSING
-            - APPROVED
-            - PAYMENT_PENDING
-            - PAID
-        num_expenses:
-          type: integer
-          description: |
-            Number of expenses part of this report
-          example: 3
-        is_manually_flagged:
-          type: boolean
-          description: |
-            Determines whether this report was flagged manually
-        is_policy_flagged:
-          type: boolean
-          description: |
-            Determines whether this report was flagged from a policy
-        last_reimbursed_at:
-          type: string
-          format: date-time
-          example: '2020-06-11T13:14:55.201598+00:00'
-          description: |
-            Signifies if and when this report was reimbursed.
-          nullable: true
-        last_approved_at:
-          type: string
-          format: date-time
-          example: '2020-06-11T13:14:55.201598+00:00'
-          description: |
-            Signifies if and when this report was approved.
-          nullable: true
-        last_submitted_at:
-          type: string
-          format: date-time
-          example: '2020-06-11T13:14:55.201598+00:00'
-          description: |
-            Signifies if and when this report was submitted.
-          nullable: true
-        seq_num:
-          type: string
-          description: |
-            A unique human readable identifier for the report
-          example: C/2021/02/R/907
-        source:
-          type: string
-          description: |
-            where was this report object created from
-          nullable: true
-        approvals:
-          type: array
-          items:
-            $ref: '#/components/schemas/report_approval_out_embed'
-          description: |
-            List of report_approval objects
+          example: report.created
     advance_out_embed:
       type: object
       nullable: true
@@ -1537,6 +1570,17 @@ components:
           $ref: '#/components/schemas/currency'
         amount:
           $ref: '#/components/schemas/amount'
+        advance_request_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advances.
+            This field can be used as reference in UI.
+          example: A/2020/10/T/95
     advance_request_approval_out_embed:
       type: object
       additionalProperties: false
@@ -1612,12 +1656,15 @@ components:
         source:
           type: string
           nullable: true
-          enum:
-            - WEBAPP
-            - MOBILE
           description: >
-            Enum value signifying the client method from which this
-            advance_request was initiated.
+            The name of the client app from which this advance was created.
+
+            if its a thrid party app, it prefixed with TPA_.
+
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
+            not
+
+            passed, source is saved as TPA.
           example: WEBAPP
         state:
           type: string
@@ -1683,12 +1730,15 @@ components:
         source:
           type: string
           nullable: true
-          enum:
-            - WEBAPP
-            - MOBILE
           description: >
-            Enum value signifying the client method from which this
-            advance_request was initiated.
+            The name of the client app from which this advance was created.
+
+            if its a thrid party app, it prefixed with TPA_.
+
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
+            not
+
+            passed, source is saved as TPA.
           example: WEBAPP
         project_id:
           $ref: '#/components/schemas/fk_integer'
@@ -1732,6 +1782,10 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
           example: advjrgwlk2Q
+        advance_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: accwiofowiww
         seq_num:
           type: string
           description: |
@@ -1747,12 +1801,15 @@ components:
         source:
           type: string
           nullable: true
-          enum:
-            - WEBAPP
-            - MOBILE
           description: >
-            Enum value signifying the client method from which this advance. was
-            initiated.
+            The name of the client app from which this advance was created.
+
+            if its a thrid party app, it prefixed with TPA_.
+
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
+            not
+
+            passed, source is saved as TPA.
           example: WEBAPP
         project_id:
           $ref: '#/components/schemas/fk_integer'
@@ -1768,6 +1825,7 @@ components:
           nullable: true
         card_number:
           type: string
+          nullable: true
           example: XXXXXXXXXXXX1234
         settlement_id:
           allOf:
@@ -1788,6 +1846,128 @@ components:
             system.
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+            Add only masked card-numbers, last four digits of the card.
+          example: xxxx-4543
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        data_feed_source:
+          type: string
+          nullable: true
+          description: >
+            signifies the source of how card is added and how further card
+            transactions could be synced
+          example: BANK FEED - CDF
+        card_account_type:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card account type like rewards, credit, savings
+          example: rewards
+        code:
+          type: string
+          nullable: true
+          description: >
+            Id given by external systems like Gmail. To identify whether that
+            entity
+
+            has been already added to Fyle or not.
+          example: wgjwgo3ihwljnlsww
+        is_corporate_card:
+          type: boolean
+          description: |
+            Determines whether this card is a corporate card.
+        last_synced_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last synced.
+        last_assigned_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last assigned.
+        assignor_user_id:
+          type: string
+          description: |
+            The unique id of an user who assigned the card.
+          nullable: true
+          example: uswjwgnwwgo
+      required:
+        - id
+        - org_id
+        - user_id
+        - created_at
+        - updated_at
+        - bank_name
+        - card_number
+        - cardholder_name
+        - data_feed_source
+        - card_account_type
+        - code
+        - is_corporate_card
+        - last_synced_at
+        - last_assigned_at
+        - assignor_user_id
+    card_sync_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+      required:
+        - id
+    card_sync_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        synced_card_transactions_count:
+          type: number
+          description: |
+            Total number of card transactions synced to Fyle
+          example: 10
+      required:
+        - id
+        - synced_card_transactions_count
 tags:
   - name: My Profile
     description: |
@@ -1825,6 +2005,9 @@ tags:
   - name: Subscriptions
     description: |
       This API allows you to subscribe to different events.
+  - name: Cards
+    description: |
+      This API gives you access to your Cards data.
   - name: Schedules
     description: |
       This API let you create Scheduled jobs. 
@@ -2269,6 +2452,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/report_out_subscriptions'
+              responses:
+                '200':
+                  description: OK
   /fyler/schedules:
     post:
       tags:
@@ -2535,6 +2730,94 @@ paths:
                       $ref: '#/components/schemas/advance_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /fyler/cards:
+    get:
+      tags:
+        - Cards
+      summary: List cards
+      operationId: cards_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/card_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/cards/sync:
+    post:
+      tags:
+        - Cards
+      summary: Sync transactions of a card
+      description: |
+        Sync transactions of a card
+      operationId: cards_sync
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_sync_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/card_sync_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:

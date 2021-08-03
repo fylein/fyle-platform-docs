@@ -1,22 +1,14 @@
 get:
   tags:
-    - Settlements
-  summary: List settlements
-  operationId: list-settlements
+    - Cards
+  summary: List cards
+  operationId: cards_list
   parameters:
     - $ref: '../../components/parameters/created_at.yaml'
     - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/order.yaml'
     - $ref: '../../components/parameters/offset.yaml'
     - $ref: '../../components/parameters/limit.yaml'
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
   responses:
     '200':
       description: OK
@@ -24,7 +16,6 @@ get:
         application/json:
           schema:
             type: object
-            additionalProperties: False
             required:
               - count
               - offset
@@ -37,39 +28,31 @@ get:
               data:
                 type: array
                 items:
-                  $ref: '../../components/schemas/settlement.yaml#/settlement_out'
+                  $ref: '../../components/schemas/card.yaml#/card_out'
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/401.yaml'
-    '403':
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/403.yaml'
-
 post:
   tags:
-    - Settlements
-  summary: Create a settlement
+    - Cards
+  summary: Create or update an card
   description: |
-    Create a settlement
-  operationId: post-settlements
+    Create or update an card.
+  operationId: cards_post
   requestBody:
     required: true
     content:
       application/json:
         schema:
           type: object
-          additionalProperties: False
-          required:
-            - data
           properties:
             data:
-              $ref: '../../components/schemas/settlement.yaml#/settlement_in'
+              $ref: '../../components/schemas/card.yaml#/card_in'
+          required:
+            - data
   responses:
     '200':
       description: OK
@@ -77,12 +60,11 @@ post:
         application/json:
           schema:
             type: object
-            additionalProperties: False
             required:
               - data
             properties:
               data:
-                $ref: '../../components/schemas/settlement.yaml#/settlement_out'
+                $ref: '../../components/schemas/card.yaml#/card_out'
     '400':
       description: Bad request
       content:
