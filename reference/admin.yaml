@@ -3123,6 +3123,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
+    account_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        type:
+          type: string
+          enum:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+            - PERSONAL_ADVANCE_ACCOUNT
+          example: PERSONAL_CASH_ACCOUNT
+        currency:
+          $ref: '#/components/schemas/currency'
+        current_balance_amount:
+          type: number
+          example: 90.9
+        tentative_balance_amount:
+          type: number
+          example: 43.8
+        org_id:
+          $ref: '#/components/schemas/org_id'
 tags:
   - name: Projects
     description: |
@@ -5298,3 +5328,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List accounts
+      operationId: list-accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/account_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
