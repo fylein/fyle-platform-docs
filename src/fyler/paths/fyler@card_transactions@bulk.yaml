@@ -1,0 +1,53 @@
+post:
+  tags:
+    - Card Transactions
+  summary: Create or update card transactions in bulk
+  description: |
+    Create or update personal card transactions in bulk.
+  operationId: card_transactions_bulk_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/card_transaction.yaml#/card_transaction_in'
+          required:
+            - data
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: ../../components/schemas/bulk_error.yaml
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  message:
+                    type: string
+                    nullable: true
+                  data:
+                    type: object
+                    nullable: true
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
