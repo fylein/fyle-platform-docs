@@ -1770,7 +1770,6 @@ components:
         merchant:
           type: string
           maxLength: 255
-          nullable: true
           description: >
             String denoting the name of the merchant to which the Expense was
             made.
@@ -2321,6 +2320,22 @@ components:
           example: btxnwownwrng
       required:
         - id
+    card_transaction_match_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwownwrn2
+      required:
+        - id
+        - expense_ids
     card_transaction_unmatch_in:
       type: object
       properties:
@@ -3762,8 +3777,7 @@ paths:
               type: object
               properties:
                 data:
-                  a$ref: >-
-                    ../../components/schemas/card_transaction.yaml#/card_transaction_match_in
+                  $ref: '#/components/schemas/card_transaction_match_in'
               required:
                 - data
       responses:
@@ -3863,12 +3877,6 @@ paths:
                 data:
                   allOf:
                     - $ref: '#/components/schemas/suggestions_expense_in'
-                  required:
-                    - org_id
-                    - user_id
-                    - amount
-                    - spent_at
-                    - type
               required:
                 - data
       responses:
@@ -3921,11 +3929,6 @@ paths:
                 data:
                   allOf:
                     - $ref: '#/components/schemas/suggestions_in'
-                  required:
-                    - org_id
-                    - user_id
-                    - amount
-                    - spent_at
               required:
                 - data
       responses:
