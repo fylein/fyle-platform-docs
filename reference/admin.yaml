@@ -3153,6 +3153,25 @@ components:
           example: 43.8
         org_id:
           $ref: '#/components/schemas/org_id'
+    account_in:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          allOf:
+            type: string
+            description: |
+              The unique id of an user to which the object is associated.
+            readOnly: true
+            example: uswjwgnwwgo
+          readOnly: false
+        type:
+          type: string
+          enum:
+            - PERSONAL_ADVANCE_ACCOUNT
+          example: PERSONAL_ADVANCE_ACCOUNT
+        currency:
+          $ref: '#/components/schemas/currency'
 tags:
   - name: Projects
     description: |
@@ -5361,3 +5380,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      operationId: accounts_post
+      tags:
+        - Accounts
+      summary: Create an account
+      description: |
+        Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/account_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
