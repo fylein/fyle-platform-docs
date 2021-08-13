@@ -1,10 +1,10 @@
 post:
   tags:
-    - Cards
-  summary: Create or update cards in bulk
+    - Corporate Cards
+  summary: Unassign corporate card from user
   description: |
-    Create or update cards in bulk
-  operationId: cards_bulk_post
+    Unassign a corporate card from a user
+  operationId: corporate_cards_unassign
   requestBody:
     required: true
     content:
@@ -13,9 +13,7 @@ post:
           type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: ../../components/schemas/card.yaml#/card_in
+              $ref: ../../components/schemas/corporate_card.yaml#/corporate_card_unassign_in
           required:
             - data
           additionalProperties: False
@@ -23,24 +21,21 @@ post:
   responses:
     '200':
       description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/corporate_card.yaml#/corporate_card_out'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            oneOf:
-              - $ref: ../../components/schemas/bulk_error.yaml
-              - type: object
-                properties:
-                  error:
-                    type: string
-                    nullable: true
-                  message:
-                    type: string
-                    nullable: true
-                  data:
-                    type: object
-                    nullable: true
+            $ref: '../../components/schemas/400.yaml'
     '401':
       description: Unauthorized request
       content:
