@@ -3192,6 +3192,145 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
+    event_payload:
+      nullable: true
+      type: object
+      properties:
+        resource_id:
+          nullable: true
+          type: string
+          example: tx123TRew12
+        resource_name:
+          nullable: true
+          type: string
+          example: TRANSACTION
+    schedule_config:
+      nullable: false
+      oneOf:
+        - type: object
+          properties:
+            type:
+              nullable: false
+              type: string
+              example: interval
+            when:
+              nullable: false
+              type: object
+              properties:
+                weeks:
+                  nullable: true
+                  type: number
+                  example: 2
+                days:
+                  nullable: true
+                  type: number
+                  example: 12
+                hours:
+                  nullable: true
+                  type: number
+                  example: 6
+                minutes:
+                  nullable: true
+                  type: number
+                  example: 30
+                seconds:
+                  nullable: true
+                  type: number
+                  example: 30
+                end_date:
+                  nullable: true
+                  type: string
+                  example: 2020-11-11T16:29:30.965Z
+                start_date:
+                  nullable: true
+                  type: string
+                  example: 2020-11-11T16:29:30.965Z
+                timezone:
+                  nullable: true
+                  type: string
+                  example: UTC
+                jitter:
+                  nullable: true
+                  type: number
+                  example: 20
+        - type: object
+          properties:
+            type:
+              nullable: false
+              type: string
+              example: cron
+            when:
+              nullable: false
+              type: object
+              properties:
+                day:
+                  nullable: true
+                  type: string
+                  example: last
+                hour:
+                  nullable: true
+                  type: number
+                  example: 23
+                timezone:
+                  nullable: true
+                type: string
+                example: Asia/Kolkata
+        - type: object
+          properties:
+            type:
+              nullable: false
+              type: string
+              example: date
+            when:
+              nullable: false
+              type: object
+              properties:
+                run_date:
+                  nullable: true
+                  type: string
+                  example: 2021-05-12T10:16:50.410Z
+    schedule_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        apscheduler_job_id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        event_payload:
+          $ref: '#/components/schemas/event_payload'
+        config:
+          $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        event_name:
+          type: string
+          nullable: true
+          example: report.created
+    schedule_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        config:
+          $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     account_out:
       type: object
       properties:
@@ -3298,6 +3437,9 @@ tags:
     description: >
       This API gives you access to manage your organisation's Corporate Cards
       data.
+  - name: Schedules
+    description: |
+      This API let you create Scheduled jobs.
 paths:
   /admin/projects:
     get:
@@ -5400,6 +5542,57 @@ paths:
                       $ref: '#/components/schemas/user_account_summary_out'
         '401':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/schedules:
+    post:
+      tags:
+        - Schedules
+      summary: Create or update a Schedule
+      description: |
+        Create or update a Schedule.
+      operationId: schedules_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/schedule_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/schedule_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
           content:
             application/json:
               schema:
