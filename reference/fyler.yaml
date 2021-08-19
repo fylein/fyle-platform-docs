@@ -1431,51 +1431,63 @@ components:
         reason:
           type: string
           example: comment given by Approver while approving the report.
-    event_payload:
-      nullable: true
-      type: object
-      properties:
-        resource_id:
-          nullable: true
-          type: string
-          example: tx123TRew12
-        resource_name:
-          nullable: true
-          type: string
-          example: TRANSACTION
-    config:
+    schedule_config:
       nullable: false
       oneOf:
         - type: object
           properties:
             type:
-              nullable: true
+              nullable: false
               type: string
               example: interval
             when:
-              nullable: true
+              nullable: false
               type: object
               properties:
+                weeks:
+                  nullable: true
+                  type: number
+                  example: 2
+                days:
+                  nullable: true
+                  type: number
+                  example: 12
+                hours:
+                  nullable: true
+                  type: number
+                  example: 6
                 minutes:
                   nullable: true
                   type: number
-                  example: 60
+                  example: 30
+                seconds:
+                  nullable: true
+                  type: number
+                  example: 30
                 end_date:
                   nullable: true
                   type: string
-                  example: null
+                  example: 2020-11-11T16:29:30.965Z
                 start_date:
                   nullable: true
                   type: string
                   example: 2020-11-11T16:29:30.965Z
+                timezone:
+                  nullable: true
+                  type: string
+                  example: UTC
+                jitter:
+                  nullable: true
+                  type: number
+                  example: 20
         - type: object
           properties:
             type:
-              nullable: true
+              nullable: false
               type: string
               example: cron
             when:
-              nullable: true
+              nullable: false
               type: object
               properties:
                 day:
@@ -1493,11 +1505,11 @@ components:
         - type: object
           properties:
             type:
-              nullable: true
+              nullable: false
               type: string
               example: date
             when:
-              nullable: true
+              nullable: false
               type: object
               properties:
                 run_date:
@@ -1509,26 +1521,30 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-        apscheduler_job_id:
-          $ref: '#/components/schemas/id_string'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        event_payload:
-          $ref: '#/components/schemas/event_payload'
         config:
-          $ref: '#/components/schemas/config'
+          $ref: '#/components/schemas/schedule_config'
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
           $ref: '#/components/schemas/user_id'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
-        event_name:
-          type: string
+    event_payload:
+      nullable: true
+      type: object
+      properties:
+        resource_id:
           nullable: true
-          example: report.created
+          type: string
+          example: tx123TRew12
+        resource_name:
+          nullable: true
+          type: string
+          example: TRANSACTION
     schedule_in:
       type: object
       properties:
@@ -1543,7 +1559,7 @@ components:
         event_payload:
           $ref: '#/components/schemas/event_payload'
         config:
-          $ref: '#/components/schemas/config'
+          $ref: '#/components/schemas/schedule_config'
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
