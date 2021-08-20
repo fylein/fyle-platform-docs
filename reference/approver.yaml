@@ -739,6 +739,111 @@ components:
         - last_user_matched_at
         - is_settled
         - last_settled_at
+    foreign_currency:
+      type: string
+      nullable: true
+      description: >
+        The three-letter currency code following ISO standard <a
+        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: GBP
+    foreign_amount:
+      type: number
+      nullable: true
+      description: >
+        Amount value of the object, in original currency i.e the currency in
+        which the object was initially created.
+      example: 3768
+    corporate_card_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+            Add only masked card-numbers, last four digits of the card.
+          example: xxxx-4543
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+    matched_expense_out_embed:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was made.
+            This date cannot be in future.
+        merchant:
+          type: string
+          maxLength: 255
+          description: >
+            String denoting the name of the merchant to which the Expense was
+            made.
+          example: Uber
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - DRAFT
+            - PAID
+            - PAYMENT_PROCESSING
+            - APPROVER_PENDING
+            - PAYMENT_PENDING
+            - APPROVED
+          description: The state of the Expense.
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+        seq_num:
+          type: string
+          readOnly: true
+          description: |
+            This is user visible identifier for an expense.
+            This field can be used as reference in UI.
+          example: E/2020/10/T/95
+        matched_by_user_id:
+          $ref: '#/components/schemas/user_id'
+        matched_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was matched.
     string_detail:
       type: string
       description: >-
@@ -846,116 +951,10 @@ components:
           $ref: '#/components/schemas/double_precision_detail'
         merchant_address:
           $ref: '#/components/schemas/text_detail'
-    foreign_currency:
-      type: string
-      nullable: true
-      description: >
-        The three-letter currency code following ISO standard <a
-        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
-      example: GBP
-    foreign_amount:
-      type: number
-      nullable: true
-      description: >
-        Amount value of the object, in original currency i.e the currency in
-        which the object was initially created.
-      example: 3768
-    corporate_card_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: bawownwrng
-        bank_name:
-          type: string
-          description: |
-            Specifies the name of bank who issued the card.
-          example: Bank of America
-        card_number:
-          type: string
-          description: |
-            Specifies the masked number of the card.
-            Add only masked card-numbers, last four digits of the card.
-          example: xxxx-4543
-        cardholder_name:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: |
-            String denoting the card holder's name
-          example: John Cena
-    matched_expense_out_embed:
-      type: object
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: txwownwrng
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            signifies when this expense was made.
-            This date cannot be in future.
-        merchant:
-          type: string
-          maxLength: 255
-          description: >
-            String denoting the name of the merchant to which the Expense was
-            made.
-          example: Uber
-        purpose:
-          type: string
-          nullable: true
-          example: Team lunch
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-          description: The state of the Expense.
-        file_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - figwiwpjww
-        seq_num:
-          type: string
-          readOnly: true
-          description: |
-            This is user visible identifier for an expense.
-            This field can be used as reference in UI.
-          example: E/2020/10/T/95
-        matched_by_user_id:
-          $ref: '#/components/schemas/user_id'
-        matched_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            signifies when this expense was matched.
     corporate_card_transaction_match_out:
       type: object
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata'
       properties:
         id:
           allOf:
@@ -1119,6 +1118,8 @@ components:
           description: |
             Signifies when this card transaction was last settled.
           example: null
+        metadata:
+          $ref: '#/components/schemas/corporate_card_transaction_metadata'
     corporate_card_transaction_unmatch_in:
       type: object
       properties:
@@ -1139,7 +1140,6 @@ components:
       type: object
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata'
       properties:
         id:
           allOf:
@@ -1300,6 +1300,8 @@ components:
           description: |
             Signifies when this card transaction was last settled.
           example: null
+        metadata:
+          $ref: '#/components/schemas/corporate_card_transaction_metadata'
     suggestions_in:
       type: object
       properties:
@@ -1333,7 +1335,6 @@ components:
       type: object
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata'
       properties:
         id:
           allOf:
@@ -1495,6 +1496,8 @@ components:
           description: |
             Signifies when this card transaction was last settled.
           example: null
+        metadata:
+          $ref: '#/components/schemas/corporate_card_transaction_metadata'
 tags:
   - name: Reports
     description: |
