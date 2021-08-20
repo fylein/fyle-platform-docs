@@ -726,8 +726,8 @@ components:
         - assignor_user
         - is_assigned
         - last_assigned_at
-        - is_personal_transaction
-        - last_personal_transaction_at
+        - is_marked_personal
+        - last_marked_personal_at
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
@@ -786,7 +786,7 @@ components:
           $ref: '#/components/schemas/string_detail'
         flight_total_fare:
           $ref: '#/components/schemas/double_precision_detail'
-        flight_scheduled_at:
+        flight_travel_date:
           $ref: '#/components/schemas/timestamp_detail'
         flight_service_class:
           $ref: '#/components/schemas/string_detail'
@@ -846,45 +846,6 @@ components:
           $ref: '#/components/schemas/double_precision_detail'
         merchant_address:
           $ref: '#/components/schemas/text_detail'
-    corporate_card_transaction_metadata_required:
-      type: object
-      required:
-        - merchant_category_code
-        - flight_merchant_category_code
-        - flight_supplier_name
-        - flight_travel_agency_name
-        - flight_ticket_number
-        - flight_total_fare
-        - flight_scheduled_at
-        - flight_service_class
-        - flight_carrier_code
-        - flight_fare_base_code
-        - flight_trip_leg_number
-        - hotel_merchant_category_code
-        - hotel_supplier_name
-        - hotel_checked_in_at
-        - hotel_nights
-        - hotel_checked_out_at
-        - hotel_country
-        - hotel_city
-        - hotel_total_fare
-        - fleet_product_merchant_category_code
-        - fleet_product_supplier_name
-        - fleet_service_merchant_category_code
-        - fleet_service_supplier_name
-        - car_rental_merchant_category_code
-        - car_rental_supplier_name
-        - car_rental_started_at
-        - car_rental_days
-        - car_rental_ended_at
-        - general_ticket_issued_at
-        - general_ticket_number
-        - general_issuing_carrier
-        - general_travel_agency_name
-        - general_travel_agency_code
-        - general_ticket_total_fare
-        - general_ticket_total_tax
-        - merchant_address
     foreign_currency:
       type: string
       nullable: true
@@ -995,7 +956,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
         - $ref: '#/components/schemas/corporate_card_transaction_metadata'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata_required'
       properties:
         id:
           allOf:
@@ -1078,13 +1038,13 @@ components:
           nullable: true
           description: |
             Signifies when this card transaction was last assigned.
-        is_personal_transaction:
+        is_marked_personal:
           type: boolean
           example: false
           description: >
             Determines whether this card transaction is marked as personal
             transaction made on the corporate card.
-        last_personal_transaction_at:
+        last_marked_personal_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
@@ -1114,9 +1074,9 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
-          example: null
+          example: []
         auto_matched_expenses:
-          example: null
+          example: []
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -1130,7 +1090,8 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
-          example: txwownwrng
+          example:
+            - txwownwrng
         user_matched_expenses:
           type: array
           items:
@@ -1179,7 +1140,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
         - $ref: '#/components/schemas/corporate_card_transaction_metadata'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata_required'
       properties:
         id:
           allOf:
@@ -1262,13 +1222,13 @@ components:
           nullable: true
           description: |
             Signifies when this card transaction was last assigned.
-        is_personal_transaction:
+        is_marked_personal:
           type: boolean
           example: false
           description: >
             Determines whether this card transaction is marked as personal
             transaction made on the corporate card.
-        last_personal_transaction_at:
+        last_marked_personal_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
@@ -1298,9 +1258,9 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
-          example: null
+          example: []
         auto_matched_expenses:
-          example: null
+          example: []
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -1314,9 +1274,9 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
-          example: null
+          example: []
         user_matched_expenses:
-          example: null
+          example: []
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -1374,7 +1334,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/corporate_card_transaction_required_fields'
         - $ref: '#/components/schemas/corporate_card_transaction_metadata'
-        - $ref: '#/components/schemas/corporate_card_transaction_metadata_required'
       properties:
         id:
           allOf:
@@ -1457,13 +1416,13 @@ components:
           nullable: true
           description: |
             Signifies when this card transaction was last assigned.
-        is_personal_transaction:
+        is_marked_personal:
           type: boolean
           example: false
           description: >
             Determines whether this card transaction is marked as personal
             transaction made on the corporate card.
-        last_personal_transaction_at:
+        last_marked_personal_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
@@ -1493,9 +1452,9 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
-          example: null
+          example: []
         auto_matched_expenses:
-          example: null
+          example: []
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -1509,9 +1468,9 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
-          example: null
+          example: []
         user_matched_expenses:
-          example: null
+          example: []
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
