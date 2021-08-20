@@ -1,7 +1,6 @@
 corporate_card_transaction_metadata:
   type: object
   properties:
-    # metadata
     merchant_category_code:
       $ref: './additional_detail.yaml#/string_detail'
     flight_merchant_category_code:
@@ -14,7 +13,7 @@ corporate_card_transaction_metadata:
       $ref: './additional_detail.yaml#/string_detail'
     flight_total_fare:
       $ref: './additional_detail.yaml#/double_precision_detail'
-    flight_scheduled_at:
+    flight_travel_date:
       $ref: './additional_detail.yaml#/timestamp_detail'
     flight_service_class:
       $ref: './additional_detail.yaml#/string_detail'
@@ -75,46 +74,6 @@ corporate_card_transaction_metadata:
     merchant_address:
       $ref: './additional_detail.yaml#/text_detail'
 
-corporate_card_transaction_metadata_required:
-  type: object
-  required:
-    - merchant_category_code
-    - flight_merchant_category_code
-    - flight_supplier_name
-    - flight_travel_agency_name
-    - flight_ticket_number
-    - flight_total_fare
-    - flight_scheduled_at
-    - flight_service_class
-    - flight_carrier_code
-    - flight_fare_base_code
-    - flight_trip_leg_number
-    - hotel_merchant_category_code
-    - hotel_supplier_name
-    - hotel_checked_in_at
-    - hotel_nights
-    - hotel_checked_out_at
-    - hotel_country
-    - hotel_city
-    - hotel_total_fare
-    - fleet_product_merchant_category_code
-    - fleet_product_supplier_name
-    - fleet_service_merchant_category_code
-    - fleet_service_supplier_name
-    - car_rental_merchant_category_code
-    - car_rental_supplier_name
-    - car_rental_started_at
-    - car_rental_days
-    - car_rental_ended_at
-    - general_ticket_issued_at
-    - general_ticket_number
-    - general_issuing_carrier
-    - general_travel_agency_name
-    - general_travel_agency_code
-    - general_ticket_total_fare
-    - general_ticket_total_tax
-    - merchant_address
-
 corporate_card_transaction_required_fields:
   type: object
   required:
@@ -158,8 +117,6 @@ corporate_card_transaction_list_out:
   type: object
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -315,11 +272,11 @@ corporate_card_transaction_list_out:
       nullable: true
       description: |
         Signifies when this card transaction was last settled.
+    metadata:
+      $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
 
 corporate_card_transaction_in:
   type: object
-  allOf:
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
   properties:
     id:
       allOf:
@@ -368,6 +325,8 @@ corporate_card_transaction_in:
       allOf:
         - $ref: './fields.yaml#/id_string'
       example: bawownwrng
+    metadata:
+      $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
   required:
     - amount
     - currency
@@ -379,7 +338,6 @@ corporate_card_transaction_post_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -498,9 +456,9 @@ corporate_card_transaction_post_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -563,7 +521,6 @@ corporate_card_transaction_assign_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -676,9 +633,9 @@ corporate_card_transaction_assign_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -741,7 +698,6 @@ corporate_card_transaction_unassign_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -859,9 +815,9 @@ corporate_card_transaction_unassign_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -925,7 +881,6 @@ corporate_card_transaction_match_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1038,9 +993,9 @@ corporate_card_transaction_match_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1054,7 +1009,8 @@ corporate_card_transaction_match_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are matched by the user
-      example: txwownwrng
+      example:
+        - txwownwrng
     user_matched_expenses:
       type: array
       items:
@@ -1105,7 +1061,6 @@ corporate_card_transaction_unmatch_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1218,9 +1173,9 @@ corporate_card_transaction_unmatch_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1276,7 +1231,6 @@ corporate_card_transaction_mark_personal_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1388,9 +1342,9 @@ corporate_card_transaction_mark_personal_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1437,7 +1391,6 @@ corporate_card_transaction_unmark_personal_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1549,9 +1502,9 @@ corporate_card_transaction_unmark_personal_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1598,7 +1551,6 @@ corporate_card_transaction_ignore_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1710,9 +1662,9 @@ corporate_card_transaction_ignore_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1759,7 +1711,6 @@ corporate_card_transaction_undo_ignore_out:
   allOf:
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_required_fields'
     - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata'
-    - $ref: './corporate_card_transaction.yaml#/corporate_card_transaction_metadata_required'
   properties:
     id:
       allOf:
@@ -1871,9 +1822,9 @@ corporate_card_transaction_undo_ignore_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the expense ids which are auto-matically matched by the system
-      example: null
+      example: []
     auto_matched_expenses:
-      example: null
+      example: []
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
