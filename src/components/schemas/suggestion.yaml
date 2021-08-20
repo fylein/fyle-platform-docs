@@ -1,0 +1,46 @@
+suggestions_in:
+  type: object
+  properties:
+    org_id:
+      allOf:
+        - $ref: './fields.yaml#/org_id'
+      readOnly: false
+      example: orwruogwnngg
+    user_id:
+      allOf:
+        - $ref: './fields.yaml#/user_id'
+      readOnly: false
+      example: uswjwgnwwgo
+    amount:
+      $ref: './fields.yaml#/amount'
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        signifies when this card transaction was made.
+        This date cannot be in future.
+  required:
+    - org_id
+    - user_id
+    - amount
+    - spent_at
+
+suggestions_card_transaction_in:
+  allOf:
+    - $ref: '#/suggestions_in'
+
+suggestions_expense_in:
+  allOf:
+    - $ref: '#/suggestions_in'
+    - type: object
+      properties:
+        type:
+          type: string
+          description: |
+            This helps in getting expenses for personal/corporate card transactions
+          enum:
+            - PERSONAL_CARD
+            - CORPORATE_CARD
+          example: CORPORATE_CARD
+      required:
+        - type
