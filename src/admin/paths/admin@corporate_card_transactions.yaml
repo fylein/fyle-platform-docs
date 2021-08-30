@@ -1,22 +1,16 @@
 get:
   tags:
-    - Advances
-  summary: List advance requests
-  operationId: list-advance-requests
+    - Corporate Card Transactions
+  summary: List corporate card transactions
+  description: |
+    List the corporate card transactions.
+  operationId: corporate_card_transactions_list
   parameters:
     - $ref: '../../components/parameters/created_at.yaml'
     - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/order.yaml'
     - $ref: '../../components/parameters/offset.yaml'
     - $ref: '../../components/parameters/limit.yaml'
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
   responses:
     '200':
       description: OK
@@ -24,7 +18,11 @@ get:
         application/json:
           schema:
             type: object
-            properties:
+            required:
+              - count
+              - offset
+              - data
+            properties: 
               count:
                 $ref: '../../components/schemas/count.yaml'
               offset:
@@ -32,38 +30,31 @@ get:
               data:
                 type: array
                 items:
-                  $ref: '../../components/schemas/advance_request.yaml#/advance_request_out'
+                  $ref: '../../components/schemas/corporate_card_transaction.yaml#/corporate_card_transaction_list_out'
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/401.yaml'
-    '403':
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/403.yaml'
 post:
   tags:
-    - Advances
-  summary: Create or update an advance requests
+    - Corporate Card Transactions
+  summary: Create or update corporate card transaction
   description: |
-    Create or update an advance requests.
-  operationId: advance_requests_post
+    Create or update an corporate card transactions.
+  operationId: corporate_card_transactions_post
   requestBody:
     required: true
     content:
       application/json:
         schema:
           type: object
-          additionalProperties: False
-          required:
-            - data
           properties:
             data:
-              $ref: '../../components/schemas/advance_request.yaml#/advance_request_in'
+              $ref: '../../components/schemas/corporate_card_transaction.yaml#/corporate_card_transaction_in'
+          required:
+            - data
   responses:
     '200':
       description: OK
@@ -71,12 +62,11 @@ post:
         application/json:
           schema:
             type: object
-            additionalProperties: False
-            required:
-              - data
             properties:
               data:
-                $ref: '../../components/schemas/advance_request.yaml#/advance_request_out'
+                $ref: '../../components/schemas/corporate_card_transaction.yaml#/corporate_card_transaction_post_out'
+            required:
+              - data
     '400':
       description: Bad request
       content:

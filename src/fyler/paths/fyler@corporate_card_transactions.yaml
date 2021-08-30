@@ -1,22 +1,16 @@
 get:
   tags:
-    - Advances
-  summary: List advance requests
-  operationId: list-advance-requests
+    - Corporate Card Transactions
+  summary: List corporate card transactions
+  description: |
+    List the corporate card transactions.
+  operationId: corporate_card_transactions_list
   parameters:
     - $ref: '../../components/parameters/created_at.yaml'
     - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/order.yaml'
     - $ref: '../../components/parameters/offset.yaml'
     - $ref: '../../components/parameters/limit.yaml'
-    - in: query
-      name: order
-      description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `updated_at.desc`.<br>
-        Supported columns are `updated_at`, `id`.
-      schema:
-        type: string
-        example: 'updated_at.desc,id'
   responses:
     '200':
       description: OK
@@ -24,7 +18,11 @@ get:
         application/json:
           schema:
             type: object
-            properties:
+            required:
+              - count
+              - offset
+              - data
+            properties: 
               count:
                 $ref: '../../components/schemas/count.yaml'
               offset:
@@ -32,16 +30,10 @@ get:
               data:
                 type: array
                 items:
-                  $ref: '../../components/schemas/advance_request.yaml#/advance_request_out'
+                  $ref: '../../components/schemas/corporate_card_transaction.yaml#/corporate_card_transaction_list_out'
     '401':
-      description: Unauthorised request
+      description: Unauthorized request
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/401.yaml'
-    '403':
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/403.yaml'
