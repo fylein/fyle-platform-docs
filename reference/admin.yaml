@@ -2853,6 +2853,14 @@ components:
           description: |
             String denoting the card holder's name
           example: John Cena
+    test_embed:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+          nullable: true
     corporate_card_transaction_list_out:
       type: object
       properties:
@@ -2985,12 +2993,36 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
+        auto_matched_expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: |
+            Holds the expense ids which are auto-matically matched by the system
+          example:
+            - txwownwrng
+        auto_matched_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/test_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
           description: |
             signifies when this expense was auto matched.
+        user_matched_expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: |
+            Holds the expense ids which are matched by the user
+          example:
+            - txwownwrng
+        user_matched_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/test_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3035,7 +3067,11 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
+        - auto_matched_expense_ids
+        - auto_matched_expenses
         - last_auto_matched_at
+        - user_matched_expense_ids
+        - user_matched_expenses
         - last_user_matched_at
         - is_settled
         - last_settled_at
