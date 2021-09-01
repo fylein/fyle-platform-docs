@@ -1946,6 +1946,24 @@ components:
         - last_synced_at
         - last_assigned_at
         - assignor_user_id
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     corporate_card_out_embed:
       type: object
       additionalProperties: false
@@ -1974,6 +1992,7 @@ components:
           example: John Cena
     matched_expense_out_embed:
       type: object
+      nullable: true
       properties:
         id:
           allOf:
@@ -1986,7 +2005,6 @@ components:
         spent_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
           description: |
             signifies when this expense was made.
             This date cannot be in future.
@@ -2059,6 +2077,7 @@ components:
         href="https://tools.ietf.org/html/rfc3339#section-5.6">RFC 3339, section
         5.6 compliant timestamp.</a>
       example: '2020-07-03T18:19:31.193Z'
+      nullable: true
     integer_detail:
       type: integer
       description: Additional integer details of the card transaction.
@@ -2158,9 +2177,14 @@ components:
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
-          $ref: '#/components/schemas/user_id'
+          type: string
+          description: |
+            The unique id of an user to whom the card transaction is assigned.
+          readOnly: true
+          nullable: true
+          example: null
         user:
-          $ref: '#/components/schemas/user_out_embed'
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -2170,6 +2194,7 @@ components:
         currency:
           $ref: '#/components/schemas/currency'
         spent_at:
+          nullable: false
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           description: |
@@ -2215,9 +2240,14 @@ components:
         corporate_card:
           $ref: '#/components/schemas/corporate_card_out_embed'
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: set7oisw24gju
         assignor_user_id:
           type: string
@@ -2226,7 +2256,7 @@ components:
           nullable: true
           example: uswjwgnwwgo
         assignor_user:
-          $ref: '#/components/schemas/user_out_embed'
+          $ref: '#/components/schemas/user_out_embed_nullable'
         is_assigned:
           type: boolean
           description: |

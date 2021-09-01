@@ -87,9 +87,14 @@ corporate_card_transaction_list_out:
     org_id:
       $ref: './fields.yaml#/org_id'
     user_id:
-      $ref: './fields.yaml#/user_id'
+      type: string
+      description: |
+        The unique id of an user to whom the card transaction is assigned.
+      readOnly: true
+      nullable: true
+      example: null
     user:
-      $ref: './user.yaml#/user_out_embed'
+      $ref: './user.yaml#/user_out_embed_nullable'
     created_at:
       $ref: './fields.yaml#/created_at'
     updated_at:
@@ -99,6 +104,7 @@ corporate_card_transaction_list_out:
     currency:
       $ref: './fields.yaml#/currency'
     spent_at:
+      nullable: false
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
       description: |
@@ -139,9 +145,12 @@ corporate_card_transaction_list_out:
     corporate_card:
       $ref: './corporate_card.yaml#/corporate_card_out_embed'
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: set7oisw24gju
     assignor_user_id:
       type: string
@@ -150,7 +159,7 @@ corporate_card_transaction_list_out:
       nullable: true
       example: uswjwgnwwgo
     assignor_user:
-      $ref: './user.yaml#/user_out_embed'
+      $ref: './user.yaml#/user_out_embed_nullable'
     is_assigned:
       type: boolean
       description: |
@@ -345,8 +354,12 @@ corporate_card_transaction_post_out:
       description: |
         The unique id of an user to which the object is associated.
       readOnly: true
+      nullable: true
       example: null
     user:
+      allOf:
+          - $ref:  './user.yaml#/user_out_embed'
+      nullable: true
       example: null
     created_at:
       $ref: './fields.yaml#/created_at'
@@ -403,6 +416,9 @@ corporate_card_transaction_post_out:
       nullable: true
       example: null
     assignor_user:
+      allOf:
+          - $ref:  './user.yaml#/user_out_embed'
+      nullable: true
       example: null
     is_assigned:
       type: boolean
