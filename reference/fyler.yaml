@@ -3903,6 +3903,35 @@ components:
         - is_settled
         - last_settled_at
         - metadata
+    tax_group_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: tgwfjbgqo32
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the tax_group.
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 18
+          description: percentage of tax levied.
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        code:
+          $ref: '#/components/schemas/code'
 tags:
   - name: My Profile
     description: |
@@ -3931,6 +3960,9 @@ tags:
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
+  - name: Tax Groups
+    description: |
+      These APIs gives you access to manage your organisation's Tax Groups data.
   - name: Reports
     description: |
       This API gives you access to your Expense Reports data.
@@ -5374,3 +5406,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/tax_groups:
+    get:
+      tags:
+        - Tax Groups
+      summary: List tax groups
+      operationId: tax_groups_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/tax_group_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
