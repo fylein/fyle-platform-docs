@@ -1433,17 +1433,27 @@ components:
           example: comment given by Approver while approving the report.
     schedule_config:
       nullable: false
+      type: object
+      required:
+        - tyoe
       discriminator:
         propertyName: type
-      oneOf:
+      properties:
+        type:
+          nullable: false
+          type: string
+          enum:
+            - interval
+            - cron
+            - date
+          example: interval
+    schedule_config_interval:
+      allOf:
+        - $ref: '#/components/schemas/schedule_config'
         - type: object
           required:
-            - type
+            - when
           properties:
-            type:
-              nullable: false
-              type: string
-              example: interval
             when:
               nullable: false
               type: object
@@ -1484,14 +1494,13 @@ components:
                   nullable: true
                   type: number
                   example: 20
+    schedule_config_cron:
+      allOf:
+        - $ref: '#/components/schemas/schedule_config'
         - type: object
           required:
-            - type
+            - when
           properties:
-            type:
-              nullable: false
-              type: string
-              example: cron
             when:
               nullable: false
               type: object
@@ -1508,14 +1517,13 @@ components:
                   nullable: true
                   type: string
                   example: Asia/Kolkata
+    schedule_config_date:
+      allOf:
+        - $ref: '#/components/schemas/schedule_config'
         - type: object
           required:
-            - type
+            - when
           properties:
-            type:
-              nullable: false
-              type: string
-              example: date
             when:
               nullable: false
               type: object
@@ -1534,7 +1542,16 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
         config:
-          $ref: '#/components/schemas/schedule_config'
+          oneOf:
+            - $ref: '#/components/schemas/schedule_config_interval'
+            - $ref: '#/components/schemas/schedule_config_cron'
+            - $ref: '#/components/schemas/schedule_config_date'
+          discriminator:
+            propertyName: type
+            mapping:
+              interval: '#/components/schemas/schedule_config_interval'
+              cron: '#/components/schemas/schedule_config_cron'
+              date: '#/components/schemas/schedule_config_date'
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
@@ -1565,7 +1582,16 @@ components:
         event_payload:
           $ref: '#/components/schemas/event_payload'
         config:
-          $ref: '#/components/schemas/schedule_config'
+          oneOf:
+            - $ref: '#/components/schemas/schedule_config_interval'
+            - $ref: '#/components/schemas/schedule_config_cron'
+            - $ref: '#/components/schemas/schedule_config_date'
+          discriminator:
+            propertyName: type
+            mapping:
+              interval: '#/components/schemas/schedule_config_interval'
+              cron: '#/components/schemas/schedule_config_cron'
+              date: '#/components/schemas/schedule_config_date'
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
