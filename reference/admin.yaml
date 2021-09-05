@@ -867,6 +867,13 @@ components:
           example: Associate
         code:
           $ref: '#/components/schemas/code'
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
     email:
       type: string
       maxLength: 127
@@ -876,234 +883,6 @@ components:
 
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
-    name_nullable:
-      type: string
-      maxLength: 255
-      nullable: true
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
-      example: foo123
-    timestamptz_pst:
-      type: string
-      nullable: true
-      example: '2020-06-01T01:18:19.292-08:00'
-    location:
-      type: object
-      nullable: true
-      properties:
-        city:
-          type: string
-          nullable: true
-          example: London
-        state:
-          type: string
-          nullable: true
-          example: London
-        display_name:
-          type: string
-          nullable: true
-        country:
-          type: string
-          nullable: true
-          example: United Kingdom
-        formatted_address:
-          type: string
-          nullable: true
-          example: '221 Baker St, Marylebone, London, United Kingdom'
-        latitude:
-          type: number
-          nullable: true
-          example: 12.971599
-        longitude:
-          type: number
-          nullable: true
-          example: 77.594566
-    custom_field:
-      type: object
-      description: |
-        Custom field
-      properties:
-        name:
-          type: string
-          example: cf1
-        value:
-          nullable: true
-          oneOf:
-            - type: string
-              example: string1
-            - type: boolean
-              example: true
-            - type: integer
-              example: 123
-            - $ref: '#/components/schemas/location'
-            - type: array
-              items:
-                type: string
-              example:
-                - v1
-                - v2
-    custom_fields:
-      type: array
-      description: |
-        Custom fields
-      items:
-        $ref: '#/components/schemas/custom_field'
-    invitation_in:
-      type: object
-      additionalProperties: false
-      required:
-        - user_email
-        - user_full_name
-        - business_unit
-        - code
-        - department_name
-        - sub_department
-        - is_enabled
-        - joined_at
-        - level
-        - location
-        - title
-        - approver_emails
-        - project_names
-        - cost_center_names
-        - per_diem_rate_names
-        - vehicle_types
-        - custom_fields
-      properties:
-        user_email:
-          $ref: '#/components/schemas/email'
-        user_full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
-        business_unit:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: Finance ops
-        code:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
-        department_name:
-          $ref: '#/components/schemas/name_nullable'
-        sub_department:
-          $ref: '#/components/schemas/name_nullable'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        joined_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        level:
-          $ref: '#/components/schemas/name_nullable'
-        location:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: Bangalore Ofc
-        title:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: Branch Manager
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-        approver_emails:
-          type: array
-          maxLength: 3
-          nullable: true
-          items:
-            $ref: '#/components/schemas/email'
-          example:
-            - approver1@example.com
-            - approver2@example.com
-          description: |
-            List of emails of employees that are approvers for this employee.
-        project_names:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/name'
-          example:
-            - Formula 1
-            - Dream work
-          description: >
-            List of project names that this employee is allowed to access. If
-            null, then there are no restrictions
-        cost_center_names:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/name'
-          example:
-            - Sales
-          description: >
-            List of cost center names that this employee is allowed to access.
-            If null, then there are no restrictions
-        per_diem_rate_names:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/name'
-          example:
-            - TA - USD
-          description: >
-            List of per diem rate names that this employee is allowed to access.
-            If null, then there are no restrictions
-        vehicle_types:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/name'
-          example:
-            - two_wheeler
-            - four_wheeler_1
-          description: >
-            List of mileage rate's vehicle types that this employee is allowed
-            to access. If null, then there are no restrictions
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                type: string
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     user_out_embed:
       type: object
       additionalProperties: false
@@ -1179,6 +958,67 @@ components:
       description: |
         Roles are assigned by Admin.
       example: FYLER
+    location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        display_name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: true
+          example: '221 Baker St, Marylebone, London, United Kingdom'
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    custom_field:
+      type: object
+      description: |
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
     project_out_embed:
       type: object
       nullable: true
@@ -1405,6 +1245,166 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are approvers for this employee.
+    name_nullable:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: >
+        This represents the name of the resource. This should be unique in an
+        organization
+      example: foo123
+    timestamptz_pst:
+      type: string
+      nullable: true
+      example: '2020-06-01T01:18:19.292-08:00'
+    invitation_in:
+      type: object
+      additionalProperties: false
+      required:
+        - user_email
+        - user_full_name
+        - business_unit
+        - code
+        - department_name
+        - sub_department
+        - is_enabled
+        - joined_at
+        - level
+        - location
+        - title
+        - approver_emails
+        - project_names
+        - cost_center_names
+        - per_diem_rate_names
+        - vehicle_types
+        - custom_fields
+      properties:
+        user_email:
+          $ref: '#/components/schemas/email'
+        user_full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department_name:
+          $ref: '#/components/schemas/name_nullable'
+        sub_department:
+          $ref: '#/components/schemas/name_nullable'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        joined_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        level:
+          $ref: '#/components/schemas/name_nullable'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        approver_emails:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            $ref: '#/components/schemas/email'
+          example:
+            - approver1@example.com
+            - approver2@example.com
+          description: |
+            List of emails of employees that are approvers for this employee.
+        project_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - Formula 1
+            - Dream work
+          description: >
+            List of project names that this employee is allowed to access. If
+            null, then there are no restrictions
+        cost_center_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - Sales
+          description: >
+            List of cost center names that this employee is allowed to access.
+            If null, then there are no restrictions
+        per_diem_rate_names:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - TA - USD
+          description: >
+            List of per diem rate names that this employee is allowed to access.
+            If null, then there are no restrictions
+        vehicle_types:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example:
+            - two_wheeler
+            - four_wheeler_1
+          description: >
+            List of mileage rate's vehicle types that this employee is allowed
+            to access. If null, then there are no restrictions
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                type: string
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     file_out:
       type: object
       properties:
@@ -6679,7 +6679,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/invitations/bulk:
+  /admin/employees:
+    get:
+      tags:
+        - Employees
+      summary: List employees
+      operationId: employees_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                  - offset
+                  - data
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/invite/bulk:
     post:
       tags:
         - Employees
@@ -6734,46 +6774,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/employees:
-    get:
-      tags:
-        - Employees
-      summary: List employees
-      operationId: employees_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - count
-                  - offset
-                  - data
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/employee_out'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
   /admin/files:
     get:
       tags:
