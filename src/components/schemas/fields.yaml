@@ -246,17 +246,28 @@ location:
 
 schedule_config:
   nullable: false
+  type: object
+  required:
+    - tyoe
   discriminator:
     propertyName: type
-  oneOf:
+  properties:
+    type:
+      nullable: false
+      type: string
+      enum:
+        - interval
+        - cron
+        - date
+      example: interval
+
+schedule_config_interval:
+  allOf:
+    - $ref: '#/schedule_config'
     - type: object
       required:
-        - type
+        - when
       properties:
-        type:
-          nullable: false
-          type: string
-          example: interval
         when:
           nullable: false
           type: object
@@ -297,14 +308,14 @@ schedule_config:
               nullable: true
               type: number
               example: 20
+
+schedule_config_cron:
+  allOf:
+    - $ref: '#/schedule_config'
     - type: object
       required:
-        - type
+        - when
       properties:
-        type:
-          nullable: false
-          type: string
-          example: cron
         when:
           nullable: false
           type: object
@@ -321,14 +332,14 @@ schedule_config:
               nullable: true
               type: string
               example: Asia/Kolkata
+
+schedule_config_date:
+  allOf:
+    - $ref: '#/schedule_config'
     - type: object
       required:
-        - type
+        - when
       properties:
-        type:
-          nullable: false
-          type: string
-          example: date
         when:
           nullable: false
           type: object
