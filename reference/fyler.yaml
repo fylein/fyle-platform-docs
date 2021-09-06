@@ -1568,6 +1568,22 @@ components:
           type: string
           nullable: true
           example: report.created
+    action_add_comment_in:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: |
+            The expense id for which comment has to be created.
+          example: txhfw8d920k
+        comment:
+          type: string
+          maxLength: 255
+          description: Comment made on the expense.
+          example: This is a food expense
+      required:
+        - expense_id
+        - comment
     advance_out_embed:
       type: object
       nullable: true
@@ -4519,6 +4535,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/expenses/add_comment:
+    post:
+      tags:
+        - Expenses
+      summary: Add comment on an expense
+      description: |
+        Add comment on a specific expense.
+      operationId: add-expense-comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/action_add_comment_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/reports:
     get:
       operationId: reports_list
