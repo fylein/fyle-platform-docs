@@ -5720,18 +5720,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
-    event_payload:
-      nullable: true
-      type: object
-      properties:
-        resource_id:
-          nullable: true
-          type: string
-          example: tx123TRew12
-        resource_name:
-          nullable: true
-          type: string
-          example: TRANSACTION
     schedule_config:
       type: object
       nullable: false
@@ -5823,6 +5811,35 @@ components:
                   nullable: true
                   type: string
                   example: '2021-05-12T10:16:50.410Z'
+    schedule_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        config:
+          $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+    event_payload:
+      nullable: true
+      type: object
+      properties:
+        resource_id:
+          nullable: true
+          type: string
+          example: tx123TRew12
+        resource_name:
+          nullable: true
+          type: string
+          example: TRANSACTION
     schedule_in:
       type: object
       properties:
@@ -5846,23 +5863,6 @@ components:
           type: string
           nullable: true
           example: report.created
-    schedule_out:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        config:
-          $ref: '#/components/schemas/schedule_config'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
     account_out:
       type: object
       properties:
@@ -9168,6 +9168,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Schedules
+      summary: List Schedule
+      operationId: get-schedule
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/schedule_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/accounts:
     get:
       tags:
