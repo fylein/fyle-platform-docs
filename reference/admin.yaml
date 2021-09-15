@@ -5720,49 +5720,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
-    event_payload:
-      nullable: true
-      type: object
-      properties:
-        resource_id:
-          nullable: true
-          type: string
-          example: tx123TRew12
-        resource_name:
-          nullable: true
-          type: string
-          example: TRANSACTION
     schedule_config:
+      type: object
       nullable: false
-      oneOf:
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: interval
-            when:
-              nullable: false
-              type: object
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: interval
+          enum:
+            - interval
+            - date
+            - cron
+        when:
+          nullable: false
+          oneOf:
+            - type: object
+              additionalProperties: false
               properties:
                 weeks:
-                  nullable: true
                   type: number
                   example: 2
                 days:
-                  nullable: true
                   type: number
                   example: 12
                 hours:
-                  nullable: true
                   type: number
                   example: 6
                 minutes:
-                  nullable: true
                   type: number
                   example: 30
                 seconds:
-                  nullable: true
                   type: number
                   example: 30
                 end_date:
@@ -5781,65 +5769,26 @@ components:
                   nullable: true
                   type: number
                   example: 20
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: cron
-            when:
-              nullable: false
-              type: object
+            - type: object
+              additionalProperties: false
               properties:
                 day:
-                  nullable: true
                   type: string
                   example: last
                 hour:
-                  nullable: true
                   type: number
                   example: 23
                 timezone:
                   nullable: true
                   type: string
                   example: Asia/Kolkata
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: date
-            when:
-              nullable: false
-              type: object
+            - type: object
+              additionalProperties: false
               properties:
                 run_date:
                   nullable: true
                   type: string
                   example: '2021-05-12T10:16:50.410Z'
-    schedule_in:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        event_payload:
-          $ref: '#/components/schemas/event_payload'
-        config:
-          $ref: '#/components/schemas/schedule_config'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        event_name:
-          type: string
-          nullable: true
-          example: report.created
     schedule_out:
       type: object
       properties:
@@ -5854,9 +5803,41 @@ components:
         org_id:
           $ref: '#/components/schemas/org_id'
         user_id:
-          $ref: '#/components/schemas/user_id'
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          readOnly: true
+          example: uswjwgnwwgo
+          nullable: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+    event_payload:
+      nullable: true
+      type: object
+      properties:
+        resource_id:
+          nullable: true
+          type: string
+          example: tx123TRew12
+        resource_name:
+          nullable: true
+          type: string
+          example: TRANSACTION
+    schedule_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        event_payload:
+          $ref: '#/components/schemas/event_payload'
+        config:
+          $ref: '#/components/schemas/schedule_config'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        event_name:
+          type: string
+          nullable: true
+          example: report.created
     account_out:
       type: object
       properties:
@@ -9165,6 +9146,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Schedules
+      summary: List Schedule
+      operationId: get-schedule
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/schedule_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/accounts:
     get:
       tags:
