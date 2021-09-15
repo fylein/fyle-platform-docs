@@ -5733,17 +5733,32 @@ components:
           type: string
           example: TRANSACTION
     schedule_config:
+      type: object
       nullable: false
-      oneOf:
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: interval
-            when:
-              nullable: false
-              type: object
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: interval
+          enum:
+            - interval
+            - date
+            - cron
+        when:
+          nullable: false
+          oneOf:
+            - type: object
+              required:
+                - weeks
+                - days
+                - hours
+                - minutes
+                - seconds
+                - end_date
+                - start_date
+                - timezone
+                - jitter
+              additionalProperties: false
               properties:
                 weeks:
                   nullable: true
@@ -5781,15 +5796,12 @@ components:
                   nullable: true
                   type: number
                   example: 20
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: cron
-            when:
-              nullable: false
-              type: object
+            - type: object
+              required:
+                - day
+                - hour
+                - timezone
+              additionalProperties: false
               properties:
                 day:
                   nullable: true
@@ -5803,15 +5815,10 @@ components:
                   nullable: true
                   type: string
                   example: Asia/Kolkata
-        - type: object
-          properties:
-            type:
-              nullable: false
-              type: string
-              example: date
-            when:
-              nullable: false
-              type: object
+            - type: object
+              additionalProperties: false
+              required:
+                - run_date
               properties:
                 run_date:
                   nullable: true
