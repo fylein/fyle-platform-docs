@@ -439,6 +439,39 @@ components:
           $ref: '#/components/schemas/is_enabled'
         code:
           $ref: '#/components/schemas/code'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    currency:
+      type: string
+      description: >
+        The three-letter currency code following ISO standard <a
+        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: '([A-Z]{3})'
+    org_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
+        domain:
+          type: string
+          maxLength: 255
+          description: >-
+            This field specifies the domain with which the organisation is
+            registered.
+          example: example.com
+        currency:
+          $ref: '#/components/schemas/currency'
     role:
       type: string
       enum:
@@ -457,6 +490,20 @@ components:
       description: |
         Roles are assigned by Admin.
       example: FYLER
+    my_profile_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        org:
+          $ref: '#/components/schemas/org_out_embed'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
     id_string:
       type: string
       maxLength: 15
@@ -470,13 +517,6 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
-    currency:
-      type: string
-      description: >
-        The three-letter currency code following ISO standard <a
-        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
-      example: USD
-      pattern: '([A-Z]{3})'
     account_out:
       type: object
       properties:
@@ -540,12 +580,6 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     email:
       type: string
       maxLength: 127
@@ -4423,21 +4457,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    type: object
-                    properties:
-                      user_id:
-                        type: string
-                        maxLength: 255
-                        description: |
-                          User Id of the fyler
-                        example: usRboARkbAB
-                      org_id:
-                        $ref: '#/components/schemas/org_id'
-                      roles:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/role'
-                    additionalProperties: false
+                    $ref: '#/components/schemas/my_profile_out'
         '401':
           description: Unauthorised request
           content:
