@@ -352,15 +352,12 @@ corporate_card_transaction_post_out:
     user_id:
       type: string
       description: |
-        The unique id of an user to which the object is associated.
+        The unique id of an user to whom the card transaction is assigned.
       readOnly: true
       nullable: true
       example: null
     user:
-      allOf:
-          - $ref:  './user.yaml#/user_out_embed'
-      nullable: true
-      example: null
+      $ref: './user.yaml#/user_out_embed_nullable'
     created_at:
       $ref: './fields.yaml#/created_at'
     updated_at:
@@ -375,6 +372,7 @@ corporate_card_transaction_post_out:
       description: |
         signifies when this card transaction was made.
         This date cannot be in future.
+      nullable: false
     description:
       type: string
       nullable: true
@@ -416,10 +414,7 @@ corporate_card_transaction_post_out:
       nullable: true
       example: null
     assignor_user:
-      allOf:
-          - $ref:  './user.yaml#/user_out_embed'
-      nullable: true
-      example: null
+      $ref: './user.yaml#/user_out_embed_nullable'
     is_assigned:
       type: boolean
       description: |
@@ -469,7 +464,9 @@ corporate_card_transaction_post_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -485,7 +482,9 @@ corporate_card_transaction_post_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -499,9 +498,12 @@ corporate_card_transaction_post_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -682,7 +684,9 @@ corporate_card_transaction_assign_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -698,7 +702,9 @@ corporate_card_transaction_assign_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -712,9 +718,12 @@ corporate_card_transaction_assign_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -763,22 +772,6 @@ corporate_card_transaction_assign_out:
     - last_settled_at
     - metadata
 
-corporate_card_transaction_unassign_in:
-  type: object 
-  properties:
-    id:
-      allOf:
-        - $ref: './fields.yaml#/id_string'
-      example: btxnwownwrng
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to whom the card transaction is assigned.
-      example: usge49ielgel
-  required:
-    - id
-    - user_id
-
 corporate_card_transaction_unassign_out:
   type: object
   properties:
@@ -793,9 +786,10 @@ corporate_card_transaction_unassign_out:
       description: |
         The unique id of an user to which the object is associated.
       readOnly: true
+      nullable: true
       example: null
     user:
-      example: null
+      $ref: './user.yaml#/user_out_embed_nullable'
     created_at:
       $ref: './fields.yaml#/created_at'
     updated_at:
@@ -851,7 +845,7 @@ corporate_card_transaction_unassign_out:
       nullable: true
       example: null
     assignor_user:
-      example: null
+      $ref: './user.yaml#/user_out_embed_nullable'
     is_assigned:
       type: boolean
       description: |
@@ -900,7 +894,9 @@ corporate_card_transaction_unassign_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -916,7 +912,9 @@ corporate_card_transaction_unassign_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -930,9 +928,12 @@ corporate_card_transaction_unassign_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -1114,7 +1115,9 @@ corporate_card_transaction_match_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1146,9 +1149,12 @@ corporate_card_transaction_match_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -1330,7 +1336,9 @@ corporate_card_transaction_unmatch_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1346,7 +1354,9 @@ corporate_card_transaction_unmatch_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1359,9 +1369,12 @@ corporate_card_transaction_unmatch_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -1535,7 +1548,9 @@ corporate_card_transaction_mark_personal_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1551,7 +1566,9 @@ corporate_card_transaction_mark_personal_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1565,9 +1582,12 @@ corporate_card_transaction_mark_personal_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -1731,7 +1751,9 @@ corporate_card_transaction_unmark_personal_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1747,7 +1769,9 @@ corporate_card_transaction_unmark_personal_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1761,9 +1785,12 @@ corporate_card_transaction_unmark_personal_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -1927,7 +1954,9 @@ corporate_card_transaction_ignore_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1943,7 +1972,9 @@ corporate_card_transaction_ignore_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1957,9 +1988,12 @@ corporate_card_transaction_ignore_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
@@ -2123,7 +2157,9 @@ corporate_card_transaction_undo_ignore_out:
         Holds the expense ids which are auto-matically matched by the system
       example: []
     auto_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_auto_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -2139,7 +2175,9 @@ corporate_card_transaction_undo_ignore_out:
         Holds the expense ids which are matched by the user
       example: []
     user_matched_expenses:
-      example: []
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
     last_user_matched_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -2153,9 +2191,12 @@ corporate_card_transaction_undo_ignore_out:
         Determines whether this card transaction is settled.
       example: false
     settlement_id:
+      type: string
+      maxLength: 255
       nullable: true
-      allOf:
-        - $ref: './fields.yaml#/id_string'
+      description: |
+        String denoting the category of the card transaction
+        Note: This is not same as the category added in Fyle but just a string
       example: null
     last_settled_at:
       allOf:
