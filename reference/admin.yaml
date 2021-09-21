@@ -2789,21 +2789,15 @@ components:
       required:
         - id
         - user_id
-    corporate_card_unassign_in:
+    corporate_card_id_in:
       type: object
       properties:
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: bawownwrng
-        user_id:
-          type: string
-          description: |
-            The unique id of an user to whom the card is assigned.
-          example: uswjwgnwwgo
       required:
         - id
-        - user_id
     corporate_card_unassign_out:
       type: object
       properties:
@@ -3412,15 +3406,12 @@ components:
         user_id:
           type: string
           description: |
-            The unique id of an user to which the object is associated.
+            The unique id of an user to whom the card transaction is assigned.
           readOnly: true
           nullable: true
           example: null
         user:
-          allOf:
-            - $ref: '#/components/schemas/user_out_embed'
-          nullable: true
-          example: null
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -3435,6 +3426,7 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+          nullable: false
         description:
           type: string
           nullable: true
@@ -3481,10 +3473,7 @@ components:
           nullable: true
           example: null
         assignor_user:
-          allOf:
-            - $ref: '#/components/schemas/user_out_embed'
-          nullable: true
-          example: null
+          $ref: '#/components/schemas/user_out_embed_nullable'
         is_assigned:
           type: boolean
           description: |
@@ -3535,7 +3524,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3551,7 +3542,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3565,9 +3558,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -3753,7 +3751,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3769,7 +3769,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3783,9 +3785,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -3833,21 +3840,15 @@ components:
         - is_settled
         - last_settled_at
         - metadata
-    corporate_card_transaction_unassign_in:
+    corporate_card_transaction_id_in:
       type: object
       properties:
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: btxnwownwrng
-        user_id:
-          type: string
-          description: |
-            The unique id of an user to whom the card transaction is assigned.
-          example: usge49ielgel
       required:
         - id
-        - user_id
     corporate_card_transaction_unassign_out:
       type: object
       properties:
@@ -3862,9 +3863,10 @@ components:
           description: |
             The unique id of an user to which the object is associated.
           readOnly: true
+          nullable: true
           example: null
         user:
-          example: null
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -3925,7 +3927,7 @@ components:
           nullable: true
           example: null
         assignor_user:
-          example: null
+          $ref: '#/components/schemas/user_out_embed_nullable'
         is_assigned:
           type: boolean
           description: |
@@ -3975,7 +3977,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3991,7 +3995,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4005,9 +4011,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -4055,15 +4066,6 @@ components:
         - is_settled
         - last_settled_at
         - metadata
-    corporate_card_transaction_id_in:
-      type: object
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: btxnwownwrng
-      required:
-        - id
     corporate_card_transaction_mark_personal_out:
       type: object
       properties:
@@ -4185,7 +4187,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4201,7 +4205,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4215,9 +4221,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -4386,7 +4397,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4402,7 +4415,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4416,9 +4431,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -4587,7 +4607,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4603,7 +4625,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4617,9 +4641,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -4788,7 +4817,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4804,7 +4835,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4818,9 +4851,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -5006,7 +5044,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -5038,9 +5078,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -5226,7 +5271,9 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example: []
         auto_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -5242,7 +5289,9 @@ components:
             Holds the expense ids which are matched by the user
           example: []
         user_matched_expenses:
-          example: []
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         last_user_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -5255,9 +5304,14 @@ components:
             Determines whether this card transaction is settled.
           example: false
         settlement_id:
+          type: string
+          maxLength: 255
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/id_string'
+          description: >
+            String denoting the category of the card transaction
+
+            Note: This is not same as the category added in Fyle but just a
+            string
           example: null
         last_settled_at:
           allOf:
@@ -7540,7 +7594,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/corporate_card_unassign_in'
+                  $ref: '#/components/schemas/corporate_card_id_in'
               required:
                 - data
               additionalProperties: false
@@ -7835,7 +7889,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/corporate_card_transaction_unassign_in'
+                  $ref: '#/components/schemas/corporate_card_transaction_id_in'
               required:
                 - data
       responses:
@@ -7887,8 +7941,7 @@ paths:
                 data:
                   type: array
                   items:
-                    $ref: >-
-                      #/components/schemas/corporate_card_transaction_unassign_in
+                    $ref: '#/components/schemas/corporate_card_transaction_id_in'
               required:
                 - data
       responses:
