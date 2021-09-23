@@ -18,53 +18,6 @@ components:
           tokenUrl: 'https://accounts.fylehq.com/oauth/token'
           scopes:
             '*': Grant all actions
-  parameters:
-    q:
-      in: query
-      name: q
-      required: true
-      description: >
-        The query string on which to search. The service will return candidate
-        matches based on this string and order results based on their perceived
-        relevance.<br>
-
-        q=bangalore
-      schema:
-        type: string
-        example: bangalore
-    types:
-      in: query
-      name: types
-      required: true
-      description: >
-        The types of place results to return.<br>
-
-        Note the `()` which represents the collection of multiple types.<br>
-
-        For more information click <a
-        href='https://developers.google.com/places/web-service/supported_types#table3'>here</a>.<br>
-
-        types=(cities)
-      schema:
-        type: string
-        example: (cities)
-        enum:
-          - (cities)
-          - (regions)
-          - geocode
-          - address
-          - establishment
-    cordinates:
-      in: query
-      name: location
-      description: >
-        This param specifies the point around which you wish to retrieve place
-        information.<br>
-
-        location=latitude,longitude
-      schema:
-        type: string
-        example: '26.595889,85.4891037'
   schemas:
     '400':
       type: object
@@ -114,6 +67,32 @@ components:
         next 1000 objects. <br>
       type: integer
       example: 10
+    place_out:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: It containes a textual identifier that uniquely identifies a place.
+          example: ChIJify3BTzI5zsR2q86fwXrh74
+        city:
+          type: string
+          example: London
+        state:
+          type: string
+          example: London
+        country:
+          type: string
+          example: United Kingdom
+        formatted_address:
+          type: string
+          example: '221 Baker St, Marylebone, London, United Kingdom'
+        latitude:
+          type: number
+          example: 12.971599
+        longitude:
+          type: number
+          example: 77.594566
     place_out_minimal:
       type: object
       properties:
@@ -212,6 +191,96 @@ tags:
     description: |
       These APIs gives the expense relevant data from the reciepts
 paths:
+  /common/places/suggestions:
+    get:
+      tags:
+        - Places
+      summary: List places
+      description: |
+        Lists all the place suggestions based on given query.
+      operationId: places_list
+      parameters:
+        - in: query
+          name: q
+          required: true
+          description: >
+            The query string on which to search. The service will return
+            candidate matches
+
+            based on this string and order results based on their perceived
+            relevance.<br>
+
+
+            q=bangalore
+          schema:
+            type: string
+            example: bangalore
+        - in: query
+          name: types
+          required: true
+          description: >
+            The types of place results to return.<br>
+
+
+            Note the `()` which represents the collection of multiple types.<br>
+
+
+            For more information click <a
+
+            href='https://developers.google.com/places/web-service/supported_types#table3'>here</a>.<br>
+
+
+            types=(cities)
+          schema:
+            type: string
+            example: (cities)
+            enum:
+              - (cities)
+              - (regions)
+              - geocode
+              - address
+              - establishment
+        - in: query
+          name: current_location
+          description: >
+            This param specifies the point around which you wish to retrieve
+            place
+
+            information.<br>
+
+
+            location=latitude,longitude
+          schema:
+            type: string
+            example: '26.595889,85.4891037'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/place_out'
+        '400':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /common/places:
     get:
       tags:
@@ -221,9 +290,12 @@ paths:
         Lists all the place suggestions based on given query.
       operationId: places_list
       parameters:
-        - $ref: '#/components/parameters/q'
-        - $ref: '#/components/parameters/types'
-        - $ref: '#/components/parameters/cordinates'
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: ChIJify3BTzI5zsR2q86fwXrh74
       responses:
         '200':
           description: OK
@@ -240,6 +312,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/place_out_minimal'
+        '400':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
