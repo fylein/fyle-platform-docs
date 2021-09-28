@@ -39,16 +39,6 @@ components:
             Fyle or has expired.
 
             You need to generate a new access token.
-    '403':
-      type: object
-      properties:
-        message:
-          enum:
-            - Forbidden
-          type: string
-          description: >
-            This error means current user does not have enough permissions to
-            perform this operation.
     count:
       type: integer
       description: |
@@ -67,6 +57,17 @@ components:
         next 1000 objects. <br>
       type: integer
       example: 10
+    place_out_minimal:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: It containes a textual identifier that uniquely identifies a place.
+          example: ChIJify3BTzI5zsR2q86fwXrh74
+        formatted_address:
+          type: string
+          example: '221 Baker St, Marylebone, London, United Kingdom'
     place_out:
       type: object
       properties:
@@ -93,96 +94,6 @@ components:
         longitude:
           type: number
           example: 77.594566
-    place_out_minimal:
-      type: object
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: It containes a textual identifier that uniquely identifies a place.
-          example: ChIJify3BTzI5zsR2q86fwXrh74
-        formatted_address:
-          type: string
-          example: '221 Baker St, Marylebone, London, United Kingdom'
-    expense_extract_in:
-      type: object
-      properties:
-        client:
-          type: string
-          maxLength: 255
-          description: |
-            Takes the platform name from where this API is requested.
-          example: WEBAPP
-        files:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                maxLength: 255
-                description: |
-                  Takes the name of the file which contains the receipt.
-              content:
-                type: string
-                description: >
-                  This field takes the base64 encoded representation of the
-                  file.
-                example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
-        meta:
-          type: object
-          description: |
-            Additional optional data.
-          properties:
-            email:
-              type: string
-            spent_at:
-              type: string
-    timestamptz_utc:
-      type: string
-      nullable: true
-      example: '2020-06-01T13:14:54.804+00:00'
-    expense_extract_out:
-      type: object
-      properties:
-        amount:
-          type: number
-          description: |
-            Extracted expense amount from receipt.
-          example: 1500
-        category_name:
-          type: string
-          maxLength: 25
-          description: |
-            Extracted category of expense from receipt.
-          example: Flight
-        currency:
-          type: string
-          maxLength: 3
-          example: USD
-          description: >
-            Extracted currency from the given receipt. <br>
-
-            ISO 4217 currency codes that are usually of three upper case
-            letters.
-
-            See "https://www.iban.com/currency-codes" for examples.
-        date:
-          $ref: '#/components/schemas/timestamptz_utc'
-        invoice_dt:
-          $ref: '#/components/schemas/timestamptz_utc'
-        vendor_name:
-          type: string
-          example: Uber
-          maxLength: 255
-          description: >
-            Extracted string denoting the name of the vendor to which the
-            expense was made
-        source:
-          type: string
-          example: ROBOT
-          description: |
-            The name of the client which is extracting the data.
 tags:
   - name: Places
     description: |
@@ -191,14 +102,14 @@ tags:
     description: |
       These APIs gives the expense relevant data from the reciepts
 paths:
-  /common/places/suggestions:
+  /common/places/autocomplete:
     get:
       tags:
         - Places
-      summary: List places
+      summary: Suggest places
       description: |
         Lists all the place suggestions based on given query.
-      operationId: places_list
+      operationId: places_autocomplete
       parameters:
         - in: query
           name: q
@@ -268,7 +179,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/place_out'
+                      $ref: '#/components/schemas/place_out_minimal'
         '400':
           description: Unauthorized request
           content:
@@ -311,7 +222,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/place_out_minimal'
+                      $ref: '#/components/schemas/place_out'
         '400':
           description: Unauthorized request
           content:
@@ -324,47 +235,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /common/expense_extract:
-    post:
-      tags:
-        - Data Extraction
-      summary: Retrieve expense data from receipt
-      description: |
-        Retrieve expense related data from the given receipt.
-      operationId: post-vision-extract
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/expense_extract_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/expense_extract_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
