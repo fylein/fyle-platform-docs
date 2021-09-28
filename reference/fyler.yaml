@@ -606,11 +606,6 @@ components:
             Represents the full name of the Employee. Must be at least 3
             characters.
           example: John Doe
-        department_id:
-          type: string
-          maxLength: 255
-          nullable: ture
-          example: dept9in4oIHpdR
     timestamptz_utc:
       type: string
       nullable: true
@@ -905,6 +900,44 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        department:
+          $ref: '#/components/schemas/department_out_embed'
     expense_out:
       type: object
       additionalProperties: false
@@ -966,6 +999,7 @@ components:
         - last_exported_at
         - file_ids
         - files
+        - employee
       properties:
         id:
           allOf:
@@ -1272,6 +1306,8 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     amount:
       type: number
       description: |
@@ -2218,11 +2254,6 @@ components:
             Represents the full name of the Employee. Must be at least 3
             characters.
           example: John Doe
-        department_id:
-          type: string
-          maxLength: 255
-          nullable: ture
-          example: dept9in4oIHpdR
     corporate_card_out_embed:
       type: object
       additionalProperties: false
