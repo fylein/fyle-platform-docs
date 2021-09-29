@@ -1436,7 +1436,7 @@ components:
           description: >
             Indicates whether this file original size or encrypted or its
             thumbnail image.
-          example: INTEGRATION
+          example: RECEIPT
         content_type:
           type: string
           example: text/csv
@@ -1465,10 +1465,11 @@ components:
           type: string
           enum:
             - INTEGRATION
+            - RECEIPT
           description: >
             Indicates whether this file original size or encrypted or its
             thumbnail image.
-          example: INTEGRATION
+          example: RECEIPT
         password:
           type: string
           description: |
@@ -1507,6 +1508,10 @@ components:
             - fi123819sa
         exported_at:
           $ref: '#/components/schemas/timestamptz_pst'
+        name:
+          type: string
+          description: This represents name of the resource.
+          example: Accounting exports test
         description:
           $ref: '#/components/schemas/description'
         url:
@@ -1521,6 +1526,7 @@ components:
       required:
         - file_ids
         - exported_at
+        - name
       properties:
         id:
           allOf:
@@ -1537,6 +1543,10 @@ components:
           description: List of file ids which holds reference to export files
         exported_at:
           $ref: '#/components/schemas/timestamptz_utc'
+        name:
+          type: string
+          description: This represents name of the resource.
+          example: Accounting exports test
         description:
           $ref: '#/components/schemas/description'
         url:
@@ -1675,6 +1685,9 @@ components:
             - PERSONAL_CASH_ACCOUNT
             - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
             - PERSONAL_ADVANCE_ACCOUNT
+            - COMPANY_EXPENSE_ACCOUNT
+            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+            - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
     report_out_embed:
       type: object
@@ -1761,7 +1774,7 @@ components:
           description: >
             Indicates whether this file original size or encrypted or its
             thumbnail image.
-          example: INTEGRATION
+          example: RECEIPT
         content_type:
           type: string
           example: application/pdf
@@ -1783,13 +1796,53 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+    employee_id:
+      type: string
+      maxLength: 255
+      description: >
+        This id provided by Fyle to uniquely identify an employee within an
+        organization.
+
+        This id is always prefixed with `ou`.
+      example: outGt9ju6qP
+    department_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: dept9in4oIHpdR
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          $ref: '#/components/schemas/department_id'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
     expense_out:
       type: object
       additionalProperties: false
       required:
         - id
         - user_id
-        - user
         - org_id
         - created_at
         - updated_at
@@ -1844,6 +1897,7 @@ components:
         - last_exported_at
         - file_ids
         - files
+        - employee
       properties:
         id:
           allOf:
@@ -1851,8 +1905,6 @@ components:
           example: txwownwrng
         user_id:
           $ref: '#/components/schemas/user_id'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -2150,6 +2202,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     amount:
       type: number
       description: |
@@ -3284,16 +3340,6 @@ components:
           nullable: true
           description: |
             signifies when this expense was last matched by user.
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3330,8 +3376,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_in:
       type: object
@@ -3552,11 +3596,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -3566,13 +3605,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -3610,8 +3642,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_assign_in:
       type: object
@@ -3779,11 +3809,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -3793,13 +3818,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -3837,8 +3855,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_id_in:
       type: object
@@ -4005,11 +4021,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -4019,13 +4030,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -4063,8 +4067,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_mark_personal_out:
       type: object
@@ -4215,11 +4217,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -4229,13 +4226,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -4273,8 +4263,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_unmark_personal_out:
       type: object
@@ -4425,11 +4413,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -4439,13 +4422,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -4483,8 +4459,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_ignore_out:
       type: object
@@ -4635,11 +4609,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -4649,13 +4618,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -4693,8 +4655,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_undo_ignore_out:
       type: object
@@ -4845,11 +4805,6 @@ components:
           description: |
             signifies when this expense was last matched by user.
           example: null
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -4859,13 +4814,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -4903,8 +4851,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_match_in:
       type: object
@@ -5072,11 +5018,6 @@ components:
           nullable: true
           description: |
             signifies when this expense was last matched by user.
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -5086,13 +5027,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -5130,8 +5064,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     corporate_card_transaction_unmatch_in:
       type: object
@@ -5298,11 +5230,6 @@ components:
           nullable: true
           description: |
             signifies when this expense was last matched by user.
-        is_settled:
-          type: boolean
-          description: |
-            Determines whether this card transaction is settled.
-          example: false
         settlement_id:
           type: string
           maxLength: 255
@@ -5312,13 +5239,6 @@ components:
 
             Note: This is not same as the category added in Fyle but just a
             string
-          example: null
-        last_settled_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card transaction was last settled.
           example: null
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
@@ -5356,8 +5276,6 @@ components:
         - user_matched_expense_ids
         - user_matched_expenses
         - last_user_matched_at
-        - is_settled
-        - last_settled_at
         - metadata
     suggestions_in:
       type: object
@@ -5911,6 +5829,9 @@ components:
             - PERSONAL_CASH_ACCOUNT
             - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
             - PERSONAL_ADVANCE_ACCOUNT
+            - COMPANY_EXPENSE_ACCOUNT
+            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+            - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
         currency:
           $ref: '#/components/schemas/currency'
