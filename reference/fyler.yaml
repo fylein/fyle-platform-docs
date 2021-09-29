@@ -583,32 +583,6 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     timestamptz_utc:
       type: string
       nullable: true
@@ -888,6 +862,32 @@ components:
         content_type:
           type: string
           example: application/pdf
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -906,13 +906,70 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+    employee_id:
+      type: string
+      maxLength: 255
+      description: >
+        This id provided by Fyle to uniquely identify an employee within an
+        organization.
+
+        This id is always prefixed with `ou`.
+      example: outGt9ju6qP
+    department_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: dept9in4oIHpdR
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          $ref: '#/components/schemas/department_id'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
     expense_out:
       type: object
       additionalProperties: false
       required:
         - id
         - user_id
-        - user
         - org_id
         - created_at
         - updated_at
@@ -967,6 +1024,7 @@ components:
         - last_exported_at
         - file_ids
         - files
+        - employee
       properties:
         id:
           allOf:
@@ -974,8 +1032,6 @@ components:
           example: txwownwrng
         user_id:
           $ref: '#/components/schemas/user_id'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -1273,6 +1329,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     amount:
       type: number
       description: |
