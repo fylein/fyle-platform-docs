@@ -29,13 +29,18 @@ You can check the version by running
     openapi lint src/admin/openapi.yaml
     openapi lint src/fyler/openapi.yaml
     openapi lint src/approver/openapi.yaml
+    openapi lint src/hod/openapi.yaml
+    openapi lint src/hop/openapi.yaml
     openapi lint src/common/openapi.yaml
+
 
 ## Bundling ##
 
     openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
     openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
+    openapi bundle -o reference/hod.yaml src/hod/openapi.yaml
+    openapi bundle -o reference/hop.yaml src/hop/openapi.yaml
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
 
 ## To preview changes ##
