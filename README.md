@@ -5,7 +5,7 @@
 OpenAPI documentation of Fyle Platform APIs
 
 ## Installing Nvm and Node ##
-## test this
+
 Install nvm if you haven't already and use the latest node version (>= v14.15.3)
 
     nvm install v14.15.3
