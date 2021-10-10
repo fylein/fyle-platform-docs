@@ -439,105 +439,12 @@ components:
           $ref: '#/components/schemas/is_enabled'
         code:
           $ref: '#/components/schemas/code'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
-    currency:
-      type: string
-      description: >
-        The three-letter currency code following ISO standard <a
-        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
-      example: USD
-      pattern: '([A-Z]{3})'
-    org_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/org_id'
-        name:
-          type: string
-          maxLength: 255
-          description: Represents the name of the org.
-          example: Demo Account
-        domain:
-          type: string
-          maxLength: 255
-          description: >-
-            This field specifies the domain with which the organisation is
-            registered.
-          example: example.com
-        currency:
-          $ref: '#/components/schemas/currency'
     id_string:
       type: string
       maxLength: 15
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
-    role:
-      type: string
-      enum:
-        - FYLER
-        - APPROVER
-        - TRAVEL_ADMIN
-        - VERIFIER
-        - PAYMENT_PROCESSOR
-        - FINANCE
-        - ADMIN
-        - TRAVEL_AGENT
-        - OWNER
-        - AUDITOR
-        - HOD
-        - HOP
-      description: |
-        Roles are assigned by Admin.
-      example: FYLER
-    my_profile_out:
-      type: object
-      additionalProperties: false
-      properties:
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        org:
-          $ref: '#/components/schemas/org_out_embed'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/role'
     fk_string:
       type: string
       nullable: true
@@ -545,6 +452,13 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
+    currency:
+      type: string
+      description: >
+        The three-letter currency code following ISO standard <a
+        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: '([A-Z]{3})'
     account_out:
       type: object
       properties:
@@ -611,6 +525,38 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     timestamptz_utc:
       type: string
       nullable: true
@@ -4460,28 +4406,6 @@ paths:
                       $ref: '#/components/schemas/mileage_rate_out'
         '401':
           description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-  /fyler/my_profile:
-    get:
-      tags:
-        - My Profile
-      summary: Retrieve my profile
-      operationId: get-my-profile
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/my_profile_out'
-        '401':
-          description: Unauthorised request
           content:
             application/json:
               schema:
