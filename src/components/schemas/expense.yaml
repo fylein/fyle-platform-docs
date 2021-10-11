@@ -60,6 +60,9 @@ expense_out:
     - file_ids
     - files
     - employee
+    - is_corporate_card_transaction_auto_matched
+    - matched_corporate_card_transaction_ids
+    - matched_corporate_card_transactions
   properties:
     id:
       allOf:
@@ -350,6 +353,23 @@ expense_out:
       $ref: './fields.yaml#/employee_id'
     employee:
       $ref: './employee.yaml#/employee_out_embed'
+    is_corporate_card_transaction_auto_matched:
+      type: boolean
+      example: false
+      description: |
+        Signifies when this corporate card transaction is auto_matched.
+    matched_corporate_card_transaction_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: |
+        Holds the corporate card transaction ids which are matched by the user
+      example:
+        - btxnwownwrng
+    matched_corporate_card_transactions:
+      type: array
+      items:
+        $ref: '#/matched_corporate_card_transaction_out_embed'
 
 expense_in:
   type: object
@@ -597,3 +617,18 @@ matched_expense_out_embed:
         This is user visible identifier for an expense.
         This field can be used as reference in UI.
       example: E/2020/10/T/95
+
+matched_corporate_card_transaction_out_embed:
+  type: object
+  required:
+    - id
+    - corporate_card_id
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: btxnwownwrng
+    corporate_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
