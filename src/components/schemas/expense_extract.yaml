@@ -1,19 +1,29 @@
 expense_extract_out:
   type: object
+  required:
+    - amount
+    - category
+    - currency
+    - spent_at
+    - merchant
+    - extraction_source
   properties:
     amount:
       type: number
+      nullable: True
       description: |
         Extracted expense amount from receipt.
       example: 1500
     category:
       type: string
+      nullable: True
       maxLength: 25
       description: |
         Extracted category of expense from receipt.
       example: Flight
     currency:
       type: string
+      nullable: True
       maxLength: 3
       example: USD
       description: |
@@ -24,6 +34,7 @@ expense_extract_out:
       $ref: './fields.yaml#/timestamptz_utc'
     merchant:
       type: string
+      nullable: True
       example: Uber
       maxLength: 255
       description: >
@@ -37,6 +48,8 @@ expense_extract_out:
 
 expense_extract_in:
   type: object
+  required:
+    - files
   properties:
     client:
       type: string
@@ -48,6 +61,9 @@ expense_extract_in:
       type: array
       items:
         type: object
+        required:
+          - name
+          - content
         properties:
           name:
             type: string
@@ -67,9 +83,14 @@ expense_extract_in:
         spent_at:
           allOf:
             - $ref: './fields.yaml#/timestamptz_utc'
-        subject:
-          type: string
-        sender_name:
-          type: string
-        sender_email:
-          type: string
+        email_info:
+          type: object
+          description: |
+            optional data about email.
+          properties:
+            subject:
+              type: string
+            sender_name:
+              type: string
+            sender_email:
+              type: string
