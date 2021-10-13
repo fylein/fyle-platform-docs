@@ -966,6 +966,20 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           $ref: '#/components/schemas/department_out_embed'
+    matched_corporate_card_transaction_out_embed:
+      type: object
+      required:
+        - id
+        - corporate_card_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
     expense_out:
       type: object
       additionalProperties: false
@@ -1028,6 +1042,9 @@ components:
         - file_ids
         - files
         - employee
+        - is_corporate_card_transaction_auto_matched
+        - matched_corporate_card_transaction_ids
+        - matched_corporate_card_transactions
       properties:
         id:
           allOf:
@@ -1338,6 +1355,24 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        is_corporate_card_transaction_auto_matched:
+          type: boolean
+          example: false
+          description: |
+            Signifies when this corporate card transaction is auto_matched.
+        matched_corporate_card_transaction_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: >
+            Holds the corporate card transaction ids which are matched by the
+            user
+          example:
+            - btxnwownwrng
+        matched_corporate_card_transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed'
     amount:
       type: number
       description: |
@@ -2324,10 +2359,7 @@ components:
         - foreign_currency
         - foreign_amount
         - state
-        - file_ids
         - seq_num
-        - matched_by_user_id
-        - matched_at
       properties:
         id:
           allOf:
@@ -2350,14 +2382,14 @@ components:
             String denoting the name of the merchant to which the Expense was
             made.
           example: Uber
-        purpose:
-          type: string
-          nullable: true
-          example: Team lunch
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
           $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
         state:
           type: string
           enum:
@@ -2369,12 +2401,6 @@ components:
             - PAYMENT_PENDING
             - APPROVED
           description: The state of the Expense.
-        file_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - figwiwpjww
         seq_num:
           type: string
           readOnly: true
@@ -2382,14 +2408,6 @@ components:
             This is user visible identifier for an expense.
             This field can be used as reference in UI.
           example: E/2020/10/T/95
-        matched_by_user_id:
-          $ref: '#/components/schemas/user_id'
-        matched_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            signifies when this expense was matched.
     string_detail:
       type: string
       description: >-
@@ -2630,7 +2648,7 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
@@ -2638,17 +2656,13 @@ components:
             Holds the expense ids which are auto-matically matched by the system
           example:
             - txwownwrng
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
           description: |
             signifies when this expense was auto matched.
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
@@ -2656,7 +2670,7 @@ components:
             Holds the expense ids which are matched by the user
           example:
             - txwownwrng
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -2696,11 +2710,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     corporate_card_transaction_id_in:
@@ -2825,17 +2838,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -2843,14 +2852,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -2901,11 +2910,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     bulk_error:
@@ -3047,17 +3055,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3065,14 +3069,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -3123,11 +3127,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     corporate_card_transaction_ignore_out:
@@ -3243,17 +3246,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3261,14 +3260,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -3319,11 +3318,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     corporate_card_transaction_undo_ignore_out:
@@ -3439,17 +3437,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3457,14 +3451,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -3515,11 +3509,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     corporate_card_transaction_match_in:
@@ -3652,17 +3645,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3670,7 +3659,7 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
@@ -3678,7 +3667,7 @@ components:
             Holds the expense ids which are matched by the user
           example:
             - txwownwrng
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -3728,11 +3717,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     corporate_card_transaction_unmatch_in:
@@ -3865,17 +3853,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3883,14 +3867,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -3940,11 +3924,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     suggestions_in:
@@ -4106,17 +4089,13 @@ components:
           example: false
           description: |
             Signifies when this card transaction is auto_matched.
-        auto_matched_expense_ids:
+        auto_suggested_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are auto-matically matched by the system
           example: []
-        auto_matched_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/matched_expense_out_embed'
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4124,14 +4103,14 @@ components:
           description: |
             signifies when this expense was auto matched.
           example: null
-        user_matched_expense_ids:
+        matched_expense_ids:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the expense ids which are matched by the user
           example: []
-        user_matched_expenses:
+        matched_expenses:
           type: array
           items:
             $ref: '#/components/schemas/matched_expense_out_embed'
@@ -4182,11 +4161,10 @@ components:
         - is_dismissed
         - last_dismissed_at
         - is_auto_matched
-        - auto_matched_expense_ids
-        - auto_matched_expenses
+        - auto_suggested_expense_ids
         - last_auto_matched_at
-        - user_matched_expense_ids
-        - user_matched_expenses
+        - matched_expense_ids
+        - matched_expenses
         - last_user_matched_at
         - metadata
     tax_group_out:
