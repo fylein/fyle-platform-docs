@@ -60,6 +60,9 @@ expense_out:
     - file_ids
     - files
     - employee
+    - is_corporate_card_transaction_auto_matched
+    - matched_corporate_card_transaction_ids
+    - matched_corporate_card_transactions
   properties:
     id:
       allOf:
@@ -350,6 +353,23 @@ expense_out:
       $ref: './fields.yaml#/employee_id'
     employee:
       $ref: './employee.yaml#/employee_out_embed'
+    is_corporate_card_transaction_auto_matched:
+      type: boolean
+      example: false
+      description: |
+        Signifies when this corporate card transaction is auto_matched.
+    matched_corporate_card_transaction_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: |
+        Holds the corporate card transaction ids which are matched to this expense
+      example:
+        - btxnwownwrng
+    matched_corporate_card_transactions:
+      type: array
+      items:
+        $ref: '#/matched_corporate_card_transaction_out_embed'
 
 expense_in:
   type: object
@@ -549,10 +569,7 @@ matched_expense_out_embed:
     - foreign_currency
     - foreign_amount
     - state
-    - file_ids
     - seq_num
-    - matched_by_user_id
-    - matched_at
   properties:
     id:
       allOf:
@@ -574,14 +591,14 @@ matched_expense_out_embed:
       description: |
         String denoting the name of the merchant to which the Expense was made.
       example: Uber
-    purpose:
-      type: string
-      nullable: true
-      example: Team lunch
     foreign_currency:
       $ref: './fields.yaml#/foreign_currency'
     foreign_amount:
       $ref: './fields.yaml#/foreign_amount'
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
     state:
       type: string
       enum:
@@ -593,12 +610,6 @@ matched_expense_out_embed:
         - PAYMENT_PENDING
         - APPROVED
       description: The state of the Expense.
-    file_ids:
-      type: array
-      items:
-        $ref: './fields.yaml#/id_string'
-      example:
-        - figwiwpjww
     seq_num:
       type: string
       readOnly: true
@@ -606,11 +617,18 @@ matched_expense_out_embed:
         This is user visible identifier for an expense.
         This field can be used as reference in UI.
       example: E/2020/10/T/95
-    matched_by_user_id:
-      $ref: './fields.yaml#/user_id'
-    matched_at:
+
+matched_corporate_card_transaction_out_embed:
+  type: object
+  required:
+    - id
+    - corporate_card_id
+  properties:
+    id:
       allOf:
-        - $ref: './fields.yaml#/timestamptz_utc'
-      nullable: true
-      description: |
-        signifies when this expense was matched.
+        - $ref: './fields.yaml#/id_string'
+      example: btxnwownwrng
+    corporate_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
