@@ -6070,6 +6070,90 @@ components:
           description: Month number of start of fisical year
           minimum: 1
           maximum: 12
+    budget_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales Montly Budget
+        type:
+          $ref: '#/components/schemas/budget_type'
+        amount_limit:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 10000
+        observer_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - usge49ielgel
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        department_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of department ids
+        project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids
+    budget_usage_out:
+      type: object
+      required:
+        - budget_id
+        - observer_ids
+        - spent
+        - amount_limit
+        - budget
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        budget_id:
+          $ref: '#/components/schemas/id_string'
+        start_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: 2020-06-11T00.00.00Z
+          description: Start date of the cycle of the budget
+        end_date:
+          type: string
+          nullable: true
+          format: date
+          example: 2020-06-11T00.00.00Z
+          description: End date of the cycle of the budget
+        observer_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - usge49ielgel
+        spent:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 1000
+        amount_limit:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 10000
+        budget:
+          $ref: '#/components/schemas/budget_out_embed'
 tags:
   - name: Projects
     description: |
@@ -9618,6 +9702,40 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/budget_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/budget_usages:
+    get:
+      tags:
+        - Get Budget Usages
+      summary: List Budget Usages
+      operationId: get-budget_usages
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/budget_usage_out'
         '401':
           description: Unauthorized request
           content:
