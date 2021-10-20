@@ -7,7 +7,7 @@ info:
     name: Integrations
     email: support@fylehq.com
 servers:
-  - url: 'https://hulk.fyle.tech/platform/v1'
+  - url: https://hulk.fyle.tech/platform/v1
     description: Staging Server
 components:
   securitySchemes:
@@ -15,8 +15,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: 'https://accounts.fylehq.com/app/developers/#/oauth/authorize'
-          tokenUrl: 'https://accounts.fylehq.com/oauth/token'
+          authorizationUrl: https://accounts.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
           scopes:
             '*': Grant all actions
   parameters:
@@ -28,7 +28,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: 'gte.2020-06-01T00:00:00.000-08:00'
+        example: gte.2020-06-01T00:00:00.000-08:00
     updated_at:
       in: query
       name: updated_at
@@ -37,7 +37,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: 'gte.2020-06-01T00:00:00.000-08:00'
+        example: gte.2020-06-01T00:00:00.000-08:00
     offset:
       in: query
       name: offset
@@ -65,7 +65,7 @@ components:
         For sorting in descending order, use `column_name.desc`
       schema:
         type: string
-        example: 'updated_at.desc,id'
+        example: updated_at.desc,id
   schemas:
     '401':
       type: object
@@ -108,6 +108,11 @@ components:
       description: |
         amount of money
       example: 47.99
+    id_integer:
+      type: integer
+      description: |
+        This id provided by Fyle to identify an object.
+      example: 1234
     name:
       type: string
       maxLength: 255
@@ -128,6 +133,13 @@ components:
       description: |
         Type of budgets 
       example: WEEKLY
+    is_enabled:
+      type: boolean
+      description: >
+        This indicates if the resource is enabled for use within the
+        organisation.
+      default: true
+      example: true
     budget_out_embed:
       type: object
       additionalProperties: false
@@ -150,6 +162,26 @@ components:
             $ref: '#/components/schemas/id_string'
           example:
             - usge49ielgel
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        department_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of department ids
+        project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids
     budget_usage_out:
       type: object
       required:
@@ -190,6 +222,24 @@ components:
           allOf:
             - $ref: '#/components/schemas/amount'
           example: 10000
+        budget_department_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of department ids
+        budget_project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids
         budget:
           $ref: '#/components/schemas/budget_out_embed'
 tags:
