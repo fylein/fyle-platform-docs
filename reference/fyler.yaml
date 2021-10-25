@@ -1549,6 +1549,20 @@ components:
             claim_amount:
               $ref: '#/components/schemas/amount'
         - $ref: '#/components/schemas/expense_in'
+    expense_add_comment_action_in:
+      type: object
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        comment:
+          type: string
+          description: Comment made on the expense.
+          example: This is a food expense.
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -4686,6 +4700,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/expenses/add_comment:
+    post:
+      tags:
+        - Expenses
+      summary: Add comment on an expense
+      description: |
+        This API creates comment on a specific expense.
+      operationId: add-expense-comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_add_comment_action_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /fyler/per_diem_rates:
     get:
       tags:
