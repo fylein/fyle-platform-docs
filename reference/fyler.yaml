@@ -1923,6 +1923,45 @@ components:
           type: string
           nullable: true
           example: report.created
+    policy_test_out:
+      type: object
+      properties:
+        policy_violation_summary:
+          type: object
+          properties:
+            action_description:
+              type: string
+              maxLength: 255
+              description: |
+                Describes the what action will taken on the expense.
+              example: >
+                The following action(s) will be taken- expense violation will be
+                marked.
+
+                expense amount will be changed to 0 USD
+            policy_amount:
+              type: number
+              example: 10
+        policy_violations:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                description: |
+                  Description of this policy rule.
+                example: Receipt needed for expenses above USD 74
+              policy_amount:
+                type: number
+                description: |
+                  Amount capping set in the policy.
+                example: 100
+              is_popup_required:
+                type: boolean
+                description: |
+                  Indicates whether the message is shown in popup window or not.
+                example: false
     advance_out_embed:
       type: object
       nullable: true
@@ -4855,6 +4894,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /fyler/expenses/policy_test:
+    post:
+      tags:
+        - Expenses
+      summary: Test policy on an expense
+      description: >
+        This API runs organization defined policy for the expense and returns
+        any violation that occurred.
+
+        This is a test call. The results wont be stored.
+      operationId: post-policy-test
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/fyler_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/policy_test_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /fyler/reports:
     get:
       operationId: reports_list
