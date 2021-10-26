@@ -1976,6 +1976,37 @@ components:
                 description: |
                   Indicates whether the message is shown in popup window or not.
                 example: false
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
+    report_action_with_expense_ids_in:
+      allOf:
+        - $ref: '#/components/schemas/report_action_in'
+        - type: object
+          additionalProperties: false
+          required:
+            - expense_ids
+          properties:
+            expense_ids:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+              example:
+                - txelntgwgwll
+    reason:
+      type: string
+      description: |
+        Explanation to the action if provided by the user
+      example: All bills are in order
     advance_out_embed:
       type: object
       nullable: true
@@ -5047,6 +5078,98 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/reports/add_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Add expenses to a report
+      description: Add expenses to a report
+      operationId: add-expenses-to-report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_with_expense_ids_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /fyler/reports/eject_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Eject expenses from a report
+      description: Eject expenses from a report
+      operationId: Eject-expenses-from-report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_with_expense_ids_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /fyler/advance_requests:
     get:
       tags:
