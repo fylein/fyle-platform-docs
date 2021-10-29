@@ -1,0 +1,56 @@
+post:
+  operationId: cost_centers_post_bulk
+  tags:
+    - Cost Centers
+  summary: Create or update cost centers
+  description: |
+    Create or update cost centers.
+  requestBody:
+    required: true
+    content:  
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: ../../components/schemas/cost_center.yaml#/cost_center_in
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/bulk_error.yaml'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  message: 
+                    type: string
+                    nullable: true
+                  data:
+                    type: string
+                    nullable: true
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
+                
+    
