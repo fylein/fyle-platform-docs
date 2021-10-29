@@ -299,12 +299,6 @@ components:
             project.
           items:
             type: integer
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     project_in:
       type: object
       additionalProperties: false
@@ -315,7 +309,7 @@ components:
         - is_enabled
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          $ref: '#/components/schemas/id_integer'
         name:
           type: string
           maxLength: 255
@@ -712,6 +706,12 @@ components:
           type: number
           example: 10
           description: Amount per night
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
     department_out:
       type: object
       additionalProperties: false
@@ -6262,9 +6262,9 @@ paths:
       operationId: projects_post_bulk
       tags:
         - Projects
-      summary: Create or update projects
+      summary: Create or update projects in bulk
       description: |
-        Create or update projects
+        Create or update projects in bulk.
       requestBody:
         required: true
         content:
@@ -6404,6 +6404,61 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cost_centers/bulk:
+    post:
+      operationId: cost_centers_post_bulk
+      tags:
+        - Cost Centers
+      summary: Create or update cost centers in bulk
+      description: |
+        Create or update cost centers in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
