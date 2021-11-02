@@ -101,6 +101,15 @@ components:
         example: 20
         default: 50
         maximum: 200
+    order:
+      in: query
+      name: order
+      description: |
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
+      schema:
+        type: string
+        example: 'updated_at.desc,id'
   schemas:
     '400':
       type: object
@@ -406,17 +415,6 @@ components:
       description: |
         URL Endpoint for webhook
       example: 'https://api.custom.com/webhook1'
-    subscriptions_in:
-      type: object
-      additionalProperties: false
-      required:
-        - is_enabled
-        - webhook_url
-      properties:
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        webhook_url:
-          $ref: '#/components/schemas/webhook_url'
     approver_subscriptions_out:
       type: object
       additionalProperties: false
@@ -433,6 +431,17 @@ components:
           $ref: '#/components/schemas/created_at'
         approver_user_id:
           $ref: '#/components/schemas/fk_string'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
     report_out_subscriptions:
       type: object
       additionalProperties: false
@@ -1753,12 +1762,24 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/approver_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
-          description: Unauthorised request
+          description: Unauthorized request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
       callbacks:
         REPORT.*:
           '{$request.body#/data/webhook_url}':
@@ -1771,6 +1792,51 @@ paths:
               responses:
                 '200':
                   description: OK
+    get:
+      tags:
+        - Subscriptions
+      summary: List Approver Subscriptions
+      operationId: get-subscriptions
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/approver_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/advance_requests:
     get:
       tags:
