@@ -4,7 +4,7 @@ Let's face it. Most API docs are super-boring and have words like Authorization,
 
 This doc is no different :(
 
-However, we will try to make it a little more accessible by explaining some basic concepts.
+However, we will try to make it a little more fun and accessible.
 
 Let's set the stage first. We have two characters, John and Amy.
 
