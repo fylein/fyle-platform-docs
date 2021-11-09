@@ -5261,51 +5261,6 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
-    suggestions_in:
-      type: object
-      properties:
-        org_id:
-          allOf:
-            - $ref: '#/components/schemas/org_id'
-          readOnly: false
-          example: orwruogwnngg
-        user_id:
-          allOf:
-            - $ref: '#/components/schemas/user_id'
-          readOnly: false
-          example: uswjwgnwwgo
-        amount:
-          $ref: '#/components/schemas/amount'
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            signifies when this card transaction was made.
-            This date cannot be in future.
-      required:
-        - org_id
-        - user_id
-        - amount
-        - spent_at
-    suggestions_expense_in:
-      allOf:
-        - $ref: '#/components/schemas/suggestions_in'
-        - type: object
-          properties:
-            type:
-              type: string
-              description: >
-                This helps in getting expenses for personal/corporate card
-                transactions
-              enum:
-                - PERSONAL_CARD
-                - CORPORATE_CARD
-              example: CORPORATE_CARD
-          required:
-            - type
-    suggestions_card_transaction_in:
-      allOf:
-        - $ref: '#/components/schemas/suggestions_in'
     settlement_out:
       type: object
       properties:
@@ -6087,84 +6042,70 @@ components:
         budget:
           $ref: '#/components/schemas/budget_out_embed'
 tags:
-  - name: Projects
-    description: |
-      These APIs gives you access to manage your organisation's Projects
-  - name: Cost Centers
-    description: >
-      These APIs gives you access to manage your organisation's Cost Centers
-      data.
-  - name: Tax Groups
-    description: |
-      These APIs gives you access to manage your organisation's Tax Groups data.
-  - name: Per Diem Rates
-    description: |
-      These APIs gives you access to manage your organisation's Per Diem Rates
-  - name: Categories
-    description: |
-      These APIs gives you access to manage your organisation's Categories
-  - name: Mileage Rates
-    description: |
-      These APIs gives you access to manage your organisation's Mileage Rates
-  - name: Expense Fields
-    description: >
-      This API gives you access to manage your organisation's Expense Fields
-      data.
-  - name: Departments
-    description: |
-      These APIs gives you access to manage your organisation's Departments
-  - name: Levels
-    description: |
-      These APIs gives you access to manage your organisation's Employee levels.
-  - name: Employees
-    description: |
-      These APIs gives you access to manage your organisation's Employees
-  - name: Accounts
-    description: |
-      This APIs gives access to your Employees's accounts data.
-  - name: Files
-    description: |
-      This API gives you access to creates a file in Fyle
-  - name: Expenses
-    description: |
-      This API gives you access to your organisation's Expenses
-  - name: Reports
-    description: |
-      This API gives you access to your organisation's Expense Reports.
-  - name: Advances
-    description: |
-      This API gives you access to manage your organisation's Advances data.
-  - name: Settlements
-    description: |
-      This API gives you access to manage your organisation's Settlements data.
-  - name: Adjustments
-    description: |
-      This API gives you access to manage your organisation's Adjustments data.
-  - name: Reimbursements
-    description: |
-      These APIs gives you access to manage your organisation's Reimbursements
-      data
   - name: Accounting Exports
     description: >
       This API allows you to record export of Fyle resources to an external
       accounting exports
+  - name: Accounts
+    description: |
+      This APIs gives access to your Employees's accounts data.
+  - name: Adjustments
+    description: |
+      This API gives you access to manage your organisation's Adjustments data.
+  - name: Advances
+    description: |
+      This API gives you access to manage your organisation's Advances data.
+  - name: Budgets
+    description: |
+      This API gives you access to Budgets.
+  - name: Categories
+    description: |
+      These APIs gives you access to manage your organisation's Categories
   - name: Corporate Cards
     description: >
       This API gives you access to manage your organisation's Corporate Cards
       data.
-  - name: Corporate Card Transactions
+  - name: Cost Centers
     description: >
-      This API gives you access to manage your organisation's Corporate Card
-      Transactions data.
-  - name: Suggestions
+      These APIs gives you access to manage your organisation's Cost Centers
+      data.
+  - name: Departments
     description: |
-      This API gives you access to Expense/Card Transactions Suggestions.
+      These APIs gives you access to manage your organisation's Departments
+  - name: Employees
+    description: |
+      These APIs gives you access to manage your organisation's Employees
+  - name: Expenses
+    description: |
+      This API gives you access to your organisation's Expenses
+  - name: Files
+    description: |
+      This API gives you access to creates a file in Fyle
+  - name: Levels
+    description: |
+      These APIs gives you access to manage your organisation's Employee levels.
+  - name: Mileage Rates
+    description: |
+      These APIs gives you access to manage your organisation's Mileage Rates
+  - name: Per Diem Rates
+    description: |
+      These APIs gives you access to manage your organisation's Per Diem Rates
+  - name: Projects
+    description: |
+      These APIs gives you access to manage your organisation's Projects
+  - name: Reimbursements
+    description: |
+      These APIs gives you access to manage your organisation's Reimbursements
+      data
   - name: Schedules
     description: |
       This API gives you access to manage Scheduled jobs.
-  - name: Budgets
+  - name: Settlements
     description: |
-      This API gives you access to Budgets.
+      This API gives you access to manage your organisation's Settlements data.
+  - name: Tax Groups
+    description: |
+      These APIs gives you access to manage your organisation's Tax Groups data.
 paths:
   /admin/projects:
     get:
@@ -6616,7 +6557,7 @@ paths:
   /admin/expense_fields:
     get:
       tags:
-        - Expense Fields
+        - Expenses
       summary: List expense fields
       description: |
         Gives the list of all expense fields based on query parameters.
@@ -6657,7 +6598,7 @@ paths:
                 $ref: '#/components/schemas/401'
     post:
       tags:
-        - Expense Fields
+        - Expenses
       summary: Create or update an expense fields
       operationId: expense_fields_post
       requestBody:
@@ -7946,7 +7887,7 @@ paths:
   /admin/corporate_card_transactions:
     get:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: List corporate card transactions
       description: |
         List the corporate card transactions.
@@ -7985,7 +7926,7 @@ paths:
                 $ref: '#/components/schemas/401'
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Create or update corporate card transaction
       description: |
         Create or update an corporate card transactions.
@@ -8034,7 +7975,7 @@ paths:
   /admin/corporate_card_transactions/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Create or update corporate card transactions in bulk
       description: |
         Create or update corporate card transactions in bulk.
@@ -8088,7 +8029,7 @@ paths:
   /admin/corporate_card_transactions/assign:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Assign corporate card transaction
       description: |
         Assign corporate card transaction to a user.
@@ -8137,7 +8078,7 @@ paths:
   /admin/corporate_card_transactions/assign/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Assign corporate card transaction in bulk
       description: |
         Assign corporate card transactions to users in bulk.
@@ -8191,7 +8132,7 @@ paths:
   /admin/corporate_card_transactions/unassign:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Unassign corporate card transaction
       description: |
         Unassign a corporate card transaction from a user.
@@ -8241,7 +8182,7 @@ paths:
   /admin/corporate_card_transactions/unassign/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Unassign corporate card transaction in bulk
       description: |
         Unassign a corporate card transactions from users in bulk
@@ -8295,7 +8236,7 @@ paths:
   /admin/corporate_card_transactions/mark_personal:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Mark a corporate card transaction as personal
       description: |
         Mark a corporate card transaction as personal
@@ -8345,7 +8286,7 @@ paths:
   /admin/corporate_card_transactions/mark_personal/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Mark corporate card transactions as personal in bulk
       description: |
         Mark corporate card transactions as personal in bulk.
@@ -8399,7 +8340,7 @@ paths:
   /admin/corporate_card_transactions/unmark_personal:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Unmark a corporate card transaction which is marked as personal
       description: |
         Unmark a corporate card transaction which is marked as personal
@@ -8449,7 +8390,7 @@ paths:
   /admin/corporate_card_transactions/unmark_personal/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Unmark a corporate card transaction which is marked as personal in bulk
       description: |
         Unmark a corporate card transaction which is marked as personal in bulk.
@@ -8503,7 +8444,7 @@ paths:
   /admin/corporate_card_transactions/ignore:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Ignore a corporate card transaction
       description: |
         Ignore a corporate card transaction
@@ -8552,7 +8493,7 @@ paths:
   /admin/corporate_card_transactions/ignore/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Ignore corporate card transactions in bulk
       description: |
         Ignore corporate card transactions in bulk.
@@ -8606,7 +8547,7 @@ paths:
   /admin/corporate_card_transactions/undo_ignore:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Undo an ignored corporate card transaction
       description: |
         Undo an ignored corporate card transaction
@@ -8656,7 +8597,7 @@ paths:
   /admin/corporate_card_transactions/undo_ignore/bulk:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Undo an ignored corporate card transaction in bulk
       description: |
         Undo an ignored corporate card transaction in bulk.
@@ -8710,7 +8651,7 @@ paths:
   /admin/corporate_card_transactions/match:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Match corporate card transaction
       description: |
         Match corporate card transaction to expenses
@@ -8759,7 +8700,7 @@ paths:
   /admin/corporate_card_transactions/unmatch:
     post:
       tags:
-        - Corporate Card Transactions
+        - Corporate Cards
       summary: Unmatch corporate card transaction
       description: |
         Unmatch a matched corporate card transaction
@@ -8788,109 +8729,6 @@ paths:
                   data:
                     $ref: >-
                       #/components/schemas/corporate_card_transaction_unmatch_out
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/suggestions/expenses:
-    post:
-      tags:
-        - Suggestions
-      summary: Get expense suggestions
-      description: |
-        Get expense suggestions to match with card transactions
-      operationId: suggestions_expenses
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/suggestions_expense_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - data
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/suggestions/corporate_card_transactions:
-    post:
-      tags:
-        - Suggestions
-      summary: Get card transaction suggestions
-      description: |
-        Get card transaction suggestions to match with expenses
-      operationId: suggestions_card_transactions
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/suggestions_card_transaction_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - data
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: >-
-                        #/components/schemas/corporate_card_transaction_assign_out
         '400':
           description: Bad request
           content:
@@ -9521,7 +9359,7 @@ paths:
   /admin/budget_usages:
     get:
       tags:
-        - Get Budget Usages
+        - Budgets
       summary: List Budget Usages
       operationId: get-budget_usages
       parameters:
