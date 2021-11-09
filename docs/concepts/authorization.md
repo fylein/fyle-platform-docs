@@ -18,12 +18,12 @@ The body will have the following data:
 
 * grant_type should be the literal string 'refresh_token'
 * refresh_token
-* client_id = <Your Client Id>
-* client_secret = <Your Client Secret>
+* client_id
+* client_secret
 
 This will return the access token which has to be attached to the header of every API call.
 
-The access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. See the API reference for more details.
+The access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. 
 
 The client is responsible for getting a new access token when it expires.
 
@@ -33,10 +33,10 @@ While building a public application that you will share with many users, you'll 
 
 The query parameters that need to be sent along with this URL are:
 
-* client_id = <Your Client Id>
-* response_type = <Your Response Type> (eg.- code, token)
-* redirect_uri = <Your Redirect URI>
-* State = <Current State of your Application>
+* client_id
+* response_type (code, token)
+* redirect_uri
+* state
 
 The authorizing user will be sent to a page like this:
 
@@ -45,3 +45,9 @@ The authorizing user will be sent to a page like this:
 Once the user clicks yes, they will be redirected to the redirect URL registered by the client application during creation with the code.
 
 Rest of the steps are standard OAuth flows. We currently support the code flow. We plan on supporting PKCE shortly.
+
+At this point, you should have a refresh token and access token.
+
+Note that your access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. 
+
+The client is responsible for getting a new access token when it expires.
