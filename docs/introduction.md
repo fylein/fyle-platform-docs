@@ -1,4 +1,4 @@
-# Overview
+# Introduction
 
 Let's face it. Most API docs are super-boring and have words like Authorization, REST APIs and resources and all that.
 
@@ -14,11 +14,7 @@ Let's set the stage first. We have two characters, John and Amy.
 * John wants to access his Fyle data (e.g. expenses) and do something with it. Maybe create a CSV or push the data to another system
 * John asks Amy who is a coding ninja warrior for help
 
-If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. 
-
-If John's requirements are straightforward, Amy could skip a few steps and use Fyle's [Zapier integration](../integrations/zapier.md) to get the job done. 
-
-If the requirements are complex, she'll need to write an application for John.
+If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. If the requirements are complex, she'll need to write an application for John.
 
 * Amy should have a Fyle account. If she doesn't, she can be invited to join Fyle by an admin (this could be John or someone else)
 * She needs to create an application by going to Fyle's developer page
