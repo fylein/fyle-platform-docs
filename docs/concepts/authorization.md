@@ -40,6 +40,9 @@ The query parameters that need to be sent along with this URL are:
 
 The authorizing user will be sent to a page like this:
 
+<!--
+focus: false
+-->
 ![The stage](../../assets/images/concepts/authorization/authorization1.png)
 
 Once the user clicks yes, they will be redirected to the redirect URL registered by the client application during creation with the code.
@@ -51,3 +54,5 @@ At this point, you should have a refresh token and access token.
 Note that your access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. 
 
 The client is responsible for getting a new access token when it expires.
+
+The next step is to figure out which [data server](../concepts/data-server.md) contains data so that you can hit the relevant APIs hosted in the specific data server.

@@ -1,10 +1,12 @@
 # Introduction
 
+[Fyle](https://www.fylehq.com) is an expense management SaaS product. If you don't have a Fyle account, please visit our [website](https://www.fylehq.com).
+
+If you're looking to build applications that interface with Fyle, then you're in the right place.
+
 Let's face it. Most API docs are super-boring and have words like Authorization, REST APIs and resources and all that.
 
-This doc is no different :(
-
-However, we will try to make it a little more fun and accessible.
+We strive to make it a little more fun and accessible.
 
 Let's set the stage first. We have two characters, John and Amy.
 
@@ -22,6 +24,9 @@ If you're reading this, you're likely an Amy. Amy can whip up some frontend or b
 * Her code has to make the right REST API calls to either read data that John can read or perform some modifications on behalf of John
 * She can also register callback URLs that can get called by Fyle when certain events occur
 
+<!--
+focus: false
+-->
 ![The stage](../assets/images/overview/overview1.png)
 
 The application she writes will have to talk to an authorization server to refresh tokens, log out etc. The authorization server also tells the application which data server hosts the actual data for John. Subsequent calls to read or write data via REST APIs have to hit the right data server.

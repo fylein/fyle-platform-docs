@@ -31,7 +31,7 @@ Next, run a simple curl command to confirm that you are hitting the right cluste
 
 You should see a successful result like this:
 
-```
+```json json_schema
 {
   "data": {
     "org": {
