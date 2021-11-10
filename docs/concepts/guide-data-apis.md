@@ -1,22 +1,37 @@
 # Guide to Data APIs
 
-If you're reading this section, you should already be familiar with:
+At this point, you should already be familiar with:
 * [Creating an application](./concepts/application.md) in Fyle
 * [Authorizing the application](./concepts/authorization.md) using the authorization server
 * [Figuring out which cluster](./concepts/cluster.md) you should be hitting to access your data
 
+## Security
 
-## Role-specific APIs
+Every data API call that you make has to have an authorization header like this:
 
-## Resources
+```
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+```
 
-## Filtering
+If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](./concepts/authorization.md).
 
-## Sorting
+## Resources and role-specific APIs
 
-## Ordering
+Resources are business objects that are relevant to expense management. Typical resources that you'll see are: `expenses`, `reports`, `employees`, `projects` etc. Not all roles have access to all resources. Access to these resources are via role-specific APIs.
 
-## Offset and limit
+Every user in Fyle has one or more roles. Every application that you write assumes that the user who will authorize the application has certain roles. Each role has access to specific set of APIs.
+
+E.g. if John has the role `["FYLER"]` only, then John will only have access to fyler APIs. If John has roles `["FYLER","ADMIN"]`, then John has access to both fyler and admin APIs. Therefore, the application that John authorizes also has access to both fyler and admin APIs.
+
+> #### 💡 Finer access control is coming soon
+>
+> In the not too distant future, John will be able to grant an application only `FYLER` role even though he has both `FYLER` and `ADMIN` roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
+
+All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity.
+
+E.g. `/fyler/expenses` means the application is accessing `expenses` resources in the `FYLER` role i.e. their personal expenses. `/admin/expenses` means the application is accessing expenses as an admin and will be able to see the entire org's expenses.
+
+Some roles have read access and some have create/update access to resources. 
 
 ## Rate limits
 
@@ -25,3 +40,10 @@ We have a limit on the number of requests that can be made per second from a par
 ## Safety Precautions
 We have a Denial of Service (DoS) attack prevention mechanisms in place to safeguard the system against suspicious use. The Denial of Service (DoS) prevention limits exposure to request flooding, whether malicious or as a result of a misconfigured client. The DoS prevention keeps track of the number of requests from a connection per second. So, certain precautions and standards should be maintained while developing integrations to avoid them from getting blocked.
 
+## Filtering
+
+## Sorting
+
+## Ordering
+
+## Offset and limit
