@@ -1,13 +1,13 @@
-# Data Server
+# Clusters
 
-Once the app is authorized i.e. has an access token, the next thing is to figure out which data server to GET or POST calls.
+Once the app is authorized i.e. has an access token, the next thing is to figure out which cluster hosts your data. Your data will available only in one cluster - so it is important to get this right.
 
-At this time there are two possible data servers:
+At this time there are two possible clusters:
 * https://us1.fylehq.com
 * https://in1.fylehq.com 
 
 
-You can do that by 
+To figure out which one is right for you, you can use a call like this:
 
 ```
     curl --location --request POST "https://accounts.fylehq.com/oauth/cluster" --header 'Authorization: Bearer ${access_token}'
@@ -21,7 +21,7 @@ This will return something like:
 }
 ```
 
-Use the `${CLUSTER_DOMAIN}` for all subsequent data calls. If you use the wrong server, your API calls will error out.
+Use the `${CLUSTER_DOMAIN}` for all subsequent data calls. If you use the wrong cluster, your API calls will error out.
 
 Next, run a simple curl command to confirm that you are hitting the right cluster.
 
@@ -54,5 +54,10 @@ You should see a successful result like this:
   }
 }
 ```
+
+> #### 💡 Do not hard-code the cluster endpoint in your app
+>
+> Your data may be moved to a different cluster endpoint in the future for balancing load or for any other reason. Do not hardcode these in your application code. Instead, fetch the cluster endpoint everytime you refresh your access token.
+
 
 You're now set to make additional API calls. Next, head over to the read up about [common API structures and patterns](./concepts/api-patterns.md).

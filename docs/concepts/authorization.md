@@ -55,4 +55,4 @@ Note that your access token is valid for one hour. Every subsequent request shou
 
 The client is responsible for getting a new access token when it expires.
 
-The next step is to figure out which [data server](../concepts/data-server.md) contains data so that you can hit the relevant APIs hosted in the specific data server.
+The next step is to figure out which [cluster](../concepts/cluster.md) contains data so that you can hit the right API endpoints.
