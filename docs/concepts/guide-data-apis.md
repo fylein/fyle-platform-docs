@@ -1,12 +1,14 @@
-# API Patterns
+# Guide to Data APIs
+
+If you're reading this section, you should already be familiar with:
+* [Creating an application](./concepts/application.md) in Fyle
+* [Authorizing the application](./concepts/authorization.md) using the authorization server
+* [Figuring out which cluster](./concepts/cluster.md) you should be hitting to access your data
+
 
 ## Role-specific APIs
 
-## Creating a resource
-
-## Updating a resource
-
-## Deleting a resource
+## Resources
 
 ## Filtering
 
