@@ -10,9 +10,9 @@ info:
     These APIs are used by applications that operate on the Fyler's behalf. Very
     commonly, it is to enable creation of expenses and reports.
 servers:
-  - url: 'https://us1.fylehq.com/platform/v1'
+  - url: 'https://us1.fylehq.com/platform/v1beta'
     description: US Region Server
-  - url: 'https://in1.fylehq.com/platform/v1'
+  - url: 'https://in1.fylehq.com/platform/v1beta'
     description: India Region Server
 components:
   securitySchemes:
@@ -1378,182 +1378,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed'
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
-    timestamptz_pst:
-      type: string
-      nullable: true
-      example: '2020-06-01T01:18:19.292-08:00'
-    expense_in:
-      type: object
-      additionalProperties: false
-      properties:
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_pst'
-          description: |
-            signifies when this expense was made.
-            This date cannot be in future.
-        source:
-          type: string
-          description: >
-            The name of the client app which is creating the expense.
-
-            if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: SLACK_APP
-        merchant:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: >
-            String denoting the name of the vendor to which the Expense was
-            made.
-          example: Uber
-        currency:
-          $ref: '#/components/schemas/currency'
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        purpose:
-          type: string
-          example: Team lunch
-        cost_center_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 1049
-        category_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 49058
-        project_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 92895
-        source_account_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          example: acwbl222wlg
-        tax_amount:
-          type: number
-          nullable: true
-          description: Tax amount as setup by your organisation.
-        tax_group_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          nullable: true
-        is_billable:
-          type: boolean
-          nullable: true
-          example: true
-          description: This fields marks whether a given expense is billable a not.
-        is_reimbursable:
-          type: boolean
-          nullable: true
-          description: This fields marks whether a given expense is reimbursable a not.
-          example: true
-        distance:
-          type: number
-          nullable: true
-          description: Actual distance travelled by employee in travel related expenses.
-        distance_unit:
-          type: string
-          nullable: true
-          description: Unit of distance travelled.
-          enum:
-            - KM
-            - MILES
-            - null
-          example: MILES
-        mileage_calculated_distance:
-          type: number
-          nullable: true
-          description: Distance compluted by Fyle in mileage expenses.
-        mileage_calculated_amount:
-          type: number
-          nullable: true
-          description: Amount compluted by Fyle in mileage expenses.
-        mileage_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 9080
-        mileage_is_round_trip:
-          type: boolean
-          nullable: true
-          description: Flag stating whether this was a round trip or not.
-        per_diem_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 583
-        num_days:
-          type: integer
-          nullable: true
-          description: >
-            Specific to per diem related expenses, number of days ofr which per
-            diem claim is made.
-          example: 2
-        started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        travel_classes:
-          description: >
-            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-            category.
-
-            index 0 holds onward journey class, index 1 holds return journey
-            travel class.
-          type: array
-          minItems: 0
-          maxItems: 2
-          items:
-            type: string
-          example:
-            - ECONOMY
-            - BUSINESS
-        hotel_is_breakfast_provided:
-          type: boolean
-          nullable: true
-          description: |
-            This field is applicable for only `Hotel` category.
-        locations:
-          description: >
-            This field will be present for travel related categories.
-
-            For travel between Place A to Place B, this array will contain two
-            items, From location at array index 0 and To location at array index
-            1.
-
-            For travel between Place A to Place c and stopping at Place B, this
-          type: array
-          minItems: 0
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/location'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-    fyler_expense_in:
-      allOf:
-        - type: object
-          required:
-            - claim_amount
-          properties:
-            claim_amount:
-              $ref: '#/components/schemas/amount'
-        - $ref: '#/components/schemas/expense_in'
     expense_add_comment_action_in:
       type: object
       required:
@@ -1645,6 +1469,11 @@ components:
           $ref: '#/components/schemas/is_enabled'
         webhook_url:
           $ref: '#/components/schemas/webhook_url'
+    amount:
+      type: number
+      description: |
+        amount of money
+      example: 47.99
     report_out:
       type: object
       additionalProperties: false
@@ -1942,6 +1771,177 @@ components:
           type: string
           nullable: true
           example: report.created
+    timestamptz_pst:
+      type: string
+      nullable: true
+      example: '2020-06-01T01:18:19.292-08:00'
+    expense_in:
+      type: object
+      additionalProperties: false
+      properties:
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: |
+            signifies when this expense was made.
+            This date cannot be in future.
+        source:
+          type: string
+          description: >
+            The name of the client app which is creating the expense.
+
+            if its a thrid party app, it prefixed with TPA_.
+
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
+            not
+
+            passed, source is saved as TPA.
+          example: SLACK_APP
+        merchant:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: >
+            String denoting the name of the vendor to which the Expense was
+            made.
+          example: Uber
+        currency:
+          $ref: '#/components/schemas/currency'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organisation.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          type: boolean
+          nullable: true
+          example: true
+          description: This fields marks whether a given expense is billable a not.
+        is_reimbursable:
+          type: boolean
+          nullable: true
+          description: This fields marks whether a given expense is reimbursable a not.
+          example: true
+        distance:
+          type: number
+          nullable: true
+          description: Actual distance travelled by employee in travel related expenses.
+        distance_unit:
+          type: string
+          nullable: true
+          description: Unit of distance travelled.
+          enum:
+            - KM
+            - MILES
+            - null
+          example: MILES
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: Distance compluted by Fyle in mileage expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: Amount compluted by Fyle in mileage expenses.
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 9080
+        mileage_is_round_trip:
+          type: boolean
+          nullable: true
+          description: Flag stating whether this was a round trip or not.
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+        num_days:
+          type: integer
+          nullable: true
+          description: >
+            Specific to per diem related expenses, number of days ofr which per
+            diem claim is made.
+          example: 2
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          description: >
+            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
+            category.
+
+            index 0 holds onward journey class, index 1 holds return journey
+            travel class.
+          type: array
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - ECONOMY
+            - BUSINESS
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+        locations:
+          description: >
+            This field will be present for travel related categories.
+
+            For travel between Place A to Place B, this array will contain two
+            items, From location at array index 0 and To location at array index
+            1.
+
+            For travel between Place A to Place c and stopping at Place B, this
+          type: array
+          minItems: 0
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/location'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+    fyler_expense_in:
+      allOf:
+        - type: object
+          required:
+            - claim_amount
+          properties:
+            claim_amount:
+              $ref: '#/components/schemas/amount'
+        - $ref: '#/components/schemas/expense_in'
     policy_test_out:
       type: object
       properties:
@@ -4448,56 +4448,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-    post:
-      tags:
-        - Expenses
-      summary: Create or update expense
-      description: |
-        Create or update an expense.
-      operationId: fyler-expenses-post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/fyler_expense_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
   '/fyler/expenses/{id}':
     delete:
       tags:

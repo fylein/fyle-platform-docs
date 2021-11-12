@@ -9,9 +9,9 @@ info:
     name: Platform Beta
     email: platform-beta@fylehq.com
 servers:
-  - url: 'https://us1.fylehq.com/platform/v1'
+  - url: 'https://us1.fylehq.com/platform/v1beta'
     description: US Region Server
-  - url: 'https://in1.fylehq.com/platform/v1'
+  - url: 'https://in1.fylehq.com/platform/v1beta'
     description: India Region Server
 components:
   securitySchemes:
@@ -308,7 +308,6 @@ components:
       additionalProperties: false
       required:
         - name
-        - sub_project
         - category_ids
         - is_enabled
       properties:
@@ -1409,6 +1408,43 @@ components:
           description: >
             List of mileage rate's vehicle types that this employee is allowed
             to access. If null, then there are no restrictions
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    admin_file_in:
+      allOf:
+        - $ref: '#/components/schemas/file_in'
+        - type: object
+          required:
+            - user_id
+          properties:
+            user_id:
+              allOf:
+                - $ref: '#/components/schemas/fk_string'
     file_out:
       type: object
       properties:
@@ -1452,43 +1488,6 @@ components:
           type: string
           description: |
             Link to download this file
-    file_in:
-      type: object
-      required:
-        - name
-        - type
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        name:
-          type: string
-          description: |
-            Name of the uploaded file.
-          example: uber_expenses_vmrpw.pdf
-        type:
-          type: string
-          enum:
-            - INTEGRATION
-            - RECEIPT
-          description: >
-            Indicates whether this file original size or encrypted or its
-            thumbnail image.
-          example: RECEIPT
-        password:
-          type: string
-          description: |
-            Password which required to unlock the file.
-          example: SuperSecretPassword
-    admin_file_in:
-      allOf:
-        - $ref: '#/components/schemas/file_in'
-        - type: object
-          required:
-            - user_id
-          properties:
-            user_id:
-              allOf:
-                - $ref: '#/components/schemas/fk_string'
     accounting_export_out:
       type: object
       properties:
@@ -2250,178 +2249,6 @@ components:
       description: |
         amount of money
       example: 47.99
-    expense_in:
-      type: object
-      additionalProperties: false
-      properties:
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_pst'
-          description: |
-            signifies when this expense was made.
-            This date cannot be in future.
-        source:
-          type: string
-          description: >
-            The name of the client app which is creating the expense.
-
-            if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: SLACK_APP
-        merchant:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: >
-            String denoting the name of the vendor to which the Expense was
-            made.
-          example: Uber
-        currency:
-          $ref: '#/components/schemas/currency'
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        purpose:
-          type: string
-          example: Team lunch
-        cost_center_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 1049
-        category_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 49058
-        project_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 92895
-        source_account_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          example: acwbl222wlg
-        tax_amount:
-          type: number
-          nullable: true
-          description: Tax amount as setup by your organisation.
-        tax_group_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          nullable: true
-        is_billable:
-          type: boolean
-          nullable: true
-          example: true
-          description: This fields marks whether a given expense is billable a not.
-        is_reimbursable:
-          type: boolean
-          nullable: true
-          description: This fields marks whether a given expense is reimbursable a not.
-          example: true
-        distance:
-          type: number
-          nullable: true
-          description: Actual distance travelled by employee in travel related expenses.
-        distance_unit:
-          type: string
-          nullable: true
-          description: Unit of distance travelled.
-          enum:
-            - KM
-            - MILES
-            - null
-          example: MILES
-        mileage_calculated_distance:
-          type: number
-          nullable: true
-          description: Distance compluted by Fyle in mileage expenses.
-        mileage_calculated_amount:
-          type: number
-          nullable: true
-          description: Amount compluted by Fyle in mileage expenses.
-        mileage_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 9080
-        mileage_is_round_trip:
-          type: boolean
-          nullable: true
-          description: Flag stating whether this was a round trip or not.
-        per_diem_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 583
-        num_days:
-          type: integer
-          nullable: true
-          description: >
-            Specific to per diem related expenses, number of days ofr which per
-            diem claim is made.
-          example: 2
-        started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        travel_classes:
-          description: >
-            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-            category.
-
-            index 0 holds onward journey class, index 1 holds return journey
-            travel class.
-          type: array
-          minItems: 0
-          maxItems: 2
-          items:
-            type: string
-          example:
-            - ECONOMY
-            - BUSINESS
-        hotel_is_breakfast_provided:
-          type: boolean
-          nullable: true
-          description: |
-            This field is applicable for only `Hotel` category.
-        locations:
-          description: >
-            This field will be present for travel related categories.
-
-            For travel between Place A to Place B, this array will contain two
-            items, From location at array index 0 and To location at array index
-            1.
-
-            For travel between Place A to Place c and stopping at Place B, this
-          type: array
-          minItems: 0
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/location'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-    admin_expense_in:
-      allOf:
-        - type: object
-          required:
-            - admin_amount
-            - user_id
-          properties:
-            admin_amount:
-              $ref: '#/components/schemas/amount'
-            user_id:
-              allOf:
-                - $ref: '#/components/schemas/user_id'
-              readOnly: false
-        - $ref: '#/components/schemas/expense_in'
     advance_out_embed:
       type: object
       nullable: true
@@ -7100,44 +6927,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/403'
   /admin/files:
-    get:
-      tags:
-        - Files
-      summary: List files
-      operationId: files_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - count
-                  - offset
-                  - data
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/file_out'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
     post:
       operationId: files_post
       tags:
@@ -7455,52 +7244,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-    post:
-      tags:
-        - Expenses
-      summary: Create or update an expense
-      description: |
-        Create or update an expense.
-      operationId: expenses_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/admin_expense_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
   /admin/advance_requests:
     get:
       tags:

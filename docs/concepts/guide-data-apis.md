@@ -10,7 +10,7 @@ At this point, you should already be familiar with:
 Every data API call that you make has to have an authorization header like this:
 
 ```
-    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](./concepts/authorization.md).
@@ -40,3 +40,10 @@ We have a limit on the number of requests that can be made per second from a par
 ## Safety Precautions
 We have a Denial of Service (DoS) attack prevention mechanisms in place to safeguard the system against suspicious use. The Denial of Service (DoS) prevention limits exposure to request flooding, whether malicious or as a result of a misconfigured client. The DoS prevention keeps track of the number of requests from a connection per second. So, certain precautions and standards should be maintained while developing integrations to avoid them from getting blocked.
 
+## Filtering
+
+Section to be written
+
+## Ordering
+
+Section to be written
