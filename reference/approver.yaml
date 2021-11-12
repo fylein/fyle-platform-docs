@@ -425,6 +425,54 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_action_with_expense_ids_added_in:
+      allOf:
+        - type: object
+          additionalProperties: false
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              description: |
+                id of report, to which the expenses are to be added
+              example: rpa21A2rdj2
+        - type: object
+          additionalProperties: false
+          required:
+            - expense_ids
+          properties:
+            expense_ids:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+              example:
+                - txelntgwgwll
+    report_action_with_expense_ids_ejected_in:
+      allOf:
+        - type: object
+          additionalProperties: false
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              description: |
+                id of report, from which the expenses are to be ejected
+              example: rpa21A2rdj2
+        - type: object
+          additionalProperties: false
+          required:
+            - expense_ids
+          properties:
+            expense_ids:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+              example:
+                - txelntgwgwll
     is_enabled:
       type: boolean
       description: >
@@ -1556,6 +1604,99 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/report_action_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/reports/add_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Add expenses to a report
+      description: Add expenses to a report.
+      operationId: add-expenses-to-report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_with_expense_ids_added_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/reports/eject_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Eject expenses from a report
+      description: Eject expenses from a report
+      operationId: Eject-expenses-from-report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: >-
+                    #/components/schemas/report_action_with_expense_ids_ejected_in
                 reason:
                   $ref: '#/components/schemas/reason'
       responses:
