@@ -4083,6 +4083,9 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your Expenses data.
+  - name: Employees
+    description: |
+      These APIs gives you access to manage your organisation's Employees
   - name: Merchants
     description: >
       This API gives you access to merchants, primarily to help with
@@ -5718,6 +5721,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /fyler/employees: null
   /fyler/tax_groups:
     get:
       tags:
@@ -5759,3 +5763,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  get:
+    tags:
+      - Employees
+    summary: List employees
+    operationId: employees_list
+    parameters:
+      - $ref: ../../components/parameters/created_at.yaml
+      - $ref: ../../components/parameters/updated_at.yaml
+      - $ref: ../../components/parameters/is_enabled.yaml
+      - $ref: ../../components/parameters/order.yaml
+      - $ref: ../../components/parameters/offset.yaml
+      - $ref: ../../components/parameters/limit.yaml
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - count
+                - offset
+                - data
+              additionalProperties: false
+              properties:
+                count:
+                  $ref: ../../components/schemas/count.yaml
+                offset:
+                  $ref: ../../components/schemas/offset.yaml
+                data:
+                  type: array
+                  items:
+                    $ref: ../../components/schemas/employee.yaml#/fyler_employee_out
+      '401':
+        description: Unauthorized request
+        content:
+          application/json:
+            schema:
+              $ref: ../../components/schemas/401.yaml
