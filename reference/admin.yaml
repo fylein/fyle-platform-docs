@@ -1408,6 +1408,43 @@ components:
           description: >
             List of mileage rate's vehicle types that this employee is allowed
             to access. If null, then there are no restrictions
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    admin_file_in:
+      allOf:
+        - $ref: '#/components/schemas/file_in'
+        - type: object
+          required:
+            - user_id
+          properties:
+            user_id:
+              allOf:
+                - $ref: '#/components/schemas/fk_string'
     file_out:
       type: object
       properties:
@@ -1451,43 +1488,6 @@ components:
           type: string
           description: |
             Link to download this file
-    file_in:
-      type: object
-      required:
-        - name
-        - type
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        name:
-          type: string
-          description: |
-            Name of the uploaded file.
-          example: uber_expenses_vmrpw.pdf
-        type:
-          type: string
-          enum:
-            - INTEGRATION
-            - RECEIPT
-          description: >
-            Indicates whether this file original size or encrypted or its
-            thumbnail image.
-          example: RECEIPT
-        password:
-          type: string
-          description: |
-            Password which required to unlock the file.
-          example: SuperSecretPassword
-    admin_file_in:
-      allOf:
-        - $ref: '#/components/schemas/file_in'
-        - type: object
-          required:
-            - user_id
-          properties:
-            user_id:
-              allOf:
-                - $ref: '#/components/schemas/fk_string'
     accounting_export_out:
       type: object
       properties:
@@ -6927,44 +6927,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/403'
   /admin/files:
-    get:
-      tags:
-        - Files
-      summary: List files
-      operationId: files_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - count
-                  - offset
-                  - data
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/file_out'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
     post:
       operationId: files_post
       tags:
