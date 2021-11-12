@@ -61,4 +61,4 @@ You should see a successful result like this:
 > Your data may be moved to a different cluster endpoint in the future for balancing load or for any other reason. Do not hardcode these in your application code. Instead, fetch the cluster endpoint everytime you refresh your access token.
 
 
-You're now set to make API calls to read and write your data. This [Guide to Data APIs](./concepts/guide-data-apis.md) would be a great place to go next.
+You're now set to make API calls to read and write your data. This [Guide to Data APIs](./guide-data-apis.md) would be a great place to go next.
