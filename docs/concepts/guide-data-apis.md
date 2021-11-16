@@ -1,7 +1,7 @@
 # Guide to Data APIs
 
 At this point, you should already be familiar with:
-* [Different types of applications](./concepts/types-of-applications.md) in Fyle
+* [Different types of applications](./concepts/types-of-application.md) in Fyle
 * [Figuring out which cluster](./concepts/cluster.md) you should be hitting to access your data
 
 ## Security
