@@ -1,6 +1,6 @@
 # Internal Application
 
-An internal application is one that will be used by a specific user or organization only. This is the most common type of application that will be built by Fyle customers. If you are a Fyle partner, you will likely want to check out [OAuth 2.0 applications](./oauth2-applications.md).
+An internal application is one that will be used by a specific user or organization only. This is the most common type of application that will be built by Fyle customers. If you are a Fyle partner, you will likely want to check out [OAuth 2.0 applications](./oauth2-application.md).
 
 <!-- theme: warning -->
 
