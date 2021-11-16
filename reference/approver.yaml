@@ -132,6 +132,59 @@ components:
       schema:
         type: string
         example: eq.true
+    code:
+      in: query
+      name: code
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        name=in.(value1,value2)
+      schema:
+        type: string
+        example: eq.c2344
+    id:
+      in: query
+      name: id
+      description: |
+        A resource ID
+      schema:
+        type: string
+        example:
+          - eq.ouwruogwnngg
+    name:
+      in: query
+      name: name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        name=in.(value1,value2)
+      schema:
+        type: string
+        example: eq.c2344
+    org_id:
+      in: query
+      name: org_id
+      description: |
+        The unique id of the organization to which the object is associated.
+      schema:
+        type: string
+        example: org_id=eq.orwruogwnngg
+    sub_category:
+      in: query
+      name: sub_category
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        sub_category=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Desk*
+    system_category:
+      in: query
+      name: system_category
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        system_category=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Food*
   schemas:
     '400':
       type: object
@@ -1482,6 +1535,47 @@ components:
             project.
           items:
             type: integer
+    category_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the category.
+        sub_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Turbo charged
+          description: Represents the name of the sub_category.
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        display_name:
+          type: string
+          maxLength: 255
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
+        code:
+          $ref: '#/components/schemas/code'
 tags:
   - name: Advances
     description: |
@@ -1977,6 +2071,48 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/project_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/categories:
+    get:
+      tags:
+        - Categories
+      summary: List categories
+      operationId: categories_list
+      parameters:
+        - $ref: '#/components/parameters/code'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/display_name'
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/is_enabled'
+        - $ref: '#/components/parameters/name'
+        - $ref: '#/components/parameters/org_id'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/sub_category'
+        - $ref: '#/components/parameters/system_category'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/category_out'
         '401':
           description: Unauthorized request
           content:
