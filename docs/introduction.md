@@ -27,7 +27,7 @@ If you're reading this, you're likely an Amy. Amy can whip up some frontend or b
 <!--
 focus: false
 -->
-![The stage](../assets/images/overview/overview1.png)
+![The stage](../assets/images/introduction/introduction2.png)
 
 The application she writes will have to talk to an authorization server to refresh tokens, log out etc. The authorization server also tells the application which data server hosts the actual data for John. Subsequent calls to read or write data via REST APIs have to hit the right data server.
 
