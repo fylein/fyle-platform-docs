@@ -34,4 +34,4 @@ focus: false
 
 That's a very high-level summary of how to use Fyle's APIs. The devil, as always, is in the details. 
 
-First things first, let's find out how to [create an application](./concepts/application.md) in Fyle.
+Next, you'd want to understand the [Types of Applications](./concepts/types-of-applications.md) in Fyle and how to get them to work for you.
