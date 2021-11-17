@@ -34,6 +34,6 @@ Copy over the these three critical pieces of information:
 
 Client secret and refresh token should be treated as confidential - don't post it on your twitter profile.
 
-To get an access token, you need to POST to the [token API](./missing-link). The access token is valid for 1 hour.
+To get an access token, you need to POST to the [token API](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token) with `grant_type` as `refresh_token`. The access token is valid for 1 hour.
 
 As the next step, you need to figure out the [cluster endpoint](./cluster.md). Once you have the access token and cluster endpoint, go over the short [guide to data APIs](./guide-data-apis.md).
