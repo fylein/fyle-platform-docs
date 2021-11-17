@@ -34,7 +34,7 @@ Some roles have read access and some have create/update access to resources.
 
 ## Filtering
 
-Our get APIs support very rich filtering via query parameters, inspired by the [Postgrest project](https://postgrest.org/en/v8.0/api.html#horizontal-filtering-rows).
+Our GET APIs support very rich filtering via query parameters, inspired by the [Postgrest project](https://postgrest.org/en/v8.0/api.html#horizontal-filtering-rows).
 
 Let's take an example. Let's say you are interested in accessing all expenses in the organization where the amount is greater than USD 10. You'll make a call like this:
 
@@ -50,18 +50,30 @@ GET /admin/expenses?amount=gt.10&project_id=eq.pr123
 
 Here's the full list of operators supported:
 
-|-----|-----------|-----------|
 | op  |  Meaning  | Examples  |
 |-----|-----------|-----------|
 | eq  | Equals     | project_id=eq.pr123 |
 | lt  | Less than  | amount=lt.100 |
-| lte | Less than or equal to  | amount=lte.100 |
+| lte | Less than or equal to  | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
 | gt | Greater than  | amount=gt.100 |
-|-----|-----------|-----------|
+| gte | Greater than or equal to  | updated_at=gte.2020-06-01T00:00:00.000-08:00 |
+| in | Is one of  | id=in.(id1,id2,id3) |
 
-## Ordering
+## Ordering, Offset and Limit
 
-Section to be written
+Every GET API call is paginated. Each page can contain max of 100 elements. To indicate exactly which elements you want,
+you'll need to pass three additional parameters;
+
+* order
+* offset
+* limit
+
+The following example will get the top 100 most expensive expenses with a specific project
+```
+GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=100
+```
+
+In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit.
 
 ## Rate limits
 
