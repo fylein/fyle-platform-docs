@@ -116,6 +116,13 @@ components:
       schema:
         type: string
         example: like.Outbound*
+    q:
+      in: query
+      name: q
+      description: A search query to filter the results.
+      schema:
+        type: string
+        example: Ritas
   schemas:
     '400':
       type: object
@@ -1981,30 +1988,6 @@ components:
                 description: |
                   Indicates whether the message is shown in popup window or not.
                 example: false
-    report_action_with_expenses_ids_to_add:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - expense_ids
-      properties:
-        id:
-          type: string
-          description: |
-            id of report, to which the expenses are to be added
-          example: rpa21A2rdj2
-        expense_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - txelntgwgwll
-    reason:
-      type: string
-      description: |
-        Explanation to the action if provided by the user
-      example: All bills are in order
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2024,6 +2007,11 @@ components:
               - $ref: '#/components/schemas/id_string'
           example:
             - txelntgwgwll
+    reason:
+      type: string
+      description: |
+        Explanation to the action if provided by the user
+      example: All bills are in order
     advance_out_embed:
       type: object
       nullable: true
@@ -4612,6 +4600,7 @@ paths:
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/q'
       responses:
         '200':
           description: OK
@@ -4917,52 +4906,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /fyler/reports/add_expenses:
-    post:
-      tags:
-        - Reports
-      summary: Add expenses to a report
-      description: Add expenses to a report
-      operationId: add-expenses-to-report
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/report_action_with_expenses_ids_to_add'
-                reason:
-                  $ref: '#/components/schemas/reason'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/report_out'
-        '400':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
   /fyler/reports/eject_expenses:
     post:
       tags:
