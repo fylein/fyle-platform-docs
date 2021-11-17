@@ -8,16 +8,17 @@ This type of application is generally built by partners and are used by multiple
 > If you're considering building an OAuth 2.0 application, do send us a note at platform-beta@fylehq.com. We'd love to understand your use-case and explore potential for partnership.
 
 
+
+Login to Fyle by going to https://accounts.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+
+On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
+
 <!-- theme: warning -->
 
 > #### 💡 Currently, only admins can create applications
 >
 >  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
 
-
-Login to Fyle by going to https://accounts.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
-
-On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 
 <!--
 focus: false
@@ -33,64 +34,18 @@ You can add the redirect URIs that you want to allow in the OAuth 2.0 flows. Aft
 * client_id
 * client_secret
 
+We currently support the "Authorization Code" flow and "Refresh Token Flow" of OAuth 2.0. If you want a primer on these flows, head to this great [blogpost](https://darutk.medium.com/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85), but come back soon! We plan on adding support for PKCE Authorization request in the near future.
 
-Next, we'll talk about how to [authorize the application](../concepts/authorization.md).
+When a user authorizes the app, they will be redirected to the redirect URI above with the `code` and `state` parameter. At this point, your web application will need to pass this to your server which stores the `client_id` and `client_secret`.
 
-# Authorization
+Your backend server will have to make a OAuth 2.0 token call ([API reference](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token)) and send in the code. You will receive the following two pieces of information back:
 
-Authorization typically involves two steps:
+* refresh_token - which is valid for a year
+* access_token - which is valid for 1 hour
 
-1. Getting a refresh token - this represents the fact that a end-user has authorized this piece of code to act on their behalf. The refresh token is long-lived ~1 yr
-2. Using the refresh token, the application should get an access token which is short-lived (~1 hr). All data operation API calls should only include the access token
+You can store the refresh_token in the backend as you might need it again later.
 
+Once the access token expires, you'll need to get a new access token. You need to POST to the [token endpoint](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token) with `grant_type` as `refresh_token`. The access token is valid for 1 hour.
 
-Step 1 differs based on whether your app is an internal app or an OAuth 2.0 app. Step 2 is identical for both types of apps.
+As the next step, you need to figure out the [cluster endpoint](./cluster.md). Once you have the access token and cluster endpoint, go over the short [guide to data APIs](./guide-data-apis.md).
 
-## Internal app
-
-For internal apps, you will get the refresh token, client id and client secret when creating the application. You can get the access token using an HTTP POST to the token URL. This returns a new access token.
-
-POST https://accounts.fylehq.com/api/oauth/token
-
-The body will have the following data:
-
-* grant_type should be the literal string 'refresh_token'
-* refresh_token
-* client_id
-* client_secret
-
-This will return the access token which has to be attached to the header of every API call.
-
-The access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. 
-
-The client is responsible for getting a new access token when it expires.
-
-## OAuth 2.0 application
-
-While building a public application that you will share with many users, you'll need to direct your users to the authorize URL https://accounts.fylehq.com/app/developers/#/oauth/authorize
-
-The query parameters that need to be sent along with this URL are:
-
-* client_id
-* response_type (code, token)
-* redirect_uri
-* state
-
-The authorizing user will be sent to a page like this:
-
-<!--
-focus: false
--->
-![The stage](../../assets/images/concepts/authorization/authorization1.png)
-
-Once the user clicks yes, they will be redirected to the redirect URL registered by the client application during creation with the code.
-
-Rest of the steps are standard OAuth flows. We currently support the code flow. We plan on supporting PKCE shortly.
-
-At this point, you should have a refresh token and access token.
-
-Note that your access token is valid for one hour. Every subsequent request should have an Authorization header with the access token. 
-
-The client is responsible for getting a new access token when it expires.
-
-The next step is to figure out which [cluster](../concepts/cluster.md) contains data so that you can hit the right API endpoints.
