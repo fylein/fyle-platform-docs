@@ -26,6 +26,7 @@ You can check the version by running
 
 ## Linting ##
 
+    openapi lint src/authorization/openapi.yaml
     openapi lint src/admin/openapi.yaml
     openapi lint src/fyler/openapi.yaml
     openapi lint src/approver/openapi.yaml
@@ -36,6 +37,7 @@ You can check the version by running
 
 ## Bundling ##
 
+    openapi bundle -o reference/authorization.yaml src/authorization/openapi.yaml
     openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
     openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
