@@ -8,12 +8,30 @@ This type of application is generally built by partners and are used by multiple
 > If you're considering building an OAuth 2.0 application, do send us a note at platform-beta@fylehq.com. We'd love to understand your use-case and explore potential for partnership.
 
 
+<!-- theme: warning -->
+
+> #### 💡 Currently, only admins can create applications
+>
+>  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
+
+
+Login to Fyle by going to https://accounts.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+
+On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
+
 <!--
 focus: false
 -->
-![Create OAuth 2.0 app](../../assets/images/concepts/application/application3.png)
+![Create internal app 1](../../assets/images/concepts/application/internal-application1.png)
 
-You can provide us with all the redirect URIs that you want Fyle to allow in OAuth 2. After clicking on ‘save’ you will be able to copy the Client Id, Client Secret.
+In the "Custom Apps" page, you will have the option to create a new app.
+
+Give your application a friendly name and a nice description and not "test test". Pick "OAuth 2.0" as the application type.
+
+You can add the redirect URIs that you want to allow in the OAuth 2.0 flows. After clicking on ‘save’ you will be able to copy the following pieces of information:
+
+* client_id
+* client_secret
 
 
 Next, we'll talk about how to [authorize the application](../concepts/authorization.md).

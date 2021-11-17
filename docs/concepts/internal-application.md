@@ -28,9 +28,9 @@ focus: false
 ![Create internal app 2](../../assets/images/concepts/application/internal-application2.png)
 
 Copy over the these three critical pieces of information:
-1. Client id
-2. Client secret
-3. Refresh token
+1. client_id
+2. client_secret
+3. refresh_token
 
 Client secret and refresh token should be treated as confidential - don't post it on your twitter profile.
 
