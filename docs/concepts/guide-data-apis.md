@@ -59,7 +59,7 @@ Here's the full list of operators supported:
 | gte | Greater than or equal to  | updated_at=gte.2020-06-01T00:00:00.000-08:00 |
 | in | Is one of  | id=in.(id1,id2,id3) |
 
-## Ordering, Offset and Limit
+## Pagination
 
 Every GET API call is paginated. Each page can contain max of 100 elements. To indicate exactly which elements you want,
 you'll need to pass three additional parameters;
