@@ -79,10 +79,10 @@ paths:
                 $ref: '#/components/schemas/401'
   /oauth/token:
     post:
-      summary: Get a new access token
+      summary: OAuth 2.0 token
       description: |
-        Get a new access token
-      operationId: auth_token_1
+        Exchange a code for a refresh token or get a new access token
+      operationId: oauth_token
       requestBody:
         required: true
         content:
@@ -92,16 +92,30 @@ paths:
               additionalProperties: false
               required:
                 - grant_type
-                - refresh_token
                 - client_id
                 - client_secret
               properties:
                 grant_type:
                   type: string
-                  example: refresh_token
+                  enum:
+                    - code
+                    - refresh_token
+                  description: >
+                    To get a refresh token for the first time, use `code`. If
+                    you are trying to get a
+
+                    new access token, then use `refresh_token`. Yes, it is
+                    confusing. That's OAuth 2.0 for you.
                 refresh_token:
                   type: string
                   example: xxxyyy.aaaa.aaa
+                  description: Send refresh_token to get a new access token
+                code:
+                  type: string
+                  example: aaaa.bbbbb.cccc
+                  description: >-
+                    Send code if you're trying to get a refresh token for the
+                    first time.
                 client_id:
                   type: string
                   example: tpaXXYYY
