@@ -7,8 +7,7 @@ You're probably here because you want to build some interesting applications or 
 Here are some quick links to important parts of the documentation:
 
 * [Introduction](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjE-introduction) section is the best place to start. You'll learn a bunch of concepts that are important before you start building.
-* [Application](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjE1NDM0NzI2-application) section walks you through how to register an app with Fyle.
-* [Authorization](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjE1NDM0NzI3-authorization) sections will talk about how to authorize the app to act on a user's behalf
+* [Types of Application](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI4MTQ2NTc1-types-of-application) section will help you decide which type of application is right for you and help you create them 
 * [Guide to APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is) will make it easier to understand how to use the APIs to the fullest
 * [Admin API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/YXBpOjQwNjU3MA-admin-ap-is) covers all the APIs your application will have access to if authorized by an admin
 * [Fyler API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/YXBpOjQ2MTc2NTg-fyler-ap-is) covers all the APIs your application will have access to if authorized by a fyler

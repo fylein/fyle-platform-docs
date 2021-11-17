@@ -1,8 +1,7 @@
 # Guide to Data APIs
 
 At this point, you should already be familiar with:
-* [Creating an application](./concepts/application.md) in Fyle
-* [Authorizing the application](./concepts/authorization.md) using the authorization server
+* [Different types of applications](./concepts/types-of-application.md) in Fyle
 * [Figuring out which cluster](./concepts/cluster.md) you should be hitting to access your data
 
 ## Security
@@ -13,7 +12,7 @@ Every data API call that you make has to have an authorization header like this:
     curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
-If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](./concepts/authorization.md).
+If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](./broken-link).
 
 ## Resources and role-specific APIs
 
@@ -33,17 +32,52 @@ E.g. `/fyler/expenses` means the application is accessing `expenses` resources i
 
 Some roles have read access and some have create/update access to resources. 
 
+## Filtering
+
+Our GET APIs support very rich filtering via query parameters, inspired by the [Postgrest project](https://postgrest.org/en/v8.0/api.html#horizontal-filtering-rows).
+
+Let's take an example. Let's say you are interested in accessing all expenses in the organization where the amount is greater than USD 10. You'll make a call like this:
+
+```
+GET /admin/expenses?amount=gt.10
+```
+
+If, in addition, you were interested in expenses tagged with a specific project id pr123, then the call would be something like this:
+
+```
+GET /admin/expenses?amount=gt.10&project_id=eq.pr123
+```
+
+Here's the full list of operators supported:
+
+| op  |  Meaning  | Examples  |
+|-----|-----------|-----------|
+| eq  | Equals     | project_id=eq.pr123 |
+| lt  | Less than  | amount=lt.100 |
+| lte | Less than or equal to  | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
+| gt | Greater than  | amount=gt.100 |
+| gte | Greater than or equal to  | updated_at=gte.2020-06-01T00:00:00.000-08:00 |
+| in | Is one of  | id=in.(id1,id2,id3) |
+
+## Pagination
+
+Every GET API call is paginated. Each page can contain max of 100 elements. To indicate exactly which elements you want,
+you'll need to pass three additional parameters;
+
+* order
+* offset
+* limit
+
+The following example will get the top 100 most expensive expenses with a specific project
+```
+GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=100
+```
+
+In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit.
+
 ## Rate limits
 
 We have a limit on the number of requests that can be made per second from a particular IP address while accessing our resources. Currently, we allow only 10 requests/second for an IP address.
 
 ## Safety Precautions
 We have a Denial of Service (DoS) attack prevention mechanisms in place to safeguard the system against suspicious use. The Denial of Service (DoS) prevention limits exposure to request flooding, whether malicious or as a result of a misconfigured client. The DoS prevention keeps track of the number of requests from a connection per second. So, certain precautions and standards should be maintained while developing integrations to avoid them from getting blocked.
-
-## Filtering
-
-Section to be written
-
-## Ordering
-
-Section to be written

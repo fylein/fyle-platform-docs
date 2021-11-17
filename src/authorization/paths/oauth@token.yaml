@@ -1,0 +1,68 @@
+post:
+  summary: OAuth 2.0 token
+  description: |
+    Exchange a code for a refresh token or get a new access token
+  operationId: oauth_token
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - grant_type
+            - client_id
+            - client_secret
+          properties:
+            grant_type:
+              type: string
+              enum: [code,refresh_token]
+              description: |
+                To get a refresh token for the first time, use `code`. If you are trying to get a
+                new access token, then use `refresh_token`. Yes, it is confusing. That's OAuth 2.0 for you.
+            refresh_token:
+              type: string
+              example: xxxyyy.aaaa.aaa
+              description: Send refresh_token to get a new access token
+            code:
+              type: string
+              example: aaaa.bbbbb.cccc
+              description: Send code if you're trying to get a refresh token for the first time.
+            client_id:
+              type: string
+              example: tpaXXYYY
+            client_secret:
+              type: string
+              example: ASJJWERC       
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              access_token:
+                type: string
+                example: xxxyyy.aaaa.aaa
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
+
