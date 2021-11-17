@@ -32,17 +32,39 @@ E.g. `/fyler/expenses` means the application is accessing `expenses` resources i
 
 Some roles have read access and some have create/update access to resources. 
 
+## Filtering
+
+Our get APIs support very rich filtering via query parameters, inspired by the [Postgrest project](https://postgrest.org/en/v8.0/api.html#horizontal-filtering-rows).
+
+Let's take an example. Let's say you are interested in accessing all expenses in the organization where the amount is greater than USD 10. You'll make a call like this:
+
+```
+GET /admin/expenses?amount=gt.10
+```
+
+If, in addition, you were interested in expenses tagged with a specific project id pr123, then the call would be something like this:
+
+```
+GET /admin/expenses?amount=gt.10&project_id=eq.pr123
+```
+
+Here's the full list of operators supported:
+----------------------------------------------------------------------------------------
+| op  |  Meaning  | Examples  |
+----------------------------------------------------------------------------------------
+| eq  | Equals     | project_id=eq.pr123 |
+| lt  | Less than  | amount=lt.100 |
+| lte | Less than or equal to  | amount=lte.100 |
+| gt | Greater than  | amount=gt.100 |
+----------------------------------------------------------------------------------------
+
+## Ordering
+
+Section to be written
+
 ## Rate limits
 
 We have a limit on the number of requests that can be made per second from a particular IP address while accessing our resources. Currently, we allow only 10 requests/second for an IP address.
 
 ## Safety Precautions
 We have a Denial of Service (DoS) attack prevention mechanisms in place to safeguard the system against suspicious use. The Denial of Service (DoS) prevention limits exposure to request flooding, whether malicious or as a result of a misconfigured client. The DoS prevention keeps track of the number of requests from a connection per second. So, certain precautions and standards should be maintained while developing integrations to avoid them from getting blocked.
-
-## Filtering
-
-Section to be written
-
-## Ordering
-
-Section to be written
