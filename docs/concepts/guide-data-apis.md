@@ -50,12 +50,14 @@ GET /admin/expenses?amount=gt.10&project_id=eq.pr123
 
 Here's the full list of operators supported:
 
+|-----|-----------|-----------|
 | op  |  Meaning  | Examples  |
 |-----|-----------|-----------|
 | eq  | Equals     | project_id=eq.pr123 |
 | lt  | Less than  | amount=lt.100 |
 | lte | Less than or equal to  | amount=lte.100 |
 | gt | Greater than  | amount=gt.100 |
+|-----|-----------|-----------|
 
 ## Ordering
 
