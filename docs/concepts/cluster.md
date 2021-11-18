@@ -1,4 +1,4 @@
-# Cluster
+# Cluster Endpoint
 
 Once the app is authorized i.e. you have an access token, the next thing is to figure out which cluster hosts your data. Your data will available only in one cluster - so it is important to get this right.
 
@@ -7,7 +7,7 @@ At this time, there are two possible clusters:
 * https://in1.fylehq.com 
 
 
-To figure out which one is right for you, you can use a call like this:
+To figure out which one is right for you, you can use a call like this (see [API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MjgyNzIxNjk-get-data-cluster)):
 
 ```
     curl --location --request POST "https://accounts.fylehq.com/oauth/cluster" --header 'Authorization: Bearer ${access_token}'
@@ -52,13 +52,11 @@ You should see a successful result like this:
     },
     "user_id": "UUU"
   }
-}
 ```
 
-<!-- theme: warning -->
-> #### 💡 Do not hardcode the cluster in your app
+> #### Do not hardcode the cluster in your app
 >
-> Your data may be moved to a different cluster endpoint in the future for balancing load or for any other reason. Do not hardcode these in your application code. Instead, fetch the cluster endpoint everytime you refresh your access token.
+> Your data may be moved to a different cluster endpoint in the future. Do not hardcode these in your application code. Instead, fetch the cluster endpoint everytime you refresh your access token.
 
 
-You're now set to make API calls to read and write your data. This [Guide to Data APIs](./guide-data-apis.md) would be a great place to go next.
+You're now set to make API calls to read and write your data. The [Guide to Data APIs](./guide-data-apis.md) would be a great place to go next.

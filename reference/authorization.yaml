@@ -1,0 +1,167 @@
+openapi: 3.0.3
+info:
+  version: '1.0'
+  title: Authorization APIs
+  termsOfService: https://www.fylehq.com/privacy/terms-and-conditions
+  contact:
+    name: Platform Beta
+    email: platform-beta@fylehq.com
+  description: |
+    These APIs are used for authorization.
+servers:
+  - url: https://accounts.fylehq.com
+    description: Authorization Server
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
+          scopes:
+            '*': Grant all actions
+  schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is valid
+    '401':
+      type: object
+      properties:
+        message:
+          enum:
+            - invalid token
+          type: string
+          description: >
+            This error means that the input access token is either not issued by
+            Fyle or has expired.
+
+            You need to generate a new access token.
+    '403':
+      type: object
+      properties:
+        message:
+          enum:
+            - Forbidden
+          type: string
+          description: >
+            This error means current user does not have enough permissions to
+            perform this operation.
+paths:
+  /oauth/cluster:
+    post:
+      summary: Data Cluster
+      operationId: data_cluster_post
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cluster_domain:
+                    type: string
+                    maxLength: 255
+                    description: |
+                      The data for this user will be available in this cluster
+                    example: https://us1.fylehq.com
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /oauth/token:
+    post:
+      summary: OAuth 2.0 token
+      description: >
+        Exchange a code for a refresh token or get a new access token.
+
+
+        To get a refresh token for the first time, set `grant_type` value `code`
+        and send the `code` in the payload. 
+
+
+        If you are trying to get a new access token using a refresh token, then
+        set `grant_type` to `refresh_token` and
+
+        send `refresh_token` in the payload.
+
+
+        Yes, it is confusing. That's OAuth 2.0 for you.
+      operationId: oauth_token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - grant_type
+                - client_id
+                - client_secret
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - code
+                    - refresh_token
+                  description: >
+                    To get a refresh token for the first time, use `code`. If
+                    you are trying to get a
+
+                    new access token, then use `refresh_token`. Yes, it is
+                    confusing. That's OAuth 2.0 for you.
+                refresh_token:
+                  type: string
+                  description: Send refresh_token to get a new access token
+                  example: rrr.bbbb.ccc
+                code:
+                  type: string
+                  description: >-
+                    Send code if you're trying to get a refresh token for the
+                    first time.
+                  example: yyy.bbbb.ccc
+                client_id:
+                  type: string
+                  example: tpaXXYYY
+                client_secret:
+                  type: string
+                  example: ASJJWERC
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  access_token:
+                    type: string
+                    example: xxxyyy.aaaa.aaa
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
