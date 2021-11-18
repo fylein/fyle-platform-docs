@@ -54,7 +54,7 @@ You should see a successful result like this:
   }
 ```
 
-> #### 💡 Do not hardcode the cluster in your app
+> #### Do not hardcode the cluster in your app
 >
 > Your data may be moved to a different cluster endpoint in the future. Do not hardcode these in your application code. Instead, fetch the cluster endpoint everytime you refresh your access token.
 

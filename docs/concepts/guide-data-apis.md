@@ -22,7 +22,7 @@ Every user in Fyle has one or more roles. Every application that you write assum
 
 E.g. if John has the role `["FYLER"]` only, then John will only have access to fyler APIs. If John has roles `["FYLER","ADMIN"]`, then John has access to both fyler and admin APIs. Therefore, the application that John authorizes also has access to both fyler and admin APIs.
 
-> #### 💡 Finer access control is coming soon
+> #### Finer access control is coming soon!
 >
 > In the not too distant future, John will be able to grant an application only `FYLER` role even though he has both `FYLER` and `ADMIN` roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
 

@@ -15,9 +15,9 @@ Here are some quick links to important parts of the documentation:
 
 <!-- theme: warning -->
 
-> #### 💡 You're in Beta Land
+> #### You're in beta land
 >
-> While you have access to a very rich set of APIs, these APIs are currently in beta and there may be some niggles. We might even make some minor changes to the API endpoints in this phase (we'll avoid this as much as possible). If you do decide to try out these APIs, please send us a note at platform-beta@fylehq.com so that we can assist you in case of any issues.
+> While you have access to a very rich set of APIs, these are currently in beta and there may be some niggles. We might even make some minor changes to the API endpoints in this phase (we'll avoid this as much as possible). If you do decide to try out these APIs, please send us a note at platform-beta@fylehq.com so that we can assist you in case of any issues.
 
 
 Built with ❤️ by [Fyle](https://www.fylehq.com)

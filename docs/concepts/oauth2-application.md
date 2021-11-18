@@ -13,9 +13,7 @@ Login to Fyle by going to https://accounts.fylehq.com and entering your credenti
 
 On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 
-<!-- theme: warning -->
-
-> #### 💡 Currently, only admins can create applications
+> #### Currently, only admins can create applications
 >
 >  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
 
