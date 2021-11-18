@@ -108,6 +108,12 @@ components:
         longitude:
           type: number
           example: 77.594566
+    exchange_rate_out:
+      type: object
+      properties:
+        exchange_rate:
+          type: number
+          example: 12.123456
     expense_extract_in:
       type: object
       required:
@@ -525,6 +531,49 @@ paths:
                       ZMK: Zambian Kwacha (pre-2013)
                       ZMW: Zambian Kwacha
                       ZWL: Zimbabwean Dollar
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/currency/exchange_rate:
+    get:
+      tags:
+        - Currencies
+      summary: Get exchange rate
+      description: |
+        Get exchange rate for the given query
+      operationId: currencies_exchange_rate
+      parameters:
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            example: INR
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            example: USD
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            example: '2021-11-18'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/exchange_rate_out'
         '401':
           description: Unauthorized request
           content:
