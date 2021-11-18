@@ -50,14 +50,20 @@ GET /admin/expenses?amount=gt.10&project_id=eq.pr123
 
 Here's the full list of operators supported:
 
-| op  |  Meaning  | Examples  |
-|-----|-----------|-----------|
-| eq  | Equals     | project_id=eq.pr123 |
-| lt  | Less than  | amount=lt.100 |
-| lte | Less than or equal to  | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
-| gt | Greater than  | amount=gt.100 |
-| gte | Greater than or equal to  | updated_at=gte.2020-06-01T00:00:00.000-08:00 |
-| in | Is one of  | id=in.(id1,id2,id3) |
+| op  |  Meaning  | Supported types | Examples  |
+|-----|-----------|----------|----------------|
+| eq  | Equals     | integer, string | project_id=eq.pr123 |
+| lt  | Less than  | integer, string, timestamp | amount=lt.100 |
+| lte | Less than or equal to  | integer, string, timestamp | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
+| gt | Greater than  | integer, string, timestamp | amount=gt.100 |
+| gte | Greater than or equal to  | integer, string, timestamp| updated_at=gte.2020-06-01T00:00:00.000-08:00 |
+| in | Is one of  | integer, string | id=in.(id1,id2,id3) |
+
+Sometimes one of the columns is a a JSON object and you want to apply a filter on a nested field. If you wanted to filter all expenses with cost center name CC123, you would use something like this:
+
+```
+GET /admin/expenses?cost_center->name=eq.CC123
+```
 
 ## Pagination
 

@@ -52,7 +52,6 @@ You should see a successful result like this:
     },
     "user_id": "UUU"
   }
-}
 ```
 
 > #### 💡 Do not hardcode the cluster in your app
