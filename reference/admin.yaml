@@ -164,6 +164,30 @@ components:
             project.
           items:
             type: integer
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    fyler_user_ids:
+      type: array
+      nullable: true
+      items:
+        $ref: '#/components/schemas/fk_string'
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
+      description: |
+        List of IDs of users who access the project.
+    admin_project_out:
+      allOf:
+        - $ref: '#/components/schemas/project_out'
+        - type: object
+          properties:
+            fyler_user_ids:
+              $ref: '#/components/schemas/fyler_user_ids'
     project_in:
       type: object
       additionalProperties: false
@@ -201,6 +225,8 @@ components:
           items:
             type: integer
             example: 16570
+        fyler_user_ids:
+          $ref: '#/components/schemas/fyler_user_ids'
     bulk_error:
       type: object
       properties:
@@ -251,6 +277,13 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    admin_cost_center_out:
+      allOf:
+        - $ref: '#/components/schemas/cost_center_out'
+        - type: object
+          properties:
+            fyler_user_ids:
+              $ref: '#/components/schemas/fyler_user_ids'
     cost_center_in:
       type: object
       required:
@@ -274,6 +307,8 @@ components:
           $ref: '#/components/schemas/is_enabled'
         org_id:
           $ref: '#/components/schemas/org_id'
+        fyler_user_ids:
+          $ref: '#/components/schemas/fyler_user_ids'
     category_out:
       type: object
       additionalProperties: false
@@ -315,6 +350,16 @@ components:
           description: Represents the name of the system_category.
         code:
           $ref: '#/components/schemas/code'
+        project_ids:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids for which this category is available 
     category_in:
       type: object
       required:
@@ -346,6 +391,16 @@ components:
           description: Represents the name of the system_category.
         code:
           $ref: '#/components/schemas/code'
+        project_ids:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids for which this category is available 
     category_ids:
       type: array
       description: |
@@ -758,13 +813,6 @@ components:
           example: Associate
         code:
           $ref: '#/components/schemas/code'
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     email:
       type: string
       maxLength: 127
@@ -5899,7 +5947,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/project_out'
+                      $ref: '#/components/schemas/admin_project_out'
         '401':
           description: Unauthorized request
           content:
@@ -5937,7 +5985,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/project_out'
+                    $ref: '#/components/schemas/admin_project_out'
         '400':
           description: Bad request
           content:
@@ -6042,7 +6090,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/cost_center_out'
+                      $ref: '#/components/schemas/admin_cost_center_out'
         '400':
           description: Bad request
           content:
@@ -6092,7 +6140,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/cost_center_out'
+                    $ref: '#/components/schemas/admin_cost_center_out'
         '400':
           description: Bad request
           content:
