@@ -4,7 +4,7 @@ An application, in this context, is any piece of code that will interact with Fy
 
 ## Internal
 
-This the more common type of application. If your application will only be used by your organization, this is the right type for you. To learn how to create and authorize an internal application, proceed to the [Internal Application](./internal-application.md) page.
+This is the more common type of application. If your application will only be used by your organization, this is the right type for you. To learn how to create and authorize an internal application, proceed to the [Internal Application](./internal-application.md) page.
 
 
 ## OAuth 2.0

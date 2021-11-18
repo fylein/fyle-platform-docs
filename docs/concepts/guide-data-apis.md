@@ -12,11 +12,11 @@ Every data API call that you make has to have an authorization header like this:
     curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
-If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](./broken-link).
+If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token).
 
-## Resources and role-specific APIs
+## Resources and Role-specific APIs
 
-Resources are business objects that are relevant to expense management. Typical resources that you'll see are: `expenses`, `reports`, `employees`, `projects` etc. Not all roles have access to all resources. Access to these resources are via role-specific APIs.
+Resources are business objects that are relevant to expense management. Typical resources that you'll see are: `expenses`, `reports`, `employees`, `projects` etc. Not all roles have access to all resources. Access to these resources are restricted via role-specific APIs.
 
 Every user in Fyle has one or more roles. Every application that you write assumes that the user who will authorize the application has certain roles. Each role has access to specific set of APIs.
 
@@ -59,7 +59,7 @@ Here's the full list of operators supported:
 | gte | Greater than or equal to  | integer, string, timestamp| updated_at=gte.2020-06-01T00:00:00.000-08:00 |
 | in | Is one of  | integer, string | id=in.(id1,id2,id3) |
 
-Sometimes one of the columns is a a JSON object and you want to apply a filter on a nested field. If you wanted to filter all expenses with cost center name CC123, you would use something like this:
+Sometimes one of the columns is a JSON object and you want to apply a filter on a nested field. If you wanted to filter all expenses with cost center name CC123, you would use something like this:
 
 ```
 GET /admin/expenses?cost_center->name=eq.CC123
@@ -67,8 +67,7 @@ GET /admin/expenses?cost_center->name=eq.CC123
 
 ## Pagination
 
-Every GET API call is paginated. Each page can contain max of 100 elements. To indicate exactly which elements you want,
-you'll need to pass three additional parameters;
+Every GET API call is paginated. Each page can contain a maximum of 100 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
 
 * order
 * offset

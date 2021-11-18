@@ -36,7 +36,7 @@ We currently support the "Authorization Code" flow and "Refresh Token Flow" of O
 
 When a user authorizes the app, they will be redirected to the redirect URI above with the `code` and `state` parameter. At this point, your web application will need to pass this to your server which stores the `client_id` and `client_secret`.
 
-Your backend server will have to make a OAuth 2.0 token call ([API reference](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token)) and send in the code. You will receive the following two pieces of information back:
+Your backend server will have to make an OAuth 2.0 token call ([API reference](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token)) and send in the code. You will receive the following two pieces of information back:
 
 * refresh_token - which is valid for a year
 * access_token - which is valid for 1 hour
