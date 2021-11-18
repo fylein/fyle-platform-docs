@@ -89,33 +89,6 @@ components:
       schema:
         type: string
         example: 'updated_at.desc,id'
-    name:
-      in: query
-      name: name
-      description: |
-        Supported operators are `eq`, `like`, `in`.<br>
-        name=in.(value1,value2)
-      schema:
-        type: string
-        example: eq.c2344
-    code:
-      in: query
-      name: code
-      description: |
-        Supported operators are `eq`, `like`, `in`.<br>
-        name=in.(value1,value2)
-      schema:
-        type: string
-        example: eq.c2344
-    sub_department:
-      in: query
-      name: sub_department
-      description: |
-        Supported operators are `eq`, `like`, `in`.<br>
-        sub_department=in.(value1,value2)
-      schema:
-        type: string
-        example: like.Outbound*
     q:
       in: query
       name: q
@@ -1057,6 +1030,7 @@ components:
         - is_corporate_card_transaction_auto_matched
         - matched_corporate_card_transaction_ids
         - matched_corporate_card_transactions
+        - last_settled_at
       properties:
         id:
           allOf:
@@ -1385,6 +1359,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed'
+        last_settled_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was last settled.
     expense_add_comment_action_in:
       type: object
       required:
@@ -4172,13 +4152,11 @@ paths:
       tags:
         - Cost Centers
       summary: List cost centers
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/order'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4219,12 +4197,11 @@ paths:
         - Categories
       summary: List categories
       operationId: categories_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4252,16 +4229,12 @@ paths:
       tags:
         - Expenses
       summary: List expense fields
-      description: |
-        Gives the list of all expense fields based on query parameters.
       operationId: expense_fields_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4290,12 +4263,11 @@ paths:
         - Mileage Rates
       summary: List mileage rates
       operationId: mileage_rates_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4346,6 +4318,11 @@ paths:
         - Accounts
       summary: List accounts
       operationId: list-accounts
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4378,17 +4355,12 @@ paths:
       tags:
         - Departments
       summary: List departments
-      operationId: departments
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/name'
-        - $ref: '#/components/parameters/code'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/sub_department'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      operationId: departments_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4422,12 +4394,11 @@ paths:
         - Expenses
       summary: List expenses
       operationId: fyler-expenses-list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/order'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4552,15 +4523,11 @@ paths:
         - Per Diem Rates
       summary: List per diem rates
       operationId: per_diem_rates_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/name'
-        - $ref: '#/components/parameters/code'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4687,13 +4654,12 @@ paths:
       tags:
         - Subscriptions
       summary: List Fyler Subscriptions
-      operationId: get-subscriptions
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/order'
+      operationId: subscriptions_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4783,13 +4749,12 @@ paths:
       tags:
         - Schedules
       summary: List Schedule
-      operationId: get-schedule
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/order'
+      operationId: schedules_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -4959,20 +4924,11 @@ paths:
         - Advances
       summary: List advance requests
       operationId: list-advance-requests
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - in: query
-          name: order
-          description: |
-            use comma separated column names for sorting the results. <br>
-            For sorting in descending order, use `updated_at.desc`.<br>
-            Supported columns are `updated_at`, `id`.
-          schema:
-            type: string
-            example: 'updated_at.desc,id'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -5057,20 +5013,11 @@ paths:
         - Advances
       summary: List advances
       operationId: get-advances
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
-        - in: query
-          name: order
-          description: |
-            use comma separated column names for sorting the results. <br>
-            For sorting in descending order, use `updated_at.desc`.<br>
-            Supported columns are `updated_at`, `id`.
-          schema:
-            type: string
-            example: 'updated_at.desc,id'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -5105,12 +5052,11 @@ paths:
         - Corporate Cards
       summary: List of corporate cards assigned to user
       operationId: corporate_cards_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -5142,15 +5088,12 @@ paths:
       tags:
         - Corporate Cards
       summary: List corporate card transactions
-      description: |
-        List the corporate card transactions.
       operationId: corporate_card_transactions_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -5697,13 +5640,11 @@ paths:
         - Employees
       summary: List employees
       operationId: employees_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
@@ -5737,14 +5678,11 @@ paths:
         - Tax Groups
       summary: List tax groups
       operationId: tax_groups_list
-      parameters:
-        - $ref: '#/components/parameters/created_at'
-        - $ref: '#/components/parameters/updated_at'
-        - $ref: '#/components/parameters/name'
-        - $ref: '#/components/parameters/is_enabled'
-        - $ref: '#/components/parameters/order'
-        - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/limit'
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
         '200':
           description: OK
