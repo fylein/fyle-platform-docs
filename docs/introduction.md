@@ -19,11 +19,12 @@ Let's set the stage first. We have two characters, John and Amy.
 If you're reading this, you're likely an Amy. Amy can whip up some frontend or backend code in a jiffy. She talks to John and understands his requirements. She whips up a cool application in Python or something.
 
 * Amy needs to have a Fyle account. If she doesn't, she can be invited to join Fyle by an admin (this could be John or someone else)
-* She needs to create an application by going to Fyle's developer page and get a client_id
+* She needs to create an application by going to Fyle's developer page and get some magical information
 * She will deploy her application somewhere and provide a link to John
-* When John tries to access this app, he will be redirected to Fyle's account server where he will have to establish his identity (i.e. prove that he is, indeed, John) and then he will have to grant the app rights to act on his behalf. The app performs the holy OAuth 2.0 dance with the Authorization server and some magic tokens
+* When John tries to access this app, he will be redirected to Fyle's account server where he will have to establish his identity (i.e. prove that he is, indeed, John) and then he will have to grant the app rights to act on his behalf. The app performs the holy OAuth 2.0 dance with the Authorization server and gets some magic tokens
+* The app figures out which Data Cluster hosts John's data
 
-Now, the app does its magic. It makes REST API calls to Fyle's Data Cluster and pulls out John's data using the right APIs with the magic tokens and maybe even writes some data back. 
+Now, the app starts doing real work. It makes REST API calls to the right Data Cluster and pulls out John's data using the right APIs with the magic tokens and maybe even writes some data back. 
 
 
 <!--

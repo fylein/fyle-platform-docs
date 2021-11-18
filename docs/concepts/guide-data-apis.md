@@ -1,8 +1,8 @@
 # Guide to Data APIs
 
 At this point, you should already be familiar with:
-* [Different types of applications](./concepts/types-of-application.md) in Fyle
-* [Figuring out which cluster](./concepts/cluster.md) you should be hitting to access your data
+* [Different types of applications](./types-of-application.md) in Fyle
+* [Figuring out which cluster](./cluster.md) you should be hitting to access your data
 
 ## Security
 
@@ -26,9 +26,10 @@ E.g. if John has the role `["FYLER"]` only, then John will only have access to f
 >
 > In the not too distant future, John will be able to grant an application only `FYLER` role even though he has both `FYLER` and `ADMIN` roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
 
-All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity.
+All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity. For example,
 
-E.g. `/fyler/expenses` means the application is accessing `expenses` resources in the `FYLER` role i.e. their personal expenses. `/admin/expenses` means the application is accessing expenses as an admin and will be able to see the entire org's expenses.
+* `/fyler/expenses` means the application is accessing `expenses` resources in the `FYLER` role i.e. their personal expenses. 
+* `/admin/expenses` means the application is accessing expenses as an admin and will be able to see the entire org's expenses.
 
 Some roles have read access and some have create/update access to resources. 
 
