@@ -103,21 +103,22 @@ components:
         This represents a code that is typically used for syncing with other
         systems.
       example: C1234
-    description:
-      type: string
+    spender_user_ids:
+      type: array
       nullable: true
-      maxLength: 255
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
       description: |
-        This represents the description of the resource.
-      example: Win the trophy
-    is_enabled:
-      type: boolean
-      description: >
-        This indicates if the resource is enabled for use within the
-        organisation.
-      default: true
-      example: true
-    project_out:
+        List of IDs of users who access the project.
+    admin_project_out:
       type: object
       additionalProperties: false
       properties:
@@ -152,18 +153,22 @@ components:
             In case if no sub_project is present it is same as name of the
             project.
           example: Fast and Furious / Formula One
-        description:
-          $ref: '#/components/schemas/description'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        category_ids:
-          type: array
-          nullable: true
-          description: >
-            Has the list of all category ids that are applicable for this
-            project.
-          items:
-            type: integer
+        spender_user_ids:
+          $ref: '#/components/schemas/spender_user_ids'
+    description:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        This represents the description of the resource.
+      example: Win the trophy
+    is_enabled:
+      type: boolean
+      description: >
+        This indicates if the resource is enabled for use within the
+        organisation.
+      default: true
+      example: true
     project_in:
       type: object
       additionalProperties: false
@@ -201,6 +206,8 @@ components:
           items:
             type: integer
             example: 16570
+        spender_user_ids:
+          $ref: '#/components/schemas/spender_user_ids'
     bulk_error:
       type: object
       properties:
@@ -227,21 +234,6 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
-    spender_user_ids:
-      type: array
-      nullable: true
-      items:
-        type: string
-        nullable: true
-        maxLength: 15
-        description: |
-          This id provided by Fyle to identify an object.
-        example: sdfd2391
-      example:
-        - uswoirwlwwg
-        - uswlgwkgw42
-      description: |
-        List of IDs of users who access the project.
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -5918,7 +5910,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/project_out'
+                      $ref: '#/components/schemas/admin_project_out'
         '401':
           description: Unauthorized request
           content:
@@ -5956,7 +5948,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/project_out'
+                    $ref: '#/components/schemas/admin_project_out'
         '400':
           description: Bad request
           content:
