@@ -12,7 +12,7 @@ Let's set the stage first. We have two characters, John and Amy.
 
 * John is a Fyle user. He has a Fyle login. 
 * John is part of one or more organizations, let's call it Acme Inc. Most users are only part of one organization, btw.
-* John plays one or more roles in the organization. John may be an admin, but not a spender (called fyler). John may be a spender and an approver. You get the picture.
+* John plays one or more roles in the organization. John may be an admin, but not a spender. John may be a spender and an approver. You get the picture.
 * John wants to access his Fyle data (e.g. expenses) and do something with it. Maybe create a CSV or push the data to another system
 * John asks Amy who is a coding ninja warrior for help
 

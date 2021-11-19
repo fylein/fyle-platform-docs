@@ -28,7 +28,7 @@ You can check the version by running
 
     openapi lint src/authorization/openapi.yaml
     openapi lint src/admin/openapi.yaml
-    openapi lint src/fyler/openapi.yaml
+    openapi lint src/spender/openapi.yaml
     openapi lint src/approver/openapi.yaml
     openapi lint src/hod/openapi.yaml
     openapi lint src/hop/openapi.yaml
@@ -39,7 +39,7 @@ You can check the version by running
 
     openapi bundle -o reference/authorization.yaml src/authorization/openapi.yaml
     openapi bundle -o reference/admin.yaml src/admin/openapi.yaml
-    openapi bundle -o reference/fyler.yaml src/fyler/openapi.yaml
+    openapi bundle -o reference/spender.yaml src/spender/openapi.yaml
     openapi bundle -o reference/approver.yaml src/approver/openapi.yaml
     openapi bundle -o reference/hod.yaml src/hod/openapi.yaml
     openapi bundle -o reference/hop.yaml src/hop/openapi.yaml
@@ -47,7 +47,7 @@ You can check the version by running
 
 ## To preview changes ##
 
-    openapi preview-docs src/fyler/openapi.yaml
+    openapi preview-docs src/spender/openapi.yaml
 
 ## Mock Server ##
 
@@ -55,7 +55,7 @@ Bring up mock server by running:
 
     docker-compose up
 
-The admin APIs will be available at port 4011, fyler APIs in port 4012, approver APIs in port 4013 and common APIs in port 4014.
+The admin APIs will be available at port 4011, spender APIs in port 4012, approver APIs in port 4013 and common APIs in port 4014.
 
 Note that the mock server works off the bundled yaml files. So if you make some changes in development, please bundle
 the file. The mock server will reload automatically.

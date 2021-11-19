@@ -8,9 +8,9 @@ info:
     name: Platform Beta
     email: platform-beta@fylehq.com
 servers:
-  - url: 'https://us1.fylehq.com/platform/v1beta'
+  - url: https://us1.fylehq.com/platform/v1beta
     description: US Region Server
-  - url: 'https://in1.fylehq.com/platform/v1beta'
+  - url: https://in1.fylehq.com/platform/v1beta
     description: India Region Server
 components:
   securitySchemes:
@@ -18,8 +18,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: 'https://accounts.fylehq.com/app/developers/#/oauth/authorize'
-          tokenUrl: 'https://accounts.fylehq.com/oauth/token'
+          authorizationUrl: https://accounts.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
           scopes:
             '*': Grant all actions
   schemas:
@@ -81,7 +81,7 @@ components:
           example: ChIJify3BTzI5zsR2q86fwXrh74
         formatted_address:
           type: string
-          example: '221 Baker St, Marylebone, London, United Kingdom'
+          example: 221 Baker St, Marylebone, London, United Kingdom
     place_out:
       type: object
       properties:
@@ -101,13 +101,19 @@ components:
           example: United Kingdom
         formatted_address:
           type: string
-          example: '221 Baker St, Marylebone, London, United Kingdom'
+          example: 221 Baker St, Marylebone, London, United Kingdom
         latitude:
           type: number
           example: 12.971599
         longitude:
           type: number
           example: 77.594566
+    exchange_rate_out:
+      type: object
+      properties:
+        exchange_rate:
+          type: number
+          example: 12.123456
     expense_extract_in:
       type: object
       required:
@@ -146,7 +152,7 @@ components:
     timestamptz_utc:
       type: string
       nullable: true
-      example: '2020-06-01T13:14:54.804+00:00'
+      example: 2020-06-01T13:14:54.804+00:00
     expense_extract_out:
       type: object
       required:
@@ -264,7 +270,7 @@ paths:
             location=latitude,longitude
           schema:
             type: string
-            example: '26.595889,85.4891037'
+            example: 26.595889,85.4891037
       responses:
         '200':
           description: OK
@@ -525,6 +531,49 @@ paths:
                       ZMK: Zambian Kwacha (pre-2013)
                       ZMW: Zambian Kwacha
                       ZWL: Zimbabwean Dollar
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/currency/exchange_rate:
+    get:
+      tags:
+        - Currencies
+      summary: Get exchange rate
+      description: |
+        Get exchange rate for the given query
+      operationId: currencies_exchange_rate
+      parameters:
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+            example: INR
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            example: USD
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            example: 2021-11-18
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/exchange_rate_out'
         '401':
           description: Unauthorized request
           content:

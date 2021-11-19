@@ -26,7 +26,7 @@ Use the `${CLUSTER_DOMAIN}` for all subsequent data calls. If you use the wrong 
 Next, run a simple curl command to confirm that you are hitting the right cluster.
 
 ```
-    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/fyler/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 You should see a successful result like this:

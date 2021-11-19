@@ -1,33 +1,25 @@
 get:
   tags:
-    - Currencies
-  summary: Retrieve currency exchange rate
-  operationId: currency_exchange_get
+    - Advances
+  summary: Retrieve advance requests stats
+  operationId: advance_requests_stats
   parameters:
     - in: query
-      name: date
+      name: state
       description: |
-        Supported operators are `eq`.<br>
-        date=eq.(value)
+        Supported operators are `eq`, `in`.<br>
+        state=in.(value1,value2)
       schema:
         type: string
-        example: eq.2020-10-26
+        example: in.(DRAFT)
     - in: query
-      name: from_currency
+      name: sent_back
       description: |
-        Supported operators are `eq`.<br>
-        from_currency=eq.(value)
+        This param is used to filter records.
+        Supported operators are `eq`,`not.eq`.<br>
       schema:
         type: string
-        example: eq.USD
-    - in: query
-      name: to_currency
-      description: |
-        Supported operators are `eq`.<br>
-        to_currency=eq.(value)
-      schema:
-        type: string
-        example: eq.INR
+        example: eq.true
   responses:
     '200':
       description: OK
@@ -38,16 +30,20 @@ get:
             properties:
               url:
                 type: string
-                example: /fyler/exchange_rate
+                example: /spender/advance_requests_stats
               data:
                 type: object
                 properties:
-                  exchange_rate:
+                  total_amount:
                     type: number
-                    description: >
-                      This represents the exchange rate between the given
-                      currencies.
-                    example: 64.12
+                    description: |
+                      This field indicates the total amount of advance requests.
+                    example: 1234.56
+                  total_count:
+                    type: integer
+                    description: |
+                      This field indicates the total count of advance requests.
+                    example: 12
     '401':
       description: Unauthorized request
       content:

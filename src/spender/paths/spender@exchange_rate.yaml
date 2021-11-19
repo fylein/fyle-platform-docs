@@ -1,17 +1,33 @@
 get:
   tags:
-    - Reports
-  summary: Retrieve report stats
-  operationId: report_stats_get
+    - Currencies
+  summary: Retrieve currency exchange rate
+  operationId: currency_exchange_get
   parameters:
     - in: query
-      name: state
+      name: date
       description: |
-        Supported operators are `eq`, `in`.<br>
-        state=in.(value1,value2)
+        Supported operators are `eq`.<br>
+        date=eq.(value)
       schema:
         type: string
-        example: in.(DRAFT)
+        example: eq.2020-10-26
+    - in: query
+      name: from_currency
+      description: |
+        Supported operators are `eq`.<br>
+        from_currency=eq.(value)
+      schema:
+        type: string
+        example: eq.USD
+    - in: query
+      name: to_currency
+      description: |
+        Supported operators are `eq`.<br>
+        to_currency=eq.(value)
+      schema:
+        type: string
+        example: eq.INR
   responses:
     '200':
       description: OK
@@ -22,20 +38,16 @@ get:
             properties:
               url:
                 type: string
-                example: /fyler/reports_stats
+                example: /spender/exchange_rate
               data:
                 type: object
                 properties:
-                  total_amount:
+                  exchange_rate:
                     type: number
-                    description: |
-                      This field indicates the total amount of report.
-                    example: 1234.56
-                  total_count:
-                    type: integer
-                    description: |
-                      This field indicates the total amount of report.
-                    example: 12
+                    description: >
+                      This represents the exchange rate between the given
+                      currencies.
+                    example: 64.12
     '401':
       description: Unauthorized request
       content:
