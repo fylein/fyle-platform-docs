@@ -10,7 +10,7 @@ Here are some quick links to important parts of the documentation:
 * [Types of Application](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI4MTQ2NTc1-types-of-application) section will help you decide which type of application is right for you and help you create them 
 * [Guide to APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is) will make it easier to understand how to use the APIs to the fullest
 * [Admin API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/YXBpOjQwNjU3MA-admin-ap-is) covers all the APIs your application will have access to if authorized by an admin
-* [Spender API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/YXBpOjQ2MTc2NTg-spender-ap-is) covers all the APIs your application will have access to if authorized by a spender
+* [Spender API Reference](https://docs.fylehq.com/docs/fyle-platform-docs/YXBpOjI4NjcwODI4-spender-ap-is) covers all the APIs your application will have access to if authorized by a spender
 
 
 <!-- theme: warning -->
