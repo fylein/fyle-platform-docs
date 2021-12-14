@@ -1176,6 +1176,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are approvers for this employee.
+        has_accepted_invite:
+          type: boolean
+          description: >
+            This boolean field represents whether the employee has accepted the
+            current org's invite by veryfying his/her email or not.
+          default: true
+          example: true
     name_nullable:
       type: string
       maxLength: 255
@@ -1369,11 +1376,6 @@ components:
           description: |
             Name of the uploaded file.
           example: uber_expenses_vmrpw.pdf
-        password:
-          type: string
-          description: |
-            Password which required to unlock the file.
-          example: SuperSecretPassword
         type:
           type: string
           enum:
@@ -1383,6 +1385,24 @@ components:
             Indicates whether this file original size or encrypted or its
             thumbnail image.
           example: RECEIPT
+        content_type:
+          type: string
+          example: text/csv
+    file_generate_urls_action_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    file_generate_urls_action_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
         content_type:
           type: string
           example: text/csv
@@ -6944,6 +6964,57 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/files/generate_urls/bulk:
+    post:
+      operationId: files_generate_urls_bulk_post
+      tags:
+        - Files
+      summary: Generate URLs for files in bulk
+      description: |
+        Generate upload and download URLs for files in bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/file_generate_urls_action_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_generate_urls_action_out'
         '400':
           description: Bad request
           content:
