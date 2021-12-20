@@ -5255,6 +5255,18 @@ components:
             - $ref: '#/components/schemas/code'
           description: |
             Optional field for external acounting system reference and linking
+    reimbursement_in_minimal:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          example: reimntGt9ju6qP
+        code:
+          $ref: '#/components/schemas/code'
     expense_out_embed:
       type: object
       required:
@@ -8356,6 +8368,43 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reimbursement_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reimbursements/mark_paid/bulk:
+    post:
+      tags:
+        - Reimbursements
+      summary: Bulk mark paid reimbursements
+      operationId: mark_paid_reimbursements_bulk
+      description: |
+        Marks reimbursement as paid and move reports to paid state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/reimbursement_in_minimal'
+      responses:
+        '200':
+          description: OK
         '401':
           description: Unauthorised request
           content:
