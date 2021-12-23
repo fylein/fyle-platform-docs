@@ -175,70 +175,6 @@ components:
           $ref: '#/components/schemas/is_enabled'
         spender_user_ids:
           $ref: '#/components/schemas/spender_user_ids'
-    project_in:
-      type: object
-      additionalProperties: false
-      required:
-        - name
-        - category_ids
-        - is_enabled
-      properties:
-        id:
-          $ref: '#/components/schemas/id_integer'
-        name:
-          type: string
-          maxLength: 255
-          description: Represents the name of the project.
-          example: Fast and Furious
-        sub_project:
-          nullable: true
-          type: string
-          maxLength: 255
-          description: Represents the name of the sub_project.
-          example: Formula One
-        code:
-          $ref: '#/components/schemas/code'
-        description:
-          $ref: '#/components/schemas/description'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        category_ids:
-          type: array
-          nullable: true
-          description: >
-            Has the list of all category ids that are applicable for this
-            project.
-          items:
-            type: integer
-            example: 16570
-        spender_user_ids:
-          $ref: '#/components/schemas/spender_user_ids'
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                type: string
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -265,31 +201,6 @@ components:
           $ref: '#/components/schemas/updated_at'
         spender_user_ids:
           $ref: '#/components/schemas/spender_user_ids'
-    cost_center_in:
-      type: object
-      required:
-        - name
-        - is_enabled
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_integer'
-        name:
-          type: string
-          maxLength: 255
-          description: |
-            This represents the name of the cost center.
-          example: sales & marketing
-        code:
-          $ref: '#/components/schemas/code'
-        description:
-          $ref: '#/components/schemas/description'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        spender_user_ids:
-          $ref: '#/components/schemas/spender_user_ids'
-        org_id:
-          $ref: '#/components/schemas/org_id'
     category_out:
       type: object
       additionalProperties: false
@@ -342,49 +253,6 @@ components:
           description: >
             List of project ids for which this category can be used. If
             project_ids is null, then this category can be used for any project.
-    category_in:
-      type: object
-      required:
-        - name
-        - sub_category
-        - is_enabled
-        - project_ids
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_integer'
-        name:
-          type: string
-          maxLength: 255
-          example: Engine
-          description: Represents the name of the category.
-        sub_category:
-          nullable: true
-          type: string
-          maxLength: 255
-          example: Turbo charged
-          description: Represents the name of the sub_category.
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        system_category:
-          nullable: true
-          type: string
-          maxLength: 255
-          example: Others
-          description: Represents the name of the system_category.
-        code:
-          $ref: '#/components/schemas/code'
-        project_ids:
-          type: array
-          nullable: true
-          items:
-            $ref: '#/components/schemas/id_integer'
-          example:
-            - 2222
-            - 1221
-          description: >
-            List of project ids for which this category can be used. If
-            project_ids is null, then this category can be used for any project
     category_ids:
       type: array
       description: |
@@ -1335,6 +1203,32 @@ components:
           description: >
             List of mileage rate's vehicle types that this employee is allowed
             to access. If null, then there are no restrictions
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                type: string
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     file_in:
       type: object
       required:
@@ -6026,111 +5920,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-    post:
-      operationId: projects_post
-      tags:
-        - Projects
-      summary: Create or update a project
-      description: |
-        Create or update a project.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/project_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/admin_project_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/projects/bulk:
-    post:
-      operationId: projects_bulk_post
-      tags:
-        - Projects
-      summary: Create or update projects in bulk
-      description: |
-        Create or update projects in bulk.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/project_in'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/bulk_error'
-                  - type: object
-                    properties:
-                      error:
-                        type: string
-                        nullable: true
-                      message:
-                        type: string
-                        nullable: true
-                      data:
-                        type: string
-                        nullable: true
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
+  /admin/projects/bulk: null
   /admin/cost_centers:
     get:
       operationId: cost_centers_list
@@ -6181,111 +5971,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-    post:
-      operationId: cost_centers_post
-      tags:
-        - Cost Centers
-      summary: Create or update a cost center
-      description: |
-        Create or update a cost center.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/cost_center_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/admin_cost_center_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/cost_centers/bulk:
-    post:
-      operationId: cost_centers_bulk_post
-      tags:
-        - Cost Centers
-      summary: Create or update cost centers in bulk
-      description: |
-        Create or update cost centers in bulk.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/cost_center_in'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/bulk_error'
-                  - type: object
-                    properties:
-                      error:
-                        type: string
-                        nullable: true
-                      message:
-                        type: string
-                        nullable: true
-                      data:
-                        type: string
-                        nullable: true
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
+  /admin/cost_centers/bulk: null
   /admin/categories:
     get:
       tags:
@@ -6324,111 +6010,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-    post:
-      tags:
-        - Categories
-      summary: Create or update a category
-      description: |
-        Create or update a category.
-      operationId: categories_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/category_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/category_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/categories/bulk:
-    post:
-      tags:
-        - Categories
-      summary: Create or update categories in bulk
-      description: |
-        Create or update categories in bulk.
-      operationId: categories_bulk_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/category_in'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/bulk_error'
-                  - type: object
-                    properties:
-                      error:
-                        type: string
-                        nullable: true
-                      message:
-                        type: string
-                        nullable: true
-                      data:
-                        type: string
-                        nullable: true
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
+  /admin/categories/bulk: null
   /admin/expense_fields:
     get:
       tags:
