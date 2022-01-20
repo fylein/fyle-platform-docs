@@ -119,12 +119,11 @@ components:
         organisation.
       default: true
       example: true
-    spender_user_ids:
+    restricted_spender_user_ids:
       type: array
       nullable: true
       items:
         type: string
-        nullable: true
         maxLength: 15
         description: |
           This id provided by Fyle to identify an object.
@@ -133,7 +132,7 @@ components:
         - uswoirwlwwg
         - uswlgwkgw42
       description: |
-        List of IDs of users who access the project.
+        List of IDs of users who can access this object.
     admin_project_out:
       type: object
       additionalProperties: false
@@ -173,8 +172,77 @@ components:
           $ref: '#/components/schemas/description'
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
-        spender_user_ids:
-          $ref: '#/components/schemas/spender_user_ids'
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
+    project_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - sub_project
+        - is_enabled
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the project.
+          example: Fast and Furious
+        sub_project:
+          nullable: true
+          type: string
+          maxLength: 255
+          description: Represents the name of the sub_project.
+          example: Formula One
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                type: string
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
+    spender_user_ids:
+      type: array
+      nullable: true
+      items:
+        type: string
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
+      description: |
+        List of IDs of users who can access the object.
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -1203,32 +1271,6 @@ components:
           description: >
             List of mileage rate's vehicle types that this employee is allowed
             to access. If null, then there are no restrictions
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                type: string
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
     file_in:
       type: object
       required:
@@ -5920,6 +5962,111 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      operationId: projects_post
+      tags:
+        - Projects
+      summary: Create or update a project
+      description: |
+        Create or update a project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/project_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/projects/bulk:
+    post:
+      operationId: projects_bulk_post
+      tags:
+        - Projects
+      summary: Create or update projects in bulk
+      description: |
+        Create or update projects in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/cost_centers:
     get:
       operationId: cost_centers_list
