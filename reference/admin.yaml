@@ -54,6 +54,16 @@ components:
           description: >
             This error means current user does not have enough permissions to
             perform this operation.
+    '404':
+      type: object
+      properties:
+        message:
+          enum:
+            - Resource not found
+          type: string
+          description: >
+            This error means the requested resource was not found or the
+            requester doesn't have sufficient access.
     count:
       type: integer
       description: |
@@ -221,7 +231,9 @@ components:
                 description: |
                   This holds the info of which row contains bad data.
               key:
-                type: string
+                oneOf:
+                  - type: string
+                  - type: integer
                 description: |
                   This helps in identifying the error by unique key.
               message:
@@ -266,8 +278,33 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        spender_user_ids:
-          $ref: '#/components/schemas/spender_user_ids'
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
+    cost_center_in:
+      type: object
+      required:
+        - name
+        - is_enabled
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     category_out:
       type: object
       additionalProperties: false
@@ -309,7 +346,7 @@ components:
           description: Represents the name of the system_category.
         code:
           $ref: '#/components/schemas/code'
-        project_ids:
+        restricted_project_ids:
           type: array
           nullable: true
           items:
@@ -320,6 +357,47 @@ components:
           description: >
             List of project ids for which this category can be used. If
             project_ids is null, then this category can be used for any project.
+    category_in:
+      type: object
+      required:
+        - name
+        - is_enabled
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the category.
+        sub_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Turbo charged
+          description: Represents the name of the sub_category.
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
+        code:
+          $ref: '#/components/schemas/code'
+        restricted_project_ids:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: >
+            List of project ids for which this category can be used. If
+            project_ids is null, then this category can be used for any project
     category_ids:
       type: array
       description: |
@@ -1783,6 +1861,7 @@ components:
         - report
         - is_verified
         - last_verified_at
+        - is_receipt_mandatory
         - is_exported
         - last_exported_at
         - file_ids
@@ -2069,6 +2148,11 @@ components:
           nullable: true
           description: |
             signifies when this expense was verified.
+        is_receipt_mandatory:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether a receipt is required for this expense.
         is_exported:
           type: boolean
           nullable: true
@@ -2947,6 +3031,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -3093,6 +3184,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -3134,6 +3226,13 @@ components:
             - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             signifies when this card transaction was made.
+            This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
             This date cannot be in future.
         description:
           type: string
@@ -3212,6 +3311,13 @@ components:
             signifies when this card transaction was made.
             This date cannot be in future.
           nullable: false
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -3362,6 +3468,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -3430,6 +3537,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -3572,6 +3686,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -3637,6 +3752,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -3780,6 +3902,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -3831,6 +3954,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -3972,6 +4102,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -4023,6 +4154,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -4164,6 +4302,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -4214,6 +4353,13 @@ components:
             - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             signifies when this card transaction was made.
+            This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
             This date cannot be in future.
         description:
           type: string
@@ -4356,6 +4502,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -4406,6 +4553,13 @@ components:
             - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             signifies when this card transaction was made.
+            This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
             This date cannot be in future.
         description:
           type: string
@@ -4548,6 +4702,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -4615,6 +4770,13 @@ components:
           description: |
             signifies when this card transaction was made.
             This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
+            This date cannot be in future.
         description:
           type: string
           nullable: true
@@ -4757,6 +4919,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -4823,6 +4986,13 @@ components:
             - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             signifies when this card transaction was made.
+            This date cannot be in future.
+        post_date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies post date of a card transaction.
             This date cannot be in future.
         description:
           type: string
@@ -4965,6 +5135,7 @@ components:
         - amount
         - currency
         - spent_at
+        - post_date
         - description
         - foreign_currency
         - foreign_amount
@@ -5185,10 +5356,19 @@ components:
         payment_id:
           $ref: '#/components/schemas/id_string'
         code:
-          allOf:
-            - $ref: '#/components/schemas/code'
+          $ref: '#/components/schemas/code'
+    reimbursement_in_minimal:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 255
           description: |
-            Optional field for external acounting system reference and linking
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          example: reimntGt9ju6qP
+        code:
+          $ref: '#/components/schemas/code'
     expense_out_embed:
       type: object
       required:
@@ -6011,6 +6191,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/projects/bulk:
     post:
       operationId: projects_bulk_post
@@ -6116,6 +6302,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    post:
+      operationId: cost_centers_post
+      tags:
+        - Cost Centers
+      summary: Create or update a cost center
+      description: |
+        Create or update a cost center.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/cost_center_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/cost_centers/bulk:
+    post:
+      operationId: cost_centers_bulk_post
+      tags:
+        - Cost Centers
+      summary: Create or update cost centers in bulk
+      description: |
+        Create or update cost centers in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/categories:
     get:
       tags:
@@ -6154,6 +6451,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Categories
+      summary: Create or update a category
+      description: |
+        Create or update a category.
+      operationId: categories_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/category_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/categories/bulk:
+    post:
+      tags:
+        - Categories
+      summary: Create or update categories in bulk
+      description: |
+        Create or update categories in bulk.
+      operationId: categories_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/category_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expense_fields:
     get:
       tags:
@@ -6233,6 +6641,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/per_diem_rates:
     get:
       tags:
@@ -6321,6 +6735,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/departments:
     get:
       tags:
@@ -6409,6 +6829,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/mileage_rates:
     get:
       tags:
@@ -6493,6 +6919,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/levels:
     get:
       tags:
@@ -6577,6 +7009,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employees:
     get:
       tags:
@@ -6721,6 +7159,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/files/generate_urls/bulk:
     post:
       operationId: files_generate_urls_bulk_post
@@ -6864,6 +7308,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_export_lineitems:
     get:
       tags:
@@ -6952,6 +7402,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_export_lineitems/bulk:
     post:
       operationId: accounting_export_lineitems_bulk_post
@@ -7172,6 +7628,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards:
     get:
       tags:
@@ -7263,6 +7725,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards/bulk:
     post:
       tags:
@@ -7368,6 +7836,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards/unassign:
     post:
       tags:
@@ -7418,6 +7892,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions:
     get:
       tags:
@@ -7509,6 +7989,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/bulk:
     post:
       tags:
@@ -7612,6 +8098,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/unassign:
     post:
       tags:
@@ -7662,6 +8154,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/mark_personal:
     post:
       tags:
@@ -7712,6 +8210,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/unmark_personal:
     post:
       tags:
@@ -7762,6 +8266,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/ignore:
     post:
       tags:
@@ -7811,6 +8321,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/undo_ignore:
     post:
       tags:
@@ -7861,6 +8377,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/match:
     post:
       tags:
@@ -7910,6 +8432,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/unmatch:
     post:
       tags:
@@ -7960,6 +8488,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/settlements:
     get:
       tags:
@@ -8092,6 +8626,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reimbursements/mark_paid/bulk:
+    post:
+      tags:
+        - Reimbursements
+      summary: Bulk mark paid reimbursements
+      operationId: mark_paid_reimbursements_bulk
+      description: |
+        Marks reimbursement as paid and move reports to paid state.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/reimbursement_in_minimal'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/user_account_summaries:
     get:
       tags:
@@ -8187,6 +8764,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
     get:
       tags:
         - Schedules
@@ -8395,6 +8978,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/tax_groups/bulk:
     post:
       operationId: tax_groups_bulk_post
@@ -8501,6 +9090,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
     get:
       tags:
         - Budgets
