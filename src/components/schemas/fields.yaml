@@ -128,6 +128,80 @@ category_ids:
     type: integer
     example: 16570
 
+locations:
+  description: |
+    This field will be present for travel related categories.
+    For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+  type: array
+  minItems: 0
+  maxItems: 10
+  items:
+    $ref: './fields.yaml#/location'
+
+travel_classes:
+  description: |
+    This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+    index 0 holds onward journey class, index 1 holds return journey travel class.
+  type: array
+  minItems: 0
+  maxItems: 2
+  items:
+    type: string
+  example:
+    - ECONOMY
+    - BUSINESS
+
+distance_unit:
+  type: string
+  nullable: true
+  description: Unit of distance travelled.
+  enum:
+    - KM
+    - MILES
+    - null
+  example: MILES
+
+distance:
+  type: number
+  nullable: true
+  description: Actual distance travelled by employee in travel related expenses.
+
+spent_at:
+  allOf:
+    - $ref: './fields.yaml#/timestamptz_pst'
+  description: |
+    It signifies when this expense was made.
+    This date cannot be in future.
+
+source:
+  type: string
+  description: |
+    The name of the client app which is creating the expense.
+    If its a thrid party app, it is prefixed with TPA_.
+    Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+    passed, source is saved as TPA.
+  example: SLACK_APP
+
+merchant:
+  type: string
+  maxLength: 255
+  nullable: true
+  description: |
+    String denoting the name of the vendor to which the expense was made.
+  example: Uber
+
+is_billable:
+  type: boolean
+  nullable: true
+  example: true
+  description: This field marks whether a given expense is billable a not.
+  
+is_reimbursable:
+  type: boolean
+  nullable: true
+  description: This fields marks whether a given expense is reimbursable a not.
+  example: true
+
 role:
   type: string
   enum:
@@ -377,3 +451,4 @@ restricted_spender_user_ids:
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
     List of IDs of users who access the project.
+
