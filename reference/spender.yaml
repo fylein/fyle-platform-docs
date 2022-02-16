@@ -100,14 +100,14 @@ components:
       description: >
         Signifies when this object was created in [ISO8601
         format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: 2020-06-01T13:14:54.804+00:00
+      example: '2020-06-01T13:14:54.804+00:00'
     updated_at:
       type: string
       format: date-time
       description: >
         Signifies when this object was updated in [ISO8601
         format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: 2020-06-11T13:14:55.201598+00:00
+      example: '2020-06-11T13:14:55.201598+00:00'
     code:
       type: string
       nullable: true
@@ -548,7 +548,7 @@ components:
       description: >-
         Date-time in [ISO8601
         format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: 2020-06-01T13:14:54.804+00:00
+      example: '2020-06-01T13:14:54.804+00:00'
     foreign_currency:
       type: string
       nullable: true
@@ -757,14 +757,14 @@ components:
           type: string
           nullable: true
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was approved.
         last_submitted_at:
           type: string
           nullable: true
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was submitted.
         seq_num:
@@ -797,7 +797,7 @@ components:
           type: string
           nullable: true
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was reimbursed.
     file_out_embed:
@@ -1326,13 +1326,28 @@ components:
       description: >-
         Date-time in [ISO8601
         format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: 2020-06-01T01:18:19.292-08:00
+      example: '2020-06-01T01:18:19.292-08:00'
     spent_at:
       allOf:
         - $ref: '#/components/schemas/timestamptz_pst'
       description: |
         It signifies when this expense was made.
         This date cannot be in future.
+    source:
+      type: string
+      description: |
+        The name of the client app which is creating the expense.
+        If its a thrid party app, it is prefixed with TPA_.
+        Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+        passed, source is saved as TPA.
+      example: SLACK_APP
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
     distance:
       type: number
       nullable: true
@@ -1381,25 +1396,9 @@ components:
         spent_at:
           $ref: '#/components/schemas/spent_at'
         source:
-          type: string
-          description: >
-            The name of the client app which is creating the expense.
-
-            If its a thrid party app, it is prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: SLACK_APP
+          $ref: '#/components/schemas/source'
         merchant:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: >
-            String denoting the name of the vendor to which the expense was
-            made.
-          example: Uber
+          $ref: '#/components/schemas/merchant'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -1435,15 +1434,9 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
         is_billable:
-          type: boolean
-          nullable: true
-          example: true
-          description: This field marks whether a given expense is billable a not.
+          $ref: '#/components/schemas/foreign_currency'
         is_reimbursable:
-          type: boolean
-          nullable: true
-          description: This fields marks whether a given expense is reimbursable a not.
-          example: true
+          $ref: '#/components/schemas/foreign_currency'
         distance:
           $ref: '#/components/schemas/distance'
         distance_unit:
@@ -1639,7 +1632,7 @@ components:
         physical_bill_submitted_at:
           type: string
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: >
             Signifies if and when the physical bill for this report was
             submitted.
@@ -1661,21 +1654,21 @@ components:
         last_paid_at:
           type: string
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was reimbursed.
           nullable: true
         last_approved_at:
           type: string
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was approved.
           nullable: true
         last_submitted_at:
           type: string
           format: date-time
-          example: 2020-06-11T13:14:55.201598+00:00
+          example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was submitted.
           nullable: true
@@ -1769,11 +1762,11 @@ components:
                 end_date:
                   nullable: true
                   type: string
-                  example: 2020-11-11T16:29:30.965869Z
+                  example: '2020-11-11T16:29:30.965869Z'
                 start_date:
                   nullable: true
                   type: string
-                  example: 2020-11-11T16:29:30.965869Z
+                  example: '2020-11-11T16:29:30.965869Z'
                 timezone:
                   nullable: true
                   type: string
@@ -1801,7 +1794,7 @@ components:
                 run_date:
                   nullable: true
                   type: string
-                  example: 2021-05-12T10:16:50.410Z
+                  example: '2021-05-12T10:16:50.410Z'
     schedule_out:
       type: object
       properties:
@@ -2427,7 +2420,7 @@ components:
         Additional details of the card transaction. <a
         href="https://tools.ietf.org/html/rfc3339#section-5.6">RFC 3339, section
         5.6 compliant timestamp.</a>
-      example: 2020-07-03T18:19:31.193Z
+      example: '2020-07-03T18:19:31.193Z'
       nullable: true
     integer_detail:
       type: integer
