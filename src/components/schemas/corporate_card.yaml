@@ -1,5 +1,6 @@
 corporate_card_out:
   type: object
+  additionalProperties: False
   properties:
     id:
       allOf:
@@ -24,11 +25,7 @@ corporate_card_out:
         Specifies the name of bank who issued the card.
       example: Bank of America
     card_number:
-      type: string
-      description: |
-        Specifies the masked number of the card.
-        Add only masked card-numbers, last four digits of the card.
-      example: xxxx-4543
+      $ref: './fields.yaml#/card_number'
     cardholder_name:
       type: string
       maxLength: 255
@@ -67,6 +64,45 @@ corporate_card_out:
         The unique id of an user who assigned the card.
       nullable: true
       example: uswjwgnwwgo
+    is_visa_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with direct visa_feed
+      nullable: false
+    is_dummy: 
+      type: boolean
+      description: |
+        If the card is a test card
+      nullable: false
+    last_ready_for_verification_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies when the card was ready to be verified 
+      example: "2022-02-01T07:20:30.951475+00:00"
+      nullable: true
+    last_verification_attempt_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+         Signifies when the last card verification was attempted
+      nullable: true
+    last_verified_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies when the card was verified
+      example: "2022-02-01T07:20:39.207250+00:00"
+      nullable: true
+    verification_status:
+      type: string
+      nullable: false
+      description: |
+        Verification status of the corporate card
+      enum: 
+        - VERIFIED
+        - NOT_VERIFIED
+        - READY_FOR_VERIFICATION
   required:
     - id
     - org_id
@@ -81,6 +117,12 @@ corporate_card_out:
     - last_synced_at
     - last_assigned_at
     - assignor_user_id
+    - is_visa_enrolled
+    - is_dummy
+    - last_ready_for_verification_at
+    - last_verification_attempt_at
+    - last_verified_at
+    - verification_status
 
 corporate_card_in:
   type: object
