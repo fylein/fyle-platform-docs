@@ -249,6 +249,7 @@ components:
             project_ids is null, then this category can be used for any project.
     category_ids:
       type: array
+      nullable: true
       description: |
         List of category ids.
       items:
@@ -980,7 +981,7 @@ components:
         - report
         - is_verified
         - last_verified_at
-        - is_receipt_mandatory
+        - is_receipt_missing_when_required
         - is_exported
         - last_exported_at
         - file_ids
@@ -1267,11 +1268,12 @@ components:
           nullable: true
           description: |
             signifies when this expense was verified.
-        is_receipt_mandatory:
+        is_receipt_missing_when_required:
           type: boolean
           nullable: true
-          description: |
-            Determines whether a receipt is required for this expense.
+          description: >
+            Determines whether a receipt is missing for this expense when it is
+            required.
         is_exported:
           type: boolean
           nullable: true
@@ -1358,6 +1360,12 @@ components:
       description: |
         String denoting the name of the vendor to which the expense was made.
       example: Uber
+    claim_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount as claimed by user.
+      example: 1984.18
     distance:
       type: number
       nullable: true
@@ -1373,11 +1381,10 @@ components:
       example: MILES
     travel_classes:
       description: >
-        This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-        category.
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
 
-        index 0 holds onward journey class, index 1 holds return journey travel
-        class.
+        index 0 holds onward journey travel class, index 1 holds return journey
+        travel class.
       type: array
       minItems: 0
       maxItems: 2
@@ -1391,8 +1398,10 @@ components:
         This field will be present for travel related categories.
 
         For travel between Place A to Place B, this array will contain two
-        items, From location at array index 0 and To location at array index 1.
+        items. From location at array index i and To location at array index
+        i+1.
       type: array
+      nullable: true
       minItems: 0
       maxItems: 10
       items:
@@ -1400,6 +1409,9 @@ components:
     spender_expense_in:
       type: object
       additionalProperties: false
+      required:
+        - claim_amount
+        - spent_at
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1413,6 +1425,8 @@ components:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
           $ref: '#/components/schemas/foreign_amount'
+        claim_amount:
+          $ref: '#/components/schemas/claim_amount'
         purpose:
           type: string
           example: Team lunch
