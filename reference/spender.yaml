@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   version: '1.0'
   title: Spender APIs
-  termsOfService: 'https://www.fylehq.com/privacy/terms-and-conditions'
+  termsOfService: https://www.fylehq.com/privacy/terms-and-conditions
   contact:
     name: Platform Beta
     email: platform-beta@fylehq.com
@@ -10,9 +10,9 @@ info:
     These APIs are used by applications that operate on the Spender's behalf.
     Very commonly, it is to enable creation of expenses and reports.
 servers:
-  - url: 'https://us1.fylehq.com/platform/v1beta'
+  - url: https://us1.fylehq.com/platform/v1beta
     description: US Region Server
-  - url: 'https://in1.fylehq.com/platform/v1beta'
+  - url: https://in1.fylehq.com/platform/v1beta
     description: India Region Server
 components:
   securitySchemes:
@@ -20,8 +20,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: 'https://accounts.fylehq.com/app/developers/#/oauth/authorize'
-          tokenUrl: 'https://accounts.fylehq.com/oauth/token'
+          authorizationUrl: https://accounts.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
           scopes:
             '*': Grant all actions
   schemas:
@@ -381,7 +381,7 @@ components:
         The three-letter currency code following ISO standard <a
         href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
       example: USD
-      pattern: '([A-Z]{3})'
+      pattern: ([A-Z]{3})
     org_out_embed:
       type: object
       additionalProperties: false
@@ -696,7 +696,7 @@ components:
         formatted_address:
           type: string
           nullable: true
-          example: '221 Baker St, Marylebone, London, United Kingdom'
+          example: 221 Baker St, Marylebone, London, United Kingdom
         latitude:
           type: number
           nullable: true
@@ -900,11 +900,18 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           $ref: '#/components/schemas/department_out_embed'
+    card_number:
+      type: string
+      description: |
+        Specifies the masked number of the card.
+        Add only masked card-numbers, last four digits of the card.
+      example: xxxx-4543
     matched_corporate_card_transaction_out_embed:
       type: object
       required:
         - id
         - corporate_card_id
+        - corporate_card_number
       properties:
         id:
           allOf:
@@ -914,6 +921,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
     expense_out:
       type: object
       additionalProperties: false
@@ -1383,7 +1392,7 @@ components:
       type: string
       description: |
         URL Endpoint for webhook
-      example: 'https://api.custom.com/webhook1'
+      example: https://api.custom.com/webhook1
     spender_subscriptions_out:
       type: object
       additionalProperties: false
@@ -2251,6 +2260,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
     corporate_card_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2275,11 +2285,7 @@ components:
             Specifies the name of bank who issued the card.
           example: Bank of America
         card_number:
-          type: string
-          description: |
-            Specifies the masked number of the card.
-            Add only masked card-numbers, last four digits of the card.
-          example: xxxx-4543
+          $ref: '#/components/schemas/card_number'
         cardholder_name:
           type: string
           maxLength: 255
@@ -2321,6 +2327,45 @@ components:
             The unique id of an user who assigned the card.
           nullable: true
           example: uswjwgnwwgo
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with direct visa_feed
+          nullable: false
+        is_dummy:
+          type: boolean
+          description: |
+            If the card is a test card
+          nullable: false
+        last_ready_for_verification_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was ready to be verified 
+          example: '2022-02-01T07:20:30.951475+00:00'
+          nullable: true
+        last_verification_attempt_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the last card verification was attempted
+          nullable: true
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was verified
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        verification_status:
+          type: string
+          nullable: false
+          description: |
+            Verification status of the corporate card
+          enum:
+            - VERIFIED
+            - NOT_VERIFIED
+            - READY_FOR_VERIFICATION
       required:
         - id
         - org_id
@@ -2335,6 +2380,12 @@ components:
         - last_synced_at
         - last_assigned_at
         - assignor_user_id
+        - is_visa_enrolled
+        - is_dummy
+        - last_ready_for_verification_at
+        - last_verification_attempt_at
+        - last_verified_at
+        - verification_status
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -4061,7 +4112,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: 'gte.2020-06-01T00:00:00.000-08:00'
+        example: gte.2020-06-01T00:00:00.000-08:00
     updated_at:
       in: query
       name: updated_at
@@ -4070,7 +4121,7 @@ components:
         RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
       schema:
         type: string
-        example: 'gte.2020-06-01T00:00:00.000-08:00'
+        example: gte.2020-06-01T00:00:00.000-08:00
     offset:
       in: query
       name: offset
@@ -4098,7 +4149,7 @@ components:
         For sorting in descending order, use `column_name.desc`
       schema:
         type: string
-        example: 'updated_at.desc,id'
+        example: updated_at.desc,id
     q:
       in: query
       name: q
@@ -4384,10 +4435,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
                 additionalProperties: false
                 properties:
                   count:
@@ -4496,7 +4543,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  '/spender/expenses/{id}':
+  /spender/expenses/{id}:
     delete:
       tags:
         - Expenses
@@ -4607,10 +4654,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
                 additionalProperties: false
                 properties:
                   count:
@@ -5162,10 +5205,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -5199,10 +5238,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -5608,10 +5643,6 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - offset
-                  - data
                 additionalProperties: false
                 properties:
                   count:
