@@ -55,7 +55,7 @@ expense_out:
     - report
     - is_verified
     - last_verified_at
-    - is_receipt_mandatory
+    - is_receipt_missing_when_required
     - is_exported
     - last_exported_at
     - file_ids
@@ -318,11 +318,11 @@ expense_out:
       nullable: true
       description: |
         signifies when this expense was verified.
-    is_receipt_mandatory:
+    is_receipt_missing_when_required:
       type: boolean
       nullable: true
       description: |
-        Determines whether a receipt is required for this expense.
+        Determines whether a receipt is missing for this expense when it is required.
     is_exported:
       type: boolean
       nullable: true
@@ -387,6 +387,9 @@ expense_out:
 expense_in:
   type: object
   additionalProperties: false
+  required:
+    - claim_amount
+    - spent_at
   properties:
     spent_at:
       allOf:
@@ -409,8 +412,6 @@ expense_in:
       description: |
         String denoting the name of the vendor to which the Expense was made.
       example: Uber
-    currency:
-      $ref: './fields.yaml#/currency'
     foreign_currency:
       $ref: './fields.yaml#/foreign_currency'
     foreign_amount:
@@ -468,34 +469,6 @@ expense_in:
         - MILES
         - null
       example: MILES
-    mileage_calculated_distance:
-      type: number
-      nullable: true
-      description: Distance compluted by Fyle in mileage expenses.
-    mileage_calculated_amount:
-      type: number
-      nullable: true
-      description: Amount compluted by Fyle in mileage expenses.
-    mileage_rate_id:
-      allOf:
-        - $ref: './fields.yaml#/fk_integer'
-      nullable: true
-      example: 9080
-    mileage_is_round_trip:
-      type: boolean
-      nullable: true
-      description: Flag stating whether this was a round trip or not.
-    per_diem_rate_id:
-      allOf:
-        - $ref: './fields.yaml#/fk_integer'
-      nullable: true
-      example: 583
-    num_days:
-      type: integer
-      nullable: true
-      description: |
-        Specific to per diem related expenses, number of days ofr which per diem claim is made.
-      example: 2
     started_at:
       $ref: './fields.yaml#/timestamptz_pst'
     ended_at:
@@ -529,10 +502,14 @@ expense_in:
         $ref: './fields.yaml#/location'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+      
 
 spender_expense_in:
   type: object
   additionalProperties: false
+  required:
+    - claim_amount
+    - spent_at
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -546,6 +523,8 @@ spender_expense_in:
       $ref: './fields.yaml#/foreign_currency'
     foreign_amount:
       $ref: './fields.yaml#/foreign_amount'
+    claim_amount:
+      $ref: './fields.yaml#/claim_amount'
     purpose:
       type: string
       example: Team lunch
