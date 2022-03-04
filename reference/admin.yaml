@@ -791,6 +791,9 @@ components:
           $ref: '#/components/schemas/code'
     level_in:
       type: object
+      required:
+        - name
+        - is_enabled
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -808,6 +811,8 @@ components:
           example: Associate
         code:
           $ref: '#/components/schemas/code'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     fk_string:
       type: string
       nullable: true
@@ -1537,6 +1542,7 @@ components:
         - object_id
         - object_type
         - accounting_export_id
+        - reference
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -2540,6 +2546,147 @@ components:
           example: XXXXXXXXXXXX1234
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    report_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - user_id
+        - user
+        - purpose
+        - currency
+        - amount
+        - tax
+        - state
+        - num_expenses
+        - is_manually_flagged
+        - is_policy_flagged
+        - last_paid_at
+        - last_approved_at
+        - last_submitted_at
+        - seq_num
+        - source
+        - approvals
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report has been verified by a verifier
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: set5nlgnwgwl
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            If physical has been collected for this report
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this expense has been exported to external
+            accounting system or not.
+        last_paid_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
     corporate_card_out:
       type: object
       additionalProperties: false
@@ -6144,6 +6291,9 @@ tags:
     description: |
       These APIs gives you access to manage your organisation's Reimbursements
       data
+  - name: Reports
+    description: |
+      These APIs gives you access to manage your organisation's Reports data
   - name: Schedules
     description: |
       This API gives you access to manage Scheduled jobs.
@@ -7283,10 +7433,10 @@ paths:
     post:
       tags:
         - Accounting Exports
-      summary: Create an accounting export
+      summary: Create or update an accounting export
       operationId: accounting_export_post
       description: |
-        Create an accounting export.
+        Create or update an accounting export.
       requestBody:
         required: true
         content:
@@ -7374,7 +7524,7 @@ paths:
         - Accounting Exports
       summary: Create or update an accounting export lineitem
       description: |
-        Create or update a project.
+        Create or update an accounting export lineitem.
       requestBody:
         required: true
         content:
@@ -7427,9 +7577,9 @@ paths:
       operationId: accounting_export_lineitems_bulk_post
       tags:
         - Accounting Exports
-      summary: Create accounting export lineitems in bulk
+      summary: Create or update accounting export lineitems in bulk
       description: |
-        Create accounting export lineitems in bulk.
+        Create or update accounting export lineitems in bulk.
       requestBody:
         required: true
         content:
@@ -7646,6 +7796,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports:
+    get:
+      tags:
+        - Reports
+      summary: List reports
+      operationId: reports_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/report_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/corporate_cards:
     get:
       tags:
