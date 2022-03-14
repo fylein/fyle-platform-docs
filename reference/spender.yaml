@@ -1000,7 +1000,7 @@ components:
         - matched_corporate_card_transaction_ids
         - matched_corporate_card_transactions
         - last_settled_at
-        - missing_mandatory_fields
+        - missing_mandatory_field_ids
       properties:
         id:
           allOf:
@@ -1348,8 +1348,9 @@ components:
           example:
             - 123
             - 32421
-          description: |
-            This is list of all the mandatory expense field ids which are missing from this expense.
+          description: >
+            This is list of all the mandatory expense field ids which are
+            missing from this expense.
     timestamptz_pst:
       type: string
       format: date-time
@@ -1364,6 +1365,16 @@ components:
       description: |
         It signifies when this expense was made.
         This date cannot be in future.
+    source:
+      type: string
+      enum:
+        - WEBAPP
+        - SLACK
+        - TPA
+        - CORPORATE_CARD
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
     merchant:
       type: string
       maxLength: 255
@@ -1422,11 +1433,14 @@ components:
       required:
         - claim_amount
         - spent_at
+        - source
       properties:
         id:
           $ref: '#/components/schemas/id_string'
         spent_at:
           $ref: '#/components/schemas/spent_at'
+        source:
+          $ref: '#/components/schemas/source'
         merchant:
           $ref: '#/components/schemas/merchant'
         foreign_currency:
