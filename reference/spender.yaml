@@ -1356,6 +1356,20 @@ components:
           type: string
           description: Comment made on the expense.
           example: This is a food expense.
+    expense_attach_receipt_in:
+      type: object
+      required:
+        - id
+        - file_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fisjfwlrglw
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -4679,6 +4693,55 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/expense_add_comment_action_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/attach_receipt:
+    post:
+      tags:
+        - Expenses
+      summary: Attach Receipt to an expense
+      description: |
+        This API attach Receipt to an existing expense
+      operationId: attach_receipt_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_attach_receipt_in'
       responses:
         '200':
           description: OK
