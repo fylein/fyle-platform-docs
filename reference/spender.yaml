@@ -256,6 +256,7 @@ components:
         example: 16570
     expense_field_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -324,6 +325,7 @@ components:
           $ref: '#/components/schemas/code'
     mileage_rate_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -470,6 +472,7 @@ components:
             $ref: '#/components/schemas/role'
     account_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -1511,6 +1514,20 @@ components:
           type: string
           description: Comment made on the expense.
           example: This is a food expense.
+    expense_attach_receipt_in:
+      type: object
+      required:
+        - id
+        - file_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fisjfwlrglw
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -1544,6 +1561,7 @@ components:
           description: Amount per night
     merchant_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1890,45 +1908,6 @@ components:
           type: string
           nullable: true
           example: report.created
-    policy_test_out:
-      type: object
-      properties:
-        policy_violation_summary:
-          type: object
-          properties:
-            action_description:
-              type: string
-              maxLength: 255
-              description: |
-                Describes the what action will taken on the expense.
-              example: >
-                The following action(s) will be taken- expense violation will be
-                marked.
-
-                expense amount will be changed to 0 USD
-            policy_amount:
-              type: number
-              example: 10
-        policy_violations:
-          type: array
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-                description: |
-                  Description of this policy rule.
-                example: Receipt needed for expenses above USD 74
-              policy_amount:
-                type: number
-                description: |
-                  Amount capping set in the policy.
-                example: 100
-              is_popup_required:
-                type: boolean
-                description: |
-                  Indicates whether the message is shown in popup window or not.
-                example: false
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2000,6 +1979,7 @@ components:
             State of this advance request approval
     advance_request_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2151,6 +2131,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
     advance_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2254,7 +2235,6 @@ components:
           $ref: '#/components/schemas/custom_fields'
     corporate_card_out:
       type: object
-      additionalProperties: false
       properties:
         id:
           allOf:
@@ -4097,6 +4077,91 @@ components:
           $ref: '#/components/schemas/is_enabled'
         code:
           $ref: '#/components/schemas/code'
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    file_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        content_type:
+          type: string
+          example: text/csv
+    file_generate_urls_action_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    file_generate_urls_action_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          type: string
+          description: |
+            Link to download this file
   parameters:
     created_at:
       in: query
@@ -4677,6 +4742,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/attach_receipt:
+    post:
+      tags:
+        - Expenses
+      summary: Attach Receipt to an expense
+      description: |
+        This API attach Receipt to an existing expense
+      operationId: attach_receipt_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_attach_receipt_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/per_diem_rates:
     get:
       tags:
@@ -4937,60 +5051,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /spender/expenses/policy_test:
-    post:
-      tags:
-        - Expenses
-      summary: Test policy on an expense
-      description: >
-        This API runs organization defined policy for the expense and returns
-        any violation that occurred.
-
-        This is a test call. The results wont be stored.
-      operationId: expenses_policy_test_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/spender_expense_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/policy_test_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /spender/reports:
     get:
       operationId: reports_list
@@ -5676,3 +5736,111 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/files:
+    post:
+      operationId: files_post
+      tags:
+        - Files
+      summary: Create a file
+      description: |
+        Create a file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/file_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/files/generate_urls:
+    post:
+      tags:
+        - Files
+      summary: Generate download and upload URLs
+      description: >
+        Once a file is created, its contents may need to be uploaded (or
+        downloaded). To upload (or download) contents, you'll
+
+        need to generate a temporary signed URL. This API accomplishes that. The
+        signed URL is valid for 5 mins.
+      operationId: files_generate_urls_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/file_generate_urls_action_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_generate_urls_action_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'

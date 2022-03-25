@@ -1,10 +1,11 @@
 post:
-  operationId: files_post
   tags:
     - Files
-  summary: Create a file
+  summary: Generate download and upload URLs
   description: |
-    Create a file.
+    Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
+    need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+  operationId: files_generate_urls_post
   requestBody:
     required: true
     content:
@@ -16,7 +17,7 @@ post:
             - data
           properties:
             data:
-              $ref: ../../components/schemas/file.yaml#/file_in
+              $ref: ../../components/schemas/file.yaml#/file_generate_urls_action_in
   responses:
     '200':
       description: OK
@@ -27,25 +28,19 @@ post:
             additionalProperties: False
             properties:
               data:
-                $ref: ../../components/schemas/file.yaml#/file_out
-    '400':
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: ../../components/schemas/400.yaml
+                $ref: ../../components/schemas/file.yaml#/file_generate_urls_action_out
     '401':
-      description: Unauthorized request
+      description: Unauthorised request
       content:
         application/json:
           schema:
-            $ref: ../../components/schemas/401.yaml
-    '403':
-      description: Forbidden
+            $ref: '../../components/schemas/401.yaml'
+    '400':
+      description: Unauthorised request
       content:
         application/json:
           schema:
-            $ref: ../../components/schemas/403.yaml
+            $ref: '../../components/schemas/400.yaml'
     '404':
       description: Not Found
       content:

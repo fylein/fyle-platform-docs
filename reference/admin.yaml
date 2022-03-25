@@ -144,6 +144,22 @@ components:
         - uswlgwkgw42
       description: |
         List of IDs of users who access the project.
+    approver_user_ids:
+      type: array
+      nullable: false
+      maxItems: 2
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
+      description: |
+        List of IDs of users who are approvers of the project.
     admin_approver_project_out:
       type: object
       additionalProperties: false
@@ -185,12 +201,13 @@ components:
           $ref: '#/components/schemas/is_enabled'
         restricted_spender_user_ids:
           $ref: '#/components/schemas/restricted_spender_user_ids'
+        approver_user_ids:
+          $ref: '#/components/schemas/approver_user_ids'
     project_in:
       type: object
       additionalProperties: false
       required:
         - name
-        - is_enabled
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -213,6 +230,8 @@ components:
           $ref: '#/components/schemas/is_enabled'
         restricted_spender_user_ids:
           $ref: '#/components/schemas/restricted_spender_user_ids'
+        approver_user_ids:
+          $ref: '#/components/schemas/approver_user_ids'
     bulk_error:
       type: object
       properties:
@@ -394,6 +413,7 @@ components:
         example: 16570
     expense_field_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -678,6 +698,7 @@ components:
           example: Outbound Sales
     mileage_rate_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1252,22 +1273,6 @@ components:
       additionalProperties: false
       required:
         - user_email
-        - user_full_name
-        - business_unit
-        - code
-        - department_name
-        - sub_department
-        - is_enabled
-        - joined_at
-        - level
-        - location
-        - title
-        - approver_emails
-        - project_names
-        - cost_center_names
-        - per_diem_rate_names
-        - vehicle_types
-        - custom_fields
       properties:
         user_email:
           $ref: '#/components/schemas/email'
@@ -1276,7 +1281,9 @@ components:
           maxLength: 255
           description: >
             Represents the full name of the Employee. Must be at least 3
-            characters.
+            characters. 
+
+            Is required when creating a new employee
           example: John Doe
         business_unit:
           type: string
@@ -1408,6 +1415,7 @@ components:
                 - $ref: '#/components/schemas/fk_string'
     file_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1443,6 +1451,7 @@ components:
           $ref: '#/components/schemas/id_string'
     file_generate_urls_action_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1533,6 +1542,7 @@ components:
           description: An optional URL where the exported data could be accessed
     accounting_export_lineitem_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -2305,6 +2315,7 @@ components:
             State of this advance request approval
     advance_request_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2414,6 +2425,7 @@ components:
             external accounting system or not.
     advance_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2651,7 +2663,11 @@ components:
       additionalProperties: false
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          type: string
+          maxLength: 20
+          description: |
+            This id provided by Fyle to identify an object.
+          example: remindRsjf2WmGd2
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -2703,7 +2719,11 @@ components:
       additionalProperties: false
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          type: string
+          maxLength: 20
+          description: |
+            This id provided by Fyle to identify an object.
+          example: remindRsjf2WmGd2
         type:
           $ref: '#/components/schemas/reminder_type'
         message:
@@ -2866,7 +2886,6 @@ components:
             List of report_approval objects
     corporate_card_out:
       type: object
-      additionalProperties: false
       properties:
         id:
           allOf:
@@ -5536,6 +5555,7 @@ components:
         - metadata
     settlement_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -5610,6 +5630,7 @@ components:
                 $ref: '#/components/schemas/org_id'
     adjustment_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -5670,6 +5691,7 @@ components:
           example: Adjusting pending amount of CCC account with personal account
     reimbursement_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           type: string
@@ -5968,6 +5990,7 @@ components:
           example: report.created
     account_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -8045,6 +8068,56 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/reminder_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reminder_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reminders/{id}:
+    delete:
+      tags:
+        - Reminders
+      summary: Delete a reminder
+      description: |
+        Delete a reminder.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Id of the reminder that needs to be deleted.
+          schema:
+            type: string
+      operationId: reminders_delete
       responses:
         '200':
           description: OK
