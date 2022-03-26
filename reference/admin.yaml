@@ -1845,6 +1845,36 @@ components:
           example: bawownwrng
         corporate_card_number:
           $ref: '#/components/schemas/card_number'
+    missing_mandatory_fields:
+      type: object
+      nullable: false
+      properties:
+        expense_field_ids:
+          type: array
+          nullable: false
+          items:
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an expense field.
+            example: 123
+          example:
+            - 123
+            - 12423
+          description: |
+            List of IDs of expense fields which are mandatory but are missing.
+        amount:
+          type: boolean
+          nullable: false
+          description: >
+            This field shows whether the amount field is present in the expense
+            or not 
+        currency:
+          type: boolean
+          nullable: false
+          description: >
+            This field shows whether the currency field is present in the
+            expense or not 
     expense_out:
       type: object
       additionalProperties: false
@@ -1912,7 +1942,7 @@ components:
         - matched_corporate_card_transaction_ids
         - matched_corporate_card_transactions
         - last_settled_at
-        - missing_mandatory_field_ids
+        - missing_mandatory_fields
       properties:
         id:
           allOf:
@@ -2253,16 +2283,8 @@ components:
           nullable: true
           description: |
             signifies when this expense was last settled.
-        missing_mandatory_field_ids:
-          type: array
-          items:
-            type: integer
-          example:
-            - 123
-            - 32421
-          description: >
-            This is list of all the mandatory expense field ids which are
-            missing from this expense.
+        missing_mandatory_fields:
+          $ref: '#/components/schemas/missing_mandatory_fields'
     amount:
       type: number
       description: |
