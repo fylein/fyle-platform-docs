@@ -647,6 +647,47 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     department_out:
       type: object
       additionalProperties: false
@@ -673,10 +714,24 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are head of the department.
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://fyle.stoplight.io/
     department_in:
       type: object
       required:
-        - is_enabled
         - name
       additionalProperties: false
       properties:
@@ -696,6 +751,14 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://fyle.stoplight.io/
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -866,32 +929,6 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     department_out_embed:
       type: object
       additionalProperties: false
