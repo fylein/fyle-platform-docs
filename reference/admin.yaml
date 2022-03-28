@@ -647,6 +647,21 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
     email:
       type: string
       maxLength: 127
@@ -656,9 +671,8 @@ components:
 
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
-    user_out_embed_nullable:
+    user_out_embed:
       type: object
-      nullable: true
       additionalProperties: false
       properties:
         id:
@@ -700,14 +714,15 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-        department_head_user_id:
-          type: string
-          description: |
-            The unique id of an user who is head of the department.
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
           nullable: true
-          example: uswjwgnwwgo
-        department_head_user:
-          $ref: '#/components/schemas/user_out_embed_nullable'
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of IDs of users who are head of the department.
         doc_url:
           type: string
           nullable: true
@@ -716,7 +731,6 @@ components:
     department_in:
       type: object
       required:
-        - is_enabled
         - name
       additionalProperties: false
       properties:
@@ -736,12 +750,15 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-        department_head_user_id:
-          type: string
-          description: |
-            The unique id of an user who is head of the department.
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
           nullable: true
-          example: uswjwgnwwgo
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of IDs of users who are head of the department.
         doc_url:
           type: string
           nullable: true
@@ -917,23 +934,6 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: sdfd2391
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     department_out_embed:
       type: object
       additionalProperties: false
@@ -3201,6 +3201,24 @@ components:
         - last_synced_at
         - last_assigned_at
         - assignor_user_id
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     corporate_card_out_embed:
       type: object
       additionalProperties: false
