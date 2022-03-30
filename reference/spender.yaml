@@ -256,6 +256,7 @@ components:
         example: 16570
     expense_field_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -324,6 +325,7 @@ components:
           $ref: '#/components/schemas/code'
     mileage_rate_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -468,15 +470,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/role'
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     account_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -487,7 +483,11 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
         user_id:
-          $ref: '#/components/schemas/fk_string'
+          type: string
+          nullable: true
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
         type:
           type: string
           enum:
@@ -508,6 +508,12 @@ components:
           example: 43.8
         org_id:
           $ref: '#/components/schemas/org_id'
+        category_id:
+          type: integer
+          description: |
+            This id is provided by Fyle to identify a category.
+          nullable: true
+          example: 49058
     name:
       type: string
       maxLength: 255
@@ -515,6 +521,21 @@ components:
         This represents the name of the resource. This should be unique in an
         organization
       example: foo123
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
     department_out:
       type: object
       additionalProperties: false
@@ -541,6 +562,21 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are head of the department.
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://fyle.stoplight.io/
     timestamptz_utc:
       type: string
       format: date-time
@@ -624,6 +660,13 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
     account_out_embed:
       type: object
       properties:
@@ -1343,6 +1386,20 @@ components:
           type: string
           description: Comment made on the expense.
           example: This is a food expense.
+    expense_attach_receipt_in:
+      type: object
+      required:
+        - id
+        - file_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fisjfwlrglw
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -1376,6 +1433,7 @@ components:
           description: Amount per night
     merchant_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1722,220 +1780,6 @@ components:
           type: string
           nullable: true
           example: report.created
-    timestamptz_pst:
-      type: string
-      format: date-time
-      nullable: true
-      description: >-
-        Date-time in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: '2020-06-01T01:18:19.292-08:00'
-    expense_in:
-      type: object
-      additionalProperties: false
-      properties:
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_pst'
-          description: |
-            signifies when this expense was made.
-            This date cannot be in future.
-        source:
-          type: string
-          description: >
-            The name of the client app which is creating the expense.
-
-            if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: SLACK_APP
-        merchant:
-          type: string
-          maxLength: 255
-          nullable: true
-          description: >
-            String denoting the name of the vendor to which the Expense was
-            made.
-          example: Uber
-        currency:
-          $ref: '#/components/schemas/currency'
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        purpose:
-          type: string
-          example: Team lunch
-        cost_center_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 1049
-        category_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 49058
-        project_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 92895
-        source_account_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          example: acwbl222wlg
-        tax_amount:
-          type: number
-          nullable: true
-          description: Tax amount as setup by your organisation.
-        tax_group_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          nullable: true
-        is_billable:
-          type: boolean
-          nullable: true
-          example: true
-          description: This fields marks whether a given expense is billable a not.
-        is_reimbursable:
-          type: boolean
-          nullable: true
-          description: This fields marks whether a given expense is reimbursable a not.
-          example: true
-        distance:
-          type: number
-          nullable: true
-          description: Actual distance travelled by employee in travel related expenses.
-        distance_unit:
-          type: string
-          nullable: true
-          description: Unit of distance travelled.
-          enum:
-            - KM
-            - MILES
-            - null
-          example: MILES
-        mileage_calculated_distance:
-          type: number
-          nullable: true
-          description: Distance compluted by Fyle in mileage expenses.
-        mileage_calculated_amount:
-          type: number
-          nullable: true
-          description: Amount compluted by Fyle in mileage expenses.
-        mileage_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 9080
-        mileage_is_round_trip:
-          type: boolean
-          nullable: true
-          description: Flag stating whether this was a round trip or not.
-        per_diem_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          nullable: true
-          example: 583
-        num_days:
-          type: integer
-          nullable: true
-          description: >
-            Specific to per diem related expenses, number of days ofr which per
-            diem claim is made.
-          example: 2
-        started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-        travel_classes:
-          description: >
-            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-            category.
-
-            index 0 holds onward journey class, index 1 holds return journey
-            travel class.
-          type: array
-          minItems: 0
-          maxItems: 2
-          items:
-            type: string
-          example:
-            - ECONOMY
-            - BUSINESS
-        hotel_is_breakfast_provided:
-          type: boolean
-          nullable: true
-          description: |
-            This field is applicable for only `Hotel` category.
-        locations:
-          description: >
-            This field will be present for travel related categories.
-
-            For travel between Place A to Place B, this array will contain two
-            items, From location at array index 0 and To location at array index
-            1.
-
-            For travel between Place A to Place c and stopping at Place B, this
-          type: array
-          minItems: 0
-          maxItems: 10
-          items:
-            $ref: '#/components/schemas/location'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-    spender_expense_in:
-      allOf:
-        - type: object
-          required:
-            - claim_amount
-          properties:
-            claim_amount:
-              $ref: '#/components/schemas/amount'
-        - $ref: '#/components/schemas/expense_in'
-    policy_test_out:
-      type: object
-      properties:
-        policy_violation_summary:
-          type: object
-          properties:
-            action_description:
-              type: string
-              maxLength: 255
-              description: |
-                Describes the what action will taken on the expense.
-              example: >
-                The following action(s) will be taken- expense violation will be
-                marked.
-
-                expense amount will be changed to 0 USD
-            policy_amount:
-              type: number
-              example: 10
-        policy_violations:
-          type: array
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-                description: |
-                  Description of this policy rule.
-                example: Receipt needed for expenses above USD 74
-              policy_amount:
-                type: number
-                description: |
-                  Amount capping set in the policy.
-                example: 100
-              is_popup_required:
-                type: boolean
-                description: |
-                  Indicates whether the message is shown in popup window or not.
-                example: false
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2007,6 +1851,7 @@ components:
             State of this advance request approval
     advance_request_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2158,6 +2003,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
     advance_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -2261,7 +2107,6 @@ components:
           $ref: '#/components/schemas/custom_fields'
     corporate_card_out:
       type: object
-      additionalProperties: false
       properties:
         id:
           allOf:
@@ -4104,6 +3949,91 @@ components:
           $ref: '#/components/schemas/is_enabled'
         code:
           $ref: '#/components/schemas/code'
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    file_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: >
+            Indicates whether this file original size or encrypted or its
+            thumbnail image.
+          example: RECEIPT
+        content_type:
+          type: string
+          example: text/csv
+    file_generate_urls_action_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    file_generate_urls_action_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          type: string
+          description: |
+            Link to download this file
   parameters:
     created_at:
       in: query
@@ -4634,6 +4564,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/attach_receipt:
+    post:
+      tags:
+        - Expenses
+      summary: Attach Receipt to an expense
+      description: |
+        This API attach Receipt to an existing expense
+      operationId: attach_receipt_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_attach_receipt_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/per_diem_rates:
     get:
       tags:
@@ -4894,60 +4873,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /spender/expenses/policy_test:
-    post:
-      tags:
-        - Expenses
-      summary: Test policy on an expense
-      description: >
-        This API runs organization defined policy for the expense and returns
-        any violation that occurred.
-
-        This is a test call. The results wont be stored.
-      operationId: expenses_policy_test_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/spender_expense_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/policy_test_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /spender/reports:
     get:
       operationId: reports_list
@@ -5633,3 +5558,111 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/files:
+    post:
+      operationId: files_post
+      tags:
+        - Files
+      summary: Create a file
+      description: |
+        Create a file.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/file_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/files/generate_urls:
+    post:
+      tags:
+        - Files
+      summary: Generate download and upload URLs
+      description: >
+        Once a file is created, its contents may need to be uploaded (or
+        downloaded). To upload (or download) contents, you'll
+
+        need to generate a temporary signed URL. This API accomplishes that. The
+        signed URL is valid for 5 mins.
+      operationId: files_generate_urls_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/file_generate_urls_action_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/file_generate_urls_action_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
