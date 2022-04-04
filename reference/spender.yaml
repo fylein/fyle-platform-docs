@@ -966,6 +966,39 @@ components:
           example: bawownwrng
         corporate_card_number:
           $ref: '#/components/schemas/card_number'
+    missing_mandatory_fields:
+      type: object
+      nullable: false
+      properties:
+        expense_field_ids:
+          type: array
+          nullable: false
+          items:
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an expense field.
+            example: 123
+          example:
+            - 123
+            - 12423
+          description: |
+            List of IDs of expense fields which are mandatory but are missing.
+        amount:
+          type: boolean
+          nullable: false
+          description: >
+            This field shows whether the amount field is present in the expense
+            or not 
+        currency:
+          type: boolean
+          nullable: false
+          description: >
+            This field shows whether the currency field is present in the
+            expense or not 
+      description: >
+        This object contains all the fields which are mandatory bu tare missing
+        in the expense.
     expense_out:
       type: object
       additionalProperties: false
@@ -1033,6 +1066,7 @@ components:
         - matched_corporate_card_transaction_ids
         - matched_corporate_card_transactions
         - last_settled_at
+        - missing_mandatory_fields
       properties:
         id:
           allOf:
@@ -1313,8 +1347,9 @@ components:
         is_receipt_mandatory:
           type: boolean
           nullable: true
-          description: |
-            Determines whether a receipt is required for this expense.
+          description: >
+            Determines whether a receipt is missing for this expense when it is
+            required.
         is_exported:
           type: boolean
           nullable: true
@@ -1372,6 +1407,153 @@ components:
           nullable: true
           description: |
             signifies when this expense was last settled.
+        missing_mandatory_fields:
+          $ref: '#/components/schemas/missing_mandatory_fields'
+    timestamptz_pst:
+      type: string
+      format: date-time
+      nullable: true
+      description: >-
+        Date-time in [ISO8601
+        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T01:18:19.292-08:00'
+    spent_at:
+      allOf:
+        - $ref: '#/components/schemas/timestamptz_pst'
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+    source:
+      type: string
+      enum:
+        - WEBAPP
+        - SLACK
+        - TPA
+        - CORPORATE_CARD
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
+    claim_amount:
+      type: number
+      description: |
+        The expense amount as claimed by user.
+      example: 1984.18
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    distance_unit:
+      type: string
+      nullable: true
+      description: Unit of distance travelled.
+      enum:
+        - KM
+        - MILES
+      example: MILES
+    travel_classes:
+      description: >
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
+
+        Index 0 holds onward journey travel class, index 1 holds return journey
+        travel class.
+      type: array
+      minItems: 0
+      maxItems: 2
+      nullable: true
+      items:
+        type: string
+      example:
+        - ECONOMY
+        - BUSINESS
+    locations:
+      description: >
+        This field will be present for travel related categories.
+
+        For travel between Place A to Place B, this array will contain two
+        items. From location at array index i and To location at array index
+        i+1.
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 10
+      items:
+        $ref: '#/components/schemas/location'
+    spender_expense_in:
+      type: object
+      additionalProperties: false
+      required:
+        - claim_amount
+        - spent_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        spent_at:
+          $ref: '#/components/schemas/spent_at'
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        claim_amount:
+          $ref: '#/components/schemas/claim_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/foreign_currency'
+        is_reimbursable:
+          $ref: '#/components/schemas/foreign_currency'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     expense_add_comment_action_in:
       type: object
       required:
@@ -4473,6 +4655,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create or update expense
+      description: |
+        Create or update an expense.
+      operationId: expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/expenses/{id}:
     delete:
       tags:
