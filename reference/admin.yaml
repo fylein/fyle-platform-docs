@@ -6463,6 +6463,127 @@ components:
           description: >
             Determines whether this organization has been verified by a
             verifier.
+    statements_in:
+      type: object
+      properties:
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fidftadfdsdf
+      required:
+        - file_id
+    statements_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtwownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_name:
+          type: string
+          description: |
+            Specifies the name of file uploaded by the user.
+          example: amex.csv
+        file_size:
+          type: string
+          description: |
+            Specifies the size of file uploaded by the user.
+          example: 21KB
+        no_of_debit:
+          type: integer
+          description: |
+            Number of debit transactions in the document uploaded by the user.
+          example: 3
+        no_of_credit:
+          type: integer
+          description: |
+            Number of credit transactions in the document uploaded by the user.
+          example: 3
+        no_of_transactions:
+          type: integer
+          description: |
+            Number of transactions in the document uploaded by the user.
+          example: 3
+        statement_columns:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies headers of the statement uploaded by the user.
+          example:
+            - account_number
+            - amount
+        statement_mapping_id:
+          type: string
+          description: |
+            Refers to the mapping used in statement.
+          example: stmpdfddfd
+        start_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Start date of the statement period
+        end_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            End date of the statement period
+        has_statement_duplicate:
+          type: boolean
+          description: |
+            Determines whether the statement is duplicate or not.
+        duplicate_statement_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - stmtge49ielgel
+        has_statement_line_items_duplicate:
+          type: boolean
+          description: >
+            Determines whether the transaction inside the statement is duplicate
+            or not.
+        duplicate_statement_line_items:
+          type: array
+          items:
+            type: object
+            properties:
+              ids:
+                type: array
+                items:
+                  $ref: '#/components/schemas/id_string'
+                example:
+                  - stlige49ielgel
+                description: Ids of the current statement line items which are duplicates
+              duplicate_line_item_statement_id:
+                type: string
+                description: |
+                  Id of the existing duplicate statement
+                example:
+                  - stmpge49ielgel
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - file_name
+        - file_size
+        - no_of_debit
+        - no_of_credit
+        - no_of_transactions
+        - statement_mapping_id
+        - statement_columns
+        - start_date
+        - end_date
+        - has_statement_duplicate
+        - duplicate_statement_ids
+        - has_statement_line_items_duplicate
+        - duplicate_statement_line_items
   parameters:
     created_at:
       in: query
@@ -6538,6 +6659,10 @@ tags:
     description: >
       This API gives you access to manage your organisation's Corporate Card
       Transaction data.
+  - name: Statements
+    description: >
+      These APIs gives you access to add / view a bank statement for
+      reconciliation.
   - name: Cost Centers
     description: >
       These APIs gives you access to manage your organisation's Cost Centers
@@ -9752,3 +9877,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/statements/upload:
+    post:
+      tags:
+        - Statements
+      summary: Upload a statement
+      description: |
+        Upload a statement to Fyle for reconciliation.
+      operationId: statements_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statements_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/statements_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
