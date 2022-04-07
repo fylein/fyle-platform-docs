@@ -6463,6 +6463,573 @@ components:
           description: >
             Determines whether this organization has been verified by a
             verifier.
+    policy_source:
+      type: string
+      enum:
+        - WEBAPP_POLICY_FORM
+        - WEBAPP_POLICY_JSON
+        - WEBAPP_EXPENSE_RECEIPT_AMOUNT_LIMIT
+        - WEBAPP_EXPENSE_MILEAGE_SLAB_RATE
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: WEBAPP_POLICY_FORM
+    policy_limit_type:
+      type: string
+      enum:
+        - INDIVIDUAL
+        - DAILY
+        - NIGHTLY
+        - WEEKLY
+        - MONTHLY
+        - QUARTERLY
+        - HALF_YEARLY
+        - YEARLY
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: MONTHLY
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    policy_operator:
+      type: string
+      enum:
+        - IN
+        - NOT_IN
+        - IS
+        - IS_NOT
+        - GREATER_THAN_EQUAL_TO
+        - LESS_THAN_EQUAL_TO
+        - LESS_THAN
+        - EQUAL_TO
+        - CONTAINS
+      description: |
+        Enum value signifying the operator for the field
+      example: IN
+    policy_in:
+      type: object
+      required:
+        - source
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: tpr12345xyz
+        description:
+          allOf:
+            - $ref: '#/components/schemas/description'
+          example: Receipt is mandatory for expense above $50
+        source:
+          $ref: '#/components/schemas/policy_source'
+        expense_limit_type:
+          $ref: '#/components/schemas/policy_limit_type'
+        expense_currency:
+          $ref: '#/components/schemas/currency'
+        expense_amount_max:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 10000
+        expense_amount_min:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 500
+        expense_distance_max:
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          example: 10000
+        expense_distance_min:
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          example: 500
+        expense_category_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_category_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_project_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_cost_center_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_cost_center_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_exchange_rate_difference_percentage_allowed:
+          type: number
+          example: 10
+        expense_distance_difference_percentage_allowed:
+          type: number
+          example: 10
+        expense_custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        expense_custom_fields_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_locations:
+          description: >
+            This field will be present for travel related categories.
+
+            For travel between Place A to Place B, this array will contain two
+            items, From location at array index 0 and To location at array index
+            1.
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        expense_locations_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_creation_delay_days_max:
+          type: number
+          example: 12
+        expense_on_holiday_allowed:
+          type: boolean
+          example: true
+        expense_without_receipt_allowed:
+          type: boolean
+          example: true
+        expense_spent_at_max:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+        expense_spent_at_min:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+        expense_payment_modes:
+          type: array
+          description: |
+            Payment mode for expense
+          items:
+            type: string
+          example:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        expense_payment_modes_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_without_ccc_match_allowed:
+          type: boolean
+          example: true
+        expense_include_foreign_currency:
+          type: boolean
+          example: true
+        expense_flight_travel_class:
+          type: array
+          description: >
+            This field is applicable only for `Flight` category.
+
+            index 0 holds onward journey class, index 1 holds return journey
+            travel class.
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - ECONOMY
+            - BUSINESS
+        expense_train_travel_class:
+          type: array
+          description: >
+            This field is applicable only for `Train` category.
+
+            index 0 holds onward journey class, index 1 holds return journey
+            travel class.
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - Standard
+            - AC First Class
+            - AC 2-Tier
+        fiscal_year_start_month:
+          type: number
+          example: 4
+          description: Month number of start of fiscal year
+          minimum: 1
+          maximum: 12
+        expense_vehicle_type:
+          type: string
+          example: four_wheeler1
+        expense_annual_distance_max:
+          type: number
+          example: 1200
+        employee_level_ids:
+          type: array
+          description: |
+            Employee level ids
+          items:
+            type: string
+          example:
+            - lvl1sdfad
+            - lvl2sdfas
+        employee_level_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        employee_custom_fields_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_department_ids:
+          type: array
+          description: |
+            Employee department ids
+          items:
+            type: string
+          example:
+            - dept1asdfa
+            - dept2adfad
+        employee_department_id_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_locations:
+          description: |
+            Location of employees
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        employee_locations_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_user_ids:
+          type: array
+          description: |
+            Employee user ids
+          items:
+            type: string
+          example:
+            - ouabcds1
+            - ouabcds2
+        employee_user_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_titles:
+          type: array
+          description: |
+            Employee titles
+          items:
+            type: string
+          example:
+            - CEO
+            - Manager
+        employee_titles_op:
+          $ref: '#/components/schemas/policy_operator'
+        action_flag:
+          type: boolean
+          example: true
+        action_show_warning:
+          type: boolean
+          example: true
+        action_make_unreportable:
+          type: boolean
+          example: true
+        action_remove_employee_approver1:
+          type: boolean
+          example: true
+        action_add_employee_approver2:
+          type: boolean
+          example: true
+        action_add_employee_approver3:
+          type: boolean
+          example: true
+        action_add_project_approver1:
+          type: boolean
+          example: true
+        action_add_project_approver2:
+          type: boolean
+          example: true
+        action_add_department_head_approver:
+          type: boolean
+          example: true
+        action_cap_amount:
+          type: boolean
+          example: true
+        action_add_approver_user_ids:
+          type: array
+          description: |
+            Approver user ids
+          items:
+            type: string
+          example:
+            - ouabcds3
+            - ouabcds4
+        action_override_distance_slab_rate:
+          type: number
+          example: 20
+    policy_out:
+      type: object
+      required:
+        - source
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: tpr12345xyz
+        description:
+          allOf:
+            - $ref: '#/components/schemas/description'
+          example: Receipt is mandatory for expense above $50
+        source:
+          $ref: '#/components/schemas/policy_source'
+        expense_limit_type:
+          $ref: '#/components/schemas/policy_limit_type'
+        expense_currency:
+          $ref: '#/components/schemas/currency'
+        expense_amount_max:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 10000
+        expense_amount_min:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 500
+        expense_distance_max:
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          example: 10000
+        expense_distance_min:
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          example: 500
+        expense_category_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_category_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_project_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_cost_center_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        expense_cost_center_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_exchange_rate_difference_percentage_allowed:
+          type: number
+          example: 10
+        expense_distance_difference_percentage_allowed:
+          type: number
+          example: 10
+        expense_custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        expense_custom_fields_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_locations:
+          description: >
+            This field will be present for travel related categories.
+
+            For travel between Place A to Place B, this array will contain two
+            items, From location at array index 0 and To location at array index
+            1.
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        expense_locations_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_creation_delay_days_max:
+          type: number
+          example: 12
+        expense_on_holiday_allowed:
+          type: boolean
+          example: true
+        expense_without_receipt_allowed:
+          type: boolean
+          example: true
+        expense_spent_at_max:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+        expense_spent_at_min:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+        expense_payment_modes:
+          type: array
+          description: |
+            Payment mode for expense
+          items:
+            type: string
+          example:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        expense_payment_modes_op:
+          $ref: '#/components/schemas/policy_operator'
+        expense_without_ccc_match_allowed:
+          type: boolean
+          example: true
+        expense_include_foreign_currency:
+          type: boolean
+          example: true
+        expense_flight_travel_class:
+          type: array
+          description: >
+            This field is applicable only for `Flight` category.
+
+            index 0 holds onward journey class, index 1 holds return journey
+            travel class.
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - ECONOMY
+            - BUSINESS
+        expense_train_travel_class:
+          type: array
+          description: >
+            This field is applicable only for `Train` category.
+
+            index 0 holds onward journey class, index 1 holds return journey
+            travel class.
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - Standard
+            - AC First Class
+            - AC 2-Tier
+        fiscal_year_start_month:
+          type: number
+          example: 4
+          description: Month number of start of fiscal year
+          minimum: 1
+          maximum: 12
+        expense_vehicle_type:
+          type: string
+          example: four_wheeler1
+        expense_annual_distance_max:
+          type: number
+          example: 1200
+        employee_level_ids:
+          type: array
+          description: |
+            Employee level ids
+          items:
+            type: string
+          example:
+            - lvl1sdfad
+            - lvl2sdfas
+        employee_level_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        employee_custom_fields_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_department_ids:
+          type: array
+          description: |
+            Employee department ids
+          items:
+            type: string
+          example:
+            - dept1asdfa
+            - dept2adfad
+        employee_department_id_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_locations:
+          description: |
+            Location of employees
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        employee_locations_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_user_ids:
+          type: array
+          description: |
+            Employee user ids
+          items:
+            type: string
+          example:
+            - ouabcds1
+            - ouabcds2
+        employee_user_ids_op:
+          $ref: '#/components/schemas/policy_operator'
+        employee_titles:
+          type: array
+          description: |
+            Employee titles
+          items:
+            type: string
+          example:
+            - CEO
+            - Manager
+        employee_titles_op:
+          $ref: '#/components/schemas/policy_operator'
+        action_flag:
+          type: boolean
+          example: true
+        action_show_warning:
+          type: boolean
+          example: true
+        action_make_unreportable:
+          type: boolean
+          example: true
+        action_remove_employee_approver1:
+          type: boolean
+          example: true
+        action_add_employee_approver2:
+          type: boolean
+          example: true
+        action_add_employee_approver3:
+          type: boolean
+          example: true
+        action_add_project_approver1:
+          type: boolean
+          example: true
+        action_add_project_approver2:
+          type: boolean
+          example: true
+        action_add_department_head_approver:
+          type: boolean
+          example: true
+        action_cap_amount:
+          type: boolean
+          example: true
+        action_add_approver_user_ids:
+          type: array
+          description: |
+            Approver user ids
+          items:
+            type: string
+          example:
+            - ouabcds3
+            - ouabcds4
+        action_override_distance_slab_rate:
+          type: number
+          example: 20
   parameters:
     created_at:
       in: query
@@ -6551,6 +7118,9 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your organisation's Expenses
+  - name: Expense Policies
+    description: |
+      This API gives you access to your organisation's Expense Policies
   - name: Files
     description: |
       This API gives you access to creates a file in Fyle
@@ -9752,3 +10322,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/expense_policy_rules:
+    post:
+      tags:
+        - Expense Policies
+      summary: Create or Update Expense Policies
+      description: |
+        Create or Update Expense Policies
+      operationId: expense_policy_rules_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/policy_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/policy_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
