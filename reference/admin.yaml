@@ -6506,7 +6506,7 @@ components:
       description: |
         Enum value signifying the operator for the field
       example: IN
-    policy_in:
+    policy_out:
       type: object
       required:
         - source
@@ -6772,7 +6772,7 @@ components:
         action_override_distance_slab_rate:
           type: number
           example: 20
-    policy_out:
+    policy_in:
       type: object
       required:
         - source
@@ -10383,21 +10383,12 @@ paths:
       tags:
         - Expense Policies
       summary: Get Expense Policies
-      description: |
-        Get Expense Policies
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       operationId: expense_policy_rules_get
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/policy_in'
       responses:
         '200':
           description: OK
@@ -10407,8 +10398,14 @@ paths:
                 type: object
                 additionalProperties: false
                 properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
                   data:
-                    $ref: '#/components/schemas/policy_out'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/policy_out'
         '401':
           description: Unauthorized request
           content:
