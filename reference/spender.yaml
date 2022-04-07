@@ -4521,6 +4521,132 @@ components:
         action_override_distance_slab_rate:
           type: number
           example: 20
+    expense_id_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This represents the id of the expense.
+          example: txdsN9xJ4Wpt
+    policy_rule_minimal:
+      type: object
+      description: |
+        Policy rule minimal object
+      properties:
+        id:
+          type: string
+          example: tpr1234abcd
+          description: This represents the id of the policy.
+        description:
+          allOf:
+            - $ref: '#/components/schemas/description'
+          description: |
+            This represents the description of the policy.
+        action_show_warning:
+          type: boolean
+          example: true
+    expense_policy_violating_expenses_query_params:
+      type: object
+      description: |
+        Query params for fetching the expenses
+      properties:
+        start_date:
+          type: string
+          example: '2021-12-01'
+        end_date:
+          type: string
+          example: '2021-12-01'
+        state:
+          type: string
+          example: neq.DRAFT
+        category_id:
+          type: string
+          example: in.(60506)
+        project_id:
+          type: string
+          example: in.(261155)
+        cost_center_id:
+          type: string
+          example: in.(7475)
+        currency:
+          type: string
+          example: in.('USD')
+        vehicle_type:
+          type: string
+          example: in.('fourwheeler1')
+        employee_id:
+          type: string
+          example: in.('ouasdfcsdf')
+    expense_policy_individual_desired_states:
+      type: object
+      properties:
+        rule:
+          $ref: '#/components/schemas/policy_rule_minimal'
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 500
+        violating_expenses_query_params:
+          $ref: '#/components/schemas/expense_policy_violating_expenses_query_params'
+    expense_policy_final_desired_state:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          example: txabsdfSYqd
+        flag:
+          type: boolean
+          example: true
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          example: 500
+        is_receipt_mandatory:
+          type: boolean
+          example: true
+        add_approver_user_ids:
+          type: array
+          items:
+            type: string
+          example:
+            - ouBdsdfscl
+            - ouLSsdfwqt
+        remove_approver1:
+          type: boolean
+          example: true
+        action_description:
+          type: string
+          example: >-
+            The following action(s) will be taken: expense violation will be
+            marked.
+        run_status:
+          type: string
+          example: SUCCESS
+        run_summary:
+          type: string
+          example: Flag the expense
+    expense_states_out:
+      type: object
+      required:
+        - source
+      additionalProperties: false
+      properties:
+        expense_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This represents the id of the expense.
+          example: txp12345xyz
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_policy_final_desired_state'
   parameters:
     created_at:
       in: query
@@ -6240,3 +6366,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/expense_policy_states:
+    get:
+      tags:
+        - Expense Policies
+      summary: Get policy states of an Expense
+      description: |
+        Get policy states of an Expense
+      operationId: expense_policy_states
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_id_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_states_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Object Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
