@@ -1390,17 +1390,6 @@ components:
           description: >
             List of project ids for which this category can be used. If
             project_ids is null, then this category can be used for any project.
-    expense_id_in:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          description: |
-            This represents the id of the expense.
-          example: txdsN9xJ4Wpt
     policy_rule_minimal:
       type: object
       description: |
@@ -1415,6 +1404,7 @@ components:
             - $ref: '#/components/schemas/description'
           description: |
             This represents the description of the policy.
+          example: Receipt is mandatory for expense above $50
         action_show_warning:
           type: boolean
           example: true
@@ -1448,8 +1438,7 @@ components:
           type: string
           example: in.('fourwheeler1')
         employee_id:
-          type: string
-          example: in.('ouasdfcsdf')
+          $ref: '#/components/schemas/employee_id'
     expense_policy_individual_desired_states:
       type: object
       properties:
@@ -1482,22 +1471,21 @@ components:
           items:
             type: string
           example:
-            - ouBdsdfscl
-            - ouLSsdfwqt
+            - usBdsdfscl
+            - usLSsdfwqt
         remove_approver1:
           type: boolean
           example: true
-        action_description:
-          type: string
-          example: >-
-            The following action(s) will be taken: expense violation will be
-            marked.
         run_status:
           type: string
           example: SUCCESS
         run_summary:
-          type: string
-          example: Flag the expense
+          type: array
+          items:
+            type: string
+          example:
+            - Flag the expense
+            - Cap the amount
     expense_states_out:
       type: object
       required:
@@ -1516,6 +1504,26 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+  parameters:
+    limit:
+      in: query
+      name: limit
+      description: >
+        A limit on the number of objects to be returned. Allowed values are from
+        1 to 200.
+      schema:
+        type: integer
+        example: 20
+        default: 50
+        maximum: 200
+    offset:
+      in: query
+      name: offset
+      description: |
+        offset is used to skip that many number of objects before counting. <br>
+      schema:
+        type: integer
+        example: 10
 tags:
   - name: Categories
     description: |
@@ -1885,18 +1893,16 @@ paths:
       description: |
         Get policy states of an Expense
       operationId: expense_policy_states
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/expense_id_in'
+      parameters:
+        - in: query
+          name: expense_id
+          description: |
+            The id of the expense for which you are querying the policy states 
+          schema:
+            type: string
+            example: eq.ouwruogwnngg
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         '200':
           description: OK

@@ -4521,17 +4521,6 @@ components:
         action_override_distance_slab_rate:
           type: number
           example: 20
-    expense_id_in:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          description: |
-            This represents the id of the expense.
-          example: txdsN9xJ4Wpt
     policy_rule_minimal:
       type: object
       description: |
@@ -4546,6 +4535,7 @@ components:
             - $ref: '#/components/schemas/description'
           description: |
             This represents the description of the policy.
+          example: Receipt is mandatory for expense above $50
         action_show_warning:
           type: boolean
           example: true
@@ -4579,8 +4569,7 @@ components:
           type: string
           example: in.('fourwheeler1')
         employee_id:
-          type: string
-          example: in.('ouasdfcsdf')
+          $ref: '#/components/schemas/employee_id'
     expense_policy_individual_desired_states:
       type: object
       properties:
@@ -4613,22 +4602,21 @@ components:
           items:
             type: string
           example:
-            - ouBdsdfscl
-            - ouLSsdfwqt
+            - usBdsdfscl
+            - usLSsdfwqt
         remove_approver1:
           type: boolean
           example: true
-        action_description:
-          type: string
-          example: >-
-            The following action(s) will be taken: expense violation will be
-            marked.
         run_status:
           type: string
           example: SUCCESS
         run_summary:
-          type: string
-          example: Flag the expense
+          type: array
+          items:
+            type: string
+          example:
+            - Flag the expense
+            - Cap the amount
     expense_states_out:
       type: object
       required:
@@ -6374,18 +6362,16 @@ paths:
       description: |
         Get policy states of an Expense
       operationId: expense_policy_states
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/expense_id_in'
+      parameters:
+        - in: query
+          name: expense_id
+          description: |
+            The id of the expense for which you are querying the policy states 
+          schema:
+            type: string
+            example: eq.ouwruogwnngg
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         '200':
           description: OK
