@@ -5827,46 +5827,61 @@ components:
           example: reimntGt9ju6qP
         code:
           $ref: '#/components/schemas/code'
-    expense_out_embed:
+    account_minimal:
+      description: |
+        Account of a user belonging to any org 
       type: object
-      required:
-        - id
-        - currency
-        - amount
+      nullable: false
       properties:
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
-          example: txwownwrng
+          example: acwbl222wlg
         currency:
           $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-    corporate_credit_card_expense_out_embed:
+        current_balance_amount:
+          type: number
+          example: 50
+        tentative_balance_amount:
+          type: number
+          example: 100
+    employee_account_summary_out:
       type: object
       properties:
         id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify a balance transfer.
-            This id is always prefixed with `bt`.
-          readOnly: true
-          example: cccewjbwglwlng
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-    user_account_summary_out:
-      type: object
-      properties:
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
+          $ref: '#/components/schemas/id_integer'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/org_id'
-        account_ids:
+        org_currency:
+          $ref: '#/components/schemas/currency'
+        user_email:
+          $ref: '#/components/schemas/email'
+        user_full_name:
+          type: string
+          description: |
+            This represents the full name of the employee
+          example: foo123
+        cash_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accHbfr7An39w
+        cash_account:
+          $ref: '#/components/schemas/account_minimal'
+        cash_account_balance:
+          $ref: '#/components/schemas/amount'
+        ccc_account_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: accHbfr7An39w
+        ccc_account:
+          $ref: '#/components/schemas/account_minimal'
+        ccc_account_balance:
+          $ref: '#/components/schemas/amount'
+        advance_account_ids:
           type: array
           items:
             allOf:
@@ -5874,64 +5889,18 @@ components:
           example:
             - acwbl222wlg
             - accg30nel335
-        accounts:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                allOf:
-                  - $ref: '#/components/schemas/id_string'
-                example: acwbl222wlg
-              type:
-                type: string
-                enum:
-                  - PERSONAL_CASH_ACCOUNT
-                  - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-                  - PERSONAL_ADVANCE_ACCOUNT
-                example: PERSONAL_CASH_ACCOUNT
-              currency:
-                $ref: '#/components/schemas/currency'
-              opening_balance:
-                type: number
-                example: 50
-              current_balance:
-                type: number
-                example: 100
-        report_ids:
+        advance_accounts:
           type: array
           items:
             allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - rpwirgnwblk
-        reports:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/report_out_embed'
-        expense_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - txelntgwgwll
-        expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/expense_out_embed'
-        corporate_credit_card_expense_ids:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-          example:
-            - cccelsgnwlgw
-        corporate_credit_card_expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/corporate_credit_card_expense_out_embed'
+              - $ref: '#/components/schemas/account_minimal'
+        advance_accounts_balance:
+          $ref: '#/components/schemas/amount'
+        is_settleable:
+          type: boolean
+          description: |
+            This indicates whether the user's accounts can be settled or not.
+          example: true
     schedule_config:
       type: object
       nullable: false
@@ -9239,12 +9208,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/user_account_summaries:
+  /admin/employee_account_summaries:
     get:
       tags:
         - Settlements
-      summary: List user accounts summaries
-      operationId: user_account_summaries_list
+      summary: List employee accounts summaries
+      operationId: employee_account_summaries_list
       description: >
         This API supports very rich filtering on all response fields and
         pagination via query parameters. To understand how to use these
@@ -9266,7 +9235,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/user_account_summary_out'
+                      $ref: '#/components/schemas/employee_account_summary_out'
         '401':
           description: Unauthorised request
           content:
