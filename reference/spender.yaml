@@ -999,6 +999,18 @@ components:
       description: >
         This object contains all the fields which are mandatory bu tare missing
         in the expense.
+    activity_details:
+      type: object
+      nullable: true
+      properties:
+        unique_meetings:
+          type: number
+          nullable: false
+          example: 21
+        total_meetings:
+          type: number
+          nullable: false
+          example: 70
     expense_out:
       type: object
       additionalProperties: false
@@ -1041,7 +1053,7 @@ components:
         - mileage_is_round_trip
         - per_diem_rate_id
         - per_diem_rate
-        - num_days
+        - per_diem_num_days
         - started_at
         - ended_at
         - travel_classes
@@ -1067,6 +1079,8 @@ components:
         - matched_corporate_card_transactions
         - last_settled_at
         - missing_mandatory_fields
+        - activity_details
+        - creator_user_id
       properties:
         id:
           allOf:
@@ -1243,7 +1257,7 @@ components:
           example: 583
         per_diem_rate:
           $ref: '#/components/schemas/per_diem_rate_out_embed'
-        num_days:
+        per_diem_num_days:
           type: integer
           nullable: true
           description: >
@@ -1409,6 +1423,10 @@ components:
             signifies when this expense was last settled.
         missing_mandatory_fields:
           $ref: '#/components/schemas/missing_mandatory_fields'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        activity_details:
+          $ref: '#/components/schemas/activity_details'
     timestamptz_pst:
       type: string
       format: date-time
@@ -1582,6 +1600,25 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: fisjfwlrglw
+    expense_creation_from_receipt_in:
+      type: object
+      required:
+        - file_name
+        - file_content
+      properties:
+        file_name:
+          type: string
+          maxLength: 255
+          description: |
+            Takes the name of the file which contains the receipt.
+          example: very_important.jpeg
+        file_content:
+          type: string
+          description: |
+            This field takes the base64 encoded representation of the file.
+          example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+        source:
+          $ref: '#/components/schemas/source'
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -5401,6 +5438,55 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/expense_attach_receipt_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/create_from_receipt:
+    post:
+      tags:
+        - Expenses
+      summary: Create Expense from a receipt
+      description: |
+        This API create expense from Base64 of a receipt
+      operationId: create_from_receipt_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_creation_from_receipt_in'
       responses:
         '200':
           description: OK
