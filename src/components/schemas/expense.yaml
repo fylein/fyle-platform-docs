@@ -40,7 +40,7 @@ expense_out:
     - mileage_is_round_trip
     - per_diem_rate_id
     - per_diem_rate
-    - num_days
+    - per_diem_num_days
     - started_at
     - ended_at
     - travel_classes
@@ -66,6 +66,8 @@ expense_out:
     - matched_corporate_card_transactions
     - last_settled_at
     - missing_mandatory_fields
+    - activity_details
+    - creator_user_id
   properties:
     id:
       allOf:
@@ -228,7 +230,7 @@ expense_out:
       example: 583
     per_diem_rate:
       $ref: './per_diem_rate.yaml#/per_diem_rate_out_embed'
-    num_days:
+    per_diem_num_days:
       type: integer
       nullable: true
       description: |
@@ -386,6 +388,10 @@ expense_out:
         signifies when this expense was last settled.
     missing_mandatory_fields:
       $ref: './fields.yaml#/missing_mandatory_fields'
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
+    activity_details:
+      $ref: './fields.yaml#/activity_details'
 
 
 expense_in:
@@ -494,7 +500,7 @@ expense_in:
         - $ref: './fields.yaml#/fk_integer'
       nullable: true
       example: 583
-    num_days:
+    per_diem_num_days:
       type: integer
       nullable: true
       description: |
@@ -744,3 +750,23 @@ expense_attach_receipt_in:
       allOf:
         - $ref: './fields.yaml#/id_string'
       example: 'fisjfwlrglw'
+
+expense_creation_from_receipt_in:
+  type: object
+  required:
+    - file_name
+    - file_content
+  properties:
+    file_name:
+      type: string
+      maxLength: 255
+      description: |
+        Takes the name of the file which contains the receipt.
+      example: very_important.jpeg
+    file_content:
+      type: string
+      description: |
+        This field takes the base64 encoded representation of the file.
+      example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+    source:
+      $ref: './fields.yaml#/source'
