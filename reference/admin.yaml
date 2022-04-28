@@ -311,6 +311,37 @@ components:
           $ref: '#/components/schemas/restricted_spender_user_ids'
         org_id:
           $ref: '#/components/schemas/org_id'
+    allow_users:
+      type: string
+      nullable: false
+      description: >
+        Set who can access the object.
+
+        - `ALL` indicates the object can be accessible to all users in the org.
+
+        - `NONE` indicates the object cannot be accessible to any user in the
+        org.
+
+        - `UNRESTRICTED` indicates the object will be be accessible to all users
+        in the org who are not restricted to
+
+        specific objects of this resource.
+      enum:
+        - ALL
+        - NONE
+        - UNRESTRICTED
+      example: UNRESTRICTED
+    cost_center_restrict_in:
+      type: object
+      required:
+        - id
+        - allow_users
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        allow_users:
+          $ref: '#/components/schemas/allow_users'
     category_out:
       type: object
       additionalProperties: false
@@ -6892,6 +6923,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/cost_centers/restrict:
+    post:
+      operationId: cost_centers_restrict
+      tags:
+        - Cost Centers
+      summary: Restrict cost center to users
+      description: |
+        Restrict cost center to users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/cost_center_restrict_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/categories:
     get:
       tags:
