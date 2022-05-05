@@ -6569,15 +6569,16 @@ components:
         total of all expenses in a week. <br> `MONTHLY`: Amount limit will be
         checked against the total of all expenses in a month. <br> `QUARTERLY`:
         Amount limit will be checked against the total of all expenses in a
-        financial quarter. `fiscal_year_start_month` is required when you set
-        this. <br> `HALF_YEARLY`: Amount limit will be checked against the total
-        of all expenses in a half-year. `fiscal_year_start_month` is required
-        when you set this. <br> `YEARLY`: Amount limit will be checked against
-        the total of all expenses in a financial year. `fiscal_year_start_month`
-        is required when you set this. <br><br> When this field is set,
-        expense_currency and (`expense_amount_max` or `expense_amount_min`) must
-        be set.
+        financial quarter. <br>_Note: fiscal_year_start_month is required when
+        you set this._ <br> `HALF_YEARLY`: Amount limit will be checked against
+        the total of all expenses in a half-year. <br>_Note:
+        fiscal_year_start_month is required when you set this._ <br> `YEARLY`:
+        Amount limit will be checked against the total of all expenses in a
+        financial year. <br>_Note: fiscal_year_start_month is required when you
+        set this._ <br><br> _Note: When this field is set, expense_currency and
+        (expense_amount_max or expense_amount_min) must be set._
       example: MONTHLY
+      nullable: true
     distance:
       type: number
       nullable: true
@@ -6590,22 +6591,30 @@ components:
       description: |
         Value signifying the operator for the field
       example: IN
-    minimal_payment_modes:
-      type: string
-      enum:
-        - PERSONAL_CASH_ACCOUNT
-        - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+      nullable: true
+    policy_payment_modes:
+      type: array
+      items:
+        type: string
+        enum:
+          - PERSONAL_CASH_ACCOUNT
+          - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+          - null
       example: PERSONAL_CASH_ACCOUNT
+      nullable: true
     expense_policy_flight_travel_classes:
-      type: string
-      enum:
-        - Business
-        - Economy
-        - Economy_Plus
-        - Economy_Premium
-        - First_Class
+      type: array
+      items:
+        type: string
+        enum:
+          - Business
+          - Economy
+          - Economy_Plus
+          - Economy_Premium
+          - First_Class
+        nullable: true
       description: >
-        This field is applicable only for `Flight` category.
+        This field is applicable only for Flight category.
 
         Index 0 holds onward journey travel class, index 1 holds return journey
         travel class.
@@ -6622,8 +6631,12 @@ components:
         - four_wheeler4
         - two_wheeler
       example: electric_car
+      nullable: true
     expense_policy_out:
       type: object
+      required:
+        - source
+        - description
       additionalProperties: false
       properties:
         id:
@@ -6644,7 +6657,13 @@ components:
         expense_limit_type:
           $ref: '#/components/schemas/expense_policy_limit_type'
         expense_currency:
-          $ref: '#/components/schemas/currency'
+          allOf:
+            - $ref: '#/components/schemas/currency'
+          description: >
+            The three-letter currency code following ISO standard <a
+
+            href='https://www.iso.org/iso-4217-currency-codes.html'>ISO
+            4217</a>.
         expense_amount_max:
           allOf:
             - $ref: '#/components/schemas/amount'
@@ -6675,14 +6694,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
-          description: >
-            List of category ids targeted by this policy. <br><br>
-
-            If `expense_category_ids_op` is `IN` then these categories will be
-            included<br>
-
-            If `expense_category_ids_op` is `NOT_IN` then these categories will
-            be excluded<br>
+          description: |
+            List of category ids targeted by this policy.
           example:
             - 2222
             - 1221
@@ -6692,14 +6705,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
-          description: >
-            List of project ids targeted by this policy. <br><br>
-
-            If `expense_project_ids_op` is `IN` then these projects will be
-            included<br>
-
-            If `expense_project_ids_op` is `NOT_IN` then these projects will be
-            excluded<br>
+          description: |
+            List of project ids targeted by this policy.
           example:
             - 1234
             - 5678
@@ -6709,20 +6716,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
-          description: >
-            List of cost centers ids targeted by this policy. <br><br>
-
-            If `expense_cost_center_ids_op` is `IN` then these cost centers will
-            be included<br>
-
-            If `expense_cost_center_ids_op` is `NOT_IN` then these cost centers
-            will be excluded<br>
+          description: |
+            List of cost centers ids targeted by this policy.
           example:
             - 1987
             - 3456
         expense_cost_center_ids_op:
           $ref: '#/components/schemas/in_operator'
-        expense_exchange_rate_difference_percentage_allowed:
+        expense_allowed_exchange_rate_difference_percentage:
           type: number
           description: >
             Allowed percentage difference for exchange rates above which policy
@@ -6730,7 +6731,7 @@ components:
           example: 10
           minimum: 0
           maximum: 100
-        expense_distance_difference_percentage_allowed:
+        expense_allowed_distance_difference_percentage:
           type: number
           description: >
             Allowed percentage difference for travel distance above which policy
@@ -6739,20 +6740,14 @@ components:
           minimum: 0
           maximum: 100
         expense_custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields
         expense_custom_fields_op:
           type: object
           description: |
-            Expense custom field operator. <br>
-            field_name: operator <br>
-            Example -> gender: "IN" <br><br>
-            If field type is, then supported are: <br>
-            `Boolean`: "IS, NOT_IS" <br>
-            `Date`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
-            `Location`: "IN, NOT_IN" <br>
-            `Number`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
-            `String`: "CONTAINS, EQUALS" <br>
-            `Select`: "IN, NOT_IN"
+            Operator for the expense_custom_fields.
           properties:
             field_name:
               type: string
@@ -6776,9 +6771,13 @@ components:
             violate policy.
         expense_on_holiday_allowed:
           type: boolean
+          description: |
+            Is expense on holiday allowed.
           example: true
         expense_without_receipt_allowed:
           type: boolean
+          description: |
+            Is expense without receipt allowed.
           example: true
         expense_spent_at_max:
           allOf:
@@ -6793,7 +6792,7 @@ components:
             Expense having spent date lesser than this date will violate policy.
         expense_payment_modes:
           allOf:
-            - $ref: '#/components/schemas/minimal_payment_modes'
+            - $ref: '#/components/schemas/policy_payment_modes'
           description: |
             Payment mode for expense to be targeted in the policy.
         expense_payment_modes_op:
@@ -6813,7 +6812,7 @@ components:
         expense_train_travel_class:
           type: array
           description: >
-            This field is applicable only for `Train` category.
+            This field is applicable only for Train category.
 
             Index 0 holds onward journey travel class, index 1 holds return
             journey travel class.
@@ -6824,7 +6823,8 @@ components:
             - Second Sitting
         fiscal_year_start_month:
           type: number
-          description: Month number of start of fiscal year.
+          description: |
+            Month number of start of fiscal year.
           example: 4
           minimum: 1
           maximum: 12
@@ -6836,8 +6836,9 @@ components:
         expense_annual_distance_max:
           type: number
           example: 1200
-          description: |
-            Maximum travel distance allowed above which policy will be violated.
+          description: >
+            Maximum travel distance allowed, above which policy will be
+            violated.
         employee_level_ids:
           type: array
           description: |
@@ -6850,20 +6851,14 @@ components:
         employee_level_ids_op:
           $ref: '#/components/schemas/in_operator'
         employee_custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields
         employee_custom_fields_op:
           type: object
           description: |
-            Exmployee custom field operator. <br>
-            field_name: operator <br>
-            Example -> gender: "IN" <br><br>
-            If field type is, then supported are: <br>
-            `Boolean`: "IS, NOT_IS" <br>
-            `Date`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
-            `Location`: "IN, NOT_IN" <br>
-            `Number`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
-            `String`: "CONTAINS, EQUALS" <br>
-            `Select`: "IN, NOT_IN"
+            Operator for the employee_custom_fields.
           properties:
             field_name:
               type: string
@@ -6926,7 +6921,7 @@ components:
             <br>
 
             (Expense will be created but employee will not be able to add it to
-            report)
+            report).
           example: true
         action_remove_employee_approver1:
           type: boolean
@@ -6967,7 +6962,7 @@ components:
         action_cap_amount:
           type: boolean
           description: >
-            Whether to cap the amount to `expense_amount_max` when the expense
+            Whether to cap the amount to expense_amount_max when the expense
             violates policy.
           example: true
         action_add_approver_user_ids:
@@ -6985,7 +6980,7 @@ components:
           description: >
             Override the distance slab rate with the set value when the expense
             violates policy.
-          example: 20
+          example: 20true
     expense_policy_in:
       type: object
       required:
@@ -6998,8 +6993,8 @@ components:
             - $ref: '#/components/schemas/id_string'
           description: |
             This represents the id of the expense policy.<br><br>
-            When creating the policy, this field shouldn't be set.<br>
-            When updating, this field should be set.
+            _Note: When creating the policy, this field shouldn't be set._<br>
+            _When updating, this field should be set._
           example: tpr12345xyz
         description:
           allOf:
@@ -7013,34 +7008,47 @@ components:
         expense_limit_type:
           $ref: '#/components/schemas/expense_policy_limit_type'
         expense_currency:
-          $ref: '#/components/schemas/currency'
+          allOf:
+            - $ref: '#/components/schemas/currency'
+          description: >
+            The three-letter currency code following ISO standard <a
+
+            href='https://www.iso.org/iso-4217-currency-codes.html'>ISO
+            4217</a>.<br>
+
+            _Note: When this field is set, expense_amount_max or
+            expense_amount_min must be set._
         expense_amount_max:
           allOf:
             - $ref: '#/components/schemas/amount'
           description: |
-            Maximum amount above which policy will be violated.
+            Maximum amount above which policy will be violated.<br>
+            _Note: When this field is set, expense_currency must be set._
           example: 10000
         expense_amount_min:
           allOf:
             - $ref: '#/components/schemas/amount'
           description: |
-            Minimum amount below which policy will be violated.
+            Minimum amount below which policy will be violated.<br>
+            _Note: When this field is set, expense_currency must be set._
           example: 500
         expense_distance_max:
           allOf:
             - $ref: '#/components/schemas/distance'
           description: >
             Maximum travel distance allowed, above which policy will be
-            violated. `expense_category_ids` must be set with mileage
-            categories.
+            violated.<br>
+
+            _Note: expense_category_ids must be set with mileage categories._
           example: 10000
         expense_distance_min:
           allOf:
             - $ref: '#/components/schemas/distance'
           description: >
             Minimum travel distance allowed, below which policy will be
-            violated. `expense_category_ids` must be set with mileage
-            categories.
+            violated.<br> 
+
+            _Note: expense_category_ids must be set with mileage categories._
           example: 500
         expense_category_ids:
           type: array
@@ -7049,16 +7057,20 @@ components:
           description: >
             List of category ids targeted by this policy. <br><br>
 
-            To include these categories set `expense_category_ids_op` to
-            `IN`<br>
+            _Note: To include these categories set expense_category_ids_op to
+            IN_<br>
 
-            To exclude these categories set `expense_category_ids_op` to
-            `NOT_IN`<br>
+            _To exclude these categories set expense_category_ids_op to
+            NOT_IN_<br>
           example:
             - 2222
             - 1221
         expense_category_ids_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field expense_category_ids is
+            present in the request body._
         expense_project_ids:
           type: array
           items:
@@ -7066,15 +7078,19 @@ components:
           description: >
             List of project ids targeted by this policy. <br><br>
 
-            To include these projects set `expense_category_ids_op` to `IN`<br>
+            _Note: To include these projects set expense_project_ids_op to
+            IN_<br>
 
-            To exclude these projects set `expense_category_ids_op` to
-            `NOT_IN`<br>
+            _To exclude these projects set expense_project_ids_op to NOT_IN_<br>
           example:
             - 1234
             - 5678
         expense_project_ids_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field expense_project_ids is
+            present in the request body._
         expense_cost_center_ids:
           type: array
           items:
@@ -7082,17 +7098,21 @@ components:
           description: >
             List of cost centers ids targeted by this policy. <br><br>
 
-            To include these cost centers set `expense_category_ids_op` to
-            `IN`<br>
+            _Note: To include these cost centers set expense_cost_center_ids_op
+            to IN_<br>
 
-            To exclude these cost centers set `expense_category_ids_op` to
-            `NOT_IN`<br>
+            _To exclude these cost centers set expense_cost_center_ids_op to
+            NOT_IN_<br>
           example:
             - 1987
             - 3456
         expense_cost_center_ids_op:
-          $ref: '#/components/schemas/in_operator'
-        expense_exchange_rate_difference_percentage_allowed:
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field expense_cost_center_ids
+            is present in the request body._
+        expense_allowed_exchange_rate_difference_percentage:
           type: number
           description: >
             Allowed percentage difference for exchange rates above which policy
@@ -7100,30 +7120,47 @@ components:
           example: 10
           minimum: 0
           maximum: 100
-        expense_distance_difference_percentage_allowed:
+        expense_allowed_distance_difference_percentage:
           type: number
           description: >
             Allowed percentage difference for travel distance above which policy
-            will be violated. `expense_category_ids` must be set with mileage
-            categories.
+            will be violated.<br>
+
+            _Note: expense_category_ids must be set with mileage categories._
           example: 8
           minimum: 0
           maximum: 100
         expense_custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields (if any)<br>
+            _Example -> "No of days": 5_
         expense_custom_fields_op:
           type: object
-          description: |
-            Expense custom field operator. <br>
-            field_name: operator <br>
-            Example -> gender: "IN" <br><br>
-            If field type is, then supported are: <br>
+          description: >
+            Operator for the expense_custom_fields. <br>
+
+            _Format -> field_name: operator_ <br>
+
+            _Example -> "No of days": "GREATER_THAN_EQUAL_TO"_ <br><br>
+
+            Supported values based on field type: <br>
+
             `Boolean`: "IS, NOT_IS" <br>
+
             `Date`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
+
             `Location`: "IN, NOT_IN" <br>
+
             `Number`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
+
             `String`: "CONTAINS, EQUALS" <br>
-            `Select`: "IN, NOT_IN"
+
+            `Select`: "IN, NOT_IN"<br>
+
+            _Note: This field is mandatory if the field expense_custom_fields is
+            present in the request body._
           properties:
             field_name:
               type: string
@@ -7138,7 +7175,11 @@ components:
           items:
             $ref: '#/components/schemas/location'
         expense_locations_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field expense_locations is
+            present in the request body._
         expense_creation_delay_days_max:
           type: number
           example: 12
@@ -7147,9 +7188,15 @@ components:
             violate policy.
         expense_on_holiday_allowed:
           type: boolean
+          description: |
+            Is expense on holiday allowed.<br>
+            _Default True._
           example: true
         expense_without_receipt_allowed:
           type: boolean
+          description: |
+            Is expense without receipt allowed.<br>
+            _Default True._
           example: true
         expense_spent_at_max:
           allOf:
@@ -7164,27 +7211,35 @@ components:
             Expense having spent date lesser than this date will violate policy.
         expense_payment_modes:
           allOf:
-            - $ref: '#/components/schemas/minimal_payment_modes'
+            - $ref: '#/components/schemas/policy_payment_modes'
           description: |
             Payment mode for expense to be targeted in the policy.
         expense_payment_modes_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field expense_payment_modes is
+            present in the request body._
         expense_without_ccc_match_allowed:
           type: boolean
-          description: |
-            Is expense without Corporate Credit Card transaction match allowed.
+          description: >
+            Is expense without Corporate Credit Card transaction match
+            allowed.<br>
+
+            _Default True._
           example: true
         expense_include_foreign_currency:
           type: boolean
           description: |
-            Should policy run on expenses created in foreign currency.
+            Should policy run on expenses created in foreign currency.<br>
+            _Default False._
           example: true
         expense_flight_travel_class:
           $ref: '#/components/schemas/expense_policy_flight_travel_classes'
         expense_train_travel_class:
           type: array
           description: >
-            This field is applicable only for `Train` category.
+            This field is applicable only for Train category.
 
             Index 0 holds onward journey travel class, index 1 holds return
             journey travel class.
@@ -7195,7 +7250,11 @@ components:
             - Second Sitting
         fiscal_year_start_month:
           type: number
-          description: Month number of start of fiscal year.
+          description: >
+            Month number of start of fiscal year.<br>
+
+            _Note: This fields is required when expense_limit_type is QUARTERLY,
+            HALF_YEARLY or YEARLY._
           example: 4
           minimum: 1
           maximum: 12
@@ -7209,8 +7268,9 @@ components:
           example: 1200
           description: >
             Maximum travel distance allowed, above which policy will be
-            violated. `expense_category_ids` must be set with mileage
-            categories.
+            violated.<br>
+
+            _Note: expense_category_ids must be set with mileage categories._
         employee_level_ids:
           type: array
           description: |
@@ -7221,22 +7281,42 @@ components:
             - lvl1sdfad
             - lvl2sdfas
         employee_level_ids_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field employee_level_ids is
+            present in the request body._
         employee_custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields (if any)<br>
+            _Example -> "Employee Age": 30_
         employee_custom_fields_op:
           type: object
-          description: |
-            Exmployee custom field operator. <br>
-            field_name: operator <br>
-            Example -> gender: "IN" <br><br>
-            If field type is, then supported are: <br>
+          description: >
+            Operator for the employee_custom_fields. <br>
+
+            _Format -> field_name: operator_ <br>
+
+            _Example -> "Employee Age": "GREATER_THAN_EQUAL_TO"_ <br><br>
+
+            Supported values based on field type: <br>
+
             `Boolean`: "IS, NOT_IS" <br>
+
             `Date`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
+
             `Location`: "IN, NOT_IN" <br>
+
             `Number`: "LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO" <br>
+
             `String`: "CONTAINS, EQUALS" <br>
-            `Select`: "IN, NOT_IN"
+
+            `Select`: "IN, NOT_IN"<br>
+
+            _Note: This field is mandatory if the field employee_custom_fields
+            is present in the request body._
           properties:
             field_name:
               type: string
@@ -7250,7 +7330,11 @@ components:
             - dept1asdfa
             - dept2adfad
         employee_department_id_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field employee_department_ids
+            is present in the request body._
         employee_locations:
           description: |
             Location of employees targeted by this policy.
@@ -7258,7 +7342,11 @@ components:
           items:
             $ref: '#/components/schemas/location'
         employee_locations_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field employee_locations is
+            present in the request body._
         employee_user_ids:
           type: array
           description: |
@@ -7269,7 +7357,11 @@ components:
             - usabcds1
             - usabcds2
         employee_user_ids_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field employee_user_ids is
+            present in the request body._
         employee_titles:
           type: array
           description: |
@@ -7280,17 +7372,24 @@ components:
             - CEO
             - Manager
         employee_titles_op:
-          $ref: '#/components/schemas/in_operator'
+          allOf:
+            - $ref: '#/components/schemas/in_operator'
+          description: >
+            _Note: This field is mandatory if the field employee_titles is
+            present in the request body._
         action_flag:
           type: boolean
           description: |
-            Whether to flag the expense when it violates policy.
+            Whether to flag the expense when it violates policy.<br>
+            _Default False._
           example: true
         action_show_warning:
           type: boolean
           description: >
             Whether to show warning to employee when the expense that they are
-            creating violates the policy.
+            creating violates the policy.<br>
+
+            _Default False._
           example: true
         action_make_unreportable:
           type: boolean
@@ -7299,49 +7398,65 @@ components:
             <br>
 
             (Expense will be created but employee will not be able to add it to
-            report)
+            report).<br>
+
+            _Default False._
           example: true
         action_remove_employee_approver1:
           type: boolean
           description: >
             Whether to remove the primary approver from the report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_add_employee_approver2:
           type: boolean
           description: >
             Whether to add secondary approver 1 as approver to report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_add_employee_approver3:
           type: boolean
           description: >
             Whether to add secondary approver 2 as approver to report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_add_project_approver1:
           type: boolean
           description: >
             Whether to add project approver 1 as approver to report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_add_project_approver2:
           type: boolean
           description: >
             Whether to add project approver 2 as approver to report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_add_department_head_approver:
           type: boolean
           description: >
             Whether to add department head as approver to report when the
-            expense violates policy.
+            expense violates policy.<br>
+
+            _Default False._
           example: true
         action_cap_amount:
           type: boolean
           description: >
-            Whether to cap the amount to `expense_amount_max` when the expense
-            violates policy.
+            Whether to cap the amount to expense_amount_max when the expense
+            violates policy.<br>
+
+            _Default False._
           example: true
         action_add_approver_user_ids:
           type: array
@@ -10714,11 +10829,13 @@ paths:
       description: >
         Create or Update Expense Policies <br>
 
-        > Apart from required fields, one of expense* or employee* and action*
-        field must be set. <br>
+        **Apart from the required fields mentioned below, the request body
+        should contain the following:**
 
-        > When a comparison field is set, it's *_op field must also be set (if
-        any).
+        - At least one condition field. You can choose any condition from
+        expense_* or employee_* or both.
+
+        - At least one action field. You can choose any action from action_*.
       operationId: expense_policy_rules_post
       requestBody:
         required: true
