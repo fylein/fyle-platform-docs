@@ -1,7 +1,6 @@
 expense_policy_in:
   type: object
   required:
-    - source
     - description
   additionalProperties: False
   properties:
@@ -20,8 +19,6 @@ expense_policy_in:
       description: |
         This represents the description of the expense policy rule.
       example: Receipt is mandatory for expense above $50
-    source:
-      $ref: ./fields.yaml#/expense_policy_source
     expense_limit_type:
       $ref: ./fields.yaml#/expense_policy_limit_type
     expense_currency:
@@ -45,7 +42,7 @@ expense_policy_in:
         If an expense's amount falls behind this value, this policy rule will be violated for that expense..<br>
         _Note: `expense_currency` is mandatory if the field `expense_amount_min` is present in the request body._
       example: 500
-    expense_fiscal_year_start_month:
+    expense_fiscal_start_month:
       type: number
       description: | 
         Month number of start of fiscal year.<br>
@@ -126,7 +123,7 @@ expense_policy_in:
       maximum: 100
     expense_custom_fields:
       allOf:
-        - $ref: './fields.yaml#/custom_fields'
+        - $ref: ./fields.yaml#/custom_fields
       description: |
         Custom fields (if any)<br>
         _Example -> "No. of days": 5_ <br>
@@ -221,9 +218,7 @@ expense_policy_in:
         _Note: `expense_category_ids` with train category is mandatory if the field `expense_train_travel_class` is present in the request body._
       items:
         type: string
-      example:
-        - AC First Class
-        - Second Sitting
+      example: ['AC First Class', 'Second Sitting']
     expense_vehicle_type:
       allOf:
         - $ref: ./fields.yaml#/vehicle_type
@@ -243,17 +238,15 @@ expense_policy_in:
         _Note: You need to use field `employee_level_ids_op` along with this field._
       items:
         type: string
-      example:
-        - lvl1sdfad
-        - lvl2sdfas
+      example: ['lvl1sdfad', 'lvl2sdfas']
     employee_level_ids_op:
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
-          Note: This field is mandatory if the field employee_department_ids is present in the request payload/body.
+          Note: This field is mandatory if the field `employee_level_ids` is present in the request payload/body.
     employee_custom_fields:
       allOf:
-        - $ref: './fields.yaml#/custom_fields'
+        - $ref: ./fields.yaml#/custom_fields
       description: |
         Custom fields (if any)<br>
         _Example -> "Employee Age": 30_ <br>
@@ -279,13 +272,11 @@ expense_policy_in:
       type: array
       description: |
         Employee department ids considered by this policy rule. <br>
-        _Note: You need to use field `employee_department_id_op` along with this field._
+        _Note: You need to use field `employee_department_ids_op` along with this field._
       items:
         type: string
-      example:
-        - dept1asdfa
-        - dept2adfad
-    employee_department_id_op:
+      example: ['dept1asdfa', 'dept2adfad']
+    employee_department_ids_op:
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
@@ -310,9 +301,7 @@ expense_policy_in:
         _Note: You need to use field `employee_user_ids_op` along with this field._
       items:
         type: string
-      example:
-        - usabcds1
-        - usabcds2
+      example: ['usabcds1', 'usabcds2']
     employee_user_ids_op:
       allOf:
         - $ref: ./fields.yaml#/contains_operator
@@ -325,9 +314,7 @@ expense_policy_in:
         _Note: You need to use field `employee_titles_op` along with this field._
       items:
         type: string
-      example:
-        - CEO
-        - Manager
+      example: ['CEO', 'Manager']
     employee_titles_op:
       allOf:
         - $ref: ./fields.yaml#/contains_operator
@@ -400,9 +387,7 @@ expense_policy_in:
         List of approver user ids that will be added to the report that contains expense(s) violating this policy rule.
       items:
         type: string
-      example:
-        - usabcds3
-        - usabcds4
+      example: ['usabcds3', 'usabcds4']
     action_override_distance_slab_rate:
       type: number
       description: |
@@ -412,9 +397,8 @@ expense_policy_in:
 expense_policy_out:
   type: object
   required:
-    - source
     - description
-  additionalProperties: False
+  additionalProperties: True
   properties:
     id:
       allOf:
@@ -427,15 +411,28 @@ expense_policy_out:
     description:
       allOf:
         - $ref: ./fields.yaml#/description
-      nullable: false
       description: |
         This represents the description of the expense policy rule.
       example: Receipt is mandatory for expense above $50
-    source:
-      $ref: ./fields.yaml#/expense_policy_source
+    is_enabled:
+      type: boolean
+      description: |
+        Whether the policy rule is active or not.
+    is_retired:
+      type: boolean
+      description: |
+        Whether the policy rule is retired and can't be made active again.
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
     expense_limit_type:
+      nullable: true
       $ref: ./fields.yaml#/expense_policy_limit_type
     expense_currency:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/currency
       description: |
@@ -443,20 +440,25 @@ expense_policy_out:
         href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.<br>
         _Note: `expense_amount_max` or `expense_amount_min` is mandatory if the field `expense_currency` is present in the request body._
     expense_amount_max:
-      allOf:
+      nullable: true
+      anyOf:
         - $ref: ./fields.yaml#/amount
+        - $ref: ./fields.yaml#/null_field
       description: |
         If an expense's amount exceeds this value, this policy rule will be violated for that expense.<br>
         _Note: `expense_currency` is mandatory if the field `expense_amount_max` is present in the request body._
       example: 10000
     expense_amount_min:
-      allOf:
+      nullable: true
+      anyOf:
         - $ref: ./fields.yaml#/amount
+        - $ref: ./fields.yaml#/null_field
       description: |
         If an expense's amount falls behind this value, this policy rule will be violated for that expense..<br>
         _Note: `expense_currency` is mandatory if the field `expense_amount_min` is present in the request body._
       example: 500
-    expense_fiscal_year_start_month:
+    expense_fiscal_start_month:
+      nullable: true
       type: number
       description: | 
         Month number of start of fiscal year.<br>
@@ -465,6 +467,7 @@ expense_policy_out:
       minimum: 1
       maximum: 12
     expense_distance_max:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/distance
       description: |
@@ -472,6 +475,7 @@ expense_policy_out:
         _Note: `expense_category_ids` with mileage category is mandatory if the field `expense_distance_max` is present in the request body._
       example: 10000
     expense_distance_min:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/distance
       description: |
@@ -479,6 +483,7 @@ expense_policy_out:
         _Note: `expense_category_ids` with mileage category is mandatory if the field `expense_distance_min` is present in the request body._
       example: 500
     expense_category_ids:
+      nullable: true
       type: array
       items:
         $ref: './fields.yaml#/id_integer'
@@ -487,12 +492,14 @@ expense_policy_out:
           _Note: You need to use field `expense_category_ids_op` along with this field._
       example: [2222, 1221]
     expense_category_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
         - If it is set to IN, this policy rule will be applicable to all the expenses that belong to any of the categories listed in the field `expense_category_ids`.
         - If it is set to NOT_IN, this policy rule will be applicable to all the expenses that do not belong to any of the categories listed in the field `expense_category_ids`.
     expense_project_ids:
+      nullable: true
       type: array
       items:
         $ref: './fields.yaml#/id_integer'
@@ -501,12 +508,14 @@ expense_policy_out:
         _Note: You need to use field `expense_project_ids_op` along with this field._
       example: [1234, 5678]
     expense_project_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
         - If it is set to IN, this policy rule will be applicable to all the expenses that belong to any of the projects listed in the field `expense_project_ids`.
         - If it is set to NOT_IN, this policy rule will be applicable to all the expenses that do not belong to any of the projects listed in the field `expense_project_ids`.
     expense_cost_center_ids:
+      nullable: true
       type: array
       items:
         $ref: './fields.yaml#/id_integer'
@@ -515,12 +524,14 @@ expense_policy_out:
         _Note: You need to use field `expense_cost_center_ids_op` along with this field._
       example: [1987, 3456]
     expense_cost_center_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
         - If it is set to IN, this policy rule will be applicable to all the expenses that belong to any of the cost centers listed in the field `expense_cost_center_ids`.
         - If it is set to NOT_IN, this policy rule will be applicable to all the expenses that do not belong to any of the cost centers listed in the field `expense_cost_center_ids`.
     expense_allowed_exchange_rate_difference_percentage:
+      nullable: true
       type: number
       description: |
         Allowed percentage difference for exchange rates beyond which this policy rule will be violated.
@@ -528,6 +539,7 @@ expense_policy_out:
       minimum: 0
       maximum: 100
     expense_allowed_distance_difference_percentage:
+      nullable: true
       type: number
       description: |
         Allowed distance percentage difference beyond which this policy rule will be violated.<br>
@@ -536,13 +548,16 @@ expense_policy_out:
       minimum: 0
       maximum: 100
     expense_custom_fields:
-      allOf:
-        - $ref: './fields.yaml#/custom_fields'
+      nullable: true
+      anyOf:
+        - $ref: ./fields.yaml#/custom_fields
+        - $ref: ./fields.yaml#/null_field
       description: |
         Custom fields (if any)<br>
         _Example -> "No. of days": 5_ <br>
         _Note: You need to use field `expense_custom_fields_op` along with this field._
     expense_custom_fields_op:
+      nullable: true
       type: object
       description: |
         Operator for the expense_custom_fields. <br>
@@ -560,6 +575,7 @@ expense_policy_out:
         field_name:
           type: string
     expense_locations:
+      nullable: true
       description: |
         Location of expense considered by this policy rule.
         If this is set, then for all such expenses that has location like in case of Flight, Train, Bus, Hotel etc, this policy rule will be applicable. <br>
@@ -568,11 +584,13 @@ expense_policy_out:
       items:
         $ref: './fields.yaml#/location'
     expense_locations_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
           _Note: This field is mandatory if the field `expense_locations` is present in the request body._
     expense_creation_delay_days_max:
+      nullable: true
       type: number
       example: 12
       description: |
@@ -590,22 +608,26 @@ expense_policy_out:
       default: True
       example: True
     expense_spent_at_max:
+      nullable: true
       allOf:
         - $ref: './fields.yaml#/timestamptz_pst'
       description: |
         If an expense's spend date exceeds this value, this policy rule will be violated for that expense.<br>
     expense_spent_at_min:
+      nullable: true
       allOf:
         - $ref: './fields.yaml#/timestamptz_pst'
       description: |
         If an expense's spend date falls behind this value, this policy rule will be violated for that expense.<br>
     expense_payment_modes:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/policy_payment_modes
       description: |
         Payment mode for expense to be considered by the policy rule. <br>
         _Note: You need to use field `expense_payment_modes_op` along with this field._
     expense_payment_modes_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
@@ -623,8 +645,10 @@ expense_policy_out:
       default: False
       example: True
     expense_flight_travel_class:
+      nullable: true
       $ref: ./fields.yaml#/expense_policy_flight_travel_classes
     expense_train_travel_class:
+      nullable: true
       type: array
       description: >
         This field is applicable only for Train category. <br>
@@ -632,44 +656,48 @@ expense_policy_out:
         _Note: `expense_category_ids` with train category is mandatory if the field `expense_train_travel_class` is present in the request body._
       items:
         type: string
-      example:
-        - AC First Class
-        - Second Sitting
+      example: ['AC First Class', 'Second Sitting']
     expense_vehicle_type:
-      allOf:
+      nullable: true
+      anyOf:
         - $ref: ./fields.yaml#/vehicle_type
+        - $ref: ./fields.yaml#/null_field
       description: |
         Vehicle type considered by this policy rule. <br>
         _Note: `expense_category_ids` with mileage category is mandatory if the field `expense_vehicle_type` is present in the request body._
     expense_annual_distance_max:
+      nullable: true
       type: number
       example: 1200
       description: |
         If an expense's annual distance exceeds this value, this policy rule will be violated for that expense.<br>
         _Note: `expense_category_ids` with mileage category and `action_override_distance_slab_rate` is mandatory if the field `expense_annual_distance_max` is present in the request body._
     employee_level_ids:
+      nullable: true
       type: array
       description: |
         Employee level ids considered by this policy rule. <br>
         _Note: You need to use field `employee_level_ids_op` along with this field._
       items:
         type: string
-      example:
-        - lvl1sdfad
-        - lvl2sdfas
+      example: ['lvl1sdfad', 'lvl2sdfas']
     employee_level_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
-          Note: This field is mandatory if the field employee_department_ids is present in the request payload/body.
+          Note: This field is mandatory if the field `employee_level_ids` is present in the request payload/body.
     employee_custom_fields:
-      allOf:
-        - $ref: './fields.yaml#/custom_fields'
+      nullable: true
+      anyOf:
+        - $ref: ./fields.yaml#/custom_fields
+        - $ref: ./fields.yaml#/null_field
       description: |
         Custom fields (if any)<br>
         _Example -> "Employee Age": 30_ <br>
         _Note: You need to use field `employee_custom_fields_op` along with this field._
     employee_custom_fields_op:
+      nullable: true
       type: object
       description: |
         Operator for the employee_custom_fields. <br>
@@ -687,21 +715,22 @@ expense_policy_out:
         field_name:
           type: string
     employee_department_ids:
+      nullable: true
       type: array
       description: |
         Employee department ids considered by this policy rule. <br>
-        _Note: You need to use field `employee_department_id_op` along with this field._
+        _Note: You need to use field `employee_department_ids_op` along with this field._
       items:
         type: string
-      example:
-        - dept1asdfa
-        - dept2adfad
-    employee_department_id_op:
+      example: ['dept1asdfa', 'dept2adfad']
+    employee_department_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
           _Note: This field is mandatory if the field `employee_department_ids` is present in the request body._
     employee_locations:
+      nullable: true
       description: |
         Location of employees considered by this policy rule. <br>
         If this is set, then for all such employees whose location is in `employee_locations`, this policy rule will be applicable. <br>
@@ -710,36 +739,37 @@ expense_policy_out:
       items:
         $ref: './fields.yaml#/location'
     employee_locations_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
           _Note: This field is mandatory if the field `employee_locations` is present in the request body._
     employee_user_ids:
+      nullable: true
       type: array
       description: |
         Employee user ids considered by this policy rule. <br>
         _Note: You need to use field `employee_user_ids_op` along with this field._
       items:
         type: string
-      example:
-        - usabcds1
-        - usabcds2
+      example: ['usabcds1', 'usabcds2']
     employee_user_ids_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
           _Note: This field is mandatory if the field `employee_user_ids` is present in the request body._
     employee_titles:
+      nullable: true
       type: array
       description: |
         Employee titles considered by this policy rule. <br>
         _Note: You need to use field `employee_titles_op` along with this field._
       items:
         type: string
-      example:
-        - CEO
-        - Manager
+      example: ['CEO', 'Manager']
     employee_titles_op:
+      nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
       description: |
@@ -806,15 +836,15 @@ expense_policy_out:
       default: False
       example: True
     action_add_approver_user_ids:
+      nullable: true
       type: array
       description: |
         List of approver user ids that will be added to the report that contains expense(s) violating this policy rule.
       items:
         type: string
-      example:
-        - usabcds3
-        - usabcds4
+      example: ['usabcds3', 'usabcds4']
     action_override_distance_slab_rate:
+      nullable: true
       type: number
       description: |
         When annual mileage distance limit exceeds `expense_annual_distance_max` for `expense_vehicle_type`, this rate will be applied afterwards.

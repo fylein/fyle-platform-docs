@@ -801,9 +801,7 @@ components:
         - four_wheeler3
         - four_wheeler4
         - two_wheeler
-        - null
       example: electric_car
-      nullable: true
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -6526,17 +6524,8 @@ components:
           description: >
             Determines whether this organization has been verified by a
             verifier.
-    expense_policy_source:
-      type: string
-      enum:
-        - WEBAPP_POLICY_FORM
-        - WEBAPP_POLICY_JSON
-        - WEBAPP_EXPENSE_RECEIPT_AMOUNT_LIMIT
-        - WEBAPP_EXPENSE_MILEAGE_SLAB_RATE
-      description: |
-        Value signifying the client from which this expense policy is created
-      example: WEBAPP_POLICY_FORM
     expense_policy_limit_type:
+      nullable: true
       type: string
       enum:
         - INDIVIDUAL
@@ -6547,6 +6536,7 @@ components:
         - QUARTERLY
         - HALF_YEARLY
         - YEARLY
+        - LIFETIME
         - null
       description: >
         Value signifying the limit type of the expense policy. <br><br>
@@ -6590,11 +6580,15 @@ components:
 
         - `expense_fiscal_year_start_month`
       example: MONTHLY
+    null_field:
+      type: string
+      nullable: true
     distance:
       type: number
       nullable: true
       description: Actual distance travelled by employee in travel related expenses.
     contains_operator:
+      nullable: true
       type: string
       enum:
         - IN
@@ -6604,6 +6598,7 @@ components:
         Value signifying the operator for the field
       example: IN
     policy_payment_modes:
+      nullable: true
       type: array
       items:
         type: string
@@ -6612,8 +6607,8 @@ components:
           - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
           - null
       example: PERSONAL_CASH_ACCOUNT
-      nullable: true
     expense_policy_flight_travel_classes:
+      nullable: true
       type: array
       items:
         type: string
@@ -6623,6 +6618,7 @@ components:
           - Economy_Plus
           - Economy_Premium
           - First_Class
+          - null
         nullable: true
       description: >
         This field is applicable only for Flight category. <br>
@@ -6635,9 +6631,8 @@ components:
     expense_policy_out:
       type: object
       required:
-        - source
         - description
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           allOf:
@@ -6653,15 +6648,28 @@ components:
         description:
           allOf:
             - $ref: '#/components/schemas/description'
-          nullable: false
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
-        source:
-          $ref: '#/components/schemas/expense_policy_source'
+        is_enabled:
+          type: boolean
+          description: |
+            Whether the policy rule is active or not.
+        is_retired:
+          type: boolean
+          description: |
+            Whether the policy rule is retired and can't be made active again.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
         expense_limit_type:
+          nullable: true
           $ref: '#/components/schemas/expense_policy_limit_type'
         expense_currency:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/currency'
           description: >
@@ -6673,8 +6681,10 @@ components:
             _Note: `expense_amount_max` or `expense_amount_min` is mandatory if
             the field `expense_currency` is present in the request body._
         expense_amount_max:
-          allOf:
+          nullable: true
+          anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: >
             If an expense's amount exceeds this value, this policy rule will be
             violated for that expense.<br>
@@ -6683,8 +6693,10 @@ components:
             `expense_amount_max` is present in the request body._
           example: 10000
         expense_amount_min:
-          allOf:
+          nullable: true
+          anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: >
             If an expense's amount falls behind this value, this policy rule
             will be violated for that expense..<br>
@@ -6692,7 +6704,8 @@ components:
             _Note: `expense_currency` is mandatory if the field
             `expense_amount_min` is present in the request body._
           example: 500
-        expense_fiscal_year_start_month:
+        expense_fiscal_start_month:
+          nullable: true
           type: number
           description: >
             Month number of start of fiscal year.<br>
@@ -6703,6 +6716,7 @@ components:
           minimum: 1
           maximum: 12
         expense_distance_max:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/distance'
           description: >
@@ -6713,6 +6727,7 @@ components:
             the field `expense_distance_max` is present in the request body._
           example: 10000
         expense_distance_min:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/distance'
           description: >
@@ -6723,6 +6738,7 @@ components:
             the field `expense_distance_min` is present in the request body._
           example: 500
         expense_category_ids:
+          nullable: true
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
@@ -6735,6 +6751,7 @@ components:
             - 2222
             - 1221
         expense_category_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
@@ -6746,6 +6763,7 @@ components:
             the expenses that do not belong to any of the categories listed in
             the field `expense_category_ids`.
         expense_project_ids:
+          nullable: true
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
@@ -6758,6 +6776,7 @@ components:
             - 1234
             - 5678
         expense_project_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
@@ -6769,6 +6788,7 @@ components:
             the expenses that do not belong to any of the projects listed in the
             field `expense_project_ids`.
         expense_cost_center_ids:
+          nullable: true
           type: array
           items:
             $ref: '#/components/schemas/id_integer'
@@ -6781,6 +6801,7 @@ components:
             - 1987
             - 3456
         expense_cost_center_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
@@ -6792,6 +6813,7 @@ components:
             the expenses that do not belong to any of the cost centers listed in
             the field `expense_cost_center_ids`.
         expense_allowed_exchange_rate_difference_percentage:
+          nullable: true
           type: number
           description: >
             Allowed percentage difference for exchange rates beyond which this
@@ -6800,6 +6822,7 @@ components:
           minimum: 0
           maximum: 100
         expense_allowed_distance_difference_percentage:
+          nullable: true
           type: number
           description: >
             Allowed distance percentage difference beyond which this policy rule
@@ -6812,8 +6835,10 @@ components:
           minimum: 0
           maximum: 100
         expense_custom_fields:
-          allOf:
+          nullable: true
+          anyOf:
             - $ref: '#/components/schemas/custom_fields'
+            - $ref: '#/components/schemas/null_field'
           description: >
             Custom fields (if any)<br>
 
@@ -6822,6 +6847,7 @@ components:
             _Note: You need to use field `expense_custom_fields_op` along with
             this field._
         expense_custom_fields_op:
+          nullable: true
           type: object
           description: >
             Operator for the expense_custom_fields. <br>
@@ -6850,6 +6876,7 @@ components:
             field_name:
               type: string
         expense_locations:
+          nullable: true
           description: >
             Location of expense considered by this policy rule.
 
@@ -6863,12 +6890,14 @@ components:
           items:
             $ref: '#/components/schemas/location'
         expense_locations_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
             _Note: This field is mandatory if the field `expense_locations` is
             present in the request body._
         expense_creation_delay_days_max:
+          nullable: true
           type: number
           example: 12
           description: >
@@ -6890,18 +6919,21 @@ components:
           default: true
           example: true
         expense_spent_at_max:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/timestamptz_pst'
           description: >
             If an expense's spend date exceeds this value, this policy rule will
             be violated for that expense.<br>
         expense_spent_at_min:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/timestamptz_pst'
           description: >
             If an expense's spend date falls behind this value, this policy rule
             will be violated for that expense.<br>
         expense_payment_modes:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/policy_payment_modes'
           description: >
@@ -6910,6 +6942,7 @@ components:
             _Note: You need to use field `expense_payment_modes_op` along with
             this field._
         expense_payment_modes_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
@@ -6931,8 +6964,10 @@ components:
           default: false
           example: true
         expense_flight_travel_class:
+          nullable: true
           $ref: '#/components/schemas/expense_policy_flight_travel_classes'
         expense_train_travel_class:
+          nullable: true
           type: array
           description: >
             This field is applicable only for Train category. <br> List of
@@ -6945,14 +6980,17 @@ components:
             - AC First Class
             - Second Sitting
         expense_vehicle_type:
-          allOf:
+          nullable: true
+          anyOf:
             - $ref: '#/components/schemas/vehicle_type'
+            - $ref: '#/components/schemas/null_field'
           description: >
             Vehicle type considered by this policy rule. <br>
 
             _Note: `expense_category_ids` with mileage category is mandatory if
             the field `expense_vehicle_type` is present in the request body._
         expense_annual_distance_max:
+          nullable: true
           type: number
           example: 1200
           description: >
@@ -6963,6 +7001,7 @@ components:
             `action_override_distance_slab_rate` is mandatory if the field
             `expense_annual_distance_max` is present in the request body._
         employee_level_ids:
+          nullable: true
           type: array
           description: >
             Employee level ids considered by this policy rule. <br>
@@ -6975,14 +7014,17 @@ components:
             - lvl1sdfad
             - lvl2sdfas
         employee_level_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
-            Note: This field is mandatory if the field employee_department_ids
-            is present in the request payload/body.
+            Note: This field is mandatory if the field `employee_level_ids` is
+            present in the request payload/body.
         employee_custom_fields:
-          allOf:
+          nullable: true
+          anyOf:
             - $ref: '#/components/schemas/custom_fields'
+            - $ref: '#/components/schemas/null_field'
           description: >
             Custom fields (if any)<br>
 
@@ -6991,6 +7033,7 @@ components:
             _Note: You need to use field `employee_custom_fields_op` along with
             this field._
         employee_custom_fields_op:
+          nullable: true
           type: object
           description: >
             Operator for the employee_custom_fields. <br>
@@ -7019,24 +7062,27 @@ components:
             field_name:
               type: string
         employee_department_ids:
+          nullable: true
           type: array
           description: >
             Employee department ids considered by this policy rule. <br>
 
-            _Note: You need to use field `employee_department_id_op` along with
+            _Note: You need to use field `employee_department_ids_op` along with
             this field._
           items:
             type: string
           example:
             - dept1asdfa
             - dept2adfad
-        employee_department_id_op:
+        employee_department_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
             _Note: This field is mandatory if the field
             `employee_department_ids` is present in the request body._
         employee_locations:
+          nullable: true
           description: >
             Location of employees considered by this policy rule. <br>
 
@@ -7049,12 +7095,14 @@ components:
           items:
             $ref: '#/components/schemas/location'
         employee_locations_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
             _Note: This field is mandatory if the field `employee_locations` is
             present in the request body._
         employee_user_ids:
+          nullable: true
           type: array
           description: >
             Employee user ids considered by this policy rule. <br>
@@ -7067,12 +7115,14 @@ components:
             - usabcds1
             - usabcds2
         employee_user_ids_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
             _Note: This field is mandatory if the field `employee_user_ids` is
             present in the request body._
         employee_titles:
+          nullable: true
           type: array
           description: >
             Employee titles considered by this policy rule. <br>
@@ -7085,6 +7135,7 @@ components:
             - CEO
             - Manager
         employee_titles_op:
+          nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
@@ -7171,6 +7222,7 @@ components:
           default: false
           example: true
         action_add_approver_user_ids:
+          nullable: true
           type: array
           description: >
             List of approver user ids that will be added to the report that
@@ -7181,6 +7233,7 @@ components:
             - usabcds3
             - usabcds4
         action_override_distance_slab_rate:
+          nullable: true
           type: number
           description: >
             When annual mileage distance limit exceeds
@@ -7190,7 +7243,6 @@ components:
     expense_policy_in:
       type: object
       required:
-        - source
         - description
       additionalProperties: false
       properties:
@@ -7212,8 +7264,6 @@ components:
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
-        source:
-          $ref: '#/components/schemas/expense_policy_source'
         expense_limit_type:
           $ref: '#/components/schemas/expense_policy_limit_type'
         expense_currency:
@@ -7247,7 +7297,7 @@ components:
             _Note: `expense_currency` is mandatory if the field
             `expense_amount_min` is present in the request body._
           example: 500
-        expense_fiscal_year_start_month:
+        expense_fiscal_start_month:
           type: number
           description: >
             Month number of start of fiscal year.<br>
@@ -7533,8 +7583,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
-            Note: This field is mandatory if the field employee_department_ids
-            is present in the request payload/body.
+            Note: This field is mandatory if the field `employee_level_ids` is
+            present in the request payload/body.
         employee_custom_fields:
           allOf:
             - $ref: '#/components/schemas/custom_fields'
@@ -7578,14 +7628,14 @@ components:
           description: >
             Employee department ids considered by this policy rule. <br>
 
-            _Note: You need to use field `employee_department_id_op` along with
+            _Note: You need to use field `employee_department_ids_op` along with
             this field._
           items:
             type: string
           example:
             - dept1asdfa
             - dept2adfad
-        employee_department_id_op:
+        employee_department_ids_op:
           allOf:
             - $ref: '#/components/schemas/contains_operator'
           description: >
