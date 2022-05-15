@@ -1,17 +1,29 @@
-get:
+post:
   tags:
     - Statement mappings
   summary: Statement mapping suggestion
   description: |
     This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
   operationId: statement_mappings_suggest
-  parameters:
-    - in: query
-      name: statement_id
-      required: true
-      schema:
-        type: string
-        example: 'stmtdfsdfdfdd'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                statement_id:
+                  type: string
+                  description: |
+                    The id of the uploaded statement.
+              required:
+                - statement_id
+          required:
+            - data
+          additionalProperties: False
   responses:
     '200':
       description: OK
@@ -25,7 +37,7 @@ get:
               offset:
                 $ref: '../../components/schemas/offset.yaml'
               data:
-                type: array
+                type: object
                 items:
                   $ref: '../../components/schemas/statement_mappings.yaml#/suggest_out'
     '401':

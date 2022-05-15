@@ -9990,7 +9990,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
   /admin/statement_mappings/suggest:
-    get:
+    post:
       tags:
         - Statement mappings
       summary: Statement mapping suggestion
@@ -10000,13 +10000,25 @@ paths:
         parameters, please see the [Guide to Data
         APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       operationId: statement_mappings_suggest
-      parameters:
-        - in: query
-          name: statement_id
-          required: true
-          schema:
-            type: string
-            example: stmtdfsdfdfdd
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    statement_id:
+                      type: string
+                      description: |
+                        The id of the uploaded statement.
+                  required:
+                    - statement_id
+              required:
+                - data
+              additionalProperties: false
       responses:
         '200':
           description: OK
@@ -10020,7 +10032,7 @@ paths:
                   offset:
                     $ref: '#/components/schemas/offset'
                   data:
-                    type: array
+                    type: object
                     items:
                       $ref: '#/components/schemas/suggest_out'
         '401':
