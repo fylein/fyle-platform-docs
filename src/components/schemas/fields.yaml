@@ -158,49 +158,20 @@ travel_classes:
     type: string
   example:
     - ECONOMY
-    - BUSINESS
-
-flight_travel_classes:
-  type: string
-  enum:
-    - BUSINESS
-    - ECONOMY
-    - ECONOMY_PLUS
-    - ECONOMY_PREMIUM
-    - FIRST_CLASS
-  description: |
-    This field is applicable only for `Flight` category.
-    Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-  example: ECONOMY  
-  
-train_travel_classes:
-  type: string
-  enum:
-    - STANDARD
-    - AC_FIRST_CLASS
-    - AC_2_TIER
-    - AC_3_TIER
-    - FIRST_CLASS
-    - AC_CHAIR_CAR
-    - SLEEPER
-    - SECOND_SITTING
-  description: |
-    This field is applicable only for `Train` category.
-    Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-  example: STANDARD
+    - BUSINESS 
 
 vehicle_type:
   type: string
   enum:
-    - BICYCLE
-    - ELECTRIC_CAR
-    - FOUR_WHEELER
-    - FOUR_WHEELER1
-    - FOUR_WHEELER2
-    - FOUR_WHEELER3
-    - FOUR_WHEELER4
-    - TWO_WHEELER
-  example: ELECTRIC_CAR
+    - bicycle
+    - electric_car
+    - four_wheeler
+    - four_wheeler1
+    - four_wheeler2
+    - four_wheeler3
+    - four_wheeler4
+    - two_wheeler
+  example: electric_car
 
 distance_unit:
   type: string
@@ -223,6 +194,10 @@ spent_at:
     It signifies when this expense was made.
     This date cannot be in future.
 
+null_field:
+  type: string
+  nullable: true
+
 source:
   type: string
   enum:
@@ -234,18 +209,8 @@ source:
     Enum value signifying the client from which this expense was created
   example: SLACK
 
-expense_policy_source:
-  type: string
-  enum:
-    - WEBAPP_POLICY_FORM
-    - WEBAPP_POLICY_JSON
-    - WEBAPP_EXPENSE_RECEIPT_AMOUNT_LIMIT
-    - WEBAPP_EXPENSE_MILEAGE_SLAB_RATE
-  description: >
-    Value signifying the client from which this expense policy is created
-  example: WEBAPP_POLICY_FORM
-
 expense_policy_limit_type:
+  nullable: true
   type: string
   enum:
     - INDIVIDUAL
@@ -256,24 +221,17 @@ expense_policy_limit_type:
     - QUARTERLY
     - HALF_YEARLY
     - YEARLY
-  description: >
-    Value signifying the limit type of the expense policy. <br><br>
-    `INDIVIDUAL`: Amount limit will be checked against each expense. <br>
-    `DAILY`: Amount limit will be checked against the total of all expenses in a day. <br>
-    `NIGHTLY`: Amount limit will be checked against the hotel per night. <br>
-    `WEEKLY`: Amount limit will be checked against the total of all expenses in a week. <br>
-    `MONTHLY`: Amount limit will be checked against the total of all expenses in a month. <br>
-    `QUARTERLY`: Amount limit will be checked against the total of all expenses in a financial quarter. `fiscal_year_start_month` is required when you set this. <br>
-    `HALF_YEARLY`: Amount limit will be checked against the total of all expenses in a half-year. `fiscal_year_start_month` is required when you set this. <br>
-    `YEARLY`: Amount limit will be checked against the total of all expenses in a financial year. `fiscal_year_start_month` is required when you set this. <br><br>
-    When this field is set, expense_currency and (`expense_amount_max` or `expense_amount_min`) must be set.
+    - LIFETIME
+    - null
   example: MONTHLY
 
-in_operator:
+contains_operator:
+  nullable: true
   type: string
   enum:
     - IN
     - NOT_IN
+    - null
   description: >
     Value signifying the operator for the field
   example: IN
@@ -284,47 +242,63 @@ expense_policy_rule_minimal:
     id:
       type: string
       example: tpr1234abcd
-      description: This represents the id of the policy.
+      description: This represents the id of the expense policy rule.
     description:
       allOf:
         - $ref: '#/description'
       description: |
-        This represents the description of the policy.
+        This represents the description of the expense policy rule.
       example: Receipt is mandatory for expense above $50
     action_show_warning:
       type: boolean
       description: |
-        Whether to show warning to employee when the expense that they are creating violates the policy.
+        If it is set to true, then a warning is shown to the employee, whenever he attempts to create an expense that violates this expense policy rule.
       example: True
       
 expense_policy_violating_expenses_query_params:
   type: object
   description: |
-    Query params that can be combined and used to fetch the violating expenses
+    Query params that can be combined and used to fetch the violating expenses.
   properties:
     start_date:
       type: string
+      description: |
+        Spent start date from where the expenses should be fetched.
       example: "2021-12-01"
     end_date:
       type: string
+      description: |
+        Spent end date till where the expenses should be fetched.
       example: "2021-12-01"
     state:
       type: string
+      description: |
+        State of the expenses.
       example: "neq.DRAFT"
     category_id:
       type: string
+      description: |
+        Category ids of the expenses.
       example: "in.(60506)"
     project_id:
       type: string
+      description: |
+        Project ids of the expenses.
       example: "in.(261155)" 
     cost_center_id:
       type: string
+      description: |
+        Cost center ids of the expenses.
       example: "in.(7475)"
     currency:
       type: string
+      description: |
+        Currency of the expenses.
       example: "USD"
     vehicle_type:
       type: string
+      description: |
+        Vehicle type of the expenses.
       example: "ELECTRIC_CAR"
     employee_id:
       $ref: '#/employee_id'
@@ -348,11 +322,13 @@ expense_policy_final_desired_state:
   properties:
     expense_id:
       type: string
+      description: |
+        This represents the id of the expense.
       example: "txabsdfSYqd"
     flag:
       type: boolean
       description: |
-        Whether to show warning to employee when the expense that they are creating violates the policy.
+        If it is set to true, then the expense will be flagged.
       example: True
     amount:
       allOf:
@@ -363,21 +339,21 @@ expense_policy_final_desired_state:
     is_receipt_mandatory:
       type: boolean
       description: |
-        Whether receipt is mandatory for the expense.
+        If this is set to true, then the expense requires receipt.
       example: True
     add_approver_user_ids:
       type: array
       items:
         type: string
       description: |
-        User ids to be added as an approver to the expense.
+        List of approver user ids that will be added to the report that contains this expense.
       example:
         - usBdsdfscl
         - usLSsdfwqt
     remove_employee_approver1:
       type: boolean
       description: |
-        Whether to remove the primary approver from the expense approvers.
+        If this is set to true, then the employee's first approver will be removed from the report that contains this expense.
       example: True
     run_status:
       type: string
@@ -395,12 +371,16 @@ expense_policy_final_desired_state:
         - "Flag the expense"
         - "Cap the amount"
 
-minimal_payment_modes:
-  type: string
-  enum:
-    - PERSONAL_CASH_ACCOUNT
-    - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-  example: PERSONAL_CASH_ACCOUNT
+policy_payment_modes:
+  nullable: true
+  type: array
+  items:
+    type: string
+    enum:
+      - PERSONAL_CASH_ACCOUNT
+      - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+      - null
+    example: PERSONAL_CASH_ACCOUNT
 
 merchant:
   type: string
@@ -761,7 +741,9 @@ reminder_type:
     - RESUBMIT_ADVANCE_REQUESTS
     - MATCH_ADVANCES
     - VERIFY_EMPLOYEES
-    - ADD_CORPORATE_CARDS      
+    - ADD_CORPORATE_CARDS 
+    - CONNECT_VISA_RTF
+    - VERIFY_VISA_CARD     
   maxLength: 255
   description: Represents the type of reminder.
   example: FYLE_EXPENSES
@@ -822,6 +804,20 @@ department_head_user_ids:
   description: |
     List of IDs of users who are head of the department.
 
+allow_users:
+  type: string
+  nullable: false
+  description: |
+    Set who can access the object.
+    - `ALL` indicates the object can be accessible to all users in the org.
+    - `NONE` indicates the object cannot be accessible to any user in the org.
+    - `UNRESTRICTED` indicates the object will be be accessible to all users in the org who are not restricted to
+    specific objects of this resource.
+  enum:
+    - ALL
+    - NONE
+    - UNRESTRICTED
+  example: UNRESTRICTED
 
 account_minimal:
   description: |
@@ -841,3 +837,21 @@ account_minimal:
     tentative_balance_amount:
       type: number
       example: 100.0
+
+
+phone_number:
+  type: string
+  example: '+12131234567'
+  maxLength: 16
+  description: >
+      phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+  pattern: '/^(\+\d{1,3}[- ]?)?\d{10}$/'
+
+
+bank_ifsc:
+  type: string
+  example: 'SBIN0007587'
+  maxLength: 11
+  description: >
+      IFSC code of the bank account of the Employee
+  pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
