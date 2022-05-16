@@ -6558,6 +6558,8 @@ components:
           example: stmtwownwrng
         org_id:
           $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -6569,24 +6571,25 @@ components:
           example: amex.csv
         file_size:
           type: number
-          description: |
-            Specifies the size of file uploaded by the user.
-          example: 21KB
+          description: >
+            Specifies the size of file uploaded by the user. (The size is
+            represented in bytes)
+          example: 21
         no_of_debit:
           type: integer
           description: |
-            Number of debit transactions in the document uploaded by the user.
+            Number of debit transactions in the statement uploaded by the user.
           example: 3
         no_of_credit:
           type: integer
           description: |
-            Number of credit transactions in the document uploaded by the user.
+            Number of credit transactions in the statement uploaded by the user.
           example: 3
         no_of_transactions:
           type: integer
           description: |
-            Number of transactions in the document uploaded by the user.
-          example: 3
+            Number of transactions in the statement uploaded by the user.
+          example: 6
         statement_columns:
           type: array
           items:
@@ -6596,29 +6599,30 @@ components:
           example:
             - account_number
             - amount
-        statement_mapping_id:
-          type: string
-          description: |
-            Refers to the mapping used in statement.
-          example: stmpdfddfd
         start_date:
           $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Start date of the statement period
+          nullable: true
         end_date:
           $ref: '#/components/schemas/timestamptz_utc'
           description: |
             End date of the statement period
+          nullable: true
         has_statement_duplicate:
           type: boolean
           description: |
-            Determines whether the statement is completely duplicate or not.
+            Indicates whether the statement is completely duplicate or not.
         duplicate_statement_ids:
           type: array
+          description: >-
+            Holds the list of statement_ids which are duplicate to the current
+            statement
           items:
             $ref: '#/components/schemas/id_string'
           example:
             - stmtge49ielgel
+          nullable: true
         has_statement_line_items_duplicate:
           type: boolean
           description: >
@@ -6636,35 +6640,39 @@ components:
                 example:
                   - stlige49ielgel
                 description: Ids of the current statement line items which are duplicates
+                nullable: true
               duplicate_line_item_statement_id:
                 type: string
                 description: |
                   Id of the existing duplicate statement
                 example:
                   - stmpge49ielgel
+                nullable: true
         unique_id:
           type: string
           description: |
             Unique key that is used to identify the statement.
+          example: 74175aadf22675aa59df28b96d351cfb
         file_id:
           type: string
           description: |
-            Id of the uploaded statement.
-        is_ccc_created:
+            File id of the uploaded statement.
+          example: fiit3pX9gzzP
+        is_corporate_card_transactions_created:
           type: boolean
           description: >
             Indicates whether the corporate card transactions are created out of
             the statement.
-        user_id:
-          $ref: '#/components/schemas/user_id'
         statement_mappings_id:
           type: string
+          example: stmpdfddfd
           description: |
             Id of the mapping used to extract transaction from the statement.
           nullable: true
       required:
         - id
         - org_id
+        - user_id
         - created_at
         - updated_at
         - file_name
@@ -6673,12 +6681,15 @@ components:
         - no_of_credit
         - no_of_transactions
         - statement_columns
+        - start_date
+        - end_date
         - has_statement_duplicate
         - has_statement_line_items_duplicate
+        - duplicate_statement_ids
+        - duplicate_statement_line_items
         - unique_id
         - file_id
-        - is_ccc_created
-        - user_id
+        - is_corporate_card_transactions_created
   parameters:
     created_at:
       in: query
