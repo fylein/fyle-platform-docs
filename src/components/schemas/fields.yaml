@@ -337,6 +337,32 @@ activity_details:
       nullable: False
       example: 70
 
+extracted_data:
+  type: object
+  nullable: True
+  properties:
+    amount:
+      type: number
+      nullable: True
+      example: 21
+    vendor_name:
+      type: string
+      nullable: True
+      example: Uber
+    currency:
+      type: string
+      nullable: True
+      example: USD
+    category:
+      type: string
+      nullable: True
+      example: Taxi
+    date:
+      type: string
+      nullable: True
+      example: '2020-07-20'
+
+
 location:
   type: object
   nullable: true
@@ -551,7 +577,9 @@ reminder_type:
     - RESUBMIT_ADVANCE_REQUESTS
     - MATCH_ADVANCES
     - VERIFY_EMPLOYEES
-    - ADD_CORPORATE_CARDS      
+    - ADD_CORPORATE_CARDS 
+    - CONNECT_VISA_RTF
+    - VERIFY_VISA_CARD     
   maxLength: 255
   description: Represents the type of reminder.
   example: FYLE_EXPENSES
@@ -612,6 +640,20 @@ department_head_user_ids:
   description: |
     List of IDs of users who are head of the department.
 
+allow_users:
+  type: string
+  nullable: false
+  description: |
+    Set who can access the object.
+    - `ALL` indicates the object can be accessible to all users in the org.
+    - `NONE` indicates the object cannot be accessible to any user in the org.
+    - `UNRESTRICTED` indicates the object will be be accessible to all users in the org who are not restricted to
+    specific objects of this resource.
+  enum:
+    - ALL
+    - NONE
+    - UNRESTRICTED
+  example: UNRESTRICTED
 
 account_minimal:
   description: |
@@ -631,3 +673,21 @@ account_minimal:
     tentative_balance_amount:
       type: number
       example: 100.0
+
+
+phone_number:
+  type: string
+  example: '+12131234567'
+  maxLength: 16
+  description: >
+      phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+  pattern: '/^(\+\d{1,3}[- ]?)?\d{10}$/'
+
+
+bank_ifsc:
+  type: string
+  example: 'SBIN0007587'
+  maxLength: 11
+  description: >
+      IFSC code of the bank account of the Employee
+  pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'

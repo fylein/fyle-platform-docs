@@ -68,18 +68,18 @@ GET /admin/expenses?cost_center->name=eq.CC123
 
 ## Pagination
 
-Every GET API call is paginated. Each page can contain a maximum of 100 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
+Every GET API call is paginated. Each page can contain a maximum of 200 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
 
 * order
 * offset
 * limit
 
-The following example will get the top 100 most expensive expenses with a specific project
+The following example will get the top 200 most expensive expenses with a specific project
 ```
-GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=100
+GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=200
 ```
 
-In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit.
+In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit. The limit cannot be more than 200.
 
 ## Rate limits
 
