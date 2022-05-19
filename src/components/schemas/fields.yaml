@@ -242,66 +242,71 @@ expense_policy_rule_minimal:
     id:
       type: string
       example: tpr1234abcd
-      description: This represents the id of the expense policy rule.
+      description: This represents the id of the expense policy rule that is violated for this expense.
     description:
-      allOf:
+      anyOf:
         - $ref: '#/description'
       description: |
-        This represents the description of the expense policy rule.
+        This represents the description of the expense policy rule that is violated for this expense.
       example: Receipt is mandatory for expense above $50
     action_show_warning:
       type: boolean
       description: |
-        If it is set to true, then a warning is shown to the employee, whenever he attempts to create an expense that violates this expense policy rule.
+        A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
       example: True
       
 expense_policy_violating_expenses_query_params:
   type: object
   description: |
-    Query params that can be combined and used to fetch the violating expenses.
+    An expense may be violating an expense policy rule due to a group of other expenses. 
+    These query params can be used to fetch those "violating" expenses because of which this expense is causing a violation. <br>
+    Below params should be ANDed to get the correct list of violating expenses.
   properties:
     start_date:
       type: string
       description: |
-        Spent start date from where the expenses should be fetched.
+        Spend start date query param to find the list of violating expenses.
       example: "2021-12-01"
     end_date:
       type: string
       description: |
-        Spent end date till where the expenses should be fetched.
-      example: "2021-12-01"
+        Spend end date query param to find the list of violating expenses.
+      example: "2022-03-31"
     state:
       type: string
       description: |
-        State of the expenses.
+        State query param to find the list of violating expenses.
       example: "neq.DRAFT"
-    category_id:
+    category_ids:
       type: string
       description: |
-        Category ids of the expenses.
+        Category ids query param to find the list of violating expenses.
       example: "in.(60506)"
-    project_id:
+    project_ids:
       type: string
       description: |
-        Project ids of the expenses.
+        Project ids query param to find the list of violating expenses.
       example: "in.(261155)" 
-    cost_center_id:
+    cost_center_ids:
       type: string
       description: |
-        Cost center ids of the expenses.
+        Cost center ids query param to find the list of violating expenses.
       example: "in.(7475)"
     currency:
       type: string
       description: |
-        Currency of the expenses.
+        Currency query param to find the list of violating expenses.
       example: "USD"
     vehicle_type:
       type: string
       description: |
-        Vehicle type of the expenses.
+        Vehicle type query param to find the list of violating expenses.
       example: "ELECTRIC_CAR"
     employee_id:
-      $ref: '#/employee_id'
+      anyOf:
+      - $ref: '#/employee_id'
+      description:
+        Employee id query param to find the list of violating expenses.
 
 expense_policy_individual_desired_states:
   type: object
@@ -309,10 +314,10 @@ expense_policy_individual_desired_states:
     rule:
       $ref: '#/expense_policy_rule_minimal'
     amount:
-      allOf:
+      anyOf:
         - $ref: '#/amount'
       description: |
-        Amount calculated by policy to be applied to the expense.
+        Amount that the policy calculation suggests for this expense.
       example: 500
     violating_expenses_query_params:
       $ref: '#/expense_policy_violating_expenses_query_params'
@@ -328,45 +333,48 @@ expense_policy_final_desired_state:
     flag:
       type: boolean
       description: |
-        If it is set to true, then the expense will be flagged.
+        A true value here means, that as per policy calculation this expense should be flagged.
       example: True
     amount:
-      allOf:
+      anyOf:
         - $ref: '#/amount'
       description: |
-        Amount calculated by policy to be applied to the expense.
+        Amount that the policy calculation suggests for this expense.
       example: 500
     is_receipt_mandatory:
       type: boolean
       description: |
-        If this is set to true, then the expense requires receipt.
+        A true value here means, that as per policy calculation this expense requires receipt.
       example: True
     add_approver_user_ids:
       type: array
       items:
         type: string
       description: |
-        List of approver user ids that will be added to the report that contains this expense.
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
       example:
         - usBdsdfscl
         - usLSsdfwqt
     remove_employee_approver1:
       type: boolean
       description: |
-        If this is set to true, then the employee's first approver will be removed from the report that contains this expense.
+        A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
       example: True
     run_status:
+      nullable: false
       type: string
+      enum:
+        - SUCCESS
+        - FAILURE
       description: |
-        Whether policy ran successfully or not.
-      example: "SUCCESS"
+        This represent the run status of the policy.
+      example: SUCCESS
     run_summary:
       type: array
       items:
         type: string
       description: |
-        List of action summary that needs to happen on the expense.
-        This can be combined to form a single elaborative sentence.
+        List of human-readable action summaries that the policy calculation suggests for this expense.
       example:
         - "flag the expense"
         - "cap the amount"
