@@ -6643,8 +6643,9 @@ components:
             Value signifying the limit type of the expense policy.
         expense_currency:
           nullable: true
-          allOf:
+          anyOf:
             - $ref: '#/components/schemas/currency'
+            - $ref: '#/components/schemas/null_field'
           description: >
             The three-letter currency code following ISO standard <a
 
@@ -7087,7 +7088,7 @@ components:
       type: object
       required:
         - description
-      additionalProperties: false
+      additionalProperties: true
       properties:
         id:
           allOf:
@@ -7165,24 +7166,24 @@ components:
             _Note: `expense_amount_max` or `expense_amount_min` is mandatory if
             the field `expense_currency` is present in the request body._
         expense_amount_max:
-          allOf:
+          anyOf:
             - $ref: '#/components/schemas/amount'
           description: >
             If an expense's amount exceeds this value, this policy rule will be
             violated for that expense.<br>
 
-            _Note: `expense_currency` is mandatory if the field
-            `expense_amount_max` is present in the request body._
+            _Note: `expense_currency` and `expense_limit_type` is mandatory if
+            the field `expense_amount_max` is present in the request body._
           example: 10000
         expense_amount_min:
-          allOf:
+          anyOf:
             - $ref: '#/components/schemas/amount'
           description: >
             If an expense's amount falls behind this value, this policy rule
             will be violated for that expense..<br>
 
-            _Note: `expense_currency` is mandatory if the field
-            `expense_amount_min` is present in the request body._
+            _Note: `expense_currency` and `expense_limit_type` is mandatory if
+            the field `expense_amount_min` is present in the request body._
           example: 500
         expense_fiscal_start_month:
           type: number
@@ -11247,12 +11248,13 @@ paths:
 
         - You should choose at least one action from **action_***. <br><br>
 
-        _When multiple conditions are provided the there will AND operation in
-        between them and policy rule
+        _When multiple conditions are provided, then there will AND operation in
+        between them and the policy rule 
 
-        will only be applicable on expenses if all of the conditions match. <br>
+        will only be applicable on expenses if all of the conditions match.
+        <br> 
 
-        Similarly for actions, if multiple actions are provided then all of the
+        Similarly, for actions, if multiple actions are provided then all of the
         actions will be applied when conditions satisfy._
       operationId: expense_policy_rules_post
       requestBody:
