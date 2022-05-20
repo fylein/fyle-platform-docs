@@ -7,7 +7,7 @@ An internal application is one that will be used by a specific user or organizat
 >  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
 
 
-Login to Fyle by going to https://accounts.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+Login to Fyle by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
 
 On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 
