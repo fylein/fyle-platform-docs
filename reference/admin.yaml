@@ -6578,6 +6578,149 @@ components:
           description: >
             Determines whether this organization has been verified by a
             verifier.
+    preview_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            transaction_date:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id:
+              type: string
+              description: >
+                Specifies the mapping of transaction id / unique id on the
+                statement.
+              example: reference number
+              nullable: true
+            amount:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            foreign_amount:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            statement_bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            statement_is_debit_positive:
+              type: boolean
+              description: >
+                Specifies the representation of the the amount in the statement,
+                if true then the amount represented by |
+
+                negative sign are credits, and if false then the amount
+                represented by negative sign are debits.
+              example: true
+            currency:
+              type: string
+              description: |
+                Specifies the currency used in the statement.
+              example: USD
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+        ignored_line_items:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies list of line items to be ignored in the statement.
+          example:
+            - stlisfdfadssd
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_items
+    preview_out:
+      type: array
+      items:
+        type: object
+        properties:
+          statement_bank_name:
+            type: string
+            description: |
+              Specifies the bank name of the statement
+            example: American Express
+          vendor:
+            type: string
+            description: |
+              Specifies the vendor of the statement
+            example: Amazon
+          transaction_date:
+            $ref: '#/components/schemas/timestamptz_utc'
+            description: |
+              Specifies the transaction date on the statement.
+          statement_is_debit_positive:
+            type: boolean
+            description: >
+              Specifies the representation of the the amount in the statement,
+              if true then the amount represented by |
+
+              negative sign are credits, and if false then the amount
+              represented by negative sign are debits.
+            example: true
+          amount:
+            type: integer
+            description: |
+              Specifies the amount on the statement.
+            example: 30
+          card_number:
+            type: string
+            description: |
+              Specifies the card number on the statement.
+            example: xxxx-3343
+          unique_key:
+            type: string
+            description: |
+              Specifies the unique code / transaction id on the statement.
+            example: ed0b2aa913c54b3f903a5030208e1872
+          foreign_amount:
+            type: integer
+            description: |
+              Specifies the foreign amount on the statement.
+            example: 48
+          foreign_currency:
+            type: string
+            description: |
+              Specifies the foreign currency on the statement.
+            example: USD
+      required:
+        - statement_bank_name
+        - vendor
+        - transaction_dt
+        - statement_is_debit_positive
+        - amount
+        - card_number
+        - code
+        - foreign_amount
+        - foreign_currency
   parameters:
     created_at:
       in: query
@@ -6703,6 +6846,9 @@ tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Statements
+    description: |
+      These APIs gives you access to add a bank statement for reconciliation.
 paths:
   /admin/projects:
     get:
@@ -9928,3 +10074,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/statements/preview:
+    post:
+      tags:
+        - Statements
+      summary: Preview of the uploaded statement
+      description: >
+        This API helps in converting the statement with the mapping chosed and
+        helps the user to preview it, this doesn't save the statement
+      operationId: statements_prevew
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/preview_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/preview_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
