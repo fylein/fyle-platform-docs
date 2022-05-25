@@ -4,7 +4,7 @@ An internal application is one that will be used by a specific user or organizat
 
 > #### Currently, only admins can create applications
 >
->  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
+>  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at support@fylehq.com
 
 
 Login to Fyle by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.

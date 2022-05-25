@@ -24,7 +24,7 @@ E.g. if John has the role `["FYLER"]` only, then John will only have access to s
 
 > #### Finer access control is coming soon!
 >
-> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
+> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at support@fylehq.com so we can keep you informed as soon as it is available.
 
 All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity. For example,
 
