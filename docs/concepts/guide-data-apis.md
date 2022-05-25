@@ -9,7 +9,7 @@ At this point, you should already be familiar with:
 Every data API call that you make has to have an authorization header like this:
 
 ```
-    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token).
