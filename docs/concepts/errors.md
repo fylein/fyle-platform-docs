@@ -11,50 +11,110 @@ In general:
 | SL NO.  |  HTTP STATUS CODE  | HTTP MESSAGE | ENGLISH EXPALINATION |
 |---------|--------------------|--------------|--------------------- |
 |    1.   |         400       |   Bad Request |  The request data or query sent is malformed |
-|     2.   |         401      |  Unauthorized |  The token is either not given Fyle or is timed out |
+|    2.   |         401      |  Unauthorized |  The credentials are not valid |
 |    3.   |          403      |     Forbidden |  The API token doesn't have permissions to perform the requested action|
-|     4.    |          404     |      Not Found  |  We dont understand request
+|    4.   |          404    |      Not Found| The requested resource doesn’t exist|
 
-## Differnet Reasons for 400 error 
+
+## Different Reasons for 400 errors 
 
 1. **ValidationError:** 
-    This type error occurs when either a parameter with is mandatory is missing or when the parameters that are not formated as defined (Eg: Passing a interger for a string , Not following pattern required for phone numbers etc.)
+    This type of error occurs when either a mandatory parameter is missing or when the parameters are not formatted as defined (Eg: Passing an integer for a string, Not following the pattern required for phone numbers etc.)
     <!--focus: false-->
-    |![Required Parameter Missig Error](../../assets/images/concepts/errors/ValidationError2.png)|
-    |:--:|
-    | <b>Example of ValidationError. Required parameter user_full_name is missing</b>    
+      ``` json
+    {
+    "data": {
+        "0": {
+            "user_email": [
+                "Missing data for required field."
+            ]
+        }
+    },
+    "error": "ValidationError",
+    "message": null
+    }
+    ```
+    <!--focus: false-->
+   | <b> Example of ValidationError. Required parameter user_email is missing </b>
+
 2. **BulkError:**
-    This type error occurs when you are doing a bulk operations. Generally this error occurs when you pass a value for an entity parameter for which that particular entity is not found. (Eg: Passing an unkonwn department name which does not exists etc.). 
-     <!--focus: false-->
-    |![Required Parameter Missig Error](../../assets/images/concepts/errors/bulkError.png)|
-    |:--:|
-    | <b>Example of BulkError. Department named XYZ does not exists in the org</b> 
-3. **IntegrityError:**
-    This error is encountered when an sql contraints fails. (Eg: Creating an project with same project name , sub project name inside the same org, passing user_id for which the users dont exists).
+    This type of error occurs during bulk operations when an entity is not found (Eg: Passing the name of the department which does not exist etc.)
     <!--focus: false-->
-    |![Required Parameter Missig Error](../../assets/images/concepts/errors/integrityError.png)|
-    |:--:|
-    | <b>Example of IntegrityError. User is trying to create a project with same values. Hene unqiue constraint failed</b> 
+     ``` json
+    {
+    "data": [
+        {
+            "key": "new.cbdkbcdhkbcdjkcbd@fyle.in",
+            "message": "Invalid / disabled department found",
+            "row": 0
+        }
+    ],
+    "error": "BulkError",
+    "message": null
+    }
+     ```
+    <!--focus: false-->
+    | <b>Example of BulkError. Invalid Department named</b>
 
-## Attributes Of Error Repsonse: 
+## Attributes Of Error Response:
 
-The images above show that all the three types of error have three attributes:
+The images above show that all the types of error have three attributes:
 1. data 
 2. error 
 3. message
 
 **Data Attribute:**
-    The <u>data</u> attribute will consits of usefull information pertaining to errors in the parameter sent. 
-1. When a *ValidationError* is encountred, the response data attribute will consists the information about the which key is causing the error and for what reason. Examples
-    1. [Example of missing param](../../assets/images/concepts/errors/ValidationError2.png)
-    2. [Example of malformed param](../../assets/images/concepts/errors/ValidationError1.png)
-2. When a *BulkError* is encountred, the response data is an array of object which consists of the following keys: 
-    1. *key* refers to the value that uniquley the identify the object from the array of objects that is passed as parameter.
-    2. *message* gives reason for failure of message
+    The <u>data</u> attribute will consist of information about errors in the parameter sent. 
+1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. Examples
+    <!--focus: false-->
+    1. Example of missing param
+    ``` JSON
+    {
+    "data": {
+        "0": {
+            "user_email": [
+                "Missing data for required field."
+            ]
+        }
+    },
+    "error": "ValidationError",
+    "message": null
+    }
+    ```
+    <!--focus: false--> 
+    2. Example of malformed param
+    ``` json
+    {
+    "data": {
+        "0": {
+            "mobile": [
+                "String does not match expected pattern."
+            ]
+        }
+    },
+    "error": "ValidationError",
+    "message": null
+    }
+    ```
+2. When a *BulkError* is encountered, the response data is an array of objects which consists of the following keys: 
+    1. *key* refers to the value that uniquely the identify the object from the array of objects that is passed as a parameter.
+    2. *message* gives reason for the failure of the message
     3. *row* indicates the index of the object in the data array that is passed by the user.
-    Example: [Example of Bulk Error](../../assets/images/concepts/errors/bulkError.png)
+    Example:
+    ``` json
+    {
+    "data": [
+        {
+            "key": "new.cbdkbcdhkbcdjkcbd@fyle.in",
+            "message": "Invalid / disabled department found",
+            "row": 0
+        }
+    ],
+    "error": "BulkError",
+    "message": null
+    }
+     ```
 **Error Attribute:**
-    The <u>error</u> attribute will specify the type error that has occured. 
+    The <u>error</u> attribute will specify the type of error that has occurred. 
 **message**
-    The <u>message</u> attribute will have human readable explaination of about why the request is failing. 
-    
+    The <u>message</u> attribute will have a human-readable explanation of why the request is failing. 
