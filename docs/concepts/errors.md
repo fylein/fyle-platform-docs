@@ -19,7 +19,7 @@ In general:
 ## Different Reasons for 400 errors 
 
 1. **ValidationError:** 
-    This type of error occurs when either a mandatory parameter is missing or when the parameters are not formatted as defined (Eg: Passing an integer for a string, Not following the pattern required for phone numbers etc.)
+    This type of error occurs when either a mandatory parameter is missing or when the parameters are not formatted as defined ( E.g., Passing an integer for a string, Not following the pattern required for phone numbers etc.)
     <!--focus: false-->
       ``` json
     {
@@ -38,7 +38,7 @@ In general:
    | <b> Example of ValidationError. Required parameter user_email is missing </b>
 
 2. **BulkError:**
-    This type of error occurs during bulk operations when an entity is not found (Eg: Passing the name of the department which does not exist etc.)
+    This type of error occurs during bulk operations when an entity is not found ( E.g., Passing the name of the department which does not exist etc.)
     <!--focus: false-->
      ``` json
     {
@@ -54,18 +54,20 @@ In general:
     }
      ```
     <!--focus: false-->
-    | <b>Example of BulkError. Invalid Department named</b>
+    | <b>Example of BulkError. Invalid Department name</b>
 
 ## Attributes Of Error Response:
 
-The images above show that all the types of error have three attributes:
+All the types of error have three attributes:
 1. data 
 2. error 
 3. message
 
 **Data Attribute:**
     The <u>data</u> attribute will consist of information about errors in the parameter sent. 
-1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. Examples
+1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. 
+
+Examples
     <!--focus: false-->
     1. Example of missing param
     ``` JSON
@@ -97,9 +99,10 @@ The images above show that all the types of error have three attributes:
     }
     ```
 2. When a *BulkError* is encountered, the response data is an array of objects which consists of the following keys: 
-    1. *key* refers to the value that uniquely the identify the object from the array of objects that is passed as a parameter.
+    1. *key* refers to the value that uniquely identifies the object from the array of objects that is passed as a parameter.
     2. *message* gives reason for the failure of the message
     3. *row* indicates the index of the object in the data array that is passed by the user.
+    
     Example:
     ``` json
     {
