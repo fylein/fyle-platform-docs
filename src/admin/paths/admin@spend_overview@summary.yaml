@@ -1,0 +1,49 @@
+get:
+  tags:
+    - Spend Overview
+  summary: Spend Overview Summary
+  operationId: spend_overview_summary
+  description: |
+    API to return spend overview summary data. Data returned by this API can be used to plot a time series graph depicting amount of spend over a period of time. <br>
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  parameters:
+    - $ref: ../../components/parameters/time_interval_granularity.yaml
+    - $ref: ../../components/parameters/time_interval_preset.yaml
+    - $ref: ../../components/parameters/time_interval_start.yaml
+    - $ref: ../../components/parameters/time_interval_end.yaml
+    # - $ref: ../../components/parameters/is_card_spend.yaml  # will un-comment later when this filter is available
+    - $ref: ../../components/parameters/is_reimbursable.yaml
+    - $ref: ../../components/parameters/merchants.yaml
+    - $ref: ../../components/parameters/category_ids.yaml
+    - $ref: ../../components/parameters/project_ids.yaml
+    - $ref: ../../components/parameters/department_ids.yaml
+    - $ref: ../../components/parameters/user_ids.yaml
+    # - $ref: ../../components/parameters/card_ids.yaml  # will un-comment later when this filter is available
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              time_interval_granularity:
+                $ref: ../../components/schemas/fields.yaml#/time_interval_granularity
+              total_amount:
+                $ref: ../../components/schemas/fields.yaml#/total_amount
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/fields.yaml#/spend_overview_summary_data_item
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
