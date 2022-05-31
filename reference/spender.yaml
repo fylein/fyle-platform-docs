@@ -5,14 +5,14 @@ info:
   termsOfService: https://www.fylehq.com/privacy/terms-and-conditions
   contact:
     name: Platform Beta
-    email: platform-beta@fylehq.com
+    email: support@fylehq.com
   description: >
     These APIs are used by applications that operate on the Spender's behalf.
     Very commonly, it is to enable creation of expenses and reports.
 servers:
-  - url: https://us1.fylehq.com/platform/v1beta
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: https://in1.fylehq.com/platform/v1beta
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
 components:
   securitySchemes:
@@ -571,6 +571,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
         doc_url:
           type: string
           nullable: true
@@ -627,6 +634,12 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
         name:
           type: string
           maxLength: 255
@@ -640,6 +653,13 @@ components:
           description: Represents the name of the sub_category.
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
     project_out_embed:
       type: object
       nullable: true
@@ -660,6 +680,15 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
     fk_string:
       type: string
       nullable: true
@@ -934,6 +963,13 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
     employee_out_embed:
       type: object
       additionalProperties: false
@@ -1029,6 +1065,30 @@ components:
           type: number
           nullable: false
           example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
     expense_out:
       type: object
       additionalProperties: false
@@ -1099,6 +1159,10 @@ components:
         - missing_mandatory_fields
         - activity_details
         - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
       properties:
         id:
           allOf:
@@ -1445,6 +1509,29 @@ components:
           $ref: '#/components/schemas/user_id'
         activity_details:
           $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is manually flagged or
+            not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is flagged by policy or
+            not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
     timestamptz_pst:
       type: string
       format: date-time
@@ -1970,6 +2057,7 @@ components:
                   example: '2021-05-12T10:16:50.410Z'
     schedule_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -2271,6 +2359,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2863,6 +2952,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3073,6 +3163,12 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3273,6 +3369,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3473,6 +3576,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3512,6 +3622,7 @@ components:
         - metadata
     corporate_card_transaction_undo_ignore_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -3673,6 +3784,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3702,6 +3820,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -3890,6 +4009,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3944,6 +4070,7 @@ components:
         - id
         - expense_ids
     corporate_card_transaction_unmatch_out:
+      additionalProperties: false
       type: object
       properties:
         id:
@@ -4052,6 +4179,12 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -5012,6 +5145,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/merchant_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
