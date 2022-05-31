@@ -40,7 +40,7 @@ In general:
 2. **BulkError:**
     This type of error occurs during bulk operations when an entity is not found ( E.g., Passing the name of the department which does not exist etc.)
     <!--focus: false-->
-     ``` json
+     ```json
     {
     "data": [
         {
@@ -67,10 +67,11 @@ All the types of error have three attributes:
     The <u>data</u> attribute will consist of information about errors in the parameter sent. 
 1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. 
 
-Examples
+Examples:
     <!--focus: false-->
-    1. Example of missing param
-    ``` JSON
+1. Example of missing param
+    
+    ```json
     {
     "data": {
         "0": {
@@ -84,8 +85,9 @@ Examples
     }
     ```
     <!--focus: false--> 
-    2. Example of malformed param
-    ``` json
+2. Example of malformed param
+    
+```json
     {
     "data": {
         "0": {
@@ -104,7 +106,7 @@ Examples
     3. *row* indicates the index of the object in the data array that is passed by the user.
     
     Example:
-    ``` json
+    ```json
     {
     "data": [
         {
