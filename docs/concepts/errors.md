@@ -67,37 +67,38 @@ All the types of error have three attributes:
     The <u>data</u> attribute will consist of information about errors in the parameter sent. 
 1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. 
 
-Examples:
+    Examples:
     <!--focus: false-->
-1. Example of missing param 
-    ```json
-    {
-    "data": {
-        "0": {
-            "user_email": [
-                "Missing data for required field."
-            ]
+    1. Example of missing param 
+        ```json
+        {
+        "data": {
+            "0": {
+                "user_email": [
+                    "Missing data for required field."
+                ]
+            }
+        },
+        "error": "ValidationError",
+        "message": null
         }
-    },
-    "error": "ValidationError",
-    "message": null
-    }
-    ```
-    <!--focus: false--> 
-2. Example of malformed param
-    ```json
-    {
-    "data": {
-        "0": {
-            "mobile": [
-                "String does not match expected pattern."
-            ]
+        ```
+        <!--focus: false--> 
+    2. Example of malformed param
+        ```json
+        {
+        "data": {
+            "0": {
+                "mobile": [
+                    "String does not match expected pattern."
+                ]
+            }
+        },
+        "error": "ValidationError",
+        "message": null
         }
-    },
-    "error": "ValidationError",
-    "message": null
-    }
-    ```
+        ```
+
 2. When a *BulkError* is encountered, the response data is an array of objects which consists of the following keys: 
     1. *key* refers to the value that uniquely identifies the object from the array of objects that is passed as a parameter.
     2. *message* gives reason for the failure of the message
