@@ -9,7 +9,7 @@ At this point, you should already be familiar with:
 Every data API call that you make has to have an authorization header like this:
 
 ```
-    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token).
@@ -24,7 +24,7 @@ E.g. if John has the role `["FYLER"]` only, then John will only have access to s
 
 > #### Finer access control is coming soon!
 >
-> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
+> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at support@fylehq.com so we can keep you informed as soon as it is available.
 
 All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity. For example,
 
