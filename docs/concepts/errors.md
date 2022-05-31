@@ -69,8 +69,7 @@ All the types of error have three attributes:
 
 Examples:
     <!--focus: false-->
-1. Example of missing param
-    
+1. Example of missing param 
     ```json
     {
     "data": {
@@ -86,8 +85,7 @@ Examples:
     ```
     <!--focus: false--> 
 2. Example of malformed param
-    
-```json
+    ```json
     {
     "data": {
         "0": {
