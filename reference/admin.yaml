@@ -6773,6 +6773,99 @@ components:
           description: >
             Determines whether this organization has been verified by a
             verifier.
+    preview_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            description_column:
+              type: string
+              description: >
+                Specifies the header name of the description column in the
+                statement.
+              nullable: true
+              example: description
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id_column:
+              type: string
+              description: >
+                Specifies the mapping of transaction id / unique id on the
+                statement.
+              example: reference number
+              nullable: true
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            vendor_column:
+              type: string
+              description: |
+                Specifies the vendor of the statement
+              example: Amazon
+            foreign_amount_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            is_debit_positive:
+              type: boolean
+              description: >
+                Specifies the representation of the the amount in the statement,
+                if true then the amount represented by |
+
+                negative sign are credits, and if false then the amount
+                represented by negative sign are debits.
+              example: true
+            currency:
+              type: string
+              description: |
+                Specifies the currency used in the statement.
+              example: USD
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+              nullable: true
+        ignored_line_items:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies list of line items to be ignored in the statement.
+          example:
+            - stlisfdfadssd
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_items
   parameters:
     created_at:
       in: query
@@ -6898,6 +6991,9 @@ tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Statements
+    description: |
+      These APIs gives you access to add a bank statement for reconciliation.
 paths:
   /admin/projects:
     get:
@@ -10123,3 +10219,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/statements/create_card_transactions:
+    post:
+      tags:
+        - Statements
+      summary: Create corporate card transactions out of the uploaded statement
+      description: >
+        This API helps in converting the statement with the mapping chosed and
+        create card transactions out of the statement.
+      operationId: statements_prevew
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/preview_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
