@@ -6373,6 +6373,52 @@ components:
           type: string
           nullable: true
           example: report.created
+    time_interval_granularity:
+      type: string
+      nullable: false
+      enum:
+        - day
+        - month
+        - quarter
+        - year
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount
+      example: month
+    total_amount:
+      type: number
+      nullable: false
+      description: |
+        Total sum of amount of expenses falling under filtering criteria
+      example: 990
+    time_interval_marker:
+      type: string
+      nullable: false
+      description: >
+        Representation of a point in time for which the sum of amount of
+        expenses is calculated.
+
+        Value depends of value of time_interval_granularity as follows :
+
+        - for time_interval_granularity of `day`, value will be in date format
+        YYYY-MM-DD. Example : 2021-01-01
+
+        - for time_interval_granularity of `month`, value will be in date format
+        YYYY-MM. Example : 2021-01
+
+        - for time_interval_granularity of `quarter`, value will be in date
+        format YYYY-QQ. Example : 2021-Q1
+
+        - for time_interval_granularity of `year`, value will be in date format
+        YYYY. Example : 2021
+      example: 2022-02
+    spend_overview_summary_data_item:
+      type: object
+      nullable: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/amount'
+        time_interval_marker:
+          $ref: '#/components/schemas/time_interval_marker'
     account_out:
       type: object
       additionalProperties: false
@@ -6833,6 +6879,125 @@ components:
         example: 20
         default: 50
         maximum: 200
+    time_interval_granularity:
+      in: query
+      name: time_interval_granularity
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.month
+        enum:
+          - eq.day
+          - eq.month
+          - eq.quarter
+          - eq.year
+        example: eq.month
+    time_interval_preset:
+      in: query
+      name: time_interval_preset
+      description: >
+        Preset time durations which can be used to filter expenses by spend
+        date.
+
+        Default value is used if it is not specified and time_interval_start and
+        time_interval_end params are also not specified.
+
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.this_year
+        enum:
+          - eq.this_week
+          - eq.this_month
+          - eq.this_quarter
+          - eq.this_year
+        example: eq.this_year
+    time_interval_start:
+      in: query
+      name: time_interval_start
+      description: |
+        Start of time duration for filtering expenses by spend date.
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        format: date-time
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2020-06-01T13:14:54.804+00:00'
+    time_interval_end:
+      in: query
+      name: time_interval_end
+      description: |
+        End of time duration for filtering expenses by spend date. 
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        format: date-time
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2021-06-01T13:14:54.804+00:00'
+    is_reimbursable:
+      in: query
+      name: is_reimbursable
+      description: >
+        For filtering out only those expenses which are reimbursable to the
+        employee.
+
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    merchant:
+      in: query
+      name: merchant
+      description: |
+        List of merchants for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(los-pollos-harmanos,saul-goodman)
+    category_id:
+      in: query
+      name: category_id
+      description: |
+        Category IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(cat123,cat345)
+    project_id:
+      in: query
+      name: project_id
+      description: |
+        Project IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(proj123,proj456)
+    department_id:
+      in: query
+      name: department_id
+      description: |
+        Department IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(dept123,dept345)
+    user_id:
+      in: query
+      name: user_id
+      description: |
+        User IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(us123,us456)
 tags:
   - name: Accounting Exports
     description: >
@@ -9744,6 +9909,60 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/schedule_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/spend_overview/summary:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview Summary
+      operationId: spend_overview_summary
+      description: >
+        API to return spend overview summary data. Data returned by this API can
+        be used to plot a time series graph depicting amount of spend over a
+        period of time. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_granularity'
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/is_reimbursable'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time_interval_granularity:
+                    $ref: '#/components/schemas/time_interval_granularity'
+                  total_amount:
+                    $ref: '#/components/schemas/total_amount'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_summary_data_item'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
