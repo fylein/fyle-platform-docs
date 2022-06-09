@@ -7,13 +7,16 @@ In general:
 
 > Please contact us at support@fylehq.com if a 5xx error is encountered. 
 
-## Types Of Errors
+## Types Of API Responses
 | SL NO.  |  HTTP STATUS CODE  | HTTP MESSAGE | ENGLISH EXPALINATION |
 |---------|--------------------|--------------|--------------------- |
-|    1.   |         400       |   Bad Request |  The request data or query sent is malformed |
-|    2.   |         401      |  Unauthorized |  The credentials are not valid |
-|    3.   |          403      |     Forbidden |  The API token doesn't have permissions to perform the requested action|
-|    4.   |          404    |      Not Found| The requested resource doesn’t exist|
+|    1.   |         200       |   Request Successful |  The request was successful |
+|    2.   |         202       |   Request Accepted |  The request has been accepted and server is processing it |
+|    3.   |         400       |   Bad Request |  The request data or query sent is malformed |
+|    4.   |         401      |  Unauthorized |  The credentials are not valid |
+|    5.   |          403      |     Forbidden |  The API token doesn't have permissions to perform the requested action|
+|    6.   |          404    |      Not Found| The requested resource doesn’t exist|
+|    7.   |          500    |      Server Error| Server encountered an error while processing the request|
 
 
 ## Different Reasons for 400 errors 
