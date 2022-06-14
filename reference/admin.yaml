@@ -6444,7 +6444,7 @@ components:
         - for time_interval_granularity of `year`, value will be in date format
         YYYY. Example : 2021
       example: 2022-02
-    spend_overview_summary_data_item:
+    spend_overview_summary_data_out:
       type: object
       nullable: false
       properties:
@@ -6452,6 +6452,37 @@ components:
           $ref: '#/components/schemas/amount'
         time_interval_marker:
           $ref: '#/components/schemas/time_interval_marker'
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
+    spend_overview_percentage:
+      type: number
+      description: >
+        Percentage of spend which falls under this object/resource after
+        filtering criteria is applied.
+      example: 10.34
+    spend_overview_change_percentage:
+      type: number
+      description: >
+        Change in percentage of spend compared to spend in same time period one
+        time interval ago, after filtering criteria is applied.
+      example: -4.95
+    spend_overview_by_merchant_data_out:
+      type: object
+      nullable: false
+      properties:
+        merchant_name:
+          $ref: '#/components/schemas/merchant'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
     account_out:
       type: object
       additionalProperties: false
@@ -10109,7 +10140,69 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/spend_overview_summary_data_item'
+                      $ref: '#/components/schemas/spend_overview_summary_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_merchant:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Merchant
+      operationId: spend_overview_by_merchant
+      description: >
+        API to return spend overview data grouped by merchant. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/is_reimbursable'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_merchant_data_out'
         '202':
           description: Request Accepted
           content:
