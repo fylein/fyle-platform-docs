@@ -5,17 +5,17 @@ This type of application is generally built by partners and are used by multiple
 
 > #### 💡 Talk to us if you're interested in a partnership
 >
-> If you're considering building an OAuth 2.0 application, do send us a note at platform-beta@fylehq.com. We'd love to understand your use-case and explore potential for partnership.
+> If you're considering building an OAuth 2.0 application, do send us a note at support@fylehq.com. We'd love to understand your use-case and explore potential for partnership.
 
 
 
-Login to Fyle by going to https://accounts.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+Login to Fyle by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
 
 On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 
 > #### Currently, only admins can create applications
 >
->  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at platform-beta@fylehq.com
+>  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at support@fylehq.com
 
 
 <!--
