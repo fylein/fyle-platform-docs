@@ -7,11 +7,11 @@ info:
     systems. 
   contact:
     name: Platform Beta
-    email: platform-beta@fylehq.com
+    email: support@fylehq.com
 servers:
-  - url: https://us1.fylehq.com/platform/v1beta
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: https://in1.fylehq.com/platform/v1beta
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
 components:
   securitySchemes:
@@ -24,6 +24,14 @@ components:
           scopes:
             '*': Grant all actions
   schemas:
+    '202':
+      type: object
+      properties:
+        message:
+          type: string
+          description: >
+            Request has been accepted and is being processed, Please try again
+            in sometime.
     '400':
       type: object
       properties:
@@ -31,7 +39,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -64,6 +72,14 @@ components:
           description: >
             This error means the requested resource was not found or the
             requester doesn't have sufficient access.
+    '500':
+      type: object
+      properties:
+        message:
+          type: string
+          description: >
+            API server hit an internal error and could not process request. This
+            is likely a bug.
     count:
       type: integer
       description: |
@@ -143,7 +159,7 @@ components:
         - uswoirwlwwg
         - uswlgwkgw42
       description: |
-        List of IDs of users who access the project.
+        List of IDs of users who can access this object.
     approver_user_ids:
       type: array
       nullable: false
@@ -290,7 +306,6 @@ components:
       type: object
       required:
         - name
-        - is_enabled
       additionalProperties: false
       properties:
         id:
@@ -761,6 +776,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
         doc_url:
           type: string
           nullable: true
@@ -984,6 +1006,13 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
     timestamptz_utc:
       type: string
       format: date-time
@@ -1114,6 +1143,15 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
     cost_center_out_embed:
       type: object
       nullable: true
@@ -1788,6 +1826,12 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
         name:
           type: string
           maxLength: 255
@@ -1801,6 +1845,13 @@ components:
           description: Represents the name of the sub_category.
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
     account_out_embed:
       type: object
       properties:
@@ -2052,6 +2103,30 @@ components:
           type: number
           nullable: false
           example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
     expense_out:
       type: object
       additionalProperties: false
@@ -2122,6 +2197,12 @@ components:
         - missing_mandatory_fields
         - activity_details
         - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -2468,6 +2549,44 @@ components:
           $ref: '#/components/schemas/user_id'
         activity_details:
           $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is manually flagged or
+            not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is flagged by policy or
+            not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     amount:
       type: number
       description: |
@@ -2628,6 +2747,10 @@ components:
           description: >
             Determines whether this advance request has been exported to
             external accounting system or not.
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_out:
       type: object
       additionalProperties: false
@@ -2661,6 +2784,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2732,6 +2856,10 @@ components:
             system.
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_in:
       type: object
       properties:
@@ -2739,6 +2867,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: advwrlAGwjr2
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
         currency:
           $ref: '#/components/schemas/currency'
         amount:
@@ -2754,6 +2887,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2974,6 +3108,7 @@ components:
         - seq_num
         - source
         - approvals
+        - employee
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -3091,6 +3226,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     corporate_card_out:
       type: object
       properties:
@@ -3294,6 +3433,7 @@ components:
         - id
     corporate_card_unassign_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -3364,6 +3504,41 @@ components:
             The unique id of an user who assigned the card.
           nullable: true
           example: null
+        is_dummy:
+          type: boolean
+          description: |
+            If the card is a test card
+          nullable: false
+        last_ready_for_verification_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was ready to be verified
+          example: '2022-02-01T07:20:30.951475+00:00'
+          nullable: true
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with direct visa_feed
+          nullable: false
+        last_verification_attempt_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the last card verification was attempted
+          nullable: true
+        verification_status:
+          type: string
+          nullable: false
+          description: |
+            Verification status of the corporate card
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was verified
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
       required:
         - id
         - org_id
@@ -3378,6 +3553,12 @@ components:
         - last_synced_at
         - last_assigned_at
         - assignor_user_id
+        - is_dummy
+        - last_ready_for_verification_at
+        - is_visa_enrolled
+        - last_verification_attempt_at
+        - verification_status
+        - last_verified_at
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -3772,6 +3953,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4056,6 +4238,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4274,6 +4457,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4303,6 +4493,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -4435,6 +4626,13 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4690,6 +4888,12 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4890,6 +5094,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5090,6 +5301,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5129,6 +5347,7 @@ components:
         - metadata
     corporate_card_transaction_undo_ignore_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -5290,6 +5509,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5319,6 +5545,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -5507,6 +5734,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5561,6 +5795,7 @@ components:
         - id
         - expense_ids
     corporate_card_transaction_unmatch_out:
+      additionalProperties: false
       type: object
       properties:
         id:
@@ -5669,6 +5904,12 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -6165,6 +6406,52 @@ components:
           type: string
           nullable: true
           example: report.created
+    time_interval_granularity:
+      type: string
+      nullable: false
+      enum:
+        - day
+        - month
+        - quarter
+        - year
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount
+      example: month
+    total_amount:
+      type: number
+      nullable: false
+      description: |
+        Total sum of amount of expenses falling under filtering criteria
+      example: 990
+    time_interval_marker:
+      type: string
+      nullable: false
+      description: >
+        Representation of a point in time for which the sum of amount of
+        expenses is calculated.
+
+        Value depends of value of time_interval_granularity as follows :
+
+        - for time_interval_granularity of `day`, value will be in date format
+        YYYY-MM-DD. Example : 2021-01-01
+
+        - for time_interval_granularity of `month`, value will be in date format
+        YYYY-MM. Example : 2021-01
+
+        - for time_interval_granularity of `quarter`, value will be in date
+        format YYYY-QQ. Example : 2021-Q1
+
+        - for time_interval_granularity of `year`, value will be in date format
+        YYYY. Example : 2021
+      example: 2022-02
+    spend_overview_summary_data_item:
+      type: object
+      nullable: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/amount'
+        time_interval_marker:
+          $ref: '#/components/schemas/time_interval_marker'
     account_out:
       type: object
       additionalProperties: false
@@ -6806,6 +7093,125 @@ components:
         example: 20
         default: 50
         maximum: 200
+    time_interval_granularity:
+      in: query
+      name: time_interval_granularity
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.month
+        enum:
+          - eq.day
+          - eq.month
+          - eq.quarter
+          - eq.year
+        example: eq.month
+    time_interval_preset:
+      in: query
+      name: time_interval_preset
+      description: >
+        Preset time durations which can be used to filter expenses by spend
+        date.
+
+        Default value is used if it is not specified and time_interval_start and
+        time_interval_end params are also not specified.
+
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.this_year
+        enum:
+          - eq.this_week
+          - eq.this_month
+          - eq.this_quarter
+          - eq.this_year
+        example: eq.this_year
+    time_interval_start:
+      in: query
+      name: time_interval_start
+      description: |
+        Start of time duration for filtering expenses by spend date.
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        format: date-time
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2020-06-01T13:14:54.804+00:00'
+    time_interval_end:
+      in: query
+      name: time_interval_end
+      description: |
+        End of time duration for filtering expenses by spend date. 
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        format: date-time
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2021-06-01T13:14:54.804+00:00'
+    is_reimbursable:
+      in: query
+      name: is_reimbursable
+      description: >
+        For filtering out only those expenses which are reimbursable to the
+        employee.
+
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    merchant:
+      in: query
+      name: merchant
+      description: |
+        List of merchants for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(los-pollos-harmanos,saul-goodman)
+    category_id:
+      in: query
+      name: category_id
+      description: |
+        Category IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(cat123,cat345)
+    project_id:
+      in: query
+      name: project_id
+      description: |
+        Project IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(proj123,proj456)
+    department_id:
+      in: query
+      name: department_id
+      description: |
+        Department IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(dept123,dept345)
+    user_id:
+      in: query
+      name: user_id
+      description: |
+        User IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(us123,us456)
 tags:
   - name: Accounting Exports
     description: >
@@ -6916,6 +7322,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/admin_approver_project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7269,6 +7681,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7411,6 +7829,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7497,6 +7921,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7585,6 +8015,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/department_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7673,6 +8109,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/mileage_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7759,6 +8201,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/level_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -7845,6 +8293,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8060,6 +8514,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/accounting_export_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8148,6 +8608,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/accounting_export_lineitem_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8333,6 +8799,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -8372,6 +8844,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -8465,6 +8943,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reminder_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8602,6 +9086,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8641,6 +9131,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8895,6 +9391,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_transaction_list_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9464,6 +9966,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/settlement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9504,6 +10012,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/adjustment_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9544,6 +10058,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reimbursement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9627,6 +10147,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_account_summary_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9726,6 +10252,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/spend_overview/summary:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview Summary
+      operationId: spend_overview_summary
+      description: >
+        API to return spend overview summary data. Data returned by this API can
+        be used to plot a time series graph depicting amount of spend over a
+        period of time. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_granularity'
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/is_reimbursable'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time_interval_granularity:
+                    $ref: '#/components/schemas/time_interval_granularity'
+                  total_amount:
+                    $ref: '#/components/schemas/total_amount'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_summary_data_item'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
   /admin/accounts:
     get:
       tags:
@@ -9754,6 +10346,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9836,6 +10434,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/tax_group_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -10032,6 +10636,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/budget_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -10066,6 +10676,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/budget_usage_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
