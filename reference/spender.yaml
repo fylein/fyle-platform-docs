@@ -32,7 +32,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -1163,6 +1163,8 @@ components:
         - is_manually_flagged
         - is_policy_flagged
         - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -1532,6 +1534,21 @@ components:
           description: |
             This id provided by Fyle to identify an object.
           example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     timestamptz_pst:
       type: string
       format: date-time
@@ -1831,6 +1848,7 @@ components:
         - seq_num
         - source
         - approvals
+        - employee
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1948,6 +1966,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     report_out_subscriptions:
       type: object
       additionalProperties: false
@@ -2303,6 +2325,10 @@ components:
           description: >
             Determines whether this advance request has been exported to
             external accounting system or not.
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_request_in:
       type: object
       properties:
@@ -2450,6 +2476,10 @@ components:
             system.
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     corporate_card_out:
       type: object
       properties:
@@ -4562,6 +4592,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -4640,6 +4676,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -4673,6 +4715,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -4706,6 +4754,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/mileage_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -4768,6 +4822,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -4802,6 +4862,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/department_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5129,6 +5195,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5539,6 +5611,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -5632,6 +5710,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -5671,6 +5755,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5704,6 +5794,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_transaction_list_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6060,6 +6156,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/spender_employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6094,6 +6196,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/tax_group_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
