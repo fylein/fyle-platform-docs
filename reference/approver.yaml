@@ -7,11 +7,11 @@ info:
     of reports.
   contact:
     name: Platform Beta
-    email: platform-beta@fylehq.com
+    email: support@fylehq.com
 servers:
-  - url: https://us1.fylehq.com/platform/v1beta
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: https://in1.fylehq.com/platform/v1beta
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
 components:
   securitySchemes:
@@ -31,7 +31,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -171,6 +171,92 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+    employee_id:
+      type: string
+      maxLength: 255
+      description: >
+        This id provided by Fyle to uniquely identify an employee within an
+        organization.
+
+        This id is always prefixed with `ou`.
+      example: outGt9ju6qP
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    department_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: dept9in4oIHpdR
+    code:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: >
+        This represents a code that is typically used for syncing with other
+        systems.
+      example: C1234
+    name:
+      type: string
+      maxLength: 255
+      description: >
+        This represents the name of the resource. This should be unique in an
+        organization
+      example: foo123
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          $ref: '#/components/schemas/department_id'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
     report_out:
       type: object
       additionalProperties: false
@@ -195,6 +281,7 @@ components:
         - seq_num
         - source
         - approvals
+        - employee
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -312,6 +399,10 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     report_action_in:
       type: object
       additionalProperties: false
@@ -328,12 +419,6 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     timestamptz_utc:
       type: string
       format: date-time
@@ -367,14 +452,6 @@ components:
       description: |
         This id provided by Fyle to identify an object.
       example: 1234
-    code:
-      type: string
-      nullable: true
-      maxLength: 255
-      description: >
-        This represents a code that is typically used for syncing with other
-        systems.
-      example: C1234
     cost_center_out_embed:
       type: object
       nullable: true
@@ -397,6 +474,12 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
         name:
           type: string
           maxLength: 255
@@ -410,6 +493,13 @@ components:
           description: Represents the name of the sub_category.
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
     project_out_embed:
       type: object
       nullable: true
@@ -430,6 +520,15 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
     account_out_embed:
       type: object
       properties:
@@ -467,13 +566,6 @@ components:
           example: four_wheeler
         code:
           $ref: '#/components/schemas/code'
-    name:
-      type: string
-      maxLength: 255
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
-      example: foo123
     per_diem_rate_out_embed:
       type: object
       nullable: true
@@ -655,64 +747,6 @@ components:
         content_type:
           type: string
           example: application/pdf
-    employee_id:
-      type: string
-      maxLength: 255
-      description: >
-        This id provided by Fyle to uniquely identify an employee within an
-        organization.
-
-        This id is always prefixed with `ou`.
-      example: outGt9ju6qP
-    department_id:
-      type: string
-      maxLength: 255
-      nullable: true
-      example: dept9in4oIHpdR
-    department_out_embed:
-      type: object
-      additionalProperties: false
-      nullable: true
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        code:
-          $ref: '#/components/schemas/code'
-        name:
-          allOf:
-            - $ref: '#/components/schemas/name'
-          example: Sales
-        sub_department:
-          type: string
-          nullable: true
-          example: Outbound Sales
-    employee_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        user:
-          $ref: '#/components/schemas/user_out_embed'
-        code:
-          type: string
-          maxLength: 255
-          nullable: true
-          example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        department_id:
-          $ref: '#/components/schemas/department_id'
-        department:
-          $ref: '#/components/schemas/department_out_embed'
     card_number:
       type: string
       description: |
@@ -781,6 +815,30 @@ components:
           type: number
           nullable: false
           example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
     expense_out:
       type: object
       additionalProperties: false
@@ -851,6 +909,12 @@ components:
         - missing_mandatory_fields
         - activity_details
         - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -1197,6 +1261,44 @@ components:
           $ref: '#/components/schemas/user_id'
         activity_details:
           $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is manually flagged or
+            not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is flagged by policy or
+            not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -1314,7 +1416,7 @@ components:
         - uswoirwlwwg
         - uswlgwkgw42
       description: |
-        List of IDs of users who access the project.
+        List of IDs of users who can access this object.
     approver_user_ids:
       type: array
       nullable: false
@@ -1468,6 +1570,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -1554,6 +1662,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -1748,6 +1862,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/admin_approver_project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -1781,6 +1901,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:

@@ -9,7 +9,7 @@ At this point, you should already be familiar with:
 Every data API call that you make has to have an authorization header like this:
 
 ```
-    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1beta/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
+    curl --location --request GET "${CLUSTER_DOMAIN}/platform/v1/spender/my_profile" --header "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 If your access token is invalid or expired, your call with error out. Every access token is valid for 1 hour after which you should refresh your access token. Typically, your application should never save the access token in a persistent way (e.g. database). You should save the refresh token and whenever any major activity occurs, get a new access token. You can find out more about how to get a new access token [here](https://docs.fylehq.com/docs/fyle-platform-docs/b3A6MTIyMzMxODU-o-auth-2-0-token).
@@ -24,7 +24,7 @@ E.g. if John has the role `["FYLER"]` only, then John will only have access to s
 
 > #### Finer access control is coming soon!
 >
-> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at platform-beta@fylehq.com so we can keep you informed as soon as it is available.
+> In the not too distant future, John will be able to grant an application only spender role even though he has both spender and admin roles. If you're interested in this, send us a note at support@fylehq.com so we can keep you informed as soon as it is available.
 
 All APIs have the role as part of the path to make it super-obvious to the application that it is accessing resources in that role's capacity. For example,
 
@@ -68,18 +68,18 @@ GET /admin/expenses?cost_center->name=eq.CC123
 
 ## Pagination
 
-Every GET API call is paginated. Each page can contain a maximum of 100 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
+Every GET API call is paginated. Each page can contain a maximum of 200 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
 
 * order
 * offset
 * limit
 
-The following example will get the top 100 most expensive expenses with a specific project
+The following example will get the top 200 most expensive expenses with a specific project
 ```
-GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=100
+GET /admin/expenses?project_id=eq.pr123&order=amount.desc&offset=0&limit=200
 ```
 
-In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit.
+In general, if you are expecting a lot of results, you'll need to loop over changing the offset and limit. The limit cannot be more than 200.
 
 ## Rate limits
 
