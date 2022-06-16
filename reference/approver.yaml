@@ -31,7 +31,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -913,6 +913,8 @@ components:
         - is_manually_flagged
         - is_policy_flagged
         - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -1282,6 +1284,21 @@ components:
           description: |
             This id provided by Fyle to identify an object.
           example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -1553,6 +1570,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -1639,6 +1662,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -1833,6 +1862,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/admin_approver_project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -1866,6 +1901,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
