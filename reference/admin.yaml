@@ -7061,6 +7061,15 @@ components:
         - file_id
         - are_corporate_card_transactions_created
         - statement_mappings_id
+    statements_in:
+      type: object
+      properties:
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fidftadfdsdf
+      required:
+        - file_id
     statement_mappings_out:
       type: object
       additionalProperties: false
@@ -11186,6 +11195,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/statements/upload:
+    post:
+      tags:
+        - Statements
+      summary: Upload a statement
+      description: >
+        Upload a corporate card statement(csv or excel) to Fyle for
+        reconciliation.
+      operationId: statements_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statements_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/statements_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/statement_mappings:
     get:
       tags:
