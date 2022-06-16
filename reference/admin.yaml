@@ -6076,67 +6076,6 @@ components:
                 $ref: '#/components/schemas/user_id'
               org_id:
                 $ref: '#/components/schemas/org_id'
-    adjustment_out:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify an adjustment.
-            This id is always prefixed with `adj`.
-          readOnly: true
-          example: adjmntGt9ju6qP
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        issuer_user_id:
-          allOf:
-            - $ref: '#/components/schemas/user_id'
-          description: |
-            Unique id of the user who is the issuer of adjustment.
-        from_account_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: accGdjd52nsk8
-        to_account_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: accdfbh236gn3
-        settlement_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          description: |
-            Unique ID of settlement linked to this adjustment
-          example: settGsjr5183g4
-        amount:
-          type: number
-          description: >
-            Amount transferred from source account to destination account in a
-            particular adjustment.
-          example: 50
-        type:
-          type: string
-          description: |
-            Type of adjustment
-          nullable: true
-          enum:
-            - RECOVER_CCC
-            - FORGET_CCC
-            - RECOVER_ADV
-            - FORGET_ADV
-          example: RECOVER_CCC
-        note:
-          type: string
-          description: |
-            Optional description for a particular adjustment.
-          example: Adjusting pending amount of CCC account with personal account
     reimbursement_out:
       type: object
       additionalProperties: false
@@ -7070,9 +7009,6 @@ tags:
   - name: Accounts
     description: |
       This APIs gives access to your Employees's accounts data.
-  - name: Adjustments
-    description: |
-      This API gives you access to manage your organisation's Adjustments data.
   - name: Advances
     description: |
       This API gives you access to manage your organisation's Advances data.
@@ -9813,52 +9749,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/settlement_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/adjustments:
-    get:
-      tags:
-        - Adjustments
-      summary: List adjustments
-      description: >
-        This API supports very rich filtering on all response fields and
-        pagination via query parameters. To understand how to use these
-        parameters, please see the [Guide to Data
-        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      operationId: adjustments_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/adjustment_out'
         '400':
           description: Bad request
           content:
