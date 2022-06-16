@@ -7087,6 +7087,102 @@ components:
         - foreign_currency_column
         - description_column
         - is_auto_created
+    suggest_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmpwownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement.
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: >
+            Specifies the representation of the the amount in the statement, if
+            true then the amount represented by 
+
+            positive sign are debits, and if false then the amount represented
+            by negative sign are debits.
+          example: true
+        transaction_date_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction date column in the
+            statement.
+          example: spent date
+        vendor_column:
+          type: string
+          description: |
+            Specifies the header name of the vendor column in the statement.
+          example: merchant
+        transaction_id_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction id / unique id column
+            in the statement.
+          nullable: true
+          example: reference number
+        amount_column:
+          type: string
+          description: |
+            Specifies the header name of the amount column in the statement.
+          example: amount
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: amex_mapping
+        card_number_column:
+          type: string
+          description: >
+            Specifies the header name of the card number column in the
+            statement.
+          example: account number
+        foreign_amount_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign amount column in the
+            statement.
+          nullable: true
+          example: foreign amount
+        foreign_currency_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign currency column in the
+            statement.
+          nullable: true
+          example: foreign currency
+        description_column:
+          type: string
+          description: >
+            Specifies the header name of the description column in the
+            statement.
+          nullable: true
+          example: description
+        is_auto_created:
+          type: boolean
+          description: |
+            Helps to identify if a statement mapping got auto created or not
+          example: true
+      required:
+        - id
+        - bank_name
+        - is_debit_positive
+        - transaction_date_column
+        - transaction_id_column
+        - amount_column
+        - name
+        - card_number_column
+        - vendor_column
+        - foreign_amount_column
+        - foreign_currency_column
+        - description_column
+        - is_auto_created
   parameters:
     created_at:
       in: query
@@ -10877,3 +10973,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/statement_mappings/suggest:
+    post:
+      tags:
+        - Statement mappings
+      summary: Statement mapping suggestion
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: statement_mappings_suggest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    statement_id:
+                      type: string
+                      description: |
+                        The id of the uploaded statement.
+                  required:
+                    - statement_id
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: object
+                    items:
+                      $ref: '#/components/schemas/suggest_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
