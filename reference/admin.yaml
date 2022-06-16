@@ -7183,6 +7183,186 @@ components:
         - foreign_currency_column
         - description_column
         - is_auto_created
+    preview_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            description_column:
+              type: string
+              description: >
+                Specifies the header name of the description column in the
+                statement.
+              nullable: true
+              example: description
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id_column:
+              type: string
+              description: >
+                Specifies the mapping of transaction id / unique id on the
+                statement.
+              example: reference number
+              nullable: true
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            vendor_column:
+              type: string
+              description: |
+                Specifies the mapping of vendor on the statement.
+              example: Amazon
+            foreign_amount_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            is_debit_positive:
+              type: boolean
+              description: >
+                Specifies the representation of the the amount in the statement,
+                if true then the amount represented by |
+
+                positive sign are debits, and if false then the amount
+                represented by negative sign are debits.
+              example: true
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+              nullable: true
+          required:
+            - description_column
+            - transaction_date_column
+            - transaction_id_column
+            - amount_column
+            - card_number_column
+            - vendor_column
+            - foreign_amount_column
+            - foreign_currency_column
+            - bank_name
+            - is_debit_positive
+            - name
+        ignored_line_items:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies list of statement line items to be ignored in the
+            statement.
+          example:
+            - stlisfdfadssd
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_items
+    preview_out:
+      properties:
+        transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                description: |
+                  Specifies the description of the transaction on the statement.
+                nullable: true
+                example: description
+              bank_name:
+                type: string
+                description: |
+                  Specifies the bank name of the statement
+                example: American Express
+              vendor:
+                type: string
+                description: |
+                  Specifies the vendor of the statement
+                example: Amazon
+              transaction_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the transaction date on the statement.
+              amount:
+                type: string
+                description: |
+                  Specifies the amount on the statement.
+                example: 30
+              card_number:
+                type: string
+                description: |
+                  Specifies the card number on the statement.
+                example: xxxx-3343
+              unique_id:
+                type: string
+                description: |
+                  Specifies the unique code / transaction id on the statement.
+                example: ed0b2aa913c54b3f903a5030208e1872
+              foreign_amount:
+                type: string
+                description: |
+                  Specifies the foreign amount on the statement.
+                nullable: true
+                example: 48
+              foreign_currency:
+                type: string
+                description: |
+                  Specifies the foreign currency on the statement.
+                nullable: true
+                example: USD
+              transaction_id:
+                type: string
+                description: |
+                  Specifies the transaction id / unique id on the statement.
+                nullable: true
+                example: USD
+              transaction_type:
+                type: string
+                description: >
+                  Specifies the transaction type of the transactions on the
+                  statement (credit / debit).
+                example: debit
+            required:
+              - description
+              - bank_name
+              - vendor
+              - transaction_date
+              - amount
+              - card_number
+              - unique_id
+              - foreign_amount
+              - foreign_currency
+              - transaction_id
+      required:
+        - transactions
   parameters:
     created_at:
       in: query
@@ -11037,3 +11217,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/statements/preview:
+    post:
+      tags:
+        - Statements
+      summary: Preview of the uploaded statement
+      description: >
+        This API helps in converting the statement with the mapping chosed and
+        helps the user to preview it, this doesn't save the statement
+      operationId: statements_preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/preview_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/preview_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
