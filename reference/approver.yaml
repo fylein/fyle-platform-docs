@@ -257,6 +257,176 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           $ref: '#/components/schemas/department_out_embed'
+    approver_report_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - user_id
+        - user
+        - purpose
+        - currency
+        - amount
+        - tax
+        - state
+        - num_expenses
+        - is_manually_flagged
+        - is_policy_flagged
+        - last_paid_at
+        - last_approved_at
+        - last_submitted_at
+        - seq_num
+        - source
+        - approvals
+        - employee
+        - next_approver_user_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report has been verified by a verifier
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: set5nlgnwgwl
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            If physical has been collected for this report
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this expense has been exported to external
+            accounting system or not.
+        last_paid_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
+    reason:
+      type: string
+      description: |
+        Explanation to the action if provided by the user
+      example: All bills are in order
     report_out:
       type: object
       additionalProperties: false
@@ -403,22 +573,6 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
-    report_action_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          description: |
-            id of report that is to be approved
-          example: rpa21A2rdj2
-    reason:
-      type: string
-      description: |
-        Explanation to the action if provided by the user
-      example: All bills are in order
     timestamptz_utc:
       type: string
       format: date-time
@@ -1569,7 +1723,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/report_out'
+                      $ref: '#/components/schemas/approver_report_out'
         '400':
           description: Bad request
           content:
