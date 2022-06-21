@@ -2127,6 +2127,29 @@ components:
           type: string
           nullable: true
           example: report.created
+    spender_report_in:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+        - expense_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        source:
+          $ref: '#/components/schemas/source'
+        purpose:
+          type: string
+          description: |
+            Indicates purpose of the reports.
+          example: Team lunch
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -5421,6 +5444,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
   /spender/reports:
+    post:
+      tags:
+        - Reports
+      summary: Create or update an Expense Report.
+      description: |
+        Create or update an Expense Report.
+      operationId: reports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_report_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
     get:
       operationId: reports_list
       tags:
