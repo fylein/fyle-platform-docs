@@ -324,6 +324,45 @@ department_id:
   nullable: true
   example: dept9in4oIHpdR
 
+activity_details:
+  type: object
+  nullable: true
+  properties:
+    unique_meetings:
+      type: number
+      nullable: False
+      example: 21
+    total_meetings:
+      type: number
+      nullable: False
+      example: 70
+
+extracted_data:
+  type: object
+  nullable: True
+  properties:
+    amount:
+      type: number
+      nullable: True
+      example: 21
+    vendor_name:
+      type: string
+      nullable: True
+      example: Uber
+    currency:
+      type: string
+      nullable: True
+      example: USD
+    category:
+      type: string
+      nullable: True
+      example: Taxi
+    date:
+      type: string
+      nullable: True
+      example: '2020-07-20'
+
+
 location:
   type: object
   nullable: true
@@ -496,7 +535,7 @@ restricted_spender_user_ids:
     example: 'sdfd2391'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
-    List of IDs of users who access the project.
+    List of IDs of users who can access this object.
 
 approver_user_ids:
   type: array
@@ -538,7 +577,9 @@ reminder_type:
     - RESUBMIT_ADVANCE_REQUESTS
     - MATCH_ADVANCES
     - VERIFY_EMPLOYEES
-    - ADD_CORPORATE_CARDS      
+    - ADD_CORPORATE_CARDS 
+    - CONNECT_VISA_RTF
+    - VERIFY_VISA_CARD     
   maxLength: 255
   description: Represents the type of reminder.
   example: FYLE_EXPENSES
@@ -584,6 +625,50 @@ reminder_schedule_config:
           example: 42
           description: minute of the hour
 
+time_interval_granularity:
+  type: string
+  nullable: False
+  enum:
+    - day
+    - month
+    - quarter
+    - year
+  description: |
+    The time duration by which to group expenses to aggregate sum of amount
+  example: month
+
+total_amount:
+  type: number
+  nullable: False
+  description: |
+    Total sum of amount of expenses falling under filtering criteria
+  example: 990
+
+time_interval_marker:
+  type: string
+  nullable: False
+  description: |
+    Representation of a point in time for which the sum of amount of expenses is calculated.
+    Value depends of value of time_interval_granularity as follows :
+    - for time_interval_granularity of `day`, value will be in date format YYYY-MM-DD. Example : 2021-01-01
+    - for time_interval_granularity of `month`, value will be in date format YYYY-MM. Example : 2021-01
+    - for time_interval_granularity of `quarter`, value will be in date format YYYY-QQ. Example : 2021-Q1
+    - for time_interval_granularity of `year`, value will be in date format YYYY. Example : 2021
+  example: 2022-02
+
+spend_overview_percentage:
+  type: number
+  description: |
+    Percentage of spend which falls under this object/resource after filtering criteria is applied.
+  example: 10.34
+
+spend_overview_change_percentage:
+  type: number
+  description: |
+    Change in percentage of spend compared to spend in same time period one time interval ago, after filtering criteria is applied.
+  example: -4.95
+
+
 department_head_user_ids:
   type: array
   nullable: False
@@ -599,6 +684,20 @@ department_head_user_ids:
   description: |
     List of IDs of users who are head of the department.
 
+allow_users:
+  type: string
+  nullable: false
+  description: |
+    Set who can access the object.
+    - `ALL` indicates the object can be accessible to all users in the org.
+    - `NONE` indicates the object cannot be accessible to any user in the org.
+    - `UNRESTRICTED` indicates the object will be be accessible to all users in the org who are not restricted to
+    specific objects of this resource.
+  enum:
+    - ALL
+    - NONE
+    - UNRESTRICTED
+  example: UNRESTRICTED
 
 account_minimal:
   description: |
@@ -618,3 +717,21 @@ account_minimal:
     tentative_balance_amount:
       type: number
       example: 100.0
+
+
+phone_number:
+  type: string
+  example: '+12131234567'
+  maxLength: 16
+  description: >
+      phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+  pattern: '/^(\+\d{1,3}[- ]?)?\d{10}$/'
+
+
+bank_ifsc:
+  type: string
+  example: 'SBIN0007587'
+  maxLength: 11
+  description: >
+      IFSC code of the bank account of the Employee
+  pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
