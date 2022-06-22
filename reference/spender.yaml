@@ -2151,6 +2151,30 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_purpose_in:
+      type: object
+      additionalProperties: false
+      required:
+        - expense_ids
+      properties:
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+    report_purpose_out:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+      properties:
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
     advance_out_embed:
       type: object
       nullable: true
@@ -5499,6 +5523,54 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/suggest_purpose:
+    post:
+      tags:
+        - Reports
+      summary: Suggests purpose of an Expense Report
+      description: Suggests purpose of an Expense Report
+      operationId: suggests_purpose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_purpose_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_purpose_out'
         '400':
           description: Unauthorised request
           content:
