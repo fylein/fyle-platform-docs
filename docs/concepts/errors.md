@@ -55,6 +55,40 @@ In general:
      ```
     <!--focus: false-->
     | <b>Example of BulkError. Invalid Department name</b>
+3. **IntegrityError**
+    The Integrity Error occurs for two reasons
+    
+    1. The data that is being created already exists
+    <!--focus: false-->
+    ```json
+   {
+    "data": null,
+    "error": "IntegrityError",
+    "message": "The values (\"fast and furious\", \"formula one\", \"oriSOntNdZGd\") already exists"
+    }
+     ```
+    <!--focus: false-->
+    | <b>Example of IntegrityError. Data already Exists</b>
+    
+    2. The data that in the request object is not mapped in our databases
+     <!--focus: false-->
+    ```json
+    {
+    "data": [
+        {
+            "key": "new.cbdkbcdhkbcdjkcbd@fyle.in",
+            "message": "Invalid / disabled department found",
+            "row": 0
+        }
+    ],
+    "error": "BulkError",
+    "message": null
+    }
+     ```
+    <!--focus: false-->
+    | <b>Example of IntegrityError. Data already Exists</b>
+
+> A 400 error is generally encountered due to inaccuracies in the request data. We request to rectify the data using the hints provided in the error messages before re-sending API requests.  
 
 ## Attributes Of Error Response:
 
