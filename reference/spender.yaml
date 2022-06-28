@@ -2127,6 +2127,50 @@ components:
           type: string
           nullable: true
           example: report.created
+    report_source:
+      type: string
+      enum:
+        - WEBAPP
+        - MOBILE
+        - TPA
+        - SLACK
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    spender_report_in:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        source:
+          $ref: '#/components/schemas/report_source'
+        purpose:
+          type: string
+          description: |
+            Indicates purpose of the reports.
+          example: '#1: Jun 2020'
+    report_action_with_expenses_ids_to_add:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - expense_ids
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, to which the expenses are to be added
+          example: rpa21A2rdj2
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2151,6 +2195,30 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_purpose_in:
+      type: object
+      additionalProperties: false
+      required:
+        - expense_ids
+      properties:
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+    report_purpose_out:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+      properties:
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
     advance_out_embed:
       type: object
       nullable: true
@@ -5421,6 +5489,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
   /spender/reports:
+    post:
+      tags:
+        - Reports
+      summary: Create or update an Expense Report.
+      description: |
+        Create or update an Expense Report.
+      operationId: reports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_report_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
     get:
       operationId: reports_list
       tags:
@@ -5466,6 +5584,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/reports/add_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Add expenses to a report
+      description: Add expenses to a report
+      operationId: reports_add_expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_with_expenses_ids_to_add'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/reports/eject_expenses:
     post:
       tags:
@@ -5499,6 +5665,54 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/suggest_purpose:
+    post:
+      tags:
+        - Reports
+      summary: Suggests purpose for an Expense Report
+      description: Suggests purpose of an Expense Report
+      operationId: suggests_purpose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_purpose_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_purpose_out'
         '400':
           description: Unauthorised request
           content:
