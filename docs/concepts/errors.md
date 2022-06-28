@@ -40,7 +40,7 @@ In general:
 2. **BulkError:**
     This type of error occurs during bulk operations when an entity is not found ( E.g., Passing the name of the department which does not exist etc.)
     <!--focus: false-->
-     ``` json
+     ```json
     {
     "data": [
         {
@@ -55,6 +55,40 @@ In general:
      ```
     <!--focus: false-->
     | <b>Example of BulkError. Invalid Department name</b>
+3. **IntegrityError**
+    The Integrity Error occurs for two reasons
+    
+    1. The data that is being created already exists
+    <!--focus: false-->
+    ```json
+   {
+    "data": null,
+    "error": "IntegrityError",
+    "message": "The values (\"fast and furious\", \"formula one\", \"oriSOntNdZGd\") already exists"
+    }
+     ```
+    <!--focus: false-->
+    | <b>Example of IntegrityError. Data already Exists</b>
+    
+    2. The data that in the request object is not mapped in our databases
+     <!--focus: false-->
+    ```json
+    {
+    "data": [
+        {
+            "key": "new.cbdkbcdhkbcdjkcbd@fyle.in",
+            "message": "Invalid / disabled department found",
+            "row": 0
+        }
+    ],
+    "error": "BulkError",
+    "message": null
+    }
+     ```
+    <!--focus: false-->
+    | <b>Example of IntegrityError. Data already Exists</b>
+
+> A 400 error is generally encountered due to inaccuracies in the request data. We request to rectify the data using the hints provided in the error messages before re-sending API requests.  
 
 ## Attributes Of Error Response:
 
@@ -67,44 +101,45 @@ All the types of error have three attributes:
     The <u>data</u> attribute will consist of information about errors in the parameter sent. 
 1. When a *ValidationError* is encountered, the response data attribute will consist of the information about which key is causing the error and for what reason. 
 
-Examples
+    Examples:
     <!--focus: false-->
-    1. Example of missing param
-    ``` JSON
-    {
-    "data": {
-        "0": {
-            "user_email": [
-                "Missing data for required field."
-            ]
+    1. Example of missing param 
+        ```json
+        {
+        "data": {
+            "0": {
+                "user_email": [
+                    "Missing data for required field."
+                ]
+            }
+        },
+        "error": "ValidationError",
+        "message": null
         }
-    },
-    "error": "ValidationError",
-    "message": null
-    }
-    ```
-    <!--focus: false--> 
+        ```
+        <!--focus: false--> 
     2. Example of malformed param
-    ``` json
-    {
-    "data": {
-        "0": {
-            "mobile": [
-                "String does not match expected pattern."
-            ]
+        ```json
+        {
+        "data": {
+            "0": {
+                "mobile": [
+                    "String does not match expected pattern."
+                ]
+            }
+        },
+        "error": "ValidationError",
+        "message": null
         }
-    },
-    "error": "ValidationError",
-    "message": null
-    }
-    ```
+        ```
+
 2. When a *BulkError* is encountered, the response data is an array of objects which consists of the following keys: 
     1. *key* refers to the value that uniquely identifies the object from the array of objects that is passed as a parameter.
     2. *message* gives reason for the failure of the message
     3. *row* indicates the index of the object in the data array that is passed by the user.
     
     Example:
-    ``` json
+    ```json
     {
     "data": [
         {
