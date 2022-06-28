@@ -2151,6 +2151,28 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_action_resubmit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be re-submitted
+          example: rpa21A2rdj2
+    report_action_submit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be submitted
+          example: rpa21A2rdj2
     advance_out_embed:
       type: object
       nullable: true
@@ -5486,6 +5508,106 @@ paths:
                 data:
                   $ref: >-
                     #/components/schemas/report_action_with_expenses_ids_to_eject
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/submit:
+    post:
+      tags:
+        - Reports
+      summary: Submit report
+      description: Submit report
+      operationId: reports_submit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_resubmit'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/resubmit:
+    post:
+      tags:
+        - Reports
+      summary: Resubmit report
+      description: Resubmit report
+      operationId: reports_resubmit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_submit'
                 reason:
                   $ref: '#/components/schemas/reason'
       responses:
