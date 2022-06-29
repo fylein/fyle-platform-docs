@@ -23,6 +23,7 @@ report_out:
     - source
     - approvals
     - employee
+    - next_approver_user_ids
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -142,6 +143,29 @@ report_out:
       $ref: './fields.yaml#/employee_id'
     employee:
       $ref: './employee.yaml#/employee_out_embed'
+    next_approver_user_ids:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/id_string'
+      example:
+        - us123heh98
+
+spender_report_in:
+  type: object
+  additionalProperties: false
+  required:
+    - purpose
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    source:
+      $ref: './fields.yaml#/report_source'
+    purpose:
+      type: string
+      description: |
+        Indicates purpose of the reports.
+      example: '#1: Jun 2020'
 
 report_out_embed:
   type: object
@@ -302,3 +326,28 @@ report_out_subscriptions:
     reason:
       type: string
       example: 'comment given by Approver while approving the report.'
+
+report_purpose_out:
+  type: object
+  additionalProperties: False
+  required:
+    - purpose
+  properties:
+    purpose:
+      type: string
+      description: purpose for creating the report
+      example: Business trip to London
+      nullable: True
+
+report_purpose_in:
+  type: object
+  additionalProperties: False
+  required:
+    - expense_ids
+  properties:
+    expense_ids:
+      type: array
+      items:
+        allOf:
+          - $ref: './fields.yaml#/id_string'
+      example: [ 'txelntgwgwll' ]
