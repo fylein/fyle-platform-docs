@@ -3109,6 +3109,7 @@ components:
         - source
         - approvals
         - employee
+        - next_approver_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -3230,6 +3231,13 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
     corporate_card_out:
       type: object
       properties:
@@ -6416,6 +6424,88 @@ components:
       properties:
         merchant_name:
           $ref: '#/components/schemas/merchant'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    project_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a project.
+      example: Westeros / Casterly rocks
+    spend_overview_by_project_data_out:
+      type: object
+      nullable: false
+      properties:
+        project_id:
+          $ref: '#/components/schemas/id_integer'
+        project_display_name:
+          $ref: '#/components/schemas/project_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    category_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a category.
+      example: Wildlings / Thenns
+    spend_overview_by_category_data_out:
+      type: object
+      nullable: false
+      properties:
+        category_id:
+          $ref: '#/components/schemas/id_integer'
+        category_display_name:
+          $ref: '#/components/schemas/category_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    department_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a department.
+      example: Knights / Kingsguard
+    spend_overview_by_department_data_out:
+      type: object
+      nullable: false
+      properties:
+        department_id:
+          $ref: '#/components/schemas/id_string'
+        department_display_name:
+          $ref: '#/components/schemas/department_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the full name of an employee.
+      example: Jon Snow
+    spend_overview_by_user_data_out:
+      type: object
+      nullable: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user_full_name:
+          $ref: '#/components/schemas/user_full_name'
+        user_email:
+          $ref: '#/components/schemas/email'
         amount:
           $ref: '#/components/schemas/amount'
         percentage:
@@ -10070,7 +10160,6 @@ paths:
         - $ref: '#/components/parameters/time_interval_preset'
         - $ref: '#/components/parameters/time_interval_start'
         - $ref: '#/components/parameters/time_interval_end'
-        - $ref: '#/components/parameters/is_reimbursable'
         - $ref: '#/components/parameters/category_id'
         - $ref: '#/components/parameters/project_id'
         - $ref: '#/components/parameters/department_id'
@@ -10091,6 +10180,251 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/spend_overview_by_merchant_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_project:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Project
+      operationId: spend_overview_by_project
+      description: >
+        API to return spend overview data grouped by project. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_project_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_category:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Category
+      operationId: spend_overview_by_category
+      description: >
+        API to return spend overview data grouped by category. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_category_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_department:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Department
+      operationId: spend_overview_by_department
+      description: >
+        API to return spend overview data grouped by department. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/spend_overview_by_department_data_out
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_user:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By User
+      operationId: spend_overview_by_user
+      description: >
+        API to return spend overview data grouped by user of an org. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/department_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_user_data_out'
         '202':
           description: Request Accepted
           content:
