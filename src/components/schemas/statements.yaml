@@ -1,0 +1,361 @@
+statements_in:
+  type: object
+  properties:
+    file_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: fidftadfdsdf
+  required:
+    - file_id
+
+statements_out:
+  type: object
+  additionalProperties: False
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: stmtwownwrng
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    file_name:
+      type: string
+      description: |
+        Specifies the name of file uploaded by the user.
+      example: amex.csv
+    file_size:
+      type: number
+      description: |
+        Specifies the size of file uploaded by the user. (The size is represented in bytes)
+      example: 21
+    no_of_debit:
+      type: integer
+      description: |
+        Number of debit transactions in the statement uploaded by the user.
+      example: 3
+      nullable: true
+    no_of_credit:
+      type: integer
+      description: |
+        Number of credit transactions in the statement uploaded by the user.
+      example: 3
+      nullable: true
+    no_of_transactions:
+      type: integer
+      description: |
+        Number of transactions in the statement uploaded by the user.
+      example: 6
+    all_statement_columns:
+      type: array
+      items: 
+        type: string
+      description: >
+        This specifies headers of the statement uploaded by the user.
+      example:  
+        - account_number
+        - amount
+    start_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Start date of the statement period
+      nullable: true
+    end_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        End date of the statement period
+      nullable: true
+    has_duplicate_statements:
+      type: boolean
+      description: |
+        This specifies if the statement is complete duplicate of already uploaded statement or not.
+      nullable: true
+    duplicate_statement_ids:
+      type: array
+      description:
+        Holds the list of statement_ids which are complete duplicate of the current statement
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - stmtge49ielgel
+    has_duplicate_statement_line_items:
+      type: boolean
+      description: |
+        Indicates whether there are any line items in this statement are duplicates.
+      nullable: true
+    duplicate_statement_line_items:
+      type: array
+      items:
+        type: object
+        properties:
+          ids:
+            type: array
+            items:
+              $ref: './fields.yaml#/id_string'
+            example:
+              - stlige49ielgel
+            description:
+              Ids of the current statement line items which are duplicates
+          duplicate_line_item_statement_id:
+            type: string
+            description: |
+              Id of the existing duplicate statement
+            example:
+              - stmpge49ielgel
+            nullable: true
+    unique_id:
+      type: string
+      description: |
+        Unique hash value that is used to identify the statement.
+      example: 74175aadf22675aa59df28b96d351cfb
+    file_id:
+      type: string
+      description: |
+        File id of the uploaded statement.
+      example: fiit3pX9gzzP
+      nullable: true
+    is_processed:
+      type: boolean
+      description: |
+        Indicates whether the corporate card transactions are created out of the statement.
+    statement_mappings_id:
+      type: string
+      example: stmpdfddfd
+      description: |
+        Id of the mapping used to extract transaction from the statement.
+      nullable: true
+  required:
+    - id
+    - org_id
+    - creator_user_id
+    - created_at
+    - updated_at
+    - file_name
+    - file_size
+    - no_of_debit
+    - no_of_credit
+    - no_of_transactions
+    - all_statement_columns
+    - start_date
+    - end_date
+    - has_duplicate_statements
+    - has_duplicate_statement_line_items
+    - duplicate_statement_ids
+    - duplicate_statement_line_items
+    - unique_id
+    - file_id
+    - is_processed
+    - statement_mappings_id
+
+card_transaction_from_statement_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: stmtadfdsdf
+    statement_mapping:
+      type: object
+      properties:
+        description_column:
+          type: string
+          description: |
+            Specifies the mapping of description column on the statement
+          nullable: true
+          example: description
+        transaction_date_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction date on the statement.
+          example: txn date
+        transaction_id_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction id / unique id on the statement.
+          example: reference number
+          nullable: true
+        amount_column:
+          type: string
+          description: |
+            Specifies the mapping of amount on the statement.
+          example: amount
+        card_number_column:
+          type: string
+          description: |
+            Specifies the mapping of card number on the statement.
+          example: account number
+        vendor_column:
+          type: string
+          description: |
+            Specifies the mapping of vendor on the statement.
+          example: Amazon
+        foreign_amount_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign amount on the statement.
+          example: foreign amount
+          nullable: true
+        foreign_currency_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign currency on the statement.
+          example: foreign currency
+          nullable: true
+        post_date_column:
+          type: string
+          description: |
+            Specifies the header name of the post date column in the statement.
+          example: post date
+          nullable: true
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: |
+            Specifies the representation of the the amount in the statement, if true then the amount represented by |
+            positive sign are debits, and if false then the amount represented by negative sign are debits.
+          example: true
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: USD
+          nullable: true
+      required:
+        - description_column
+        - transaction_date_column
+        - transaction_id_column
+        - amount_column
+        - card_number_column
+        - vendor_column
+        - foreign_amount_column
+        - foreign_currency_column
+        - post_date_column
+        - bank_name
+        - is_debit_positive
+        - name
+    ignored_line_item_ids:
+      type: array
+      items: 
+        type: string
+      description: >
+        This specifies list of statement line items to be ignored in the statement.
+      example:
+        - stlisfdfadssd
+  required:
+    - id
+    - statement_mapping
+    - ignored_line_item_ids
+
+preview_out:
+  properties:
+    no_of_debit:
+      type: integer
+      description: |
+        Number of debit transactions in the statement uploaded by the user.
+      example: 3
+      nullable: true
+    no_of_credit:
+      type: integer
+      description: |
+        Number of credit transactions in the statement uploaded by the user.
+      example: 3
+      nullable: true
+    no_of_transactions:
+      type: integer
+      description: |
+        Number of transactions in the statement uploaded by the user.
+      example: 6
+    transactions:
+      type: array
+      items: 
+        type: object
+        properties:
+          description:
+            type: string
+            description: |
+              Specifies the description of the transaction on the statement.
+            nullable: true
+            example: description
+          bank_name:
+            type: string
+            description: |
+              Specifies the bank name of the statement
+            example: American Express
+          vendor:
+            type: string
+            description: |
+              Specifies the vendor of the statement
+            example: Amazon
+          transaction_date:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Specifies the transaction date on the statement.
+          amount:
+            type: string
+            description: |
+              Specifies the amount on the statement.
+            example: 30
+          card_number:
+            type: string
+            description: |
+              Specifies the card number on the statement.
+            example: xxxx-3343
+          unique_id:
+            type: string
+            description: |
+              Specifies the unique code / transaction id on the statement.
+            example: ed0b2aa913c54b3f903a5030208e1872
+          foreign_amount:
+            type: string
+            description: |
+              Specifies the foreign amount on the statement.
+            nullable: true
+            example: 48
+          foreign_currency:
+            type: string
+            description: |
+              Specifies the foreign currency on the statement.
+            nullable: true
+            example: USD
+          transaction_id:
+            type: string
+            description: |
+              Specifies the transaction id / unique id on the statement.
+            nullable: true
+            example: USD
+          transaction_type:
+            type: string
+            description: |
+              Specifies the transaction type of the transactions on the statement (credit / debit).
+            example: debit
+          post_date:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Specifies the post date on the statement.
+            nullable: true
+        required:
+          - description
+          - bank_name
+          - vendor
+          - transaction_date
+          - amount
+          - card_number
+          - unique_id
+          - foreign_amount
+          - foreign_currency
+          - transaction_id
+          - post_date
+  required:
+    - transactions
+    - no_of_debit
+    - no_of_credit
+    - no_of_transactions
