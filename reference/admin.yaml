@@ -1624,6 +1624,72 @@ components:
           type: string
           description: |
             Link to download this file
+    automate_report_submission_schedule_config:
+      description: description of monthly schedule for automating report submission.
+      type: object
+      nullable: true
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: cron
+          enum:
+            - cron
+        when:
+          nullable: false
+          type: object
+          additionalProperties: false
+          properties:
+            day:
+              type: string
+              description: >-
+                day of month (1-27 for xth day of the month or "last" for last
+                day of the month)
+              example: 16, last
+    automate_report_submission_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/automate_report_submission_schedule_config'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    automate_report_submission_out:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/automate_report_submission_schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
     accounting_export_out:
       type: object
       additionalProperties: false
@@ -1762,12 +1828,6 @@ components:
             created Accounting Entry numbers in Quickbooks.
         accounting_export_id:
           $ref: '#/components/schemas/fk_string'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     currency:
       type: string
       description: >
@@ -7803,6 +7863,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to manage your organisation's Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to automate your organisation's manual work.
   - name: Budgets
     description: |
       This API gives you access to Budgets.
@@ -9068,6 +9131,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/automations/report_submissions:
+    post:
+      tags:
+        - Report Submission
+      summary: Create or update a Budget
+      description: |
+        Create or update a Budget
+      operationId: budgets_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_exports:
     get:
       tags:
