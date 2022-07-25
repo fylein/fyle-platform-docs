@@ -1654,6 +1654,10 @@ components:
       example: uswjwgnwwgo
     automate_report_submission_out:
       type: object
+      required:
+        - id
+        - description
+        - schedule_config
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1678,6 +1682,9 @@ components:
           $ref: '#/components/schemas/user_out_embed'
     automate_report_submission_in:
       type: object
+      required:
+        - description
+        - schedule_config
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1690,6 +1697,13 @@ components:
             Last Day, 7th and 24th of every month.
         schedule_config:
           $ref: '#/components/schemas/automate_report_submission_schedule_config'
+    delete_automate_report_submission_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     accounting_export_out:
       type: object
       additionalProperties: false
@@ -9221,6 +9235,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/automations/report_submissions/delete:
+    post:
+      tags:
+        - Automations
+      summary: Delete Report Submission Automation
+      description: |
+        Delete Report Submission Automation
+      operationId: report_submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_exports:
     get:
       tags:
