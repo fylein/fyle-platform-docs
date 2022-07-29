@@ -1624,28 +1624,89 @@ components:
           type: string
           description: |
             Link to download this file
-    automate_report_submission_schedule_config:
-      description: description of monthly schedule for automating report submission.
+    schedule_config:
       type: object
-      nullable: true
+      nullable: false
       properties:
         type:
           nullable: false
           type: string
-          example: cron
+          example: interval
           enum:
+            - interval
+            - date
             - cron
         when:
           nullable: false
-          type: object
-          additionalProperties: false
-          properties:
-            day:
-              type: string
-              description: >-
-                day of month (1-27 for xth day of the month or "last" for last
-                day of the month)
-              example: 16, last
+          oneOf:
+            - type: object
+              additionalProperties: false
+              properties:
+                weeks:
+                  type: number
+                  example: 2
+                days:
+                  type: number
+                  example: 12
+                hours:
+                  type: number
+                  example: 6
+                minutes:
+                  type: number
+                  example: 30
+                seconds:
+                  type: number
+                  example: 30
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+            - type: object
+              additionalProperties: false
+              properties:
+                year:
+                  type: string
+                  example: 2022
+                month:
+                  type: string
+                  example: 10
+                day:
+                  type: string
+                  example: last, 15
+                week:
+                  type: string
+                  example: 2
+                day_of_week:
+                  type: string
+                  example: mon
+                hour:
+                  type: string
+                  example: 23
+                minute:
+                  type: string
+                  example: 23
+                second:
+                  type: string
+                  example: 23
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+            - type: object
+              additionalProperties: false
+              properties:
+                run_date:
+                  nullable: true
+                  type: string
+                  example: '2021-05-12T10:16:50.410Z'
     user_id:
       type: string
       description: |
@@ -1674,7 +1735,7 @@ components:
             Expense Reports will be submitted automatically for approval on the
             Last Day, 7th and 24th of every month.
         schedule_config:
-          $ref: '#/components/schemas/automate_report_submission_schedule_config'
+          $ref: '#/components/schemas/schedule_config'
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -1698,7 +1759,7 @@ components:
             Expense Reports will be submitted automatically for approval on the
             Last Day, 7th and 24th of every month.
         schedule_config:
-          $ref: '#/components/schemas/automate_report_submission_schedule_config'
+          $ref: '#/components/schemas/schedule_config'
     delete_automate_report_submission_in:
       type: object
       required:
@@ -6380,90 +6441,6 @@ components:
           description: |
             This indicates whether the user's accounts can be settled or not.
           example: true
-    schedule_config:
-      type: object
-      nullable: false
-      properties:
-        type:
-          nullable: false
-          type: string
-          example: interval
-          enum:
-            - interval
-            - date
-            - cron
-        when:
-          nullable: false
-          oneOf:
-            - type: object
-              additionalProperties: false
-              description: For interval job
-              properties:
-                weeks:
-                  type: number
-                  example: 2
-                days:
-                  type: number
-                  example: 12
-                hours:
-                  type: number
-                  example: 6
-                minutes:
-                  type: number
-                  example: 30
-                seconds:
-                  type: number
-                  example: 30
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-            - type: object
-              additionalProperties: false
-              properties:
-                year:
-                  type: string
-                  example: 2022
-                month:
-                  type: string
-                  example: 10
-                day:
-                  type: string
-                  example: last
-                week:
-                  type: string
-                  example: 2
-                day_of_week:
-                  type: string
-                  example: mon
-                hour:
-                  type: string
-                  example: 23
-                minute:
-                  type: string
-                  example: 23
-                second:
-                  type: string
-                  example: 23
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-            - type: object
-              additionalProperties: false
-              properties:
-                run_date:
-                  nullable: true
-                  type: string
-                  example: '2021-05-12T10:16:50.410Z'
     schedule_out:
       type: object
       additionalProperties: false
