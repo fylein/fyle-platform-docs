@@ -4604,6 +4604,20 @@ components:
           type: string
           description: |
             Link to download this file
+    spender_automate_report_submission_next_at_out:
+      type: object
+      required:
+        - next_at
+      properties:
+        next_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: >-
+            Signifies the time when the next automate report submission will run
+            for the organization. Date-time in [ISO8601
+            format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2021-06-01T13:14:54.804+00:00'
   parameters:
     created_at:
       in: query
@@ -4665,6 +4679,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to view your Cash Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to organisation's automations data.
   - name: Categories
     description: |
       This API gives you list of your organisation's Categories data.
@@ -6661,3 +6678,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/automations/report_submissions/next_at:
+    post:
+      tags:
+        - Automations
+      summary: Fetch Report Submission Automation next run time
+      description: |
+        Fetch Report Submission Automation next run time
+      operationId: fetch_auto_report_submission_next_run_time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/spender_automate_report_submission_next_at_out
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
