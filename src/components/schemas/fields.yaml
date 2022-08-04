@@ -236,8 +236,9 @@ contains_operator:
     Value signifying the operator for the field
   example: IN
 
-expense_policy_rule_minimal:
+expense_policy_rule_embed:
   type: object
+  additionalProperties: false
   properties:
     id:
       type: string
@@ -255,72 +256,73 @@ expense_policy_rule_minimal:
         A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
       example: True
       
-expense_policy_violating_expenses_query_params:
+expense_policy_expenses_query_object:
   type: object
   description: |
     An expense may be violating an expense policy rule due to a group of other expenses. 
     These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
     Below params should be ANDed to get the correct list of violating expenses.
   properties:
-    start_date:
+    limit_start_date:
       type: string
       description: |
         Spend start date query param to find the list of violating expenses.
       example: "2021-12-01"
-    end_date:
+    limit_end_date:
       type: string
       description: |
         Spend end date query param to find the list of violating expenses.
       example: "2022-03-31"
-    state:
-      type: string
-      description: |
-        State query param to find the list of violating expenses.
-      example: "neq.DRAFT"
-    category_ids:
-      type: string
-      description: |
-        Category ids query param to find the list of violating expenses.
-      example: "in.(60506)"
-    project_ids:
-      type: string
-      description: |
-        Project ids query param to find the list of violating expenses.
-      example: "in.(261155)" 
-    cost_center_ids:
-      type: string
-      description: |
-        Cost center ids query param to find the list of violating expenses.
-      example: "in.(7475)"
-    currency:
-      type: string
-      description: |
-        Currency query param to find the list of violating expenses.
-      example: "USD"
-    vehicle_type:
-      type: string
-      description: |
-        Vehicle type query param to find the list of violating expenses.
-      example: "ELECTRIC_CAR"
-    employee_id:
-      anyOf:
-      - $ref: '#/employee_id'
-      description:
-        Employee id query param to find the list of violating expenses.
+    params:
+        $ref: '#/expense_policy_expenses_query_object_params'
 
 expense_policy_individual_desired_states:
   type: object
   properties:
     rule:
-      $ref: '#/expense_policy_rule_minimal'
+      $ref: '#/expense_policy_rule_embed'
     amount:
       anyOf:
         - $ref: '#/amount'
       description: |
         Amount that the policy calculation suggests for this expense.
       example: 500
-    violating_expenses_query_params:
-      $ref: '#/expense_policy_violating_expenses_query_params'
+    expenses_query_object_params:
+      $ref: '#/expense_policy_expenses_query_object'
+
+expense_policy_expenses_query_object_params:
+  type: object
+  properties:
+    category_id:
+      type: string
+      description: |
+        Category ids query param to find the list of expenses.
+      example: "in.(60506)"
+    project_id:
+      type: string
+      description: |
+        Project ids query param to find the list of expenses.
+      example: "in.(261155)" 
+    cost_center_id:
+      type: string
+      description: |
+        Cost center ids query param to find the list of expenses.
+      example: "in.(7475)"
+    currency:
+      type: string
+      description: |
+        Currency query param to find the list of expenses.
+      example: "eq.USD"
+    mileage_rate_id:
+      type: string
+      description: |
+        Mileage rate query param to find the list of expenses.
+      example: "eq.2"
+    employee_id:
+      type: string
+      description: |
+        Employee id query param to find the list of expenses.
+      example: "eq.ouNSnadfaLA"
 
 expense_policy_final_desired_state:
   type: object
@@ -387,6 +389,7 @@ policy_payment_modes:
     enum:
       - PERSONAL_CASH_ACCOUNT
       - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+      - COMPANY_ACCOUNT
       - null
   example: PERSONAL_CASH_ACCOUNT
 
