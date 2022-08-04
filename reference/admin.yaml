@@ -176,6 +176,38 @@ components:
         - uswlgwkgw42
       description: |
         List of IDs of users who are approvers of the project.
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     admin_approver_project_out:
       type: object
       additionalProperties: false
@@ -219,6 +251,13 @@ components:
           $ref: '#/components/schemas/restricted_spender_user_ids'
         approver_user_ids:
           $ref: '#/components/schemas/approver_user_ids'
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are approvers for this project.
     project_in:
       type: object
       additionalProperties: false
@@ -694,12 +733,6 @@ components:
           type: number
           example: 10
           description: Amount per night
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     department_head_user_ids:
       type: array
       nullable: false
@@ -715,32 +748,6 @@ components:
         - uswoirwlwwg
       description: |
         List of IDs of users who are head of the department.
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     department_out:
       type: object
       additionalProperties: false
