@@ -342,15 +342,7 @@ components:
             - MILES
         vehicle_type:
           type: string
-          enum:
-            - two_wheeler
-            - four_wheeler
-            - four_wheeler1
-            - four_wheeler3
-            - four_wheeler4
-            - bicycle
-            - electric_car
-          example: four_wheeler
+          example: Audi
         rate:
           type: number
           example: 10
@@ -722,15 +714,7 @@ components:
           $ref: '#/components/schemas/id_integer'
         vehicle_type:
           type: string
-          enum:
-            - two_wheeler
-            - four_wheeler
-            - four_wheeler1
-            - four_wheeler3
-            - four_wheeler4
-            - bicycle
-            - electric_car
-          example: four_wheeler
+          example: Audi
         code:
           $ref: '#/components/schemas/code'
     per_diem_rate_out_embed:
@@ -1847,6 +1831,7 @@ components:
         - last_paid_at
         - last_approved_at
         - last_submitted_at
+        - last_resubmitted_at
         - seq_num
         - source
         - approvals
@@ -1952,6 +1937,13 @@ components:
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was submitted.
+          nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
           nullable: true
         seq_num:
           type: string
@@ -2070,16 +2062,38 @@ components:
             - type: object
               additionalProperties: false
               properties:
+                year:
+                  type: string
+                  example: 2022
+                month:
+                  type: string
+                  example: 10
                 day:
                   type: string
-                  example: last
+                  example: last, 15
+                week:
+                  type: string
+                  example: 2
+                day_of_week:
+                  type: string
+                  example: mon
                 hour:
-                  type: number
+                  type: string
                   example: 23
-                timezone:
+                minute:
+                  type: string
+                  example: 23
+                second:
+                  type: string
+                  example: 23
+                end_date:
                   nullable: true
                   type: string
-                  example: Asia/Kolkata
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
             - type: object
               additionalProperties: false
               properties:
@@ -2205,6 +2219,28 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_action_submit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be submitted
+          example: rpa21A2rdj2
+    report_action_resubmit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be resubmitted
+          example: rpa21A2rdj2
     report_purpose_in:
       type: object
       additionalProperties: false
@@ -4568,6 +4604,20 @@ components:
           type: string
           description: |
             Link to download this file
+    spender_automate_report_submission_next_at_out:
+      type: object
+      required:
+        - next_at
+      properties:
+        next_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: >-
+            Signifies the time when the next automate report submission will run
+            for the organization. Date-time in [ISO8601
+            format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2021-06-01T13:14:54.804+00:00'
   parameters:
     created_at:
       in: query
@@ -4629,6 +4679,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to view your Cash Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to organisation's automations data.
   - name: Categories
     description: |
       This API gives you list of your organisation's Categories data.
@@ -5749,6 +5802,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/reports/submit:
+    post:
+      tags:
+        - Reports
+      summary: Submit report
+      description: Submit report
+      operationId: reports_submit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_submit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/resubmit:
+    post:
+      tags:
+        - Reports
+      summary: Resubmit report
+      description: Resubmit report
+      operationId: reports_resubmit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_resubmit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/reports/suggest_purpose:
     post:
       tags:
@@ -6529,3 +6678,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/automations/report_submissions/next_at:
+    post:
+      tags:
+        - Automations
+      summary: Fetch Report Submission Automation next run time
+      description: |
+        Fetch Report Submission Automation next run time
+      operationId: fetch_auto_report_submission_next_run_time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/spender_automate_report_submission_next_at_out
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'

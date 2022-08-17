@@ -176,6 +176,38 @@ components:
         - uswlgwkgw42
       description: |
         List of IDs of users who are approvers of the project.
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     admin_approver_project_out:
       type: object
       additionalProperties: false
@@ -219,6 +251,13 @@ components:
           $ref: '#/components/schemas/restricted_spender_user_ids'
         approver_user_ids:
           $ref: '#/components/schemas/approver_user_ids'
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are approvers for this project.
     project_in:
       type: object
       additionalProperties: false
@@ -595,6 +634,7 @@ components:
           description: |
             This specifies the default value of the expense fields.
           example: Coffee
+          nullable: true
         placeholder:
           type: string
           nullable: true
@@ -694,12 +734,6 @@ components:
           type: number
           example: 10
           description: Amount per night
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     department_head_user_ids:
       type: array
       nullable: false
@@ -715,32 +749,6 @@ components:
         - uswoirwlwwg
       description: |
         List of IDs of users who are head of the department.
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     department_out:
       type: object
       additionalProperties: false
@@ -838,15 +846,7 @@ components:
             - MILES
         vehicle_type:
           type: string
-          enum:
-            - two_wheeler
-            - four_wheeler
-            - four_wheeler1
-            - four_wheeler3
-            - four_wheeler4
-            - bicycle
-            - electric_car
-          example: four_wheeler
+          example: Audi
         rate:
           type: number
           example: 10
@@ -879,15 +879,7 @@ components:
             - MILES
         vehicle_type:
           type: string
-          enum:
-            - two_wheeler
-            - four_wheeler
-            - four_wheeler1
-            - four_wheeler3
-            - four_wheeler4
-            - bicycle
-            - electric_car
-          example: four_wheeler
+          example: Audi
         rate:
           type: number
           example: 10
@@ -1189,15 +1181,7 @@ components:
           $ref: '#/components/schemas/id_integer'
         vehicle_type:
           type: string
-          enum:
-            - two_wheeler
-            - four_wheeler
-            - four_wheeler1
-            - four_wheeler3
-            - four_wheeler4
-            - bicycle
-            - electric_car
-          example: four_wheeler
+          example: Audi
         code:
           $ref: '#/components/schemas/code'
     bank_ifsc:
@@ -1648,6 +1632,157 @@ components:
           type: string
           description: |
             Link to download this file
+    schedule_config:
+      type: object
+      nullable: false
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: interval
+          enum:
+            - interval
+            - date
+            - cron
+        when:
+          nullable: false
+          oneOf:
+            - type: object
+              additionalProperties: false
+              properties:
+                weeks:
+                  type: number
+                  example: 2
+                days:
+                  type: number
+                  example: 12
+                hours:
+                  type: number
+                  example: 6
+                minutes:
+                  type: number
+                  example: 30
+                seconds:
+                  type: number
+                  example: 30
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                timezone:
+                  nullable: true
+                  type: string
+                  example: UTC
+                jitter:
+                  nullable: true
+                  type: number
+                  example: 20
+            - type: object
+              additionalProperties: false
+              properties:
+                year:
+                  type: string
+                  example: 2022
+                month:
+                  type: string
+                  example: 10
+                day:
+                  type: string
+                  example: last, 15
+                week:
+                  type: string
+                  example: 2
+                day_of_week:
+                  type: string
+                  example: mon
+                hour:
+                  type: string
+                  example: 23
+                minute:
+                  type: string
+                  example: 23
+                second:
+                  type: string
+                  example: 23
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+            - type: object
+              additionalProperties: false
+              properties:
+                run_date:
+                  nullable: true
+                  type: string
+                  example: '2021-05-12T10:16:50.410Z'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    automate_report_submission_out:
+      type: object
+      required:
+        - id
+        - description
+        - schedule_config
+        - org_id
+        - created_at
+        - updated_at
+        - creator_user_id
+        - creator_user
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
+    automate_report_submission_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+    delete_automate_report_submission_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     accounting_export_out:
       type: object
       additionalProperties: false
@@ -1786,12 +1921,6 @@ components:
             created Accounting Entry numbers in Quickbooks.
         accounting_export_id:
           $ref: '#/components/schemas/fk_string'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     currency:
       type: string
       description: >
@@ -3107,6 +3236,7 @@ components:
         - last_paid_at
         - last_approved_at
         - last_submitted_at
+        - last_resubmitted_at
         - seq_num
         - source
         - approvals
@@ -3212,6 +3342,13 @@ components:
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was submitted.
+          nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
           nullable: true
         seq_num:
           type: string
@@ -6320,75 +6457,6 @@ components:
           description: |
             This indicates whether the user's accounts can be settled or not.
           example: true
-    schedule_config:
-      type: object
-      nullable: false
-      properties:
-        type:
-          nullable: false
-          type: string
-          example: interval
-          enum:
-            - interval
-            - date
-            - cron
-        when:
-          nullable: false
-          oneOf:
-            - type: object
-              additionalProperties: false
-              properties:
-                weeks:
-                  type: number
-                  example: 2
-                days:
-                  type: number
-                  example: 12
-                hours:
-                  type: number
-                  example: 6
-                minutes:
-                  type: number
-                  example: 30
-                seconds:
-                  type: number
-                  example: 30
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                timezone:
-                  nullable: true
-                  type: string
-                  example: UTC
-                jitter:
-                  nullable: true
-                  type: number
-                  example: 20
-            - type: object
-              additionalProperties: false
-              properties:
-                day:
-                  type: string
-                  example: last
-                hour:
-                  type: number
-                  example: 23
-                timezone:
-                  nullable: true
-                  type: string
-                  example: Asia/Kolkata
-            - type: object
-              additionalProperties: false
-              properties:
-                run_date:
-                  nullable: true
-                  type: string
-                  example: '2021-05-12T10:16:50.410Z'
     schedule_out:
       type: object
       additionalProperties: false
@@ -7230,10 +7298,10 @@ components:
             Specifies the header name of the transaction date column in the
             statement.
           example: spent date
-        vendor_column:
+        merchant_column:
           type: string
           description: |
-            Specifies the header name of the vendor column in the statement.
+            Specifies the header name of the merchant column in the statement.
           example: merchant
         transaction_id_column:
           type: string
@@ -7290,6 +7358,12 @@ components:
           description: |
             Helps to identify if a statement mapping got auto created or not
           example: false
+        card_network:
+          type: string
+          description: |
+            Specifies the card network used by the card
+          example: VISA
+          nullable: true
       required:
         - id
         - org_id
@@ -7302,12 +7376,13 @@ components:
         - amount_column
         - name
         - card_number_column
-        - vendor_column
+        - merchant_column
         - foreign_amount_column
         - foreign_currency_column
         - description_column
         - post_date_column
         - is_auto_created
+        - card_network
     statement_mappings_suggest_out:
       type: object
       additionalProperties: false
@@ -7336,10 +7411,10 @@ components:
             Specifies the header name of the transaction date column in the
             statement.
           example: spent date
-        vendor_column:
+        merchant_column:
           type: string
           description: |
-            Specifies the header name of the vendor column in the statement.
+            Specifies the header name of the merchant column in the statement.
           example: merchant
         transaction_id_column:
           type: string
@@ -7396,6 +7471,12 @@ components:
           description: |
             Helps to identify if a statement mapping got auto created or not
           example: false
+        card_network:
+          type: string
+          description: |
+            Specifies the credit card network used by the card
+          example: VISA
+          nullable: true
       required:
         - id
         - bank_name
@@ -7405,12 +7486,13 @@ components:
         - amount_column
         - name
         - card_number_column
-        - vendor_column
+        - merchant_column
         - foreign_amount_column
         - foreign_currency_column
         - description_column
         - post_date_column
         - is_auto_created
+        - card_network
     card_transaction_from_statement_in:
       type: object
       properties:
@@ -7449,10 +7531,10 @@ components:
               description: |
                 Specifies the mapping of card number on the statement.
               example: account number
-            vendor_column:
+            merchant_column:
               type: string
               description: |
-                Specifies the mapping of vendor on the statement.
+                Specifies the mapping of merchant on the statement.
               example: Amazon
             foreign_amount_column:
               type: string
@@ -7493,19 +7575,26 @@ components:
                 Specifies the mapping name.
               example: USD
               nullable: true
+            card_network:
+              type: string
+              description: |
+                Specifies the credit card network used by the card
+              example: VISA
+              nullable: true
           required:
             - description_column
             - transaction_date_column
             - transaction_id_column
             - amount_column
             - card_number_column
-            - vendor_column
+            - merchant_column
             - foreign_amount_column
             - foreign_currency_column
             - post_date_column
             - bank_name
             - is_debit_positive
             - name
+            - card_network
         ignored_line_item_ids:
           type: array
           items:
@@ -7554,10 +7643,10 @@ components:
                 description: |
                   Specifies the bank name of the statement
                 example: American Express
-              vendor:
+              merchant:
                 type: string
                 description: |
-                  Specifies the vendor of the statement
+                  Specifies the merchant of the statement
                 example: Amazon
               transaction_date:
                 $ref: '#/components/schemas/timestamptz_utc'
@@ -7610,7 +7699,7 @@ components:
             required:
               - description
               - bank_name
-              - vendor
+              - merchant
               - transaction_date
               - amount
               - card_number
@@ -7819,6 +7908,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to manage your organisation's Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to automate your organisation's manual work.
   - name: Budgets
     description: |
       This API gives you access to Budgets.
@@ -9084,6 +9176,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/automations/report_submissions:
+    post:
+      tags:
+        - Automations
+      summary: Create or update Report Submission Automations
+      description: |
+        Create or update Report Submission Automations
+      operationId: report_submission_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+    get:
+      tags:
+        - Automations
+      summary: List Report Submission Automations
+      operationId: report_submission_get
+      description: |
+        List Report Submission Automations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/automations/report_submissions/delete:
+    post:
+      tags:
+        - Automations
+      summary: Delete Report Submission Automation
+      description: |
+        Delete Report Submission Automation
+      operationId: report_submission_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_exports:
     get:
       tags:
