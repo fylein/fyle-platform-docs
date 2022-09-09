@@ -4955,6 +4955,123 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+    is_billable:
+      type: boolean
+      nullable: true
+      example: true
+      description: This field marks whether a given expense is billable or not.
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
+    spender_expense_check_policies_in:
+      type: object
+      additionalProperties: false
+      required:
+        - claim_amount
+        - spent_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        spent_at:
+          $ref: '#/components/schemas/spent_at'
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        claim_amount:
+          $ref: '#/components/schemas/claim_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        num_files:
+          type: integer
+          description: |
+            Number of files/reciept attached to expense
+          example: 4
+        is_matching_ccc:
+          type: boolean
+          description: |
+            This field is set if expense matches any card expense
+          default: false
+          example: false
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 9080
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+        per_diem_num_days:
+          type: integer
+          nullable: true
+          description: >
+            Specific to per diem related expenses, number of days for which per
+            diem claim is made.
+          example: 2
+    spender_expense_check_policies_out:
+      type: object
+      additionalProperties: false
+      properties:
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_policy_final_desired_state'
   parameters:
     created_at:
       in: query
@@ -6815,6 +6932,59 @@ paths:
                 $ref: '#/components/schemas/403'
         '404':
           description: Object Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/check_policies:
+    post:
+      tags:
+        - Expenses
+      summary: Check expense for policy violation
+      description: |
+        This API checks an expense for policy violations
+      operationId: check_policies_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_expense_check_policies_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    $ref: '#/components/schemas/spender_expense_check_policies_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
