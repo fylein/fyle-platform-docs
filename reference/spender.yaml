@@ -4868,6 +4868,66 @@ components:
     expense_policy_individual_desired_states:
       type: object
       properties:
+        add_approver_user_ids:
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATION_ACTION_SUCCESS
+            - VIOLATION_ACTION_FAILURE
+            - UNVIOLATED
+          description: >
+            This represent the status of policy computation for an expense
+            against the policy. If the state is
+
+            UNVIOLATED, it means that the expense is not violating the policy.
+            If the state is VIOLATION_ACTION_SUCCESS,
+
+            it means that expense is violating the policy and action stated in
+            the object will be applied to
+
+            expense. However, if the state is VIOLATION_ACTION_FAILURE, it means
+            that the policy is violated for the
+
+            expense but since some approver was missing or not setup properly,
+            it will fail to take action 
+
+            on the expense
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense. Note that, in
+
+            case some approver was not setup properly for the given violation,
+            this array will contain description of
+
+            missing approvers. For example, Department head, project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the policy rule.
+          example: tprabsdfSYqd
         rule:
           $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
@@ -4965,7 +5025,7 @@ components:
       nullable: true
       description: This field marks whether a given expense is reimbursable or not.
       example: true
-    spender_expense_check_policies_in:
+    expense_check_policies_in:
       type: object
       additionalProperties: false
       required:
@@ -4974,6 +5034,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+          description: |
+            Expense id provided by Fyle during the creation of expense.
         spent_at:
           $ref: '#/components/schemas/spent_at'
         source:
@@ -4992,21 +5054,41 @@ components:
         cost_center_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the cost_center's id given by Fyle during creation
+            of cost center
+
+            for which this expense is created.
           nullable: true
           example: 1049
         category_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the category's id given by Fyle during creation of
+            category
+
+            for which this expense is created.
           nullable: true
           example: 49058
         project_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the project's id given by Fyle during creation of
+            project
+
+            for which this expense is created.
           nullable: true
           example: 92895
         source_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the source account's id given by Fyle during
+            creation of account type
+
+            of user for which this expense is created.
           example: acwbl222wlg
         tax_amount:
           type: number
@@ -5015,6 +5097,11 @@ components:
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the Tax's group id given by Fyle during creation of
+            tax group
+
+            for which this expense is created.
           nullable: true
         is_billable:
           $ref: '#/components/schemas/is_billable'
@@ -5026,8 +5113,14 @@ components:
           $ref: '#/components/schemas/distance_unit'
         started_at:
           $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses, start date from which per
+            diem claim is made.
         ended_at:
           $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses, end date until which per diem
+            claim is made.
         travel_classes:
           $ref: '#/components/schemas/travel_classes'
         locations:
@@ -5048,11 +5141,33 @@ components:
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to mileage expense. This represents the Mileage's rate id
+            given by Fyle
+
+            during creation of mileage rate for which this expense is created.
           nullable: true
           example: 9080
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Distance compluted by Fyle in mileage
+            expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Amount compluted by Fyle in mileage
+            expenses.
         per_diem_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to per diem expense. This represents the per diem's rate id
+            given by Fyle
+
+            during creation of per diem rate for which this expense is created.
           nullable: true
           example: 583
         per_diem_num_days:
@@ -5062,7 +5177,7 @@ components:
             Specific to per diem related expenses, number of days for which per
             diem claim is made.
           example: 2
-    spender_expense_check_policies_out:
+    expense_check_policies_out:
       type: object
       additionalProperties: false
       properties:
@@ -6955,7 +7070,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/spender_expense_check_policies_in'
+                  $ref: '#/components/schemas/expense_check_policies_in'
       responses:
         '200':
           description: OK
@@ -6965,12 +7080,8 @@ paths:
                 type: object
                 additionalProperties: false
                 properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
                   data:
-                    $ref: '#/components/schemas/spender_expense_check_policies_out'
+                    $ref: '#/components/schemas/expense_check_policies_out'
         '400':
           description: Unauthorised request
           content:
