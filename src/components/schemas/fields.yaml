@@ -236,6 +236,151 @@ contains_operator:
     Value signifying the operator for the field
   example: IN
 
+expense_policy_rule_embed:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      type: string
+      example: tpr1234abcd
+      description: This represents the id of the expense policy rule that is violated for this expense.
+    description:
+      anyOf:
+        - $ref: '#/description'
+      description: |
+        This represents the description of the expense policy rule that is violated for this expense.
+      example: Receipt is mandatory for expense above $50
+    action_show_warning:
+      type: boolean
+      description: |
+        A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
+      example: True
+      
+expense_policy_expenses_query_object:
+  type: object
+  description: |
+    An expense may be violating an expense policy rule due to a group of other expenses. 
+    These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
+    Below params should be ANDed to get the correct list of violating expenses.
+  properties:
+    limit_start_date:
+      type: string
+      description: |
+        Spend start date query param to find the list of violating expenses.
+      example: "2021-12-01"
+    limit_end_date:
+      type: string
+      description: |
+        Spend end date query param to find the list of violating expenses.
+      example: "2022-03-31"
+    params:
+        $ref: '#/expense_policy_expenses_query_object_params'
+
+expense_policy_individual_desired_states:
+  type: object
+  properties:
+    rule:
+      $ref: '#/expense_policy_rule_embed'
+    amount:
+      anyOf:
+        - $ref: '#/amount'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    expenses_query_object_params:
+      $ref: '#/expense_policy_expenses_query_object'
+
+expense_policy_expenses_query_object_params:
+  type: object
+  properties:
+    category_id:
+      type: string
+      description: |
+        Category ids query param to find the list of expenses.
+      example: "in.(60506)"
+    project_id:
+      type: string
+      description: |
+        Project ids query param to find the list of expenses.
+      example: "in.(261155)" 
+    cost_center_id:
+      type: string
+      description: |
+        Cost center ids query param to find the list of expenses.
+      example: "in.(7475)"
+    currency:
+      type: string
+      description: |
+        Currency query param to find the list of expenses.
+      example: "eq.USD"
+    mileage_rate_id:
+      type: string
+      description: |
+        Mileage rate query param to find the list of expenses.
+      example: "eq.2"
+    employee_id:
+      type: string
+      description: |
+        Employee id query param to find the list of expenses.
+      example: "eq.ouNSnadfaLA"
+
+expense_policy_final_desired_state:
+  type: object
+  properties:
+    expense_id:
+      type: string
+      description: |
+        This represents the id of the expense.
+      example: "txabsdfSYqd"
+    flag:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense should be flagged.
+      example: True
+    amount:
+      anyOf:
+        - $ref: '#/amount'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    is_receipt_mandatory:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense requires receipt.
+      example: True
+    add_approver_user_ids:
+      type: array
+      items:
+        type: string
+      description: |
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
+      example:
+        - usBdsdfscl
+        - usLSsdfwqt
+    remove_employee_approver1:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+      example: True
+    run_status:
+      nullable: false
+      type: string
+      enum:
+        - SUCCESS
+        - FAILURE
+      description: |
+        This represent the run status of the policy.
+      example: SUCCESS
+    run_summary:
+      type: array
+      items:
+        type: string
+      description: |
+        List of human-readable action summaries that the policy calculation suggests for this expense.
+      example:
+        - "flag the expense"
+        - "cap the amount"
+
 policy_payment_modes:
   nullable: true
   type: array
@@ -244,6 +389,7 @@ policy_payment_modes:
     enum:
       - PERSONAL_CASH_ACCOUNT
       - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+      - COMPANY_ACCOUNT
       - null
   example: PERSONAL_CASH_ACCOUNT
 
