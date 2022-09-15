@@ -362,40 +362,43 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         restricted_spender_user_ids:
-          $ref: '#/components/schemas/restricted_spender_user_ids'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-    allow_users:
-      type: string
-      nullable: false
-      description: >
-        Set who can access the object.
+          type: array
+          nullable: true
+          items:
+            type: string
+            nullable: true
+            maxLength: 15
+            description: |
+              This id provided by Fyle to identify an object.
+            example: sdfd2391
+          example:
+            - uswoirwlwwg
+            - uswlgwkgw42
+          description: >
+            - List of IDs of users who can access this object.
 
-        - `ALL` indicates the object can be accessible to all users in the org.
+            - In the same request payload, only one of
+            restricted_spender_user_ids or restricted_spender_user_group key
+              can be used to set restrictions.
+        restricted_spender_user_group:
+          type: object
+          required:
+            - with_no_cost_center_restrictions
+          additionalProperties: false
+          properties:
+            with_no_cost_center_restrictions:
+              type: boolean
+              description: >
+                - If you want to allow the cost_center to be visible to all the
+                users in the org with cost center restrictions,
+                  you can this key to True.
+                - In above use case, it eliminates the need of finding the
+                user_ids and then adding it in the restricted_spender_user_ids.
 
-        - `NONE` indicates the object cannot be accessible to any user in the
-        org.
-
-        - `UNRESTRICTED` indicates the object will be be accessible to all users
-        in the org who are not restricted to
-
-        specific objects of this resource.
-      enum:
-        - ALL
-        - NONE
-        - UNRESTRICTED
-      example: UNRESTRICTED
-    cost_center_restrict_in:
-      type: object
-      required:
-        - id
-        - allow_users
-      additionalProperties: false
-      properties:
-        id:
-          $ref: '#/components/schemas/id_integer'
-        allow_users:
-          $ref: '#/components/schemas/allow_users'
+                - In the same request payload, only one of
+                restricted_spender_user_ids or restricted_spender_user_group key
+                  can be used to set restrictions.
+              example: true
     category_out:
       type: object
       additionalProperties: false
@@ -8293,61 +8296,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /admin/cost_centers/restrict:
-    post:
-      operationId: cost_centers_restrict
-      tags:
-        - Cost Centers
-      summary: Restrict cost center to users
-      description: |
-        Restrict cost center to users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/cost_center_restrict_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/admin_cost_center_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /admin/categories:
     get:
       tags:
