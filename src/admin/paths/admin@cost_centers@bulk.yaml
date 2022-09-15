@@ -28,7 +28,6 @@ post:
         application/json:
           schema:
             oneOf:
-              - $ref: ../../components/schemas/400.yaml
               - $ref: '../../components/schemas/bulk_error.yaml'
               - type: object
                 properties:
@@ -39,11 +38,33 @@ post:
                     type: string
                     nullable: true
                   data:
-                    oneOf:
-                      - type: string
-                        nullable: true
-                      - type: object
-                        nullable: true
+                    type: string
+                    nullable: true
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: BulkError
+                  message:
+                    type: string
+                    nullable: true
+                  data:
+                    type: object
+                    properties:
+                      row:
+                        type: integer
+                        description: |
+                          This holds the info of which row contains bad data.
+                      key:
+                        oneOf:
+                          - type: string
+                          - type: integer
+                        description: |
+                          This helps in identifying the error by unique key.
+                      message:
+                        type: string
+                        description: |
+                          This explains what the error is in `human readable` text
     '401':
       description: Unauthorised request
       content:
