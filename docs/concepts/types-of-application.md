@@ -11,4 +11,4 @@ To learn how to create and authorize an internal application, proceed to the [In
 
 ## OAuth 2.0
 
-This is the less common variety of application. These are generally built by partners of Fyle who are building integrations for their customers. These are generally multi-tenant integrations and you expect multiple distinct organizations to use it. If you are interested in building an OAuth 2.0 application, do send us a note at platform-beta@fylehq.com. Please proceed to the [OAuth 2.0 Application](./oauth2-application.md) page for instructions on how to create and authorize this type of application.
+This is the less common variety of application. These are generally built by partners of Fyle who are building integrations for their customers. These are generally multi-tenant integrations and you expect multiple distinct organizations to use it. If you are interested in building an OAuth 2.0 application, do send us a note at support@fylehq.com. Please proceed to the [OAuth 2.0 Application](./oauth2-application.md) page for instructions on how to create and authorize this type of application.

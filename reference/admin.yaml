@@ -7,11 +7,11 @@ info:
     systems. 
   contact:
     name: Platform Beta
-    email: platform-beta@fylehq.com
+    email: support@fylehq.com
 servers:
-  - url: https://us1.fylehq.com/platform/v1beta
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: https://in1.fylehq.com/platform/v1beta
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
 components:
   securitySchemes:
@@ -24,6 +24,14 @@ components:
           scopes:
             '*': Grant all actions
   schemas:
+    '202':
+      type: object
+      properties:
+        message:
+          type: string
+          description: >
+            Request has been accepted and is being processed, Please try again
+            in sometime.
     '400':
       type: object
       properties:
@@ -31,7 +39,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -64,6 +72,14 @@ components:
           description: >
             This error means the requested resource was not found or the
             requester doesn't have sufficient access.
+    '500':
+      type: object
+      properties:
+        message:
+          type: string
+          description: >
+            API server hit an internal error and could not process request. This
+            is likely a bug.
     count:
       type: integer
       description: |
@@ -143,7 +159,7 @@ components:
         - uswoirwlwwg
         - uswlgwkgw42
       description: |
-        List of IDs of users who access the project.
+        List of IDs of users who can access this object.
     approver_user_ids:
       type: array
       nullable: false
@@ -160,6 +176,38 @@ components:
         - uswlgwkgw42
       description: |
         List of IDs of users who are approvers of the project.
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: sdfd2391
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: >
+        An immutable field that represents the email address of the employee.
+
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: >
+            Represents the full name of the Employee. Must be at least 3
+            characters.
+          example: John Doe
     admin_approver_project_out:
       type: object
       additionalProperties: false
@@ -203,6 +251,13 @@ components:
           $ref: '#/components/schemas/restricted_spender_user_ids'
         approver_user_ids:
           $ref: '#/components/schemas/approver_user_ids'
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are approvers for this project.
     project_in:
       type: object
       additionalProperties: false
@@ -290,7 +345,6 @@ components:
       type: object
       required:
         - name
-        - is_enabled
       additionalProperties: false
       properties:
         id:
@@ -580,6 +634,7 @@ components:
           description: |
             This specifies the default value of the expense fields.
           example: Coffee
+          nullable: true
         placeholder:
           type: string
           nullable: true
@@ -679,12 +734,6 @@ components:
           type: number
           example: 10
           description: Amount per night
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id provided by Fyle to identify an object.
-      example: sdfd2391
     department_head_user_ids:
       type: array
       nullable: false
@@ -700,32 +749,6 @@ components:
         - uswoirwlwwg
       description: |
         List of IDs of users who are head of the department.
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: >
-        An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
-    user_out_embed:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
-          example: John Doe
     department_out:
       type: object
       additionalProperties: false
@@ -761,6 +784,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
         doc_url:
           type: string
           nullable: true
@@ -797,18 +827,6 @@ components:
           description: |
             Link to an external document that would be shared with employees
           example: https://fyle.stoplight.io/
-    vehicle_type:
-      type: string
-      enum:
-        - bicycle
-        - electric_car
-        - four_wheeler
-        - four_wheeler1
-        - four_wheeler2
-        - four_wheeler3
-        - four_wheeler4
-        - two_wheeler
-      example: electric_car
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -827,7 +845,8 @@ components:
             - KM
             - MILES
         vehicle_type:
-          $ref: '#/components/schemas/vehicle_type'
+          type: string
+          example: Audi
         rate:
           type: number
           example: 10
@@ -859,7 +878,8 @@ components:
             - KM
             - MILES
         vehicle_type:
-          $ref: '#/components/schemas/vehicle_type'
+          type: string
+          example: Audi
         rate:
           type: number
           example: 10
@@ -978,6 +998,13 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
     timestamptz_utc:
       type: string
       format: date-time
@@ -1108,6 +1135,15 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
     cost_center_out_embed:
       type: object
       nullable: true
@@ -1144,7 +1180,8 @@ components:
         id:
           $ref: '#/components/schemas/id_integer'
         vehicle_type:
-          $ref: '#/components/schemas/vehicle_type'
+          type: string
+          example: Audi
         code:
           $ref: '#/components/schemas/code'
     bank_ifsc:
@@ -1595,6 +1632,157 @@ components:
           type: string
           description: |
             Link to download this file
+    schedule_config:
+      type: object
+      nullable: false
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: interval
+          enum:
+            - interval
+            - date
+            - cron
+        when:
+          nullable: false
+          oneOf:
+            - type: object
+              additionalProperties: false
+              properties:
+                weeks:
+                  type: number
+                  example: 2
+                days:
+                  type: number
+                  example: 12
+                hours:
+                  type: number
+                  example: 6
+                minutes:
+                  type: number
+                  example: 30
+                seconds:
+                  type: number
+                  example: 30
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                timezone:
+                  nullable: true
+                  type: string
+                  example: UTC
+                jitter:
+                  nullable: true
+                  type: number
+                  example: 20
+            - type: object
+              additionalProperties: false
+              properties:
+                year:
+                  type: string
+                  example: 2022
+                month:
+                  type: string
+                  example: 10
+                day:
+                  type: string
+                  example: last, 15
+                week:
+                  type: string
+                  example: 2
+                day_of_week:
+                  type: string
+                  example: mon
+                hour:
+                  type: string
+                  example: 23
+                minute:
+                  type: string
+                  example: 23
+                second:
+                  type: string
+                  example: 23
+                end_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
+            - type: object
+              additionalProperties: false
+              properties:
+                run_date:
+                  nullable: true
+                  type: string
+                  example: '2021-05-12T10:16:50.410Z'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    automate_report_submission_out:
+      type: object
+      required:
+        - id
+        - description
+        - schedule_config
+        - org_id
+        - created_at
+        - updated_at
+        - creator_user_id
+        - creator_user
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
+    automate_report_submission_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        description:
+          type: string
+          description: |
+            A human readable identifier for the automate report submission
+          example: >-
+            Expense Reports will be submitted automatically for approval on the
+            Last Day, 7th and 24th of every month.
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+    delete_automate_report_submission_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     accounting_export_out:
       type: object
       additionalProperties: false
@@ -1733,12 +1921,6 @@ components:
             created Accounting Entry numbers in Quickbooks.
         accounting_export_id:
           $ref: '#/components/schemas/fk_string'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     currency:
       type: string
       description: >
@@ -1773,6 +1955,12 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
         name:
           type: string
           maxLength: 255
@@ -1786,6 +1974,13 @@ components:
           description: Represents the name of the sub_category.
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
     account_out_embed:
       type: object
       properties:
@@ -1966,8 +2161,10 @@ components:
         org_id:
           $ref: '#/components/schemas/org_id'
         department_id:
+          nullable: true
           $ref: '#/components/schemas/department_id'
         department:
+          nullable: true
           $ref: '#/components/schemas/department_out_embed'
     card_number:
       type: string
@@ -2037,6 +2234,30 @@ components:
           type: number
           nullable: false
           example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
     expense_out:
       type: object
       additionalProperties: false
@@ -2088,6 +2309,7 @@ components:
         - custom_fields
         - code
         - state
+        - state_display_name
         - seq_num
         - report_id
         - added_to_report_at
@@ -2107,6 +2329,12 @@ components:
         - missing_mandatory_fields
         - activity_details
         - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -2350,6 +2578,10 @@ components:
             - PAYMENT_PENDING
             - APPROVED
           description: The state of the Expense.
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
         seq_num:
           type: string
           readOnly: true
@@ -2453,6 +2685,44 @@ components:
           $ref: '#/components/schemas/user_id'
         activity_details:
           $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is manually flagged or
+            not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is flagged by policy or
+            not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     amount:
       type: number
       description: |
@@ -2613,6 +2883,10 @@ components:
           description: >
             Determines whether this advance request has been exported to
             external accounting system or not.
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_out:
       type: object
       additionalProperties: false
@@ -2646,6 +2920,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2717,6 +2992,10 @@ components:
             system.
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_in:
       type: object
       properties:
@@ -2724,6 +3003,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: advwrlAGwjr2
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
         currency:
           $ref: '#/components/schemas/currency'
         amount:
@@ -2739,6 +3023,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2956,9 +3241,12 @@ components:
         - last_paid_at
         - last_approved_at
         - last_submitted_at
+        - last_resubmitted_at
         - seq_num
         - source
         - approvals
+        - employee
+        - next_approver_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -3060,6 +3348,13 @@ components:
           description: |
             Signifies if and when this report was submitted.
           nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
+          nullable: true
         seq_num:
           type: string
           description: |
@@ -3076,6 +3371,17 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
     corporate_card_out:
       type: object
       properties:
@@ -3279,6 +3585,7 @@ components:
         - id
     corporate_card_unassign_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -3349,6 +3656,41 @@ components:
             The unique id of an user who assigned the card.
           nullable: true
           example: null
+        is_dummy:
+          type: boolean
+          description: |
+            If the card is a test card
+          nullable: false
+        last_ready_for_verification_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was ready to be verified
+          example: '2022-02-01T07:20:30.951475+00:00'
+          nullable: true
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with direct visa_feed
+          nullable: false
+        last_verification_attempt_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the last card verification was attempted
+          nullable: true
+        verification_status:
+          type: string
+          nullable: false
+          description: |
+            Verification status of the corporate card
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was verified
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
       required:
         - id
         - org_id
@@ -3363,6 +3705,12 @@ components:
         - last_synced_at
         - last_assigned_at
         - assignor_user_id
+        - is_dummy
+        - last_ready_for_verification_at
+        - is_visa_enrolled
+        - last_verification_attempt_at
+        - verification_status
+        - last_verified_at
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -3629,6 +3977,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3757,6 +4112,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3771,6 +4127,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3909,6 +4266,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4041,6 +4405,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4055,6 +4420,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4135,6 +4501,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4259,6 +4632,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4273,6 +4653,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4288,6 +4669,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -4350,6 +4732,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4420,6 +4809,13 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4489,6 +4885,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4552,6 +4949,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4675,6 +5079,12 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4689,6 +5099,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4752,6 +5163,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4875,6 +5293,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -4889,6 +5314,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4952,6 +5378,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5075,6 +5508,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5089,6 +5529,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -5114,6 +5555,7 @@ components:
         - metadata
     corporate_card_transaction_undo_ignore_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -5152,6 +5594,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5275,6 +5724,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5289,6 +5745,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -5304,6 +5761,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -5368,6 +5826,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5492,6 +5957,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -5506,6 +5978,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -5546,6 +6019,7 @@ components:
         - id
         - expense_ids
     corporate_card_transaction_unmatch_out:
+      additionalProperties: false
       type: object
       properties:
         id:
@@ -5585,6 +6059,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5654,6 +6135,12 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -5722,6 +6209,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -5820,67 +6308,6 @@ components:
                 $ref: '#/components/schemas/user_id'
               org_id:
                 $ref: '#/components/schemas/org_id'
-    adjustment_out:
-      type: object
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          maxLength: 255
-          description: |
-            This id provided by Fyle to uniquely identify an adjustment.
-            This id is always prefixed with `adj`.
-          readOnly: true
-          example: adjmntGt9ju6qP
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        issuer_user_id:
-          allOf:
-            - $ref: '#/components/schemas/user_id'
-          description: |
-            Unique id of the user who is the issuer of adjustment.
-        from_account_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: accGdjd52nsk8
-        to_account_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: accdfbh236gn3
-        settlement_id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          description: |
-            Unique ID of settlement linked to this adjustment
-          example: settGsjr5183g4
-        amount:
-          type: number
-          description: >
-            Amount transferred from source account to destination account in a
-            particular adjustment.
-          example: 50
-        type:
-          type: string
-          description: |
-            Type of adjustment
-          nullable: true
-          enum:
-            - RECOVER_CCC
-            - FORGET_CCC
-            - RECOVER_ADV
-            - FORGET_ADV
-          example: RECOVER_CCC
-        note:
-          type: string
-          description: |
-            Optional description for a particular adjustment.
-          example: Adjusting pending amount of CCC account with personal account
     reimbursement_out:
       type: object
       additionalProperties: false
@@ -5945,6 +6372,10 @@ components:
           $ref: '#/components/schemas/id_string'
         code:
           $ref: '#/components/schemas/code'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     reimbursement_in_minimal:
       type: object
       properties:
@@ -6031,75 +6462,6 @@ components:
           description: |
             This indicates whether the user's accounts can be settled or not.
           example: true
-    schedule_config:
-      type: object
-      nullable: false
-      properties:
-        type:
-          nullable: false
-          type: string
-          example: interval
-          enum:
-            - interval
-            - date
-            - cron
-        when:
-          nullable: false
-          oneOf:
-            - type: object
-              additionalProperties: false
-              properties:
-                weeks:
-                  type: number
-                  example: 2
-                days:
-                  type: number
-                  example: 12
-                hours:
-                  type: number
-                  example: 6
-                minutes:
-                  type: number
-                  example: 30
-                seconds:
-                  type: number
-                  example: 30
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                timezone:
-                  nullable: true
-                  type: string
-                  example: UTC
-                jitter:
-                  nullable: true
-                  type: number
-                  example: 20
-            - type: object
-              additionalProperties: false
-              properties:
-                day:
-                  type: string
-                  example: last
-                hour:
-                  type: number
-                  example: 23
-                timezone:
-                  nullable: true
-                  type: string
-                  example: Asia/Kolkata
-            - type: object
-              additionalProperties: false
-              properties:
-                run_date:
-                  nullable: true
-                  type: string
-                  example: '2021-05-12T10:16:50.410Z'
     schedule_out:
       type: object
       additionalProperties: false
@@ -6150,6 +6512,194 @@ components:
           type: string
           nullable: true
           example: report.created
+    time_interval_granularity:
+      type: string
+      nullable: false
+      enum:
+        - day
+        - month
+        - quarter
+        - year
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount
+      example: month
+    total_amount:
+      type: number
+      nullable: false
+      description: |
+        Total sum of amount of expenses falling under filtering criteria
+      example: 990
+    time_interval_marker:
+      type: string
+      nullable: false
+      description: >
+        Representation of a point in time for which the sum of amount of
+        expenses is calculated.
+
+        Value depends of value of time_interval_granularity as follows :
+
+        - for time_interval_granularity of `day`, value will be in date format
+        YYYY-MM-DD. Example : 2021-01-01
+
+        - for time_interval_granularity of `month`, value will be in date format
+        YYYY-MM. Example : 2021-01
+
+        - for time_interval_granularity of `quarter`, value will be in date
+        format YYYY-QQ. Example : 2021-Q1
+
+        - for time_interval_granularity of `year`, value will be in date format
+        YYYY. Example : 2021
+      example: 2022-02
+    spend_overview_summary_data_out:
+      type: object
+      nullable: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/amount'
+        time_interval_marker:
+          $ref: '#/components/schemas/time_interval_marker'
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
+    spend_overview_percentage:
+      type: number
+      description: >
+        Percentage of spend which falls under this object/resource after
+        filtering criteria is applied.
+      example: 10.34
+    spend_overview_change_percentage:
+      type: number
+      description: >
+        Change in percentage of spend compared to spend in same time period one
+        time interval ago, after filtering criteria is applied.
+      example: -4.95
+    spend_overview_by_merchant_data_out:
+      type: object
+      nullable: false
+      properties:
+        merchant_name:
+          $ref: '#/components/schemas/merchant'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    project_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a project.
+      example: Westeros / Casterly rocks
+    spend_overview_by_project_data_out:
+      type: object
+      nullable: false
+      properties:
+        project_id:
+          $ref: '#/components/schemas/id_integer'
+        project_display_name:
+          $ref: '#/components/schemas/project_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    category_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a category.
+      example: Wildlings / Thenns
+    spend_overview_by_category_data_out:
+      type: object
+      nullable: false
+      properties:
+        category_id:
+          $ref: '#/components/schemas/id_integer'
+        category_display_name:
+          $ref: '#/components/schemas/category_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    department_display_name:
+      type: string
+      nullable: false
+      description: |
+        String denoting the display name of a department.
+      example: Knights / Kingsguard
+    spend_overview_by_department_data_out:
+      type: object
+      nullable: false
+      properties:
+        department_id:
+          $ref: '#/components/schemas/id_string'
+        department_display_name:
+          $ref: '#/components/schemas/department_display_name'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the full name of an employee.
+      example: Jon Snow
+    spend_overview_by_user_data_out:
+      type: object
+      nullable: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user_full_name:
+          $ref: '#/components/schemas/user_full_name'
+        user_email:
+          $ref: '#/components/schemas/email'
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
+    spend_overview_by_corporate_card_data_out:
+      type: object
+      nullable: false
+      properties:
+        card_id:
+          $ref: '#/components/schemas/id_string'
+        card_number:
+          $ref: '#/components/schemas/card_number'
+        card_holder_name:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            String denoting the name on the corporate card. This can be null.
+          example: Jon Snow
+        user_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: >
+            This id provided by Fyle to identify a user. This can be null if the
+            corporate card is not assigned to any user.
+          example: sdfd2391
+        amount:
+          $ref: '#/components/schemas/amount'
+        percentage:
+          $ref: '#/components/schemas/spend_overview_percentage'
+        change_percentage:
+          $ref: '#/components/schemas/spend_overview_change_percentage'
     account_out:
       type: object
       additionalProperties: false
@@ -6606,6 +7156,18 @@ components:
           - COMPANY_ACCOUNT
           - null
       example: PERSONAL_CASH_ACCOUNT
+    vehicle_type:
+      type: string
+      enum:
+        - bicycle
+        - electric_car
+        - four_wheeler
+        - four_wheeler1
+        - four_wheeler2
+        - four_wheeler3
+        - four_wheeler4
+        - two_wheeler
+      example: electric_car
     expense_policy_out:
       type: object
       additionalProperties: true
@@ -7882,6 +8444,611 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+    statements_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtwownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_name:
+          type: string
+          description: |
+            Specifies the name of file uploaded by the user.
+          example: amex.csv
+        file_size:
+          type: number
+          description: >
+            Specifies the size of file uploaded by the user. (The size is
+            represented in bytes)
+          example: 21
+        no_of_debit:
+          type: integer
+          description: |
+            Number of debit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_credit:
+          type: integer
+          description: |
+            Number of credit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_transactions:
+          type: integer
+          description: |
+            Number of transactions in the statement uploaded by the user.
+          example: 6
+        all_statement_columns:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies headers of the statement uploaded by the user.
+          example:
+            - account_number
+            - amount
+        start_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Start date of the statement period
+          nullable: true
+        end_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            End date of the statement period
+          nullable: true
+        has_duplicate_statements:
+          type: boolean
+          description: >
+            This specifies if the statement is complete duplicate of already
+            uploaded statement or not.
+          nullable: true
+        duplicate_statement_ids:
+          type: array
+          description: >-
+            Holds the list of statement_ids which are complete duplicate of the
+            current statement
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - stmtge49ielgel
+        has_duplicate_statement_line_items:
+          type: boolean
+          description: >
+            Indicates whether there are any line items in this statement are
+            duplicates.
+          nullable: true
+        duplicate_statement_line_items:
+          type: array
+          items:
+            type: object
+            properties:
+              ids:
+                type: array
+                items:
+                  $ref: '#/components/schemas/id_string'
+                example:
+                  - stlige49ielgel
+                description: Ids of the current statement line items which are duplicates
+              duplicate_line_item_statement_id:
+                type: string
+                description: |
+                  Id of the existing duplicate statement
+                example:
+                  - stmpge49ielgel
+                nullable: true
+        unique_id:
+          type: string
+          description: |
+            Unique hash value that is used to identify the statement.
+          example: 74175aadf22675aa59df28b96d351cfb
+        file_id:
+          type: string
+          description: |
+            File id of the uploaded statement.
+          example: fiit3pX9gzzP
+          nullable: true
+        is_processed:
+          type: boolean
+          description: >
+            Indicates whether the corporate card transactions are created out of
+            the statement.
+        statement_mappings_id:
+          type: string
+          example: stmpdfddfd
+          description: |
+            Id of the mapping used to extract transaction from the statement.
+          nullable: true
+      required:
+        - id
+        - org_id
+        - creator_user_id
+        - created_at
+        - updated_at
+        - file_name
+        - file_size
+        - no_of_debit
+        - no_of_credit
+        - no_of_transactions
+        - all_statement_columns
+        - start_date
+        - end_date
+        - has_duplicate_statements
+        - has_duplicate_statement_line_items
+        - duplicate_statement_ids
+        - duplicate_statement_line_items
+        - unique_id
+        - file_id
+        - is_processed
+        - statement_mappings_id
+    statements_in:
+      type: object
+      properties:
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fidftadfdsdf
+      required:
+        - file_id
+    statement_mappings_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmpwownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement.
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: >
+            Specifies the representation of the the amount in the statement, if
+            true then the amount represented by 
+
+            positive sign are debits, and if false then the amount represented
+            by negative sign are debits.
+          example: true
+        transaction_date_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction date column in the
+            statement.
+          example: spent date
+        merchant_column:
+          type: string
+          description: |
+            Specifies the header name of the merchant column in the statement.
+          example: merchant
+        transaction_id_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction id / unique id column
+            in the statement.
+          nullable: true
+          example: reference number
+        amount_column:
+          type: string
+          description: |
+            Specifies the header name of the amount column in the statement.
+          example: amount
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: amex_mapping
+        card_number_column:
+          type: string
+          description: >
+            Specifies the header name of the card number column in the
+            statement.
+          example: account number
+        foreign_amount_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign amount column in the
+            statement.
+          nullable: true
+          example: foreign amount
+        foreign_currency_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign currency column in the
+            statement.
+          nullable: true
+          example: foreign currency
+        description_column:
+          type: string
+          description: >
+            Specifies the header name of the description column in the
+            statement.
+          nullable: true
+          example: description
+        post_date_column:
+          type: string
+          description: |
+            Specifies the header name of the post date column in the statement.
+          example: post date
+          nullable: true
+        is_auto_created:
+          type: boolean
+          description: |
+            Helps to identify if a statement mapping got auto created or not
+          example: false
+        card_network:
+          type: string
+          description: |
+            Specifies the card network used by the card
+          example: VISA
+          nullable: true
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - bank_name
+        - is_debit_positive
+        - transaction_date_column
+        - transaction_id_column
+        - amount_column
+        - name
+        - card_number_column
+        - merchant_column
+        - foreign_amount_column
+        - foreign_currency_column
+        - description_column
+        - post_date_column
+        - is_auto_created
+        - card_network
+    statement_mappings_suggest_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmpwownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement.
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: >
+            Specifies the representation of the the amount in the statement, if
+            true then the amount represented by 
+
+            positive sign are debits, and if false then the amount represented
+            by negative sign are debits.
+          example: true
+        transaction_date_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction date column in the
+            statement.
+          example: spent date
+        merchant_column:
+          type: string
+          description: |
+            Specifies the header name of the merchant column in the statement.
+          example: merchant
+        transaction_id_column:
+          type: string
+          description: >
+            Specifies the header name of the transaction id / unique id column
+            in the statement.
+          nullable: true
+          example: reference number
+        amount_column:
+          type: string
+          description: |
+            Specifies the header name of the amount column in the statement.
+          example: amount
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: amex_mapping
+        card_number_column:
+          type: string
+          description: >
+            Specifies the header name of the card number column in the
+            statement.
+          example: account number
+        foreign_amount_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign amount column in the
+            statement.
+          nullable: true
+          example: foreign amount
+        foreign_currency_column:
+          type: string
+          description: >
+            Specifies the header name of the foreign currency column in the
+            statement.
+          nullable: true
+          example: foreign currency
+        description_column:
+          type: string
+          description: >
+            Specifies the header name of the description column in the
+            statement.
+          nullable: true
+          example: description
+        post_date_column:
+          type: string
+          description: |
+            Specifies the header name of the post date column in the statement.
+          example: post date
+          nullable: true
+        is_auto_created:
+          type: boolean
+          description: |
+            Helps to identify if a statement mapping got auto created or not
+          example: false
+        card_network:
+          type: string
+          description: |
+            Specifies the credit card network used by the card
+          example: VISA
+          nullable: true
+      required:
+        - id
+        - bank_name
+        - is_debit_positive
+        - transaction_date_column
+        - transaction_id_column
+        - amount_column
+        - name
+        - card_number_column
+        - merchant_column
+        - foreign_amount_column
+        - foreign_currency_column
+        - description_column
+        - post_date_column
+        - is_auto_created
+        - card_network
+    card_transaction_from_statement_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            description_column:
+              type: string
+              description: |
+                Specifies the mapping of description column on the statement
+              nullable: true
+              example: description
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id_column:
+              type: string
+              description: >
+                Specifies the mapping of transaction id / unique id on the
+                statement.
+              example: reference number
+              nullable: true
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            merchant_column:
+              type: string
+              description: |
+                Specifies the mapping of merchant on the statement.
+              example: Amazon
+            foreign_amount_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            post_date_column:
+              type: string
+              description: >
+                Specifies the header name of the post date column in the
+                statement.
+              example: post date
+              nullable: true
+            bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            is_debit_positive:
+              type: boolean
+              description: >
+                Specifies the representation of the the amount in the statement,
+                if true then the amount represented by |
+
+                positive sign are debits, and if false then the amount
+                represented by negative sign are debits.
+              example: true
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+              nullable: true
+            card_network:
+              type: string
+              description: |
+                Specifies the credit card network used by the card
+              example: VISA
+              nullable: true
+          required:
+            - description_column
+            - transaction_date_column
+            - transaction_id_column
+            - amount_column
+            - card_number_column
+            - merchant_column
+            - foreign_amount_column
+            - foreign_currency_column
+            - post_date_column
+            - bank_name
+            - is_debit_positive
+            - name
+            - card_network
+        ignored_line_item_ids:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies list of statement line items to be ignored in the
+            statement.
+          example:
+            - stlisfdfadssd
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_item_ids
+    preview_out:
+      properties:
+        no_of_debit:
+          type: integer
+          description: |
+            Number of debit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_credit:
+          type: integer
+          description: |
+            Number of credit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_transactions:
+          type: integer
+          description: |
+            Number of transactions in the statement uploaded by the user.
+          example: 6
+        transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                description: |
+                  Specifies the description of the transaction on the statement.
+                nullable: true
+                example: description
+              bank_name:
+                type: string
+                description: |
+                  Specifies the bank name of the statement
+                example: American Express
+              merchant:
+                type: string
+                description: |
+                  Specifies the merchant of the statement
+                example: Amazon
+              transaction_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the transaction date on the statement.
+              amount:
+                type: string
+                description: |
+                  Specifies the amount on the statement.
+                example: 30
+              card_number:
+                type: string
+                description: |
+                  Specifies the card number on the statement.
+                example: xxxx-3343
+              unique_id:
+                type: string
+                description: |
+                  Specifies the unique code / transaction id on the statement.
+                example: ed0b2aa913c54b3f903a5030208e1872
+              foreign_amount:
+                type: string
+                description: |
+                  Specifies the foreign amount on the statement.
+                nullable: true
+                example: 48
+              foreign_currency:
+                type: string
+                description: |
+                  Specifies the foreign currency on the statement.
+                nullable: true
+                example: USD
+              transaction_id:
+                type: string
+                description: |
+                  Specifies the transaction id / unique id on the statement.
+                nullable: true
+                example: USD
+              transaction_type:
+                type: string
+                description: >
+                  Specifies the transaction type of the transactions on the
+                  statement (credit / debit).
+                example: debit
+              post_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the post date on the statement.
+                nullable: true
+            required:
+              - description
+              - bank_name
+              - merchant
+              - transaction_date
+              - amount
+              - card_number
+              - unique_id
+              - foreign_amount
+              - foreign_currency
+              - transaction_id
+              - post_date
+      required:
+        - transactions
+        - no_of_debit
+        - no_of_credit
+        - no_of_transactions
   parameters:
     created_at:
       in: query
@@ -7929,6 +9096,143 @@ components:
         example: 20
         default: 50
         maximum: 200
+    time_interval_granularity:
+      in: query
+      name: time_interval_granularity
+      description: |
+        The time duration by which to group expenses to aggregate sum of amount.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.month
+        enum:
+          - eq.day
+          - eq.month
+          - eq.quarter
+          - eq.year
+        example: eq.month
+    time_interval_preset:
+      in: query
+      name: time_interval_preset
+      description: >
+        Preset time durations which can be used to filter expenses by spend
+        date.
+
+        Default value is used if it is not specified and time_interval_start and
+        time_interval_end params are also not specified.
+
+        Supported operator is `eq`.
+      schema:
+        type: string
+        default: eq.this_year
+        enum:
+          - eq.this_week
+          - eq.this_month
+          - eq.this_quarter
+          - eq.this_year
+        example: eq.this_year
+    time_interval_start:
+      in: query
+      name: time_interval_start
+      description: |
+        Start of time duration for filtering expenses by spend date.
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2020-06-01T13:14:54.804+00:00'
+    time_interval_end:
+      in: query
+      name: time_interval_end
+      description: |
+        End of time duration for filtering expenses by spend date. 
+        Need not to be specified if time_interval_preset param is passed.
+        Supported operator is `eq`.
+      schema:
+        type: string
+        description: >-
+          Date-time in [ISO8601
+          format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2021-06-01T13:14:54.804+00:00'
+    is_card_spend:
+      in: query
+      name: is_card_spend
+      description: >
+        For filtering out only those expenses where source account is corporate
+        card account
+
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    is_reimbursable:
+      in: query
+      name: is_reimbursable
+      description: >
+        For filtering out only those expenses which are reimbursable to the
+        employee.
+
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    merchant:
+      in: query
+      name: merchant
+      description: |
+        List of merchants for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(los-pollos-harmanos,saul-goodman)
+    category_id:
+      in: query
+      name: category_id
+      description: |
+        Category IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(cat123,cat345)
+    project_id:
+      in: query
+      name: project_id
+      description: |
+        Project IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(proj123,proj456)
+    department_id:
+      in: query
+      name: department_id
+      description: |
+        Department IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(dept123,dept345)
+    user_id:
+      in: query
+      name: user_id
+      description: |
+        User IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(us123,us456)
+    corporate_card_id:
+      in: query
+      name: card_id
+      description: |
+        Corporate card IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(bacc1234,bacc4567)
 tags:
   - name: Accounting Exports
     description: >
@@ -7937,12 +9241,12 @@ tags:
   - name: Accounts
     description: |
       This APIs gives access to your Employees's accounts data.
-  - name: Adjustments
-    description: |
-      This API gives you access to manage your organisation's Adjustments data.
   - name: Advances
     description: |
       This API gives you access to manage your organisation's Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to automate your organisation's manual work.
   - name: Budgets
     description: |
       This API gives you access to Budgets.
@@ -8010,6 +9314,14 @@ tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Statements
+    description: >
+      These APIs gives you access to add / view a bank statement for
+      reconciliation.
+  - name: Statement mappings
+    description: >
+      These APIs gives you access to manage statement mappings which is used for
+      statement uploads.
 paths:
   /admin/projects:
     get:
@@ -8039,6 +9351,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/admin_approver_project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8392,6 +9710,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8534,6 +9858,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8620,6 +9950,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8708,6 +10044,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/department_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8796,6 +10138,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/mileage_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8882,6 +10230,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/level_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -8968,6 +10322,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9155,6 +10515,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/automations/report_submissions:
+    post:
+      tags:
+        - Automations
+      summary: Create or update Report Submission Automations
+      description: |
+        Create or update Report Submission Automations
+      operationId: report_submission_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+    get:
+      tags:
+        - Automations
+      summary: List Report Submission Automations
+      operationId: report_submission_get
+      description: |
+        List Report Submission Automations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/automations/report_submissions/delete:
+    post:
+      tags:
+        - Automations
+      summary: Delete Report Submission Automation
+      description: |
+        Delete Report Submission Automation
+      operationId: report_submission_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_automate_report_submission_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/automate_report_submission_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/accounting_exports:
     get:
       tags:
@@ -9183,6 +10688,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/accounting_export_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9271,6 +10782,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/accounting_export_lineitem_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9456,6 +10973,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9495,6 +11018,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9588,6 +11117,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reminder_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9725,6 +11260,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -9764,6 +11305,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -10018,6 +11565,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_transaction_list_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -10587,46 +12140,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/settlement_out'
-        '401':
-          description: Unauthorised request
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-  /admin/adjustments:
-    get:
-      tags:
-        - Adjustments
-      summary: List adjustments
-      description: >
-        This API supports very rich filtering on all response fields and
-        pagination via query parameters. To understand how to use these
-        parameters, please see the [Guide to Data
-        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      operationId: adjustments_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/adjustment_out'
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -10667,6 +12186,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reimbursement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -10750,6 +12275,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_account_summary_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -10849,6 +12380,449 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/spend_overview/summary:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview Summary
+      operationId: spend_overview_summary
+      description: >
+        API to return spend overview summary data. Data returned by this API can
+        be used to plot a time series graph depicting amount of spend over a
+        period of time. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_granularity'
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/is_card_spend'
+        - $ref: '#/components/parameters/is_reimbursable'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  time_interval_granularity:
+                    $ref: '#/components/schemas/time_interval_granularity'
+                  total_amount:
+                    $ref: '#/components/schemas/total_amount'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_summary_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_merchant:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Merchant
+      operationId: spend_overview_by_merchant
+      description: >
+        API to return spend overview data grouped by merchant. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_merchant_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_project:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Project
+      operationId: spend_overview_by_project
+      description: >
+        API to return spend overview data grouped by project. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_project_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_category:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Category
+      operationId: spend_overview_by_category
+      description: >
+        API to return spend overview data grouped by category. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_category_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_department:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Department
+      operationId: spend_overview_by_department
+      description: >
+        API to return spend overview data grouped by department. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/spend_overview_by_department_data_out
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_user:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By User
+      operationId: spend_overview_by_user
+      description: >
+        API to return spend overview data grouped by user of an org. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/corporate_card_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spend_overview_by_user_data_out'
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+  /admin/spend_overview/by_corporate_card:
+    get:
+      tags:
+        - Spend Overview
+      summary: Spend Overview By Corporate Card
+      operationId: spend_overview_by_corporate_card
+      description: >
+        API to return spend overview data grouped by corporate cards being used
+        in an org. <br>
+
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/time_interval_preset'
+        - $ref: '#/components/parameters/time_interval_start'
+        - $ref: '#/components/parameters/time_interval_end'
+        - $ref: '#/components/parameters/merchant'
+        - $ref: '#/components/parameters/project_id'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/department_id'
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: >-
+                        #/components/schemas/spend_overview_by_corporate_card_data_out
+        '202':
+          description: Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '500':
+          description: API Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
   /admin/accounts:
     get:
       tags:
@@ -10877,6 +12851,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -10959,6 +12939,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/tax_group_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -11155,6 +13141,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/budget_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -11189,6 +13181,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/budget_usage_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -11539,6 +13537,315 @@ paths:
                 $ref: '#/components/schemas/403'
         '404':
           description: Object Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statements:
+    get:
+      tags:
+        - Statements
+      summary: List Statements
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: statements_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/statements_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/statements/upload:
+    post:
+      tags:
+        - Statements
+      summary: Upload a statement
+      description: >
+        Upload a corporate card statement(csv or excel) to Fyle for
+        reconciliation.
+      operationId: statements_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statements_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/statements_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statement_mappings:
+    get:
+      tags:
+        - Statement mappings
+      summary: List of statement mappings
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: statement_mappings_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/statement_mappings_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/statements/suggest_mappings:
+    post:
+      tags:
+        - Statements
+      summary: Statement mapping suggestion
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: statement_mappings_suggest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    statement_id:
+                      type: string
+                      description: |
+                        The id of the uploaded statement.
+                  required:
+                    - id
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: object
+                    items:
+                      $ref: '#/components/schemas/statement_mappings_suggest_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/statements/preview:
+    post:
+      tags:
+        - Statements
+      summary: Preview of the uploaded statement
+      description: >
+        This API helps in converting the statement with the mapping chosed and
+        helps the user to preview it, this doesn't save the statement
+      operationId: statements_preview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_transaction_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/preview_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statements/create_card_transactions:
+    post:
+      tags:
+        - Statements
+      summary: Create corporate card transactions out of the uploaded statement
+      description: >
+        This API helps in converting the statement with the mapping chosed and
+        create card transactions out of the statement.
+      operationId: statements_create_card_transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_transaction_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
