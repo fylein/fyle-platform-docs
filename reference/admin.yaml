@@ -7341,10 +7341,8 @@ components:
           minimum: 0
           maximum: 100
         expense_custom_fields:
-          nullable: true
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/custom_fields'
-            - $ref: '#/components/schemas/null_field'
           description: |
             Custom fields (if any)
         expense_custom_fields_op:
@@ -7478,10 +7476,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/contains_operator'
         employee_custom_fields:
-          nullable: true
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/custom_fields'
-            - $ref: '#/components/schemas/null_field'
           description: |
             Custom fields (if any)
         employee_custom_fields_op:
@@ -8357,15 +8353,79 @@ components:
     expense_policy_individual_desired_states:
       type: object
       properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: >
+            This represent the status of policy computation for an expense
+            against the policy. If the state is
+
+            UNVIOLATED, it means that the expense is not violating the policy.
+            If the state is VIOLATION_ACTION_SUCCESS,
+
+            it means that expense is violating the policy and action stated in
+            the object will be applied to
+
+            expense. However, if the state is VIOLATION_ACTION_FAILURE, it means
+            that the policy is violated for the
+
+            expense but since some approver was missing or not setup properly,
+            it will fail to take action 
+
+            on the expense
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense. Note that, in
+
+            case some approver was not setup properly for the given violation,
+            this array will contain description of
+
+            missing approvers. For example, Department head, project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the policy rule.
+          example: tprabsdfSYqd
         rule:
           $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
+          nullable: true
           anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
         expenses_query_object_params:
+          nullable: true
           $ref: '#/components/schemas/expense_policy_expenses_query_object'
     expense_policy_final_desired_state:
       type: object
@@ -8382,8 +8442,10 @@ components:
             should be flagged.
           example: true
         amount:
+          nullable: true
           anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
@@ -8394,6 +8456,7 @@ components:
             requires receipt.
           example: true
         add_approver_user_ids:
+          nullable: true
           type: array
           items:
             type: string
@@ -13481,7 +13544,6 @@ paths:
       parameters:
         - in: query
           name: expense_id
-          required: true
           description: >
             The id of the expense for which you are querying the policy
             states.<br>
