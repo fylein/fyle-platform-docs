@@ -49,6 +49,7 @@ expense_out:
     - custom_fields
     - code
     - state
+    - state_display_name
     - seq_num
     - report_id
     - added_to_report_at
@@ -68,6 +69,12 @@ expense_out:
     - missing_mandatory_fields
     - activity_details
     - creator_user_id
+    - extracted_data
+    - is_manually_flagged
+    - is_policy_flagged
+    - split_group_id
+    - is_physical_bill_submitted
+    - physical_bill_submitted_at
   properties:
     id:
       allOf:
@@ -287,6 +294,10 @@ expense_out:
         - PAYMENT_PENDING
         - APPROVED
       description: The state of the Expense.
+    state_display_name:
+      type: string
+      example: Sent Back
+      description: readable state name
     seq_num:
       type: string
       readOnly: true
@@ -392,8 +403,38 @@ expense_out:
       $ref: './fields.yaml#/user_id'
     activity_details:
       $ref: './fields.yaml#/activity_details'
-
-
+    extracted_data:
+      $ref: './fields.yaml#/extracted_data'
+    is_manually_flagged:
+      type: boolean
+      nullable: true
+      description: This fields marks whether a given expense is manually flagged or not.
+      example: true
+    is_policy_flagged:
+      type: boolean
+      nullable: true
+      description: This fields marks whether a given expense is flagged by policy or not.
+      example: true
+    split_group_id:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: txwownwrngx
+    is_physical_bill_submitted:
+      type: boolean
+      nullable: true
+      description: |
+        This fields marks if physical has been collected for the given expense.
+      example: true
+    physical_bill_submitted_at:
+      type: string
+      format: date-time
+      example: '2020-06-11T13:14:55.201598+00:00'
+      description: |
+        Signifies if and when the physical bill for this report was submitted.
+      nullable: true
 expense_in:
   type: object
   additionalProperties: false
@@ -592,9 +633,9 @@ spender_expense_in:
         - $ref: './fields.yaml#/fk_string'
       nullable: true
     is_billable:
-      $ref: './fields.yaml#/foreign_currency'
+      $ref: './fields.yaml#/is_billable'
     is_reimbursable:
-      $ref: './fields.yaml#/foreign_currency'
+      $ref: './fields.yaml#/is_reimbursable'
     distance:
       $ref: './fields.yaml#/distance'
     distance_unit:

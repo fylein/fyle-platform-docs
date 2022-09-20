@@ -280,6 +280,7 @@ expense_policy_individual_desired_states:
   type: object
   properties:
     add_approver_user_ids:
+      nullable: true
       type: array
       items:
         type: string
@@ -292,8 +293,8 @@ expense_policy_individual_desired_states:
       nullable: false
       type: string
       enum:
-        - VIOLATION_ACTION_SUCCESS
-        - VIOLATION_ACTION_FAILURE
+        - VIOLATED_ACTION_SUCCESS
+        - VIOLATED_ACTION_FAILURE
         - UNVIOLATED
       description: |
         This represent the status of policy computation for an expense against the policy. If the state is
@@ -327,12 +328,15 @@ expense_policy_individual_desired_states:
     rule:
       $ref: '#/expense_policy_rule_embed'
     amount:
+      nullable: true
       anyOf:
         - $ref: '#/amount'
+        - $ref: '#/null_field'
       description: |
         Amount that the policy calculation suggests for this expense.
       example: 500
     expenses_query_object_params:
+      nullable: true
       $ref: '#/expense_policy_expenses_query_object'
 
 expense_policy_expenses_query_object_params:
@@ -383,8 +387,10 @@ expense_policy_final_desired_state:
         A true value here means, that as per policy calculation this expense should be flagged.
       example: True
     amount:
+      nullable: true
       anyOf:
         - $ref: '#/amount'
+        - $ref: '#/null_field'
       description: |
         Amount that the policy calculation suggests for this expense.
       example: 500
@@ -394,6 +400,7 @@ expense_policy_final_desired_state:
         A true value here means, that as per policy calculation this expense requires receipt.
       example: True
     add_approver_user_ids:
+      nullable: true
       type: array
       items:
         type: string
@@ -437,6 +444,16 @@ policy_payment_modes:
       - COMPANY_ACCOUNT
       - null
   example: PERSONAL_CASH_ACCOUNT
+report_source:
+  type: string
+  enum:
+    - WEBAPP
+    - MOBILE
+    - TPA
+    - SLACK
+  description: >
+    Enum value signifying the client from which this expense was created
+  example: SLACK
 
 merchant:
   type: string
@@ -583,6 +600,32 @@ activity_details:
       nullable: False
       example: 70
 
+extracted_data:
+  type: object
+  nullable: True
+  properties:
+    amount:
+      type: number
+      nullable: True
+      example: 21
+    vendor_name:
+      type: string
+      nullable: True
+      example: Uber
+    currency:
+      type: string
+      nullable: True
+      example: USD
+    category:
+      type: string
+      nullable: True
+      example: Taxi
+    date:
+      type: string
+      nullable: True
+      example: '2020-07-20'
+
+
 location:
   type: object
   nullable: true
@@ -697,16 +740,38 @@ schedule_config:
         - type: object
           additionalProperties: false
           properties:
+            year:
+              type: string
+              example: 2022
+            month:
+              type: string
+              example: 10        
             day:
               type: string
-              example: last
+              example: last, 15
+            week:
+              type: string
+              example: 2 
+            day_of_week:
+              type: string
+              example: mon
             hour:
-              type: number
+              type: string
               example: 23
-            timezone:
+            minute:
+              type: string
+              example: 23
+            second:
+              type: string
+              example: 23
+            end_date:
               nullable: true
               type: string
-              example: Asia/Kolkata
+              example: '2020-11-11T16:29:30.965869Z'
+            start_date:
+              nullable: true
+              type: string
+              example: '2020-11-11T16:29:30.965869Z'
         - type: object
           additionalProperties: false
           properties:
@@ -755,7 +820,7 @@ restricted_spender_user_ids:
     example: 'sdfd2391'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
-    List of IDs of users who access the project.
+    List of IDs of users who can access this object.
 
 approver_user_ids:
   type: array
@@ -844,6 +909,78 @@ reminder_schedule_config:
           type: number
           example: 42
           description: minute of the hour
+
+project_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a project.
+  example: Westeros / Casterly rocks
+
+category_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a category.
+  example: Wildlings / Thenns
+
+department_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a department.
+  example: Knights / Kingsguard
+
+user_full_name:
+  type: string
+  maxLength: 255
+  description: |
+    String denoting the full name of an employee.
+  example: Jon Snow
+
+time_interval_granularity:
+  type: string
+  nullable: False
+  enum:
+    - day
+    - month
+    - quarter
+    - year
+  description: |
+    The time duration by which to group expenses to aggregate sum of amount
+  example: month
+
+total_amount:
+  type: number
+  nullable: False
+  description: |
+    Total sum of amount of expenses falling under filtering criteria
+  example: 990
+
+time_interval_marker:
+  type: string
+  nullable: False
+  description: |
+    Representation of a point in time for which the sum of amount of expenses is calculated.
+    Value depends of value of time_interval_granularity as follows :
+    - for time_interval_granularity of `day`, value will be in date format YYYY-MM-DD. Example : 2021-01-01
+    - for time_interval_granularity of `month`, value will be in date format YYYY-MM. Example : 2021-01
+    - for time_interval_granularity of `quarter`, value will be in date format YYYY-QQ. Example : 2021-Q1
+    - for time_interval_granularity of `year`, value will be in date format YYYY. Example : 2021
+  example: 2022-02
+
+spend_overview_percentage:
+  type: number
+  description: |
+    Percentage of spend which falls under this object/resource after filtering criteria is applied.
+  example: 10.34
+
+spend_overview_change_percentage:
+  type: number
+  description: |
+    Change in percentage of spend compared to spend in same time period one time interval ago, after filtering criteria is applied.
+  example: -4.95
+
 
 department_head_user_ids:
   type: array

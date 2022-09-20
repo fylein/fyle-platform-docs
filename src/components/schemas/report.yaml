@@ -19,9 +19,12 @@ report_out:
     - last_paid_at
     - last_approved_at
     - last_submitted_at
+    - last_resubmitted_at
     - seq_num
     - source
     - approvals
+    - employee
+    - next_approver_user_ids
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -121,6 +124,13 @@ report_out:
       description: |
         Signifies if and when this report was submitted.
       nullable: True
+    last_resubmitted_at:
+      type: string
+      format: date-time
+      example: '2020-06-11T13:14:55.201598+00:00'
+      description: |
+        Signifies if and when this report was resubmitted.
+      nullable: True
     seq_num:
       type: string
       description: |
@@ -137,6 +147,33 @@ report_out:
         $ref: ./report_approval.yaml#/report_approval_out_embed
       description: |
         List of report_approval objects
+    employee_id:
+      $ref: './fields.yaml#/employee_id'
+    employee:
+      $ref: './employee.yaml#/employee_out_embed'
+    next_approver_user_ids:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/id_string'
+      example:
+        - us123heh98
+
+spender_report_in:
+  type: object
+  additionalProperties: false
+  required:
+    - purpose
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    source:
+      $ref: './fields.yaml#/report_source'
+    purpose:
+      type: string
+      description: |
+        Indicates purpose of the reports.
+      example: '#1: Jun 2020'
 
 report_out_embed:
   type: object
@@ -270,6 +307,30 @@ report_action_with_expenses_ids_to_eject:
           - $ref: './fields.yaml#/id_string'
       example: [ 'txelntgwgwll' ]
 
+report_action_submit:
+  type: object
+  additionalProperties: False
+  required:
+    - id
+  properties:
+    id:
+      type: string
+      description: |
+        id of report, which needs to be submitted
+      example: 'rpa21A2rdj2'
+
+report_action_resubmit:
+  type: object
+  additionalProperties: False
+  required:
+    - id
+  properties:
+    id:
+      type: string
+      description: |
+        id of report, which needs to be resubmitted
+      example: 'rpa21A2rdj2'
+
 report_out_subscriptions:
   type: object
   additionalProperties: false
@@ -297,3 +358,28 @@ report_out_subscriptions:
     reason:
       type: string
       example: 'comment given by Approver while approving the report.'
+
+report_purpose_out:
+  type: object
+  additionalProperties: False
+  required:
+    - purpose
+  properties:
+    purpose:
+      type: string
+      description: purpose for creating the report
+      example: Business trip to London
+      nullable: True
+
+report_purpose_in:
+  type: object
+  additionalProperties: False
+  required:
+    - expense_ids
+  properties:
+    expense_ids:
+      type: array
+      items:
+        allOf:
+          - $ref: './fields.yaml#/id_string'
+      example: [ 'txelntgwgwll' ]

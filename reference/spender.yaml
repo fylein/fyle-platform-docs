@@ -5,14 +5,14 @@ info:
   termsOfService: https://www.fylehq.com/privacy/terms-and-conditions
   contact:
     name: Platform Beta
-    email: platform-beta@fylehq.com
+    email: support@fylehq.com
   description: >
     These APIs are used by applications that operate on the Spender's behalf.
     Very commonly, it is to enable creation of expenses and reports.
 servers:
-  - url: https://us1.fylehq.com/platform/v1beta
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: https://in1.fylehq.com/platform/v1beta
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
 components:
   securitySchemes:
@@ -32,7 +32,7 @@ components:
           type: string
           nullable: true
           description: |
-            Message describing why the request is valid
+            Message describing why the request is invalid
     '401':
       type: object
       properties:
@@ -323,18 +323,6 @@ components:
           example: true
         code:
           $ref: '#/components/schemas/code'
-    vehicle_type:
-      type: string
-      enum:
-        - bicycle
-        - electric_car
-        - four_wheeler
-        - four_wheeler1
-        - four_wheeler2
-        - four_wheeler3
-        - four_wheeler4
-        - two_wheeler
-      example: electric_car
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -353,7 +341,8 @@ components:
             - KM
             - MILES
         vehicle_type:
-          $ref: '#/components/schemas/vehicle_type'
+          type: string
+          example: Audi
         rate:
           type: number
           example: 10
@@ -574,6 +563,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
         doc_url:
           type: string
           nullable: true
@@ -630,6 +626,12 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
         name:
           type: string
           maxLength: 255
@@ -643,6 +645,13 @@ components:
           description: Represents the name of the sub_category.
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: >
+            This is a combination of name and sub_category separated by a / and
+            spaces. In case if no sub_category is present it is same as name of
+            the category.
     project_out_embed:
       type: object
       nullable: true
@@ -663,6 +672,15 @@ components:
           example: Formula One
         code:
           $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: >
+            This is a combination of name and sub_project separated by a / and
+            spaces.
+
+            In case if no sub_project is present it is same as name of the
+            project.
     fk_string:
       type: string
       nullable: true
@@ -695,7 +713,8 @@ components:
         id:
           $ref: '#/components/schemas/id_integer'
         vehicle_type:
-          $ref: '#/components/schemas/vehicle_type'
+          type: string
+          example: Audi
         code:
           $ref: '#/components/schemas/code'
     per_diem_rate_out_embed:
@@ -928,6 +947,13 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: >
+            This is a combination of name and sub_department separated by a /
+            and spaces. In case if no sub_department is present it is same as
+            name of the department.
     employee_out_embed:
       type: object
       additionalProperties: false
@@ -952,8 +978,10 @@ components:
         org_id:
           $ref: '#/components/schemas/org_id'
         department_id:
+          nullable: true
           $ref: '#/components/schemas/department_id'
         department:
+          nullable: true
           $ref: '#/components/schemas/department_out_embed'
     card_number:
       type: string
@@ -1023,6 +1051,30 @@ components:
           type: number
           nullable: false
           example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
     expense_out:
       type: object
       additionalProperties: false
@@ -1074,6 +1126,7 @@ components:
         - custom_fields
         - code
         - state
+        - state_display_name
         - seq_num
         - report_id
         - added_to_report_at
@@ -1093,6 +1146,12 @@ components:
         - missing_mandatory_fields
         - activity_details
         - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
       properties:
         id:
           allOf:
@@ -1336,6 +1395,10 @@ components:
             - PAYMENT_PENDING
             - APPROVED
           description: The state of the Expense.
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
         seq_num:
           type: string
           readOnly: true
@@ -1439,6 +1502,44 @@ components:
           $ref: '#/components/schemas/user_id'
         activity_details:
           $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is manually flagged or
+            not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: >-
+            This fields marks whether a given expense is flagged by policy or
+            not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: >
+            This fields marks if physical has been collected for the given
+            expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: >
+            Signifies if and when the physical bill for this report was
+            submitted.
+          nullable: true
     timestamptz_pst:
       type: string
       format: date-time
@@ -1475,6 +1576,16 @@ components:
       description: |
         The expense amount as claimed by user.
       example: 1984.18
+    is_billable:
+      type: boolean
+      nullable: true
+      example: true
+      description: This field marks whether a given expense is billable or not.
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
     distance:
       type: number
       nullable: true
@@ -1567,9 +1678,9 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
         is_billable:
-          $ref: '#/components/schemas/foreign_currency'
+          $ref: '#/components/schemas/is_billable'
         is_reimbursable:
-          $ref: '#/components/schemas/foreign_currency'
+          $ref: '#/components/schemas/is_reimbursable'
         distance:
           $ref: '#/components/schemas/distance'
         distance_unit:
@@ -1735,9 +1846,12 @@ components:
         - last_paid_at
         - last_approved_at
         - last_submitted_at
+        - last_resubmitted_at
         - seq_num
         - source
         - approvals
+        - employee
+        - next_approver_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1839,6 +1953,13 @@ components:
           description: |
             Signifies if and when this report was submitted.
           nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
+          nullable: true
         seq_num:
           type: string
           description: |
@@ -1855,6 +1976,17 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
     report_out_subscriptions:
       type: object
       additionalProperties: false
@@ -1945,16 +2077,38 @@ components:
             - type: object
               additionalProperties: false
               properties:
+                year:
+                  type: string
+                  example: 2022
+                month:
+                  type: string
+                  example: 10
                 day:
                   type: string
-                  example: last
+                  example: last, 15
+                week:
+                  type: string
+                  example: 2
+                day_of_week:
+                  type: string
+                  example: mon
                 hour:
-                  type: number
+                  type: string
                   example: 23
-                timezone:
+                minute:
+                  type: string
+                  example: 23
+                second:
+                  type: string
+                  example: 23
+                end_date:
                   nullable: true
                   type: string
-                  example: Asia/Kolkata
+                  example: '2020-11-11T16:29:30.965869Z'
+                start_date:
+                  nullable: true
+                  type: string
+                  example: '2020-11-11T16:29:30.965869Z'
             - type: object
               additionalProperties: false
               properties:
@@ -2012,6 +2166,50 @@ components:
           type: string
           nullable: true
           example: report.created
+    report_source:
+      type: string
+      enum:
+        - WEBAPP
+        - MOBILE
+        - TPA
+        - SLACK
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    spender_report_in:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        source:
+          $ref: '#/components/schemas/report_source'
+        purpose:
+          type: string
+          description: |
+            Indicates purpose of the reports.
+          example: '#1: Jun 2020'
+    report_action_with_expenses_ids_to_add:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - expense_ids
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, to which the expenses are to be added
+          example: rpa21A2rdj2
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2036,6 +2234,52 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    report_action_submit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be submitted
+          example: rpa21A2rdj2
+    report_action_resubmit:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, which needs to be resubmitted
+          example: rpa21A2rdj2
+    report_purpose_in:
+      type: object
+      additionalProperties: false
+      required:
+        - expense_ids
+      properties:
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+    report_purpose_out:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+      properties:
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
     advance_out_embed:
       type: object
       nullable: true
@@ -2191,6 +2435,10 @@ components:
           description: >
             Determines whether this advance request has been exported to
             external accounting system or not.
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     advance_request_in:
       type: object
       properties:
@@ -2266,6 +2514,7 @@ components:
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
+            - CASH
           example: CASH
         advance_request_id:
           allOf:
@@ -2337,6 +2586,10 @@ components:
             system.
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     corporate_card_out:
       type: object
       properties:
@@ -2730,6 +2983,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -2858,6 +3118,7 @@ components:
           description: >
             Determines whether this CCC transaction has been exported to
             external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -2872,6 +3133,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -2945,6 +3207,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3068,6 +3337,12 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3082,6 +3357,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3145,6 +3421,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3268,6 +3551,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3282,6 +3572,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3345,6 +3636,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3468,6 +3766,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3482,6 +3787,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3507,6 +3813,7 @@ components:
         - metadata
     corporate_card_transaction_undo_ignore_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -3545,6 +3852,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3668,6 +3982,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3682,6 +4003,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3697,6 +4019,7 @@ components:
         - is_marked_personal
         - last_marked_personal_at
         - is_dismissed
+        - is_exported
         - last_dismissed_at
         - is_auto_matched
         - auto_suggested_expense_ids
@@ -3761,6 +4084,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -3885,6 +4215,13 @@ components:
             Note: This is not same as the category added in Fyle but just a
             string
           example: null
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
+          example: false
         metadata:
           $ref: '#/components/schemas/corporate_card_transaction_metadata'
       required:
@@ -3899,6 +4236,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -3939,6 +4277,7 @@ components:
         - id
         - expense_ids
     corporate_card_transaction_unmatch_out:
+      additionalProperties: false
       type: object
       properties:
         id:
@@ -3978,6 +4317,13 @@ components:
           description: |
             Holds the description of the card transaction
           example: Team lunch
+        statement_id:
+          type: string
+          nullable: true
+          description: >
+            If the transaction is created by statement uploaded then this key
+            refers to the source statement.
+          example: stmtdasfdsaf3
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -4047,6 +4393,12 @@ components:
           example: false
           description: |
             Determines whether this card transaction is dismissed.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: >
+            Determines whether this CCC transaction has been exported to
+            external accounting system or not.
         last_dismissed_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4115,6 +4467,7 @@ components:
         - spent_at
         - post_date
         - description
+        - statement_id
         - foreign_currency
         - foreign_amount
         - code
@@ -4305,6 +4658,18 @@ components:
           - COMPANY_ACCOUNT
           - null
       example: PERSONAL_CASH_ACCOUNT
+    vehicle_type:
+      type: string
+      enum:
+        - bicycle
+        - electric_car
+        - four_wheeler
+        - four_wheeler1
+        - four_wheeler2
+        - four_wheeler3
+        - four_wheeler4
+        - two_wheeler
+      example: electric_car
     expense_policy_out:
       type: object
       additionalProperties: true
@@ -4478,10 +4843,8 @@ components:
           minimum: 0
           maximum: 100
         expense_custom_fields:
-          nullable: true
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/custom_fields'
-            - $ref: '#/components/schemas/null_field'
           description: |
             Custom fields (if any)
         expense_custom_fields_op:
@@ -4615,10 +4978,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/contains_operator'
         employee_custom_fields:
-          nullable: true
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/custom_fields'
-            - $ref: '#/components/schemas/null_field'
           description: |
             Custom fields (if any)
         employee_custom_fields_op:
@@ -4869,6 +5230,7 @@ components:
       type: object
       properties:
         add_approver_user_ids:
+          nullable: true
           type: array
           items:
             type: string
@@ -4882,8 +5244,8 @@ components:
           nullable: false
           type: string
           enum:
-            - VIOLATION_ACTION_SUCCESS
-            - VIOLATION_ACTION_FAILURE
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
             - UNVIOLATED
           description: >
             This represent the status of policy computation for an expense
@@ -4931,12 +5293,15 @@ components:
         rule:
           $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
+          nullable: true
           anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
         expenses_query_object_params:
+          nullable: true
           $ref: '#/components/schemas/expense_policy_expenses_query_object'
     expense_policy_final_desired_state:
       type: object
@@ -4953,8 +5318,10 @@ components:
             should be flagged.
           example: true
         amount:
+          nullable: true
           anyOf:
             - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
@@ -4965,6 +5332,7 @@ components:
             requires receipt.
           example: true
         add_approver_user_ids:
+          nullable: true
           type: array
           items:
             type: string
@@ -5015,178 +5383,20 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
-    is_billable:
-      type: boolean
-      nullable: true
-      example: true
-      description: This field marks whether a given expense is billable or not.
-    is_reimbursable:
-      type: boolean
-      nullable: true
-      description: This field marks whether a given expense is reimbursable or not.
-      example: true
-    expense_check_policies_in:
+    spender_automate_report_submission_next_at_out:
       type: object
-      additionalProperties: false
       required:
-        - claim_amount
-        - spent_at
+        - next_at
       properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-          description: |
-            Expense id provided by Fyle during the creation of expense.
-        spent_at:
-          $ref: '#/components/schemas/spent_at'
-        source:
-          $ref: '#/components/schemas/source'
-        merchant:
-          $ref: '#/components/schemas/merchant'
-        foreign_currency:
-          $ref: '#/components/schemas/foreign_currency'
-        foreign_amount:
-          $ref: '#/components/schemas/foreign_amount'
-        claim_amount:
-          $ref: '#/components/schemas/claim_amount'
-        purpose:
+        next_at:
           type: string
-          example: Team lunch
-        cost_center_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          description: >
-            This represents the cost_center's id given by Fyle during creation
-            of cost center
-
-            for which this expense is created.
-          nullable: true
-          example: 1049
-        category_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          description: >
-            This represents the category's id given by Fyle during creation of
-            category
-
-            for which this expense is created.
-          nullable: true
-          example: 49058
-        project_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          description: >
-            This represents the project's id given by Fyle during creation of
-            project
-
-            for which this expense is created.
-          nullable: true
-          example: 92895
-        source_account_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          description: >
-            This represents the source account's id given by Fyle during
-            creation of account type
-
-            of user for which this expense is created.
-          example: acwbl222wlg
-        tax_amount:
-          type: number
-          nullable: true
-          description: Tax amount as setup by your organization.
-        tax_group_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          description: >
-            This represents the Tax's group id given by Fyle during creation of
-            tax group
-
-            for which this expense is created.
-          nullable: true
-        is_billable:
-          $ref: '#/components/schemas/is_billable'
-        is_reimbursable:
-          $ref: '#/components/schemas/is_reimbursable'
-        distance:
-          $ref: '#/components/schemas/distance'
-        distance_unit:
-          $ref: '#/components/schemas/distance_unit'
-        started_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-          description: >
-            Specific to per diem related expenses, start date from which per
-            diem claim is made.
-        ended_at:
-          $ref: '#/components/schemas/timestamptz_pst'
-          description: >
-            Specific to per diem related expenses, end date until which per diem
-            claim is made.
-        travel_classes:
-          $ref: '#/components/schemas/travel_classes'
-        locations:
-          $ref: '#/components/schemas/locations'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
-        num_files:
-          type: integer
-          description: |
-            Number of files/reciept attached to expense
-          example: 4
-        is_matching_ccc:
-          type: boolean
-          description: |
-            This field is set if expense matches any card expense
-          default: false
-          example: false
-        mileage_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          description: >
-            Specific to mileage expense. This represents the Mileage's rate id
-            given by Fyle
-
-            during creation of mileage rate for which this expense is created.
-          nullable: true
-          example: 9080
-        mileage_calculated_distance:
-          type: number
+          format: date-time
           nullable: true
           description: >-
-            Specific to mileage expense. Distance compluted by Fyle in mileage
-            expenses.
-        mileage_calculated_amount:
-          type: number
-          nullable: true
-          description: >-
-            Specific to mileage expense. Amount compluted by Fyle in mileage
-            expenses.
-        per_diem_rate_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
-          description: >
-            Specific to per diem expense. This represents the per diem's rate id
-            given by Fyle
-
-            during creation of per diem rate for which this expense is created.
-          nullable: true
-          example: 583
-        per_diem_num_days:
-          type: integer
-          nullable: true
-          description: >
-            Specific to per diem related expenses, number of days for which per
-            diem claim is made.
-          example: 2
-    expense_check_policies_out:
-      type: object
-      additionalProperties: false
-      properties:
-        individual_desired_states:
-          type: array
-          items:
-            $ref: '#/components/schemas/expense_policy_individual_desired_states'
-        final_desired_state:
-          $ref: '#/components/schemas/expense_policy_final_desired_state'
+            Signifies the time when the next automate report submission will run
+            for the organization. Date-time in [ISO8601
+            format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2021-06-01T13:14:54.804+00:00'
   parameters:
     created_at:
       in: query
@@ -5248,6 +5458,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to view your Cash Advances data.
+  - name: Automations
+    description: |
+      This API gives you access to organisation's automations data.
   - name: Categories
     description: |
       This API gives you list of your organisation's Categories data.
@@ -5329,6 +5542,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/project_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5407,6 +5626,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5440,6 +5665,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5473,6 +5704,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/mileage_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5535,6 +5772,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -5569,6 +5812,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/department_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -5896,6 +6145,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6135,6 +6390,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
   /spender/reports:
+    post:
+      tags:
+        - Reports
+      summary: Create or update an Expense Report.
+      description: |
+        Create or update an Expense Report.
+      operationId: reports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_report_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
     get:
       operationId: reports_list
       tags:
@@ -6180,6 +6485,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/reports/add_expenses:
+    post:
+      tags:
+        - Reports
+      summary: Add expenses to a report
+      description: Add expenses to a report
+      operationId: reports_add_expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_with_expenses_ids_to_add'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/reports/eject_expenses:
     post:
       tags:
@@ -6231,6 +6584,150 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/reports/submit:
+    post:
+      tags:
+        - Reports
+      summary: Submit report
+      description: Submit report
+      operationId: reports_submit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_submit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/resubmit:
+    post:
+      tags:
+        - Reports
+      summary: Resubmit report
+      description: Resubmit report
+      operationId: reports_resubmit_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_resubmit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/suggest_purpose:
+    post:
+      tags:
+        - Reports
+      summary: Suggests purpose for an Expense Report
+      description: Suggests purpose of an Expense Report
+      operationId: suggests_purpose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_purpose_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_purpose_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advance_requests:
     get:
       tags:
@@ -6258,6 +6755,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -6351,6 +6854,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -6390,6 +6899,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6423,6 +6938,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_transaction_list_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6779,6 +7300,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/spender_employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6813,6 +7340,12 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/tax_group_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
@@ -6937,8 +7470,7 @@ paths:
         - in: query
           name: id
           description: >
-            The id of the expense for which you are querying the policy
-            states.<br>
+            The id of the expense policy rule.<br>
 
             Supported operators are `eq`, `in`, `neq`, `not_in`.<br>
 
@@ -6955,6 +7487,16 @@ paths:
           schema:
             type: string
             example: eq."tprmdNPsd"
+        - in: query
+          name: is_enabled
+          description: |
+            Whether to fetch only active expense policy rule.<br>
+            Supported operators are `eq`.<br>
+            is_enabled=eq.true <br>
+            is_enabled=eq.false
+          schema:
+            type: string
+            example: eq.true
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       responses:
@@ -6991,7 +7533,10 @@ paths:
       parameters:
         - in: query
           name: expense_id
+<<<<<<< HEAD
           required: true
+=======
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           description: >
             The id of the expense for which you are querying the policy
             states.<br>
@@ -7051,6 +7596,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+<<<<<<< HEAD
   /spender/expenses/check_policies:
     post:
       tags:
@@ -7059,6 +7605,16 @@ paths:
       description: |
         This API checks an expense for policy violations
       operationId: check_policies_post
+=======
+  /spender/automations/report_submissions/next_at:
+    post:
+      tags:
+        - Automations
+      summary: Fetch Report Submission Automation next run time
+      description: |
+        Fetch Report Submission Automation next run time
+      operationId: fetch_auto_report_submission_next_run_time
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
       requestBody:
         required: true
         content:
@@ -7069,8 +7625,12 @@ paths:
               required:
                 - data
               properties:
+<<<<<<< HEAD
                 data:
                   $ref: '#/components/schemas/expense_check_policies_in'
+=======
+                data: {}
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
       responses:
         '200':
           description: OK
@@ -7079,24 +7639,48 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+<<<<<<< HEAD
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_check_policies_out'
         '400':
           description: Unauthorised request
+=======
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/spender_automate_report_submission_next_at_out
+        '400':
+          description: Bad request
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
         '401':
+<<<<<<< HEAD
           description: Unauthorised request
+=======
+          description: Unauthorized request
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+<<<<<<< HEAD
         '404':
           description: Not Found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+=======
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+>>>>>>> 9744739b017a68b72444b0a025f77b367093845e
