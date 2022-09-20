@@ -1305,11 +1305,11 @@ components:
         mileage_calculated_distance:
           type: number
           nullable: true
-          description: Distance compluted by Fyle in mileage expenses.
+          description: Distance computes by Fyle in mileage expenses.
         mileage_calculated_amount:
           type: number
           nullable: true
-          description: Amount compluted by Fyle in mileage expenses.
+          description: Amount computes by Fyle in mileage expenses.
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -5383,6 +5383,175 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+    expense_check_policies_in:
+      type: object
+      additionalProperties: false
+      required:
+        - claim_amount
+        - spent_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Expense id provided by Fyle during the creation of expense.
+        spent_at:
+          $ref: '#/components/schemas/spent_at'
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          description: >
+            Amount value of the object, in original currency i.e the currency in
+            which the expense was initially created.
+        claim_amount:
+          $ref: '#/components/schemas/claim_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the cost_center's id given by Fyle during creation
+            of cost center
+
+            for which this expense is created.
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the category's id given by Fyle during creation of
+            category
+
+            for which this expense is created.
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the project's id given by Fyle during creation of
+            project
+
+            for which this expense is created.
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the source account's id given by Fyle during
+            creation of account type
+
+            of user for which this expense is created.
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the Tax's group id given by Fyle during creation of
+            tax group
+
+            for which this expense is created.
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses, start date from which per
+            diem claim is made.
+        ended_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses, end date until which per diem
+            claim is made.
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        num_files:
+          type: integer
+          description: |
+            Number of files/reciept attached to expense
+          example: 4
+        is_matching_ccc:
+          type: boolean
+          description: |
+            This field is set to true if expense matches any card expense
+          default: false
+          example: false
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to mileage expense. This represents the Mileage's rate id
+            given by Fyle
+
+            during creation of mileage rate for which this expense is created.
+          nullable: true
+          example: 9080
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Distance computes by Fyle in mileage
+            expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Amount computes by Fyle in mileage
+            expenses.
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to per diem expense. This represents the per diem's rate id
+            given by Fyle
+
+            during creation of per diem rate for which this expense is created.
+          nullable: true
+          example: 583
+        per_diem_num_days:
+          type: integer
+          nullable: true
+          description: >
+            Specific to per diem related expenses, number of days for which per
+            diem claim is made.
+          example: 2
+    expense_check_policies_out:
+      type: object
+      additionalProperties: false
+      properties:
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_policy_final_desired_state'
     spender_automate_report_submission_next_at_out:
       type: object
       required:
@@ -7533,10 +7702,6 @@ paths:
       parameters:
         - in: query
           name: expense_id
-<<<<<<< HEAD
-          required: true
-=======
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           description: >
             The id of the expense for which you are querying the policy
             states.<br>
@@ -7596,7 +7761,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-<<<<<<< HEAD
   /spender/expenses/check_policies:
     post:
       tags:
@@ -7605,16 +7769,6 @@ paths:
       description: |
         This API checks an expense for policy violations
       operationId: check_policies_post
-=======
-  /spender/automations/report_submissions/next_at:
-    post:
-      tags:
-        - Automations
-      summary: Fetch Report Submission Automation next run time
-      description: |
-        Fetch Report Submission Automation next run time
-      operationId: fetch_auto_report_submission_next_run_time
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
       requestBody:
         required: true
         content:
@@ -7625,12 +7779,8 @@ paths:
               required:
                 - data
               properties:
-<<<<<<< HEAD
                 data:
                   $ref: '#/components/schemas/expense_check_policies_in'
-=======
-                data: {}
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
       responses:
         '200':
           description: OK
@@ -7639,13 +7789,54 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
-<<<<<<< HEAD
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_check_policies_out'
         '400':
           description: Unauthorised request
-=======
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/automations/report_submissions/next_at:
+    post:
+      tags:
+        - Automations
+      summary: Fetch Report Submission Automation next run time
+      description: |
+        Fetch Report Submission Automation next run time
+      operationId: fetch_auto_report_submission_next_run_time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -7654,33 +7845,19 @@ paths:
                       #/components/schemas/spender_automate_report_submission_next_at_out
         '400':
           description: Bad request
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
         '401':
-<<<<<<< HEAD
-          description: Unauthorised request
-=======
           description: Unauthorized request
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-<<<<<<< HEAD
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-=======
         '403':
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
->>>>>>> 9744739b017a68b72444b0a025f77b367093845e
