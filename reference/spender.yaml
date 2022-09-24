@@ -4619,6 +4619,770 @@ components:
           type: string
           description: |
             Link to download this file
+    expense_policy_limit_type:
+      nullable: true
+      type: string
+      enum:
+        - INDIVIDUAL
+        - DAILY
+        - NIGHTLY
+        - WEEKLY
+        - MONTHLY
+        - QUARTERLY
+        - HALF_YEARLY
+        - YEARLY
+        - LIFETIME
+        - null
+      example: MONTHLY
+    null_field:
+      type: string
+      nullable: true
+    contains_operator:
+      nullable: true
+      type: string
+      enum:
+        - IN
+        - NOT_IN
+        - null
+      description: |
+        Value signifying the operator for the field
+      example: IN
+    policy_payment_modes:
+      nullable: true
+      type: array
+      items:
+        type: string
+        enum:
+          - PERSONAL_CASH_ACCOUNT
+          - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+          - COMPANY_ACCOUNT
+          - null
+      example: PERSONAL_CASH_ACCOUNT
+    vehicle_type:
+      type: string
+      enum:
+        - bicycle
+        - electric_car
+        - four_wheeler
+        - four_wheeler1
+        - four_wheeler2
+        - four_wheeler3
+        - four_wheeler4
+        - two_wheeler
+      example: electric_car
+    expense_policy_out:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This represents the id of the expense policy rule.
+          example: tpr12345xyz
+        description:
+          allOf:
+            - $ref: '#/components/schemas/description'
+          description: |
+            This represents the description of the expense policy rule.
+          example: Receipt is mandatory for expense above $50
+        is_enabled:
+          type: boolean
+          description: |
+            Whether the policy rule is active or not.
+        is_retired:
+          type: boolean
+          description: |
+            Whether the policy rule is retired and can't be made active again.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        expense_limit_type:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/expense_policy_limit_type'
+          description: |
+            Value signifying the limit type of the expense policy.
+        expense_currency:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/currency'
+            - $ref: '#/components/schemas/null_field'
+          description: >
+            The three-letter currency code following ISO standard <a
+
+            href='https://www.iso.org/iso-4217-currency-codes.html'>ISO
+            4217</a>.
+        expense_amount_max:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: >
+            If an expense's amount exceeds this value, this policy rule will be
+            violated for that expense.
+          example: 10000
+        expense_amount_min:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: >
+            If an expense's amount falls behind this value, this policy rule
+            will be violated for that expense.
+          example: 500
+        expense_fiscal_start_month:
+          nullable: true
+          type: number
+          description: |
+            Month number of start of fiscal year.
+          example: 4
+          minimum: 1
+          maximum: 12
+        expense_distance_max:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          description: >
+            If an expense's distance exceeds this value, this policy rule will
+            be violated for that expense.
+          example: 10000
+        expense_distance_min:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/distance'
+          description: >
+            If an expense's distance falls behind this value, this policy rule
+            will be violated for that expense.
+          example: 500
+        expense_category_ids:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          description: |
+            List of category ids considered by this policy rule.
+          example:
+            - 2222
+            - 1221
+        expense_category_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+          description: >
+            - If it is set to IN, this policy rule will be applicable to all the
+            expenses that belong to any of the categories listed in the field
+            `expense_category_ids`.
+
+            - If it is set to NOT_IN, this policy rule will be applicable to all
+            the expenses that do not belong to any of the categories listed in
+            the field `expense_category_ids`.
+        expense_project_ids:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          description: |
+            List of project ids considered by this policy rule.
+          example:
+            - 1234
+            - 5678
+        expense_project_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+          description: >
+            - If it is set to IN, this policy rule will be applicable to all the
+            expenses that belong to any of the projects listed in the field
+            `expense_project_ids`.
+
+            - If it is set to NOT_IN, this policy rule will be applicable to all
+            the expenses that do not belong to any of the projects listed in the
+            field `expense_project_ids`.
+        expense_cost_center_ids:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          description: |
+            List of cost centers ids considered by this policy rule.
+          example:
+            - 1987
+            - 3456
+        expense_cost_center_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+          description: >
+            - If it is set to IN, this policy rule will be applicable to all the
+            expenses that belong to any of the cost centers listed in the field
+            `expense_cost_center_ids`.
+
+            - If it is set to NOT_IN, this policy rule will be applicable to all
+            the expenses that do not belong to any of the cost centers listed in
+            the field `expense_cost_center_ids`.
+        expense_allowed_exchange_rate_difference_percentage:
+          nullable: true
+          type: number
+          description: >
+            Allowed percentage difference for exchange rates beyond which this
+            policy rule will be violated.
+          example: 10
+          minimum: 0
+          maximum: 100
+        expense_allowed_distance_difference_percentage:
+          nullable: true
+          type: number
+          description: >
+            Allowed distance percentage difference beyond which this policy rule
+            will be violated.
+          example: 8
+          minimum: 0
+          maximum: 100
+        expense_custom_fields:
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields (if any)
+        expense_custom_fields_op:
+          nullable: true
+          type: object
+          description: |
+            Operator for the expense_custom_fields.
+          properties:
+            field_name:
+              type: string
+        expense_locations:
+          nullable: true
+          description: |
+            Location of expense considered by this policy rule.
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        expense_locations_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        expense_creation_delay_days_max:
+          nullable: true
+          type: number
+          example: 12
+          description: >
+            This value decides how delayed an expense creation can be. If the
+            expense is created after this many days of spend date, this policy
+            rule will be violated.
+        expense_on_holiday_allowed:
+          type: boolean
+          description: >
+            If this is set to false, then for all such expenses that are created
+            on holidays, this policy rule will be violated.
+          default: true
+          example: true
+        expense_without_receipt_allowed:
+          type: boolean
+          description: >
+            If this is set to false, then for all such expenses that doesn't
+            have receipt, this policy rule will be violated.
+          default: true
+          example: true
+        expense_spent_at_max:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            If an expense's spend date exceeds this value, this policy rule will
+            be violated for that expense.
+        expense_spent_at_min:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            If an expense's spend date falls behind this value, this policy rule
+            will be violated for that expense.
+        expense_payment_modes:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/policy_payment_modes'
+          description: |
+            Payment mode for expense to be considered by the policy rule.
+        expense_payment_modes_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        expense_without_ccc_match_allowed:
+          type: boolean
+          description: >
+            If this is set to false, then for all such expenses that are not
+            matched to corporate credit card transaction, this policy rule will
+            be violated.
+          default: true
+          example: true
+        expense_include_foreign_currency:
+          type: boolean
+          description: >
+            If this is set to true, then for all such expenses that are created
+            in foreign currency, this policy rule will be applicable.
+          default: false
+          example: true
+        expense_flight_travel_class:
+          nullable: true
+          type: array
+          description: >
+            This field is applicable only for Flight category. <br> List of
+            travel classes considered by this policy rule.
+          items:
+            type: string
+          example:
+            - BUSINESS
+            - ECONOMY
+        expense_train_travel_class:
+          nullable: true
+          type: array
+          description: >
+            This field is applicable only for Train category. <br> List of
+            travel classes considered by this policy rule.
+          items:
+            type: string
+          example:
+            - AC First Class
+            - Second Sitting
+        expense_vehicle_type:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/vehicle_type'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Vehicle type considered by this policy rule.
+        expense_annual_distance_max:
+          nullable: true
+          type: number
+          example: 1200
+          description: >
+            If an expense's annual distance exceeds this value, this policy rule
+            will be violated for that expense.
+        employee_level_ids:
+          nullable: true
+          type: array
+          description: |
+            Employee level ids considered by this policy rule.
+          items:
+            type: string
+          example:
+            - lvl1sdfad
+            - lvl2sdfas
+        employee_level_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        employee_custom_fields:
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          description: |
+            Custom fields (if any)
+        employee_custom_fields_op:
+          nullable: true
+          type: object
+          description: |
+            Operator for the employee_custom_fields.
+          properties:
+            field_name:
+              type: string
+        employee_department_ids:
+          nullable: true
+          type: array
+          description: |
+            Employee department ids considered by this policy rule.
+          items:
+            type: string
+          example:
+            - dept1asdfa
+            - dept2adfad
+        employee_department_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        employee_locations:
+          nullable: true
+          description: >
+            Location of employees considered by this policy rule. <br>
+
+            If this is set, then for all such employees whose location is in
+            `employee_locations`, this policy rule will be applicable.
+          type: array
+          items:
+            $ref: '#/components/schemas/location'
+        employee_locations_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        employee_user_ids:
+          nullable: true
+          type: array
+          description: |
+            Employee user ids considered by this policy rule.
+          items:
+            type: string
+          example:
+            - usabcds1
+            - usabcds2
+        employee_user_ids_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        employee_titles:
+          nullable: true
+          type: array
+          description: |
+            Employee titles considered by this policy rule.
+          items:
+            type: string
+          example:
+            - CEO
+            - Manager
+        employee_titles_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_operator'
+        action_flag:
+          type: boolean
+          description: >
+            If it is set to true, then the expense(s) violating this policy
+            rule, will be flagged.
+          default: false
+          example: true
+        action_show_warning:
+          type: boolean
+          description: >
+            If it is set to true, then a warning is shown to the employee,
+            whenever he attempts to create an expense that violates this policy
+            rule.
+          default: false
+          example: true
+        action_make_unreportable:
+          type: boolean
+          description: >
+            If it is set to true, then the expense(s) violating this policy
+            rule, will be made unreportable. <br>
+
+            (Expense will be created but employee will not be able to add it to
+            report).
+          default: false
+          example: true
+        action_remove_employee_approver1:
+          type: boolean
+          description: >
+            If this is set to true, then the employee's first approver will be
+            removed from the report that contains expense(s) violating this
+            policy rule.
+          default: false
+          example: true
+        action_add_employee_approver2:
+          type: boolean
+          description: >
+            If this is set to true, then the employee's second approver will be
+            added to the report that contains expense(s) violating this policy
+            rule.
+          default: false
+          example: true
+        action_add_employee_approver3:
+          type: boolean
+          description: >
+            If this is set to true, then the employee's third approver will be
+            added to the report that contains expense(s) violating this policy
+            rule.
+          default: false
+          example: true
+        action_add_project_approver1:
+          type: boolean
+          description: >
+            If this is set to true, then the project's first approver will be
+            added to the report that contains expense(s) violating this policy
+            rule.
+          default: false
+          example: true
+        action_add_project_approver2:
+          type: boolean
+          description: >
+            If this is set to true, then the project's second approver will be
+            added to the report that contains expense(s) violating this policy
+            rule.
+          default: false
+          example: true
+        action_add_department_head_approver:
+          type: boolean
+          description: >
+            If this is set to true, then the employee's department head approver
+            will be added to the report that contains expense(s) violating this
+            policy rule.
+          default: false
+          example: true
+        action_cap_amount:
+          type: boolean
+          description: >
+            If it is set to true, then expense's amount will be capped to
+            `expense_amount_max` when the expense(s) violates this policy rule.
+          default: false
+          example: true
+        action_add_approver_user_ids:
+          nullable: true
+          type: array
+          description: >
+            List of approver user ids that will be added to the report that
+            contains expense(s) violating this policy rule.
+          items:
+            type: string
+          example:
+            - usabcds3
+            - usabcds4
+        action_override_distance_slab_rate:
+          nullable: true
+          type: number
+          description: >
+            When annual mileage distance limit exceeds
+            `expense_annual_distance_max` for `expense_vehicle_type`, this rate
+            will be applied afterwards.
+          example: 20
+    expense_policy_rule_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: tpr1234abcd
+          description: >-
+            This represents the id of the expense policy rule that is violated
+            for this expense.
+        description:
+          anyOf:
+            - $ref: '#/components/schemas/description'
+          description: >
+            This represents the description of the expense policy rule that is
+            violated for this expense.
+          example: Receipt is mandatory for expense above $50
+        action_show_warning:
+          type: boolean
+          description: >
+            A true value here means that policy calculation suggests showing a
+            warning when the user attempts to create an expense that violates
+            this expense policy rule.
+          example: true
+    expense_policy_expenses_query_object_params:
+      type: object
+      properties:
+        category_id:
+          type: string
+          description: |
+            Category ids query param to find the list of expenses.
+          example: in.(60506)
+        project_id:
+          type: string
+          description: |
+            Project ids query param to find the list of expenses.
+          example: in.(261155)
+        cost_center_id:
+          type: string
+          description: |
+            Cost center ids query param to find the list of expenses.
+          example: in.(7475)
+        currency:
+          type: string
+          description: |
+            Currency query param to find the list of expenses.
+          example: eq.USD
+        mileage_rate_id:
+          type: string
+          description: |
+            Mileage rate query param to find the list of expenses.
+          example: eq.2
+        employee_id:
+          type: string
+          description: |
+            Employee id query param to find the list of expenses.
+          example: eq.ouNSnadfaLA
+    expense_policy_expenses_query_object:
+      type: object
+      description: >
+        An expense may be violating an expense policy rule due to a group of
+        other expenses. 
+
+        These query params can be used to fetch those expenses because of which
+        this expense is causing a violation. <br>
+
+        Below params should be ANDed to get the correct list of violating
+        expenses.
+      properties:
+        limit_start_date:
+          type: string
+          description: |
+            Spend start date query param to find the list of violating expenses.
+          example: '2021-12-01'
+        limit_end_date:
+          type: string
+          description: |
+            Spend end date query param to find the list of violating expenses.
+          example: '2022-03-31'
+        params:
+          $ref: '#/components/schemas/expense_policy_expenses_query_object_params'
+    expense_policy_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: >
+            This represent the status of policy computation for an expense
+            against the policy. If the state is
+
+            `UNVIOLATED`, it means that the expense is not violating the policy.
+            If the state is `VIOLATION_ACTION_SUCCESS`,
+
+            it means that expense is violating the policy and action stated in
+            the object will be applied to
+
+            expense. However, if the state is `VIOLATION_ACTION_FAILURE`, it
+            means that the policy is violated for the
+
+            expense but since some approver was missing or not setup properly,
+            it will fail to take action 
+
+            on the expense
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense. Note that, in
+
+            case some approver was not setup properly for the given violation,
+            this array will contain description of
+
+            missing approvers. For example, Department head, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_policy_final_desired_state:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        flag:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation this expense
+            should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        is_receipt_mandatory:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation this expense
+            requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation, the
+            employee's first approver should be removed from the report that
+            contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_policy_states_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_policy_final_desired_state'
     spender_automate_report_submission_next_at_out:
       type: object
       required:
@@ -4715,6 +5479,9 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your Expenses data.
+  - name: Expense Policies
+    description: |
+      This API gives you access to your organisation's Expense Policies
   - name: Employees
     description: |
       These APIs gives you access to manage your organisation's Employees
@@ -6689,6 +7456,138 @@ paths:
                 $ref: '#/components/schemas/401'
         '404':
           description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expense_policy_rules:
+    get:
+      tags:
+        - Expense Policies
+      summary: Get Expense Policy Rules
+      operationId: expense_policy_rules_get
+      parameters:
+        - in: query
+          name: id
+          description: >
+            The id of the expense policy rule.<br>
+
+            Supported operators are `eq`, `in`, `neq`, `not_in`.<br>
+
+            id=eq."id" <br>
+
+            id=in.("id1","id2","id3") <br>
+
+            id=neq."id" <br>
+
+            id=not_in.("id1","id2","id3")
+
+            > If no id is passed then all the expense policy rules of the org
+            will be returned.
+          schema:
+            type: string
+            example: eq."tprmdNPsd"
+        - in: query
+          name: is_enabled
+          description: |
+            Whether to fetch only active expense policy rule.<br>
+            Supported operators are `eq`.<br>
+            is_enabled=eq.true <br>
+            is_enabled=eq.false
+          schema:
+            type: string
+            example: eq.true
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_policy_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/expense_policy_states:
+    get:
+      tags:
+        - Expense Policies
+      summary: Get policy states of Expenses
+      description: |
+        Get policy states of Expenses
+      operationId: expense_policy_states_get
+      parameters:
+        - in: query
+          name: expense_id
+          description: >
+            The id of the expense for which you are querying the policy
+            states.<br>
+
+            Supported operators are `eq`, `in`, `neq`, `not_in`.<br>
+
+            expense_id=eq."id" <br>
+
+            expense_id=in.("id1","id2","id3") <br>
+
+            expense_id=neq."id" <br>
+
+            expense_id=not_in.("id1","id2","id3")
+          schema:
+            type: string
+            example: eq."txSdfsytrqw"
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_policy_states_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Object Not Found
           content:
             application/json:
               schema:
