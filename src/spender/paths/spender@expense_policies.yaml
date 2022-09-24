@@ -1,0 +1,56 @@
+get:
+  tags:
+    - Expense Policies
+  summary: Get Expense Policy Rules
+  operationId: expense_policy_rules_get
+  parameters:
+    - in: query
+      name: id
+      description: |
+        The id of the expense policy rule.<br>
+        Supported operators are `eq`, `in`, `neq`, `not_in`.<br>
+        id=eq."id" <br>
+        id=in.("id1","id2","id3") <br>
+        id=neq."id" <br>
+        id=not_in.("id1","id2","id3")
+        > If no id is passed then all the expense policy rules of the org will be returned.
+      schema:
+        type: string
+        example: eq."tprmdNPsd"
+    - in: query
+      name: is_enabled
+      description: |
+        Whether to fetch only active expense policy rule.<br>
+        Supported operators are `eq`.<br>
+        is_enabled=eq.true <br>
+        is_enabled=eq.false
+      schema:
+        type: string
+        example: eq.true
+    - $ref: '../../components/parameters/limit.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+  
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/expense_policies.yaml#/expense_policy_out
+    
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml     

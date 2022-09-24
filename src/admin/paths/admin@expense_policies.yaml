@@ -1,0 +1,111 @@
+post:
+  tags:
+    - Expense Policies
+  summary: Create or Update Expense Policy Rules
+  description: |
+    Create or Update Expense Policy Rules<br>
+    **Apart from the required fields mentioned below, the request body should contain the following:**
+    - You should choose at least one condition from **expense_*** or **employee_***.
+    - You should choose at least one action from **action_***. <br><br>
+    _When multiple conditions are provided, then there will AND operation in between them and the policy rule 
+    will only be applicable on expenses if all of the conditions match. <br> 
+    Similarly, for actions, if multiple actions are provided then all of the actions will be applied when conditions satisfy._
+  operationId: expense_policy_rules_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: ../../components/schemas/expense_policies.yaml#/expense_policy_in
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              data:
+                $ref: ../../components/schemas/expense_policies.yaml#/expense_policy_out
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
+   
+get:
+  tags:
+    - Expense Policies
+  summary: Get Expense Policy Rules
+  operationId: expense_policy_rules_get
+  parameters:
+    - in: query
+      name: id
+      description: |
+        The id of the expense policy rule.<br>
+        Supported operators are `eq`, `in`, `neq`, `not_in`.<br>
+        id=eq."id" <br>
+        id=in.("id1","id2","id3") <br>
+        id=neq."id" <br>
+        id=not_in.("id1","id2","id3")
+        > If no id is passed then all the expense policy rules of the org will be returned.
+      schema:
+        type: string
+        example: eq."tprmdNPsd"
+    - in: query
+      name: is_enabled
+      description: |
+        Whether to fetch only active expense policy rule.<br>
+        Supported operators are `eq`.<br>
+        is_enabled=eq.true <br>
+        is_enabled=eq.false
+      schema:
+        type: string
+        example: eq.true
+    - $ref: '../../components/parameters/limit.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+  
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/expense_policies.yaml#/expense_policy_out
+    
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml     
