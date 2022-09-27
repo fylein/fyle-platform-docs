@@ -5553,6 +5553,13 @@ components:
           example:
             - usBdsdfscl
             - usLSsdfwqt
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        expense_policy_rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
         run_status:
           nullable: false
           type: string
@@ -5561,20 +5568,21 @@ components:
             - VIOLATED_ACTION_FAILURE
             - UNVIOLATED
           description: >
-            This represents the status of policy computation for an expense
-            against the policy. If the state is `UNVIOLATED`, 
+            This represents the status of policy computation for the input
+            expense object against the policy represented by
+            `expense_policy_rule_id`.
 
-            it means that the expense is not violating the policy. If the state
-            is `VIOLATION_ACTION_SUCCESS`, it means that 
+            If the state is `UNVIOLATED`, it means that the expense is not
+            violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`, 
 
-            the expense is violating the policy and action stated in the object
-            will be applied to the expense when it is saved. 
+            it means that the expense is violating this policy and action stated
+            in the object will be applied to the expense when it is saved. 
 
             However, if the state is `VIOLATION_ACTION_FAILURE`, it means that
-            the policy is violated for the expense but since some 
+            this policy is violated for the expense but since some approver was 
 
-            approver was missing or not set up properly, it will fail to take
-            action on the expense when it is saved.
+            missing or not set up properly, it will fail to take action on the
+            expense when it is saved.
           example: SUCCESS
         run_result:
           type: array
@@ -5591,13 +5599,6 @@ components:
           example:
             - flag the expense
             - cap the amount
-        expense_policy_rule_id:
-          type: string
-          description: |
-            This represents the id of the expense policy rule.
-          example: tprabsdfSYqd
-        rule:
-          $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
           nullable: true
           anyOf:
@@ -7895,14 +7896,17 @@ paths:
         - Expenses
       summary: Check expense for policy violation
       description: >
-        Before creating or updating an expense into Fyle, based on the business
-        requirements, you might want to check that 
+        Before creating or updating an [expense
+        object](https://docs.fylehq.com/docs/fyle-platform-docs/b5ec89140e06b-create-or-update-expense)
+
+        into Fyle, based on the business requirements, you might want to check
+        that 
 
         expense against the policy rules set up by your organization. You can
         easily do that by passing the same expense object 
 
-        that you want to create/update to this API, along with some extra fields
-        documented below.
+        that you want to create/update to this API, along with some extra
+        optional fields documented below.
       operationId: check_policies_post
       requestBody:
         required: true
