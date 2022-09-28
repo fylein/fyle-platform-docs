@@ -40,7 +40,7 @@ expense_out:
     - mileage_is_round_trip
     - per_diem_rate_id
     - per_diem_rate
-    - num_days
+    - per_diem_num_days
     - started_at
     - ended_at
     - travel_classes
@@ -49,6 +49,7 @@ expense_out:
     - custom_fields
     - code
     - state
+    - state_display_name
     - seq_num
     - report_id
     - added_to_report_at
@@ -66,6 +67,14 @@ expense_out:
     - matched_corporate_card_transactions
     - last_settled_at
     - missing_mandatory_fields
+    - activity_details
+    - creator_user_id
+    - extracted_data
+    - is_manually_flagged
+    - is_policy_flagged
+    - split_group_id
+    - is_physical_bill_submitted
+    - physical_bill_submitted_at
   properties:
     id:
       allOf:
@@ -228,7 +237,7 @@ expense_out:
       example: 583
     per_diem_rate:
       $ref: './per_diem_rate.yaml#/per_diem_rate_out_embed'
-    num_days:
+    per_diem_num_days:
       type: integer
       nullable: true
       description: |
@@ -285,6 +294,10 @@ expense_out:
         - PAYMENT_PENDING
         - APPROVED
       description: The state of the Expense.
+    state_display_name:
+      type: string
+      example: Sent Back
+      description: readable state name
     seq_num:
       type: string
       readOnly: true
@@ -386,8 +399,42 @@ expense_out:
         signifies when this expense was last settled.
     missing_mandatory_fields:
       $ref: './fields.yaml#/missing_mandatory_fields'
-
-
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
+    activity_details:
+      $ref: './fields.yaml#/activity_details'
+    extracted_data:
+      $ref: './fields.yaml#/extracted_data'
+    is_manually_flagged:
+      type: boolean
+      nullable: true
+      description: This fields marks whether a given expense is manually flagged or not.
+      example: true
+    is_policy_flagged:
+      type: boolean
+      nullable: true
+      description: This fields marks whether a given expense is flagged by policy or not.
+      example: true
+    split_group_id:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id provided by Fyle to identify an object.
+      example: txwownwrngx
+    is_physical_bill_submitted:
+      type: boolean
+      nullable: true
+      description: |
+        This fields marks if physical has been collected for the given expense.
+      example: true
+    physical_bill_submitted_at:
+      type: string
+      format: date-time
+      example: '2020-06-11T13:14:55.201598+00:00'
+      description: |
+        Signifies if and when the physical bill for this report was submitted.
+      nullable: true
 expense_in:
   type: object
   additionalProperties: false
@@ -494,7 +541,7 @@ expense_in:
         - $ref: './fields.yaml#/fk_integer'
       nullable: true
       example: 583
-    num_days:
+    per_diem_num_days:
       type: integer
       nullable: true
       description: |
@@ -586,9 +633,9 @@ spender_expense_in:
         - $ref: './fields.yaml#/fk_string'
       nullable: true
     is_billable:
-      $ref: './fields.yaml#/foreign_currency'
+      $ref: './fields.yaml#/is_billable'
     is_reimbursable:
-      $ref: './fields.yaml#/foreign_currency'
+      $ref: './fields.yaml#/is_reimbursable'
     distance:
       $ref: './fields.yaml#/distance'
     distance_unit:
@@ -744,3 +791,23 @@ expense_attach_receipt_in:
       allOf:
         - $ref: './fields.yaml#/id_string'
       example: 'fisjfwlrglw'
+
+expense_creation_from_receipt_in:
+  type: object
+  required:
+    - file_name
+    - file_content
+  properties:
+    file_name:
+      type: string
+      maxLength: 255
+      description: |
+        Takes the name of the file which contains the receipt.
+      example: very_important.jpeg
+    file_content:
+      type: string
+      description: |
+        This field takes the base64 encoded representation of the file.
+      example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+    source:
+      $ref: './fields.yaml#/source'

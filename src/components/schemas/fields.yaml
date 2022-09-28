@@ -158,7 +158,20 @@ travel_classes:
     type: string
   example:
     - ECONOMY
-    - BUSINESS
+    - BUSINESS 
+
+vehicle_type:
+  type: string
+  enum:
+    - bicycle
+    - electric_car
+    - four_wheeler
+    - four_wheeler1
+    - four_wheeler2
+    - four_wheeler3
+    - four_wheeler4
+    - two_wheeler
+  example: electric_car
 
 distance_unit:
   type: string
@@ -181,6 +194,10 @@ spent_at:
     It signifies when this expense was made.
     This date cannot be in future.
 
+null_field:
+  type: string
+  nullable: true
+
 source:
   type: string
   enum:
@@ -188,6 +205,252 @@ source:
     - SLACK
     - TPA
     - CORPORATE_CARD
+  description: >
+    Enum value signifying the client from which this expense was created
+  example: SLACK
+
+expense_policy_limit_type:
+  nullable: true
+  type: string
+  enum:
+    - INDIVIDUAL
+    - DAILY
+    - NIGHTLY
+    - WEEKLY
+    - MONTHLY
+    - QUARTERLY
+    - HALF_YEARLY
+    - YEARLY
+    - LIFETIME
+    - null
+  example: MONTHLY
+
+contains_operator:
+  nullable: true
+  type: string
+  enum:
+    - IN
+    - NOT_IN
+    - null
+  description: >
+    Value signifying the operator for the field
+  example: IN
+
+expense_policy_rule_embed:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      type: string
+      example: tpr1234abcd
+      description: This represents the id of the expense policy rule that is violated for this expense.
+    description:
+      anyOf:
+        - $ref: '#/description'
+      description: |
+        This represents the description of the expense policy rule that is violated for this expense.
+      example: Receipt is mandatory for expense above $50
+    action_show_warning:
+      type: boolean
+      description: |
+        A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
+      example: True
+      
+expense_policy_expenses_query_object:
+  type: object
+  description: |
+    An expense may be violating an expense policy rule due to a group of other expenses. 
+    These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
+    Below params should be ANDed to get the correct list of violating expenses.
+  properties:
+    limit_start_date:
+      type: string
+      description: |
+        Spend start date query param to find the list of violating expenses.
+      example: "2021-12-01"
+    limit_end_date:
+      type: string
+      description: |
+        Spend end date query param to find the list of violating expenses.
+      example: "2022-03-31"
+    params:
+        $ref: '#/expense_policy_expenses_query_object_params'
+
+expense_policy_individual_desired_states:
+  type: object
+  properties:
+    add_approver_user_ids:
+      nullable: true
+      type: array
+      items:
+        type: string
+      description: |
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
+      example:
+        - usBdsdfscl
+        - usLSsdfwqt
+    run_status:
+      nullable: false
+      type: string
+      enum:
+        - VIOLATED_ACTION_SUCCESS
+        - VIOLATED_ACTION_FAILURE
+        - UNVIOLATED
+      description: |
+        This represent the status of policy computation for an expense against the policy. If the state is
+        `UNVIOLATED`, it means that the expense is not violating the policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+        it means that expense is violating the policy and action stated in the object will be applied to
+        expense. However, if the state is `VIOLATION_ACTION_FAILURE`, it means that the policy is violated for the
+        expense but since some approver was missing or not setup properly, it will fail to take action 
+        on the expense
+      example: SUCCESS
+    run_result:
+      type: array
+      items:
+        type: string
+      description: |
+        List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+        case some approver was not setup properly for the given violation, this array will contain description of
+        missing approvers. For example, Department head, Project head, etc.
+      example:
+        - "flag the expense"
+        - "cap the amount"
+    expense_id:
+      type: string
+      description: |
+        This represents the id of the expense.
+      example: "txabsdfSYqd"
+    expense_policy_rule_id:
+      type: string
+      description: |
+        This represents the id of the expense policy rule.
+      example: "tprabsdfSYqd"
+    rule:
+      $ref: '#/expense_policy_rule_embed'
+    amount:
+      nullable: true
+      anyOf:
+        - $ref: '#/amount'
+        - $ref: '#/null_field'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    expenses_query_object_params:
+      nullable: true
+      $ref: '#/expense_policy_expenses_query_object'
+
+expense_policy_expenses_query_object_params:
+  type: object
+  properties:
+    category_id:
+      type: string
+      description: |
+        Category ids query param to find the list of expenses.
+      example: "in.(60506)"
+    project_id:
+      type: string
+      description: |
+        Project ids query param to find the list of expenses.
+      example: "in.(261155)" 
+    cost_center_id:
+      type: string
+      description: |
+        Cost center ids query param to find the list of expenses.
+      example: "in.(7475)"
+    currency:
+      type: string
+      description: |
+        Currency query param to find the list of expenses.
+      example: "eq.USD"
+    mileage_rate_id:
+      type: string
+      description: |
+        Mileage rate query param to find the list of expenses.
+      example: "eq.2"
+    employee_id:
+      type: string
+      description: |
+        Employee id query param to find the list of expenses.
+      example: "eq.ouNSnadfaLA"
+
+expense_policy_final_desired_state:
+  type: object
+  properties:
+    expense_id:
+      type: string
+      description: |
+        This represents the id of the expense.
+      example: "txabsdfSYqd"
+    flag:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense should be flagged.
+      example: True
+    amount:
+      nullable: true
+      anyOf:
+        - $ref: '#/amount'
+        - $ref: '#/null_field'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    is_receipt_mandatory:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense requires receipt.
+      example: True
+    add_approver_user_ids:
+      nullable: true
+      type: array
+      items:
+        type: string
+      description: |
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
+      example:
+        - usBdsdfscl
+        - usLSsdfwqt
+    remove_employee_approver1:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+      example: True
+    run_status:
+      nullable: false
+      type: string
+      enum:
+        - SUCCESS
+        - FAILURE
+      description: |
+        This represent the run status of the policy.
+      example: SUCCESS
+    run_summary:
+      type: array
+      items:
+        type: string
+      description: |
+        List of human-readable action summaries that the policy calculation suggests for this expense.
+      example:
+        - "flag the expense"
+        - "cap the amount"
+
+policy_payment_modes:
+  nullable: true
+  type: array
+  items:
+    type: string
+    enum:
+      - PERSONAL_CASH_ACCOUNT
+      - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+      - COMPANY_ACCOUNT
+      - null
+  example: PERSONAL_CASH_ACCOUNT
+report_source:
+  type: string
+  enum:
+    - WEBAPP
+    - MOBILE
+    - TPA
+    - SLACK
   description: >
     Enum value signifying the client from which this expense was created
   example: SLACK
@@ -324,6 +587,45 @@ department_id:
   nullable: true
   example: dept9in4oIHpdR
 
+activity_details:
+  type: object
+  nullable: true
+  properties:
+    unique_meetings:
+      type: number
+      nullable: False
+      example: 21
+    total_meetings:
+      type: number
+      nullable: False
+      example: 70
+
+extracted_data:
+  type: object
+  nullable: True
+  properties:
+    amount:
+      type: number
+      nullable: True
+      example: 21
+    vendor_name:
+      type: string
+      nullable: True
+      example: Uber
+    currency:
+      type: string
+      nullable: True
+      example: USD
+    category:
+      type: string
+      nullable: True
+      example: Taxi
+    date:
+      type: string
+      nullable: True
+      example: '2020-07-20'
+
+
 location:
   type: object
   nullable: true
@@ -438,16 +740,38 @@ schedule_config:
         - type: object
           additionalProperties: false
           properties:
+            year:
+              type: string
+              example: 2022
+            month:
+              type: string
+              example: 10        
             day:
               type: string
-              example: last
+              example: last, 15
+            week:
+              type: string
+              example: 2 
+            day_of_week:
+              type: string
+              example: mon
             hour:
-              type: number
+              type: string
               example: 23
-            timezone:
+            minute:
+              type: string
+              example: 23
+            second:
+              type: string
+              example: 23
+            end_date:
               nullable: true
               type: string
-              example: Asia/Kolkata
+              example: '2020-11-11T16:29:30.965869Z'
+            start_date:
+              nullable: true
+              type: string
+              example: '2020-11-11T16:29:30.965869Z'
         - type: object
           additionalProperties: false
           properties:
@@ -496,7 +820,7 @@ restricted_spender_user_ids:
     example: 'sdfd2391'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
-    List of IDs of users who access the project.
+    List of IDs of users who can access this object.
 
 approver_user_ids:
   type: array
@@ -538,7 +862,9 @@ reminder_type:
     - RESUBMIT_ADVANCE_REQUESTS
     - MATCH_ADVANCES
     - VERIFY_EMPLOYEES
-    - ADD_CORPORATE_CARDS      
+    - ADD_CORPORATE_CARDS 
+    - CONNECT_VISA_RTF
+    - VERIFY_VISA_CARD     
   maxLength: 255
   description: Represents the type of reminder.
   example: FYLE_EXPENSES
@@ -584,6 +910,78 @@ reminder_schedule_config:
           example: 42
           description: minute of the hour
 
+project_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a project.
+  example: Westeros / Casterly rocks
+
+category_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a category.
+  example: Wildlings / Thenns
+
+department_display_name:
+  type: string
+  nullable: false
+  description: |
+    String denoting the display name of a department.
+  example: Knights / Kingsguard
+
+user_full_name:
+  type: string
+  maxLength: 255
+  description: |
+    String denoting the full name of an employee.
+  example: Jon Snow
+
+time_interval_granularity:
+  type: string
+  nullable: False
+  enum:
+    - day
+    - month
+    - quarter
+    - year
+  description: |
+    The time duration by which to group expenses to aggregate sum of amount
+  example: month
+
+total_amount:
+  type: number
+  nullable: False
+  description: |
+    Total sum of amount of expenses falling under filtering criteria
+  example: 990
+
+time_interval_marker:
+  type: string
+  nullable: False
+  description: |
+    Representation of a point in time for which the sum of amount of expenses is calculated.
+    Value depends of value of time_interval_granularity as follows :
+    - for time_interval_granularity of `day`, value will be in date format YYYY-MM-DD. Example : 2021-01-01
+    - for time_interval_granularity of `month`, value will be in date format YYYY-MM. Example : 2021-01
+    - for time_interval_granularity of `quarter`, value will be in date format YYYY-QQ. Example : 2021-Q1
+    - for time_interval_granularity of `year`, value will be in date format YYYY. Example : 2021
+  example: 2022-02
+
+spend_overview_percentage:
+  type: number
+  description: |
+    Percentage of spend which falls under this object/resource after filtering criteria is applied.
+  example: 10.34
+
+spend_overview_change_percentage:
+  type: number
+  description: |
+    Change in percentage of spend compared to spend in same time period one time interval ago, after filtering criteria is applied.
+  example: -4.95
+
+
 department_head_user_ids:
   type: array
   nullable: False
@@ -598,3 +996,55 @@ department_head_user_ids:
   example: [ 'uswoirwlwwg' ]
   description: |
     List of IDs of users who are head of the department.
+
+allow_users:
+  type: string
+  nullable: false
+  description: |
+    Set who can access the object.
+    - `ALL` indicates the object can be accessible to all users in the org.
+    - `NONE` indicates the object cannot be accessible to any user in the org.
+    - `UNRESTRICTED` indicates the object will be be accessible to all users in the org who are not restricted to
+    specific objects of this resource.
+  enum:
+    - ALL
+    - NONE
+    - UNRESTRICTED
+  example: UNRESTRICTED
+
+account_minimal:
+  description: |
+    Account of a user belonging to any org 
+  type: object
+  nullable: False
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: 'acwbl222wlg'
+    currency:
+      $ref: './fields.yaml#/currency'
+    current_balance_amount:
+      type: number
+      example: 50.0
+    tentative_balance_amount:
+      type: number
+      example: 100.0
+
+
+phone_number:
+  type: string
+  example: '+12131234567'
+  maxLength: 16
+  description: >
+      phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+  pattern: '/^(\+\d{1,3}[- ]?)?\d{10}$/'
+
+
+bank_ifsc:
+  type: string
+  example: 'SBIN0007587'
+  maxLength: 11
+  description: >
+      IFSC code of the bank account of the Employee
+  pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
