@@ -1305,11 +1305,11 @@ components:
         mileage_calculated_distance:
           type: number
           nullable: true
-          description: Distance compluted by Fyle in mileage expenses.
+          description: Distance computed by Fyle in mileage expenses.
         mileage_calculated_amount:
           type: number
           nullable: true
-          description: Amount compluted by Fyle in mileage expenses.
+          description: Amount computed by Fyle in mileage expenses.
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -4616,6 +4616,7 @@ components:
           description: |
             Link to download this file
         upload_url:
+          nullable: true
           type: string
           description: |
             Link to download this file
@@ -5383,6 +5384,304 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+    expense_check_policies_in:
+      type: object
+      additionalProperties: false
+      required:
+        - claim_amount
+        - spent_at
+      properties:
+        spent_at:
+          $ref: '#/components/schemas/spent_at'
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          description: >
+            Amount value of the expense, in original currency i.e the currency
+            in which the expense was initially created.
+        claim_amount:
+          $ref: '#/components/schemas/claim_amount'
+        purpose:
+          type: string
+          example: Team lunch
+          description: |
+            Purpose of this expense.
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the cost_center's id given by Fyle during creation
+            of cost center
+
+            for which this expense is created.
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the category's id given by Fyle during creation of
+            category
+
+            for which this expense is created.
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            This represents the project's id given by Fyle during creation of
+            project
+
+            for which this expense is created.
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the source account's id given by Fyle during
+            creation of account type
+
+            of user for which this expense is created.
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          description: >
+            This represents the tax's group id given by Fyle during creation of
+            tax group
+
+            for which this expense is created.
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses. Start date from which per
+            diem claim is made.
+        ended_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: >
+            Specific to per diem related expenses. End date until which per diem
+            claim is made.
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        num_files:
+          type: integer
+          description: |
+            Number of files/reciepts attached to expense
+          example: 4
+        is_matching_ccc:
+          type: boolean
+          description: |
+            Set this field to true if expense matches any card expense
+          default: false
+          example: false
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to mileage expense. This represents the Mileage's rate id
+            given by Fyle
+
+            during creation of mileage rate for which this expense is created.
+          nullable: true
+          example: 9080
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: >
+            Specific to per diem expense. This represents the per diem's rate id
+            given by Fyle
+
+            during creation of per diem rate for which this expense is created.
+          nullable: true
+          example: 583
+        per_diem_num_days:
+          type: integer
+          nullable: true
+          description: >
+            Specific to per diem related expenses. Number of days for which per
+            diem claim is made.
+          example: 2
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Distance computed by Fyle for mileage
+            expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: >-
+            Specific to mileage expense. Amount computed by Fyle for mileage
+            expenses.
+    expense_check_policies_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        expense_policy_rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: >
+            This represents the status of policy computation for the input
+            expense object against the policy represented by
+            `expense_policy_rule_id`.
+
+            If the state is `UNVIOLATED`, it means that the expense is not
+            violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`, 
+
+            it means that the expense is violating this policy and action stated
+            in the object will be applied to the expense when it is saved. 
+
+            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that
+            this policy is violated for the expense but since some approver was 
+
+            missing or not set up properly, it will fail to take action on the
+            expense when it is saved.
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense. Note that, in
+
+            case some approver was not setup properly for the given violation,
+            this array will contain description of
+
+            missing approvers. For example, Department head, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_check_policies_final_desired_state:
+      type: object
+      properties:
+        flag:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation this expense
+            should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        is_receipt_mandatory:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation this expense
+            requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: >
+            List of approver ids that the policy calculation suggests adding to
+            report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: >
+            A true value here means, that as per policy calculation, the
+            employee's first approver should be removed from the report that
+            contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: >
+            List of human-readable action summaries that the policy calculation
+            suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_check_policies_out:
+      type: object
+      additionalProperties: false
+      properties:
+        individual_desired_states:
+          type: array
+          items:
+            $ref: >-
+              #/components/schemas/expense_check_policies_individual_desired_states
+        final_desired_state:
+          $ref: '#/components/schemas/expense_check_policies_final_desired_state'
     spender_automate_report_submission_next_at_out:
       type: object
       required:
@@ -7588,6 +7887,65 @@ paths:
                 $ref: '#/components/schemas/403'
         '404':
           description: Object Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/check_policies:
+    post:
+      tags:
+        - Expenses
+      summary: Check expense for policy violation
+      description: >
+        Before creating or updating an [expense
+        object](https://docs.fylehq.com/docs/fyle-platform-docs/b5ec89140e06b-create-or-update-expense)
+
+        into Fyle, based on the business requirements, you might want to check
+        that 
+
+        expense against the policy rules set up by your organization. You can
+        easily do that by passing the same expense object 
+
+        that you want to create/update to this API, along with some extra
+        optional fields documented below.
+      operationId: check_policies_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_check_policies_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_policies_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
