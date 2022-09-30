@@ -214,11 +214,11 @@ expense_out:
     mileage_calculated_distance:
       type: number
       nullable: true
-      description: Distance compluted by Fyle in mileage expenses.
+      description: Distance computed by Fyle in mileage expenses.
     mileage_calculated_amount:
       type: number
       nullable: true
-      description: Amount compluted by Fyle in mileage expenses.
+      description: Amount computed by Fyle in mileage expenses.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
@@ -522,11 +522,11 @@ expense_in:
     mileage_calculated_distance:
       type: number
       nullable: true
-      description: Distance compluted by Fyle in mileage expenses.
+      description: Distance computed by Fyle in mileage expenses.
     mileage_calculated_amount:
       type: number
       nullable: true
-      description: Amount compluted by Fyle in mileage expenses.
+      description: Amount computed by Fyle in mileage expenses.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
@@ -581,6 +581,10 @@ expense_in:
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
 
+# Note: Similar object is used in /spender/expenses/check_policies. Please bear in mind while editing here
+# to make necessary changes there. If new key is being added, please add it to the payload of check_policies
+# payload as well. If the description of some field from here is overriden, and you're making the change, please
+# update the explanation there as well.
 spender_expense_in:
   type: object
   additionalProperties: false
@@ -811,3 +815,154 @@ expense_creation_from_receipt_in:
       example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
     source:
       $ref: './fields.yaml#/source'
+
+expense_check_policies_in:
+  type: object
+  additionalProperties: False
+  required:
+    - claim_amount
+    - spent_at
+  properties:
+    spent_at:
+      $ref: './fields.yaml#/spent_at'
+    source:
+      $ref: './fields.yaml#/source'
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      allOf:
+        - $ref: './fields.yaml#/foreign_amount'
+      description: |
+        Amount value of the expense, in original currency i.e the currency in which the expense was initially created.
+    claim_amount:
+      $ref: './fields.yaml#/claim_amount'
+    purpose:
+      type: string
+      example: Team lunch
+      description: |
+        Purpose of this expense.
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        This represents the cost_center's id given by Fyle during creation of cost center
+        for which this expense is created.
+      nullable: true
+      example: 1049
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        This represents the category's id given by Fyle during creation of category
+        for which this expense is created.
+      nullable: true
+      example: 49058
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        This represents the project's id given by Fyle during creation of project
+        for which this expense is created.
+      nullable: true
+      example: 92895
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      description: |
+        This represents the source account's id given by Fyle during creation of account type
+        of user for which this expense is created.
+      example: acwbl222wlg
+    tax_amount:
+      type: number
+      nullable: true
+      description: Tax amount as setup by your organization.
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      description: |
+        This represents the tax's group id given by Fyle during creation of tax group
+        for which this expense is created.
+      nullable: true
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      $ref: './fields.yaml#/is_reimbursable'
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      description: |
+        Specific to per diem related expenses. Start date from which per diem claim is made.
+    ended_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      description: |
+        Specific to per diem related expenses. End date until which per diem claim is made.
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+    num_files:
+      type: integer
+      description: |
+        Number of files/reciepts attached to expense
+      example: 4
+    is_matching_ccc:
+      type: boolean
+      description: |
+        Set this field to true if expense matches any card expense
+      default: false
+      example: false
+    mileage_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        Specific to mileage expense. This represents the Mileage's rate id given by Fyle
+        during creation of mileage rate for which this expense is created.
+      nullable: true
+      example: 9080
+    per_diem_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        Specific to per diem expense. This represents the per diem's rate id given by Fyle
+        during creation of per diem rate for which this expense is created.
+      nullable: true
+      example: 583
+    per_diem_num_days:
+      type: integer
+      nullable: true
+      description: |
+        Specific to per diem related expenses. Number of days for which per diem claim is made.
+      example: 2
+
+    # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations 
+    # when mileage support comes to platform world. If we will give APIs for distance and amount calculation, 
+    # then we will link the respective APIs in the description. If we decide to auto compute it in backend, then 
+    # these fields might need to be dropped.
+    mileage_calculated_distance:
+      type: number
+      nullable: true
+      description: Specific to mileage expense. Distance computed by Fyle for mileage expenses.
+    mileage_calculated_amount:
+      type: number
+      nullable: true
+      description: Specific to mileage expense. Amount computed by Fyle for mileage expenses.
+
+expense_check_policies_out:
+  type: object
+  additionalProperties: False
+  properties:
+    individual_desired_states:
+      type: array
+      items:
+        $ref: ./fields.yaml#/expense_check_policies_individual_desired_states
+    final_desired_state:
+      $ref: ./fields.yaml#/expense_check_policies_final_desired_state
