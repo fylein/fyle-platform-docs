@@ -101,7 +101,7 @@ components:
     id_integer:
       type: integer
       description: |
-        This id is provided by Fyle to identify an object.
+        This id provided by Fyle to identify an object.
       example: 1234
     org_id:
       type: string
@@ -153,8 +153,8 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
-        example: uswoirwlwwg
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
       example:
         - uswoirwlwwg
         - uswlgwkgw42
@@ -169,8 +169,8 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
-        example: uswoirwlwwg
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
       example:
         - uswoirwlwwg
         - uswlgwkgw42
@@ -180,7 +180,7 @@ components:
       type: string
       maxLength: 15
       description: |
-        This id is provided by Fyle to identify an object.
+        This id provided by Fyle to identify an object.
       example: sdfd2391
     email:
       type: string
@@ -362,41 +362,40 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         restricted_spender_user_ids:
-          type: array
-          nullable: true
-          items:
-            type: string
-            nullable: false
-            maxLength: 15
-            description: |
-              This id is provided by Fyle to identify an object.
-            example: uswoirwlwwg
-          example:
-            - uswoirwlwwg
-            - uswlgwkgw42
-          description: |
-            - List of IDs of users who can access this object. <br>
-            **Note:**
-              - _Either `restricted_spender_user_ids` or `restricted_spender_user_group` key can be used to set restrictions. Both the keys can't be used together._
-              - _While creating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions defaults to `"restricted_spender_user_group": {"with_no_cost_center_restrictions": "true"}`_
-              - _While updating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions remains unchanged._
-        restricted_spender_user_group:
-          type: object
-          required:
-            - with_no_cost_center_restrictions
-          additionalProperties: false
-          properties:
-            with_no_cost_center_restrictions:
-              type: boolean
-              description: >
-                - If you want the cost_center to be visible to all the users in
-                the org with no cost center restrictions,
-                  you can set this key to True. <br>
-                **Note:**
-                  - _Either `restricted_spender_user_ids` or `restricted_spender_user_group` key can be used to set restrictions. Both the keys can't be used together._
-                  - _While creating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions defaults to `"restricted_spender_user_group": {"with_no_cost_center_restrictions": "true"}`_
-                  - _While updating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions remains unchanged._
-              example: true
+          $ref: '#/components/schemas/restricted_spender_user_ids'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+    allow_users:
+      type: string
+      nullable: false
+      description: >
+        Set who can access the object.
+
+        - `ALL` indicates the object can be accessible to all users in the org.
+
+        - `NONE` indicates the object cannot be accessible to any user in the
+        org.
+
+        - `UNRESTRICTED` indicates the object will be be accessible to all users
+        in the org who are not restricted to
+
+        specific objects of this resource.
+      enum:
+        - ALL
+        - NONE
+        - UNRESTRICTED
+      example: UNRESTRICTED
+    cost_center_restrict_in:
+      type: object
+      required:
+        - id
+        - allow_users
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        allow_users:
+          $ref: '#/components/schemas/allow_users'
     category_out:
       type: object
       additionalProperties: false
@@ -744,8 +743,8 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
-        example: uswoirwlwwg
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
       example:
         - uswoirwlwwg
       description: |
@@ -980,7 +979,7 @@ components:
       nullable: true
       maxLength: 15
       description: |
-        This id is provided by Fyle to identify an object.
+        This id provided by Fyle to identify an object.
       example: sdfd2391
     department_out_embed:
       type: object
@@ -1948,7 +1947,7 @@ components:
       type: integer
       nullable: true
       description: |
-        This id is provided by Fyle to identify an object.
+        This id provided by Fyle to identify an object.
       example: 1234
     category_out_embed:
       type: object
@@ -3130,8 +3129,8 @@ components:
         type: string
         nullable: false
         description: |
-          This id is provided by Fyle to identify an object.
-        example: uswoirwlwwg
+          This id provided by Fyle to identify an object.
+        example: sdfd2391
       example:
         - uswoirwlwwg
         - uswlgwkgw42
@@ -9678,7 +9677,7 @@ paths:
                         type: string
                         nullable: true
                       data:
-                        type: object
+                        type: string
                         nullable: true
         '401':
           description: Unauthorised request
@@ -9692,6 +9691,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/cost_centers/restrict:
+    post:
+      operationId: cost_centers_restrict
+      tags:
+        - Cost Centers
+      summary: Restrict cost center to users
+      description: |
+        Restrict cost center to users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/cost_center_restrict_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_cost_center_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/categories:
     get:
       tags:
