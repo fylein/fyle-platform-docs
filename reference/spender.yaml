@@ -1695,6 +1695,13 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    expense_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     expense_add_comment_action_in:
       type: object
       required:
@@ -6276,24 +6283,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /spender/expenses/{id}:
-    delete:
+  /spender/expenses/delete:
+    post:
       tags:
         - Expenses
       summary: Delete an expense
       description: |
         Delete an expense.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: Id of the expense that needs to be deleted.
-          schema:
-            type: string
       operationId: expenses_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_delete_in'
       responses:
-        '204':
+        '200':
           description: The expense was deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
         '400':
           description: Bad request
           content:
