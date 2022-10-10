@@ -3229,6 +3229,17 @@ components:
           example: true
         receiver_user_ids:
           $ref: '#/components/schemas/reminder_receiver_user_ids'
+    reminder_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          maxLength: 20
+          description: |
+            ID of the reminder that needs to be deleted.
+          example: remindNZgN7V5pft
     report_out:
       type: object
       additionalProperties: false
@@ -11277,21 +11288,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/reminders/{id}:
-    delete:
+  /admin/reminders/delete:
+    post:
       tags:
         - Reminders
       summary: Delete a reminder
       description: |
         Delete a reminder.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: Id of the reminder that needs to be deleted.
-          schema:
-            type: string
       operationId: reminders_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reminder_delete_in'
       responses:
         '200':
           description: OK
