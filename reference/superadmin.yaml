@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  version: '1.0'
+  title: SuperAdmin APIs
+  description: |
+    These APIs are generally used to manage the enviornment. 
+  contact:
+    name: Platform Beta
+    email: support@fylehq.com
+servers:
+  - url: https://us1.fylehq.com/platform/v1
+    description: US Region Server
+  - url: https://in1.fylehq.com/platform/v1
+    description: India Region Server
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://app.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
+          scopes:
+            '*': Grant all actions
+  schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is invalid
+    '401':
+      type: object
+      properties:
+        message:
+          enum:
+            - invalid token
+          type: string
+          description: >
+            This error means that the input access token is either not issued by
+            Fyle or has expired.
+
+            You need to generate a new access token.
+    refresh_token:
+      type: string
+      description: |
+        This is user refresh token, and is used to generate access_token
+      example: xxxyyy.aaaa.aaa
+    org_id:
+      type: string
+      description: |
+        The unique id of the Organization to which the object is associated.
+      readOnly: true
+      example: orwruogwnngg
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    redirect_uri:
+      type: string
+      description: |
+        URL where user need to be redirected
+      example: https://app.fylehq.com/app/...
+tags: []
+paths:
+  /superadmin/auth/signup:
+    post:
+      x-internal: true
+      tags:
+        - Auth
+      summary: User Signup
+      operationId: signup
+      description: |
+        This API is used to signup the user and create a new org
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  refresh_token:
+                    $ref: '#/components/schemas/refresh_token'
+                  org_id:
+                    $ref: '#/components/schemas/org_id'
+                  user_id:
+                    $ref: '#/components/schemas/user_id'
+                  redirect_uri:
+                    $ref: '#/components/schemas/redirect_uri'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /superadmin/auth/signin:
+    post:
+      x-internal: true
+      tags:
+        - Auth
+      summary: User Signin
+      operationId: signup
+      description: |
+        This API is used to generate the signin uri for a user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  refresh_token:
+                    $ref: '#/components/schemas/refresh_token'
+                  org_id:
+                    $ref: '#/components/schemas/org_id'
+                  user_id:
+                    $ref: '#/components/schemas/user_id'
+                  redirect_uri:
+                    $ref: '#/components/schemas/redirect_uri'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
