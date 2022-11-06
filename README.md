@@ -34,7 +34,7 @@ You can check the version by running
     openapi lint src/hop/openapi.yaml
     openapi lint src/common/openapi.yaml
     openapi lint src/accountant/openapi.yaml
-    openapi lint src/superadmin/openapi.yaml    
+    openapi lint src/super_admin/openapi.yaml    
 
 ## Bundling ##
 
@@ -46,7 +46,7 @@ You can check the version by running
     openapi bundle -o reference/hop.yaml src/hop/openapi.yaml
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
     openapi bundle -o reference/accountant.yaml src/accountant/openapi.yaml
-    openapi bundle -o reference/superadmin.yaml src/superadmin/openapi.yaml
+    openapi bundle -o reference/super_admin.yaml src/super_admin/openapi.yaml
 
 ## To preview changes ##
 
