@@ -819,12 +819,20 @@ expense_creation_from_receipt_in:
 expense_check_policies_in:
   type: object
   additionalProperties: False
-  required:
-    - claim_amount
-    - spent_at
   properties:
+    id:
+      allOf:
+        - $ref: ./fields.yaml#/id_string
+      description: |
+        This represents the id of the expense.<br><br>
+        _Note: This field is required when you are updating an already created expense and want to check it again against the policy rules._
+      example: 'tx0agOdICdbV'
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      allOf:
+        - $ref: './fields.yaml#/spent_at'
+      description: |
+        It signifies when this expense was made. This date cannot be in future.<br><br>
+        _Note: This field is mandatory when you are creating an expense._
     source:
       $ref: './fields.yaml#/source'
     merchant:
@@ -837,7 +845,12 @@ expense_check_policies_in:
       description: |
         Amount value of the expense, in original currency i.e the currency in which the expense was initially created.
     claim_amount:
-      $ref: './fields.yaml#/claim_amount'
+      allOf:
+        - $ref: './fields.yaml#/claim_amount'
+      description: |
+        The expense amount as claimed by user.<br><br>
+        _Note: This field is mandatory when you are creating an expense._
+      example: 1984.18
     purpose:
       type: string
       example: Team lunch
