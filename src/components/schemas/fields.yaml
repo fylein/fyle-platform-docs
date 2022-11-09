@@ -8,7 +8,7 @@ id_string:
   type: string
   maxLength: 15
   description: |
-    This id provided by Fyle to identify an object.
+    This id is provided by Fyle to identify an object.
   example: 'sdfd2391'
 
 fk_string:
@@ -16,13 +16,13 @@ fk_string:
   nullable: true
   maxLength: 15
   description: |
-    This id provided by Fyle to identify an object.
+    This id is provided by Fyle to identify an object.
   example: 'sdfd2391'
 
 id_integer:
   type: integer
   description: |
-    This id provided by Fyle to identify an object.
+    This id is provided by Fyle to identify an object.
   example: 1234
 
 card_number:
@@ -36,7 +36,7 @@ fk_integer:
   type: integer
   nullable: true
   description: |
-    This id provided by Fyle to identify an object.
+    This id is provided by Fyle to identify an object.
   example: 1234
 
 org_id:
@@ -44,6 +44,13 @@ org_id:
   description: |
     The unique id of the Organization to which the object is associated.
   readOnly: true
+  example: orwruogwnngg
+
+org_id_in:
+  type: string
+  nullable: true
+  description: |
+    The unique id of the Organization to which the object is associated.
   example: orwruogwnngg
 
 user_id:
@@ -96,11 +103,30 @@ webhook_url:
     URL Endpoint for webhook
   example: 'https://api.custom.com/webhook1'
 
+redirect_uri:
+  type: string
+  description: |
+    URL where user needs to be redirected
+  example: 'https://app.fylehq.com/app/...'
+
+refresh_token:
+  type: string
+  description: |
+    This is user refresh token, and is used to generate access_token
+  example: xxxyyy.aaaa.aaa
+
 name:
   type: string
   maxLength: 255
   description: |
     This represents the name of the resource. This should be unique in an organization
+  example: foo123
+
+org_name:
+  type: string
+  maxLength: 255
+  description: |
+    This represents the name of the organization. This should be unique for all organizations
   example: foo123
 
 name_nullable:
@@ -118,6 +144,14 @@ description:
   description: |
     This represents the description of the resource.
   example: Win the trophy
+
+domain:
+  type: string
+  nullable: true
+  maxLength: 255
+  description: |
+    This represents a tld domain name 
+  example: somebusineess.com
 
 code:
   type: string
@@ -275,6 +309,118 @@ expense_policy_expenses_query_object:
       example: "2022-03-31"
     params:
         $ref: '#/expense_policy_expenses_query_object_params'
+
+expense_check_policies_individual_desired_states:
+  type: object
+  properties:
+    add_approver_user_ids:
+      nullable: true
+      type: array
+      items:
+        type: string
+      description: |
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
+      example:
+        - usBdsdfscl
+        - usLSsdfwqt
+    expense_policy_rule_id:
+      type: string
+      description: |
+        This represents the id of the expense policy rule.
+      example: "tprabsdfSYqd"
+    expense_policy_rule:
+      $ref: '#/expense_policy_rule_embed'
+    run_status:
+      nullable: false
+      type: string
+      enum:
+        - VIOLATED_ACTION_SUCCESS
+        - VIOLATED_ACTION_FAILURE
+        - UNVIOLATED
+      description: |
+        This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
+        If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`, 
+        it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved. 
+        However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was 
+        missing or not set up properly, it will fail to take action on the expense when it is saved.
+      example: SUCCESS
+    run_result:
+      type: array
+      items:
+        type: string
+      description: |
+        List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+        case some approver was not setup properly for the given violation, this array will contain description of
+        missing approvers. For example, Department head, Project head, etc.
+      example:
+        - "flag the expense"
+        - "cap the amount"
+    amount:
+      nullable: true
+      anyOf:
+        - $ref: '#/amount'
+        - $ref: '#/null_field'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    expenses_query_object_params:
+      nullable: true
+      $ref: '#/expense_policy_expenses_query_object'
+
+expense_check_policies_final_desired_state:
+  type: object
+  properties:
+    flag:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense should be flagged.
+      example: True
+    amount:
+      nullable: true
+      anyOf:
+        - $ref: '#/amount'
+        - $ref: '#/null_field'
+      description: |
+        Amount that the policy calculation suggests for this expense.
+      example: 500
+    is_receipt_mandatory:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense requires receipt.
+      example: True
+    add_approver_user_ids:
+      nullable: true
+      type: array
+      items:
+        type: string
+      description: |
+        List of approver ids that the policy calculation suggests adding to report that contains this expense.
+      example:
+        - usBdsdfscl
+        - usLSsdfwqt
+    remove_employee_approver1:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+      example: True
+    run_status:
+      nullable: false
+      type: string
+      enum:
+        - SUCCESS
+        - FAILURE
+      description: |
+        This represent the run status of the policy.
+      example: SUCCESS
+    run_summary:
+      type: array
+      items:
+        type: string
+      description: |
+        List of human-readable action summaries that the policy calculation suggests for this expense.
+      example:
+        - "flag the expense"
+        - "cap the amount"
 
 expense_policy_individual_desired_states:
   type: object
@@ -502,7 +648,7 @@ role:
 
 email:
   type: string
-  #  format: email
+  # format: email
   maxLength: 127
   example: john.doe@example.com
   description: >
@@ -816,8 +962,8 @@ restricted_spender_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id provided by Fyle to identify an object.
-    example: 'sdfd2391'
+      This id is provided by Fyle to identify an object.
+    example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
     List of IDs of users who can access this object.
@@ -831,8 +977,8 @@ approver_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id provided by Fyle to identify an object.
-    example: 'sdfd2391'
+      This id is provided by Fyle to identify an object.
+    example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
     List of IDs of users who are approvers of the project.
@@ -844,8 +990,8 @@ reminder_receiver_user_ids:
     type: string
     nullable: False
     description: |
-      This id provided by Fyle to identify an object.
-    example: 'sdfd2391'
+      This id is provided by Fyle to identify an object.
+    example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
     List of IDs of users to whom this reminder will be sent.
@@ -991,8 +1137,8 @@ department_head_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id provided by Fyle to identify an object.
-    example: 'sdfd2391'
+      This id is provided by Fyle to identify an object.
+    example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg' ]
   description: |
     List of IDs of users who are head of the department.
@@ -1048,3 +1194,29 @@ bank_ifsc:
   description: >
       IFSC code of the bank account of the Employee
   pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
+
+ach_transfer:
+  type: object
+  properties:
+    state:
+      nullable: true
+      anyOf:
+        - $ref: '#/ach_transfer_state'
+        - $ref: '#/null_field'
+    status_info:
+      type: string
+      description: >
+        Description of current status of the payment.
+      example: Kindly ask the employee to add a valid bank account in their Settings. You'll then be able to see the bank icon next to the payment number, after which you can retry the payment. 
+
+ach_transfer_state:
+  type: string
+  enum:
+    - ACH_FAILED
+    - ACH_INITIATED
+    - ACH_COMPLETE
+    - ACH_RETRY
+  description: >
+    Status of ACH if this reimbursment is processed via ACH.
+  example: ACH_FAILED
+

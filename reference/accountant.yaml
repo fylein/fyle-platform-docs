@@ -1,11 +1,10 @@
 openapi: 3.0.3
 info:
   version: '1.0'
-  title: Head of Department APIs
-  termsOfService: https://www.fylehq.com/privacy/terms-and-conditions
+  title: Admin APIs
   description: >
-    These APIs are used by applications for Head of Department - typically to
-    understand budget usages and analytics.
+    These APIs are generally used to integrate Fyle with accounting or HRMS
+    systems. 
   contact:
     name: Platform Beta
     email: support@fylehq.com
@@ -63,12 +62,19 @@ components:
         next 1000 objects. <br>
       type: integer
       example: 10
-    id_string:
+    org_id:
       type: string
-      maxLength: 15
       description: |
-        This id is provided by Fyle to identify an object.
-      example: sdfd2391
+        The unique id of the Organization to which the object is associated.
+      readOnly: true
+      example: orwruogwnngg
+    currency:
+      type: string
+      description: >
+        The three-letter currency code following ISO standard <a
+        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: ([A-Z]{3})
     created_at:
       type: string
       format: date-time
@@ -83,138 +89,130 @@ components:
         Signifies when this object was updated in [ISO8601
         format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-11T13:14:55.201598+00:00'
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
-    id_integer:
-      type: integer
+    id_string:
+      type: string
+      maxLength: 15
       description: |
         This id is provided by Fyle to identify an object.
-      example: 1234
-    name:
-      type: string
-      maxLength: 255
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
-      example: foo123
-    budget_type:
-      nullable: false
-      type: string
-      enum:
-        - WEEKLY
-        - MONTHLY
-        - QUARTERLY
-        - HALF_YEARLY
-        - YEARLY
-        - ONE_TIME
-      description: |
-        Type of budgets 
-      example: WEEKLY
-    is_enabled:
-      type: boolean
-      description: >
-        This indicates if the resource is enabled for use within the
-        organisation.
-      default: true
-      example: true
-    budget_out_embed:
+      example: sdfd2391
+    file_generate_urls_action_out:
       type: object
       additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_string'
         name:
-          allOf:
-            - $ref: '#/components/schemas/name'
-          example: Sales Montly Budget
-        type:
-          $ref: '#/components/schemas/budget_type'
-        amount_limit:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          example: 10000
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-    budget_usage_out:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          nullable: true
+          type: string
+          description: |
+            Link to download this file
+    org_rov_out:
       type: object
-      required:
-        - budget_id
-        - budget_observer_ids
-        - spent
-        - amount_limit
-        - budget
       additionalProperties: false
+      required:
+        - id
+        - name
+        - domain
+        - currency
+        - created_at
+        - updated_at
+        - is_verified
+        - approval_pending_reports_count
+        - billed_users_count
+        - enabled_users_count
+        - incomplete_expenses_count
+        - pending_reimbursement_amount
+        - pending_users_count
+        - logo_file_id
+        - logo_file
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
-        org_id:
-          $ref: '#/components/schemas/id_string'
-        budget_id:
-          $ref: '#/components/schemas/id_string'
-        start_date:
+          $ref: '#/components/schemas/org_id'
+        name:
           type: string
-          nullable: true
-          format: date-time
-          example: 2020-06-11T00.00.00Z
-          description: Start date of the cycle of the budget
-        end_date:
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
+        domain:
           type: string
-          nullable: true
-          format: date-time
-          example: 2020-06-11T00.00.00Z
-          description: End date of the cycle of the budget
+          maxLength: 255
+          description: >-
+            This field specifies the domain with which the organisation is
+            registered.
+          example: example.com
+        currency:
+          $ref: '#/components/schemas/currency'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        budget_observer_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - usge49ielgel
-        spent:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          example: 1000
-        amount_limit:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          example: 10000
-        budget_department_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - 2222
-            - 1221
+        is_verified:
+          type: boolean
+          nullable: false
+          description: >
+            Determines whether this organization has been verified by a
+            verifier.
+        approval_pending_reports_count:
+          type: integer
+          nullable: false
           description: |
-            List of department ids
-        budget_project_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_integer'
-          example:
-            - 2222
-            - 1221
+            Determines the number of reports that are pending for approval.
+        billed_users_count:
+          type: integer
+          nullable: false
+          description: >
+            Determines the number of users who qualify as active users to be
+            billed.
+        enabled_users_count:
+          type: integer
+          nullable: false
           description: |
-            List of project ids
-        budget:
-          $ref: '#/components/schemas/budget_out_embed'
-tags:
-  - name: Budget Usages
-    description: |
-      This API gives you insight of budgets in an organisation
+            Determines the number of enabled users in the org.
+        incomplete_expenses_count:
+          type: integer
+          nullable: false
+          description: >
+            Determines the number of incomplete expenses mapped to a card
+            transaction.
+        pending_reimbursement_amount:
+          type: number
+          nullable: false
+          description: |
+            Determines the total amount that is to be paid to the employees.
+        pending_users_count:
+          type: integer
+          nullable: false
+          description: >
+            Determines the number of users who are yet to accept invite and
+            verify email.
+        logo_file_id:
+          type: string
+          nullable: true
+          description: |
+            Determines the file id of the branding logo
+        logo_file:
+          nullable: true
+          $ref: '#/components/schemas/file_generate_urls_action_out'
+tags: []
 paths:
-  /hod/budget_usages:
+  /accountant/orgs:
     get:
       tags:
-        - Budgets
-      summary: List Budget Usages
-      operationId: budget_usages_list
+        - Organisations
+      summary: List Organisations
+      operationId: orgs_list
       description: >
         This API supports very rich filtering on all response fields and
         pagination via query parameters. To understand how to use these
@@ -227,6 +225,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -235,9 +234,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/budget_usage_out'
+                      $ref: '#/components/schemas/org_rov_out'
         '400':
-          description: Bad request
+          description: Bad Request
           content:
             application/json:
               schema:
