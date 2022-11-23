@@ -674,6 +674,99 @@ components:
           example: true
         code:
           $ref: '#/components/schemas/code'
+    employee_field_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            This specifies the name of the employee field.
+          example: Title
+        type:
+          type: string
+          description: |
+            This field specifies the type of the employee field.
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the employee field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Mr
+            - Mrs
+            - Ms
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_mandatory:
+          type: boolean
+          description: |
+            This specifies if the employee field is mandatory or not.
+          example: true
+    employee_field_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+        - is_mandatory
+        - is_enabled
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            This specifies the name of the employee field.
+          example: Title
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the employee field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Mr
+            - Ms
+            - Mrs
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_mandatory:
+          type: boolean
+          description: |
+            This specifies if the employee field is mandatory or not.
+          example: true
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - DATE
+          description: |
+            This field specifies the type of the employee field.
+          example: SELECT
     name:
       type: string
       maxLength: 255
@@ -3047,6 +3140,73 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advance_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+            - CASH
+          example: CASH
+        advance_request_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        advance_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: accwiofowiww
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advances.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: >
+            The name of the client app from which this advance was created.
+
+            if its a thrid party app, it prefixed with TPA_.
+
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
+            not
+
+            passed, source is saved as TPA.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        code:
+          $ref: '#/components/schemas/code'
+        card_number:
+          type: string
+          nullable: true
+          example: XXXXXXXXXXXX1234
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     reminder_type:
       type: string
       enum:
@@ -10119,6 +10279,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/employee_fields:
+    get:
+      tags:
+        - Employees
+      summary: List employee fields
+      operationId: employee_fields_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create or update an employee fields
+      operationId: employee_fields_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_field_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/employee_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/per_diem_rates:
     get:
       tags:
@@ -11287,6 +11538,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advances
+      summary: Create or update an advances
+      description: |
+        Create or update an advances.
+      operationId: advances_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reminders:
     get:
       tags:
