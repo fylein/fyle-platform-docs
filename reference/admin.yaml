@@ -674,6 +674,99 @@ components:
           example: true
         code:
           $ref: '#/components/schemas/code'
+    employee_field_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            This specifies the name of the employee field.
+          example: Title
+        type:
+          type: string
+          description: |
+            This field specifies the type of the employee field.
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the employee field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Mr
+            - Mrs
+            - Ms
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_mandatory:
+          type: boolean
+          description: |
+            This specifies if the employee field is mandatory or not.
+          example: true
+    employee_field_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+        - is_mandatory
+        - is_enabled
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            This specifies the name of the employee field.
+          example: Title
+        options:
+          type: array
+          items:
+            type: string
+          description: >
+            This specifies the option values of the employee field in case on
+            SELECT or MULTI_SELECT type.
+          example:
+            - Mr
+            - Ms
+            - Mrs
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_mandatory:
+          type: boolean
+          description: |
+            This specifies if the employee field is mandatory or not.
+          example: true
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - DATE
+          description: |
+            This field specifies the type of the employee field.
+          example: SELECT
     name:
       type: string
       maxLength: 255
@@ -10162,6 +10255,97 @@ paths:
                     type: string
                   data:
                     $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/employee_fields:
+    get:
+      tags:
+        - Employees
+      summary: List employee fields
+      operationId: employee_fields_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create or update an employee fields
+      operationId: employee_fields_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_field_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/employee_field_out'
         '400':
           description: Bad request
           content:
