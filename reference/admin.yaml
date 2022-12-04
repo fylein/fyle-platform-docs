@@ -3636,9 +3636,6 @@ components:
               - $ref: '#/components/schemas/id_string'
           example:
             - us123heh98
-<<<<<<< HEAD
-    mark_paid_bulk_in:
-=======
         reimbursement_id:
           type: string
           nullable: true
@@ -3648,8 +3645,23 @@ components:
           example: reimntGt9ju6qP
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_minimal'
+    mark_paid_bulk_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: re123453
+        paid_notify_at:
+          type: string
+          format: date-time
+          description: >
+            This field indicates when should user receive notification regarding
+            reimbursement
+          example: '2022-12-02T17:58:21.406Z'
     process_summary_in:
->>>>>>> main
       type: object
       properties:
         id:
@@ -3658,8 +3670,6 @@ components:
           example: re123453
       required:
         - id
-<<<<<<< HEAD
-=======
     process_summary_out:
       type: object
       properties:
@@ -3707,7 +3717,6 @@ components:
             - $ref: '#/components/schemas/amount'
           description: |
             This field indicates the Final amount to be reimbursement. 
->>>>>>> main
     corporate_card_out:
       type: object
       properties:
@@ -11842,7 +11851,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-<<<<<<< HEAD
   /admin/reports/mark_paid/bulk:
     post:
       tags:
@@ -11851,16 +11859,6 @@ paths:
       description: |
         Mark reports as Paid.
       operationId: reports_mark_paid
-=======
-  /admin/reports/process_summary/bulk:
-    post:
-      tags:
-        - Reports
-      summary: Reimbursable amount summary
-      description: |
-        Reimbursable amount summary
-      operationId: reports_process_summary
->>>>>>> main
       requestBody:
         required: true
         content:
@@ -11874,12 +11872,67 @@ paths:
                 data:
                   type: array
                   items:
-<<<<<<< HEAD
                     $ref: '#/components/schemas/mark_paid_bulk_in'
       responses:
         '200':
           description: OK
-=======
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/process_summary/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Reimbursable amount summary
+      description: |
+        Reimbursable amount summary
+      operationId: reports_process_summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
                     $ref: '#/components/schemas/process_summary_in'
       responses:
         '200':
@@ -11892,7 +11945,6 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/process_summary_out'
->>>>>>> main
         '400':
           description: Bad request
           content:
