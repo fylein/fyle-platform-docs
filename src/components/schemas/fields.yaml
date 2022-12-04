@@ -46,6 +46,13 @@ org_id:
   readOnly: true
   example: orwruogwnngg
 
+org_id_in:
+  type: string
+  nullable: true
+  description: |
+    The unique id of the Organization to which the object is associated.
+  example: orwruogwnngg
+
 user_id:
   type: string
   description: |
@@ -96,11 +103,30 @@ webhook_url:
     URL Endpoint for webhook
   example: 'https://api.custom.com/webhook1'
 
+redirect_uri:
+  type: string
+  description: |
+    URL where user needs to be redirected
+  example: 'https://app.fylehq.com/app/...'
+
+refresh_token:
+  type: string
+  description: |
+    This is user refresh token, and is used to generate access_token
+  example: xxxyyy.aaaa.aaa
+
 name:
   type: string
   maxLength: 255
   description: |
     This represents the name of the resource. This should be unique in an organization
+  example: foo123
+
+org_name:
+  type: string
+  maxLength: 255
+  description: |
+    This represents the name of the organization. This should be unique for all organizations
   example: foo123
 
 name_nullable:
@@ -118,6 +144,14 @@ description:
   description: |
     This represents the description of the resource.
   example: Win the trophy
+
+domain:
+  type: string
+  nullable: true
+  maxLength: 255
+  description: |
+    This represents a tld domain name 
+  example: somebusineess.com
 
 code:
   type: string
@@ -614,7 +648,7 @@ role:
 
 email:
   type: string
-  #  format: email
+  # format: email
   maxLength: 127
   example: john.doe@example.com
   description: >
@@ -1160,3 +1194,29 @@ bank_ifsc:
   description: >
       IFSC code of the bank account of the Employee
   pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
+
+ach_transfer:
+  type: object
+  properties:
+    state:
+      nullable: true
+      anyOf:
+        - $ref: '#/ach_transfer_state'
+        - $ref: '#/null_field'
+    status_info:
+      type: string
+      description: >
+        Description of current status of the payment.
+      example: Kindly ask the employee to add a valid bank account in their Settings. You'll then be able to see the bank icon next to the payment number, after which you can retry the payment. 
+
+ach_transfer_state:
+  type: string
+  enum:
+    - ACH_FAILED
+    - ACH_INITIATED
+    - ACH_COMPLETE
+    - ACH_RETRY
+  description: >
+    Status of ACH if this reimbursment is processed via ACH.
+  example: ACH_FAILED
+
