@@ -230,7 +230,7 @@ components:
             This is a combination of name and sub_department separated by a /
             and spaces. In case if no sub_department is present it is same as
             name of the department.
-    employee_out_embed:
+    employee_out_embed_for_report:
       type: object
       additionalProperties: false
       properties:
@@ -259,6 +259,20 @@ components:
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+        ach_account:
+          additionalProperties: false
+          type: object
+          properties:
+            added:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee has added ach account
+            verified:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee's ach account is verified.
     report_out:
       type: object
       additionalProperties: false
@@ -413,7 +427,7 @@ components:
         employee_id:
           $ref: '#/components/schemas/employee_id'
         employee:
-          $ref: '#/components/schemas/employee_out_embed'
+          $ref: '#/components/schemas/employee_out_embed_for_report'
         next_approver_user_ids:
           type: array
           items:
@@ -757,6 +771,35 @@ components:
         content_type:
           type: string
           example: application/pdf
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
     card_number:
       type: string
       description: |

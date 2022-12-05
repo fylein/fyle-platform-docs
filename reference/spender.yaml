@@ -1832,6 +1832,49 @@ components:
       description: |
         amount of money
       example: 47.99
+    employee_out_embed_for_report:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: >
+            This field refers to any string that the client programs can use to
+            refer to an employee's unique id.
+
+            This could be any field such as an UUID from an Active Directory
+            server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
+        ach_account:
+          additionalProperties: false
+          type: object
+          properties:
+            added:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee has added ach account
+            verified:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee's ach account is verified.
     report_out:
       type: object
       additionalProperties: false
@@ -1986,7 +2029,7 @@ components:
         employee_id:
           $ref: '#/components/schemas/employee_id'
         employee:
-          $ref: '#/components/schemas/employee_out_embed'
+          $ref: '#/components/schemas/employee_out_embed_for_report'
         next_approver_user_ids:
           type: array
           items:
@@ -2446,48 +2489,6 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
-    advance_request_in:
-      type: object
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: areqiwr3Wwirr
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        code:
-          $ref: '#/components/schemas/code'
-        notes:
-          type: string
-          nullable: true
-          description: |
-            Optional descriptive notes which can be added to an advance request.
-          example: onsite client meeting
-        purpose:
-          type: string
-          nullable: true
-          description: |
-            Descriptive purpose which is added to an advance request.
-          example: onsite client meeting
-        source:
-          type: string
-          nullable: true
-          description: >
-            The name of the client app from which this advance was created.
-
-            if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
-            passed, source is saved as TPA.
-          example: WEBAPP
-        project_id:
-          $ref: '#/components/schemas/fk_integer'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
     advance_out:
       type: object
       additionalProperties: false
@@ -2668,7 +2669,12 @@ components:
         is_visa_enrolled:
           type: boolean
           description: |
-            If the card is enrolled with direct visa_feed
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
           nullable: false
         is_dummy:
           type: boolean
@@ -2719,6 +2725,7 @@ components:
         - last_assigned_at
         - assignor_user_id
         - is_visa_enrolled
+        - is_mastercard_enrolled
         - is_dummy
         - last_ready_for_verification_at
         - last_verification_attempt_at
@@ -5443,12 +5450,27 @@ components:
     expense_check_policies_in:
       type: object
       additionalProperties: false
-      required:
-        - claim_amount
-        - spent_at
       properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: >
+            This represents the id of the expense.<br><br>
+
+            _Note: This field is required when you are updating an already
+            created expense and want to check it again against the policy rules
+            before saving the expense._
+          example: tx0agOdICdbV
         spent_at:
-          $ref: '#/components/schemas/spent_at'
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: >
+            It signifies when this expense was made. This date cannot be in
+            future.<br><br>
+
+            _Note: This field is mandatory when you are creating an expense and
+            want to check it against the policy rules before saving the
+            expense._
         source:
           $ref: '#/components/schemas/source'
         merchant:
@@ -5462,7 +5484,15 @@ components:
             Amount value of the expense, in original currency i.e the currency
             in which the expense was initially created.
         claim_amount:
-          $ref: '#/components/schemas/claim_amount'
+          allOf:
+            - $ref: '#/components/schemas/claim_amount'
+          description: >
+            The expense amount as claimed by user.<br><br>
+
+            _Note: This field is mandatory when you are creating an expense and
+            want to check it against the policy rules before saving the
+            expense._
+          example: 1984.18
         purpose:
           type: string
           example: Team lunch
@@ -7143,60 +7173,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-    post:
-      tags:
-        - Advances
-      summary: Create or update an advance requests
-      description: |
-        Create or update an advance requests.
-      operationId: advance_requests_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/advance_request_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/advance_request_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /spender/advances:
     get:
       tags:
@@ -7867,6 +7843,16 @@ paths:
           schema:
             type: string
             example: eq.true
+        - in: query
+          name: is_retired
+          description: |
+            Whether to fetch retired expense policy rule.<br>
+            Supported operators are `eq`.<br>
+            is_retired=eq.true <br>
+            is_retired=eq.false
+          schema:
+            type: string
+            example: eq.true
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       responses:
@@ -7979,6 +7965,9 @@ paths:
 
         that you want to create/update to this API, along with some extra
         optional fields documented below.
+
+        Note that, however based on whether you are creating or updating an
+        expense, some fields may be mandatory as mentioned explicitly by _Note_.
       operationId: check_policies_post
       requestBody:
         required: true
