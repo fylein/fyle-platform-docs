@@ -3645,21 +3645,15 @@ components:
           example: reimntGt9ju6qP
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_minimal'
-<<<<<<< HEAD
     mark_paid_bulk_in:
       type: object
       required:
         - id
-=======
-    process_manual_in:
-      type: object
->>>>>>> main
       properties:
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: re123453
-<<<<<<< HEAD
         paid_notify_at:
           type: string
           format: date-time
@@ -3667,10 +3661,17 @@ components:
             This field indicates when should user receive notification regarding
             reimbursement
           example: '2022-12-02T17:58:21.406Z'
-=======
+        code:
+          $ref: '#/components/schemas/code'
+    process_manual_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: re123453
       required:
         - id
->>>>>>> main
     process_summary_in:
       type: object
       properties:
@@ -11861,7 +11862,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-<<<<<<< HEAD
   /admin/reports/mark_paid/bulk:
     post:
       tags:
@@ -11870,16 +11870,6 @@ paths:
       description: |
         Mark reports as Paid.
       operationId: reports_mark_paid
-=======
-  /admin/reports/process_manual/bulk:
-    post:
-      tags:
-        - Reports
-      summary: Process Manual
-      description: |
-        Process reports manually
-      operationId: reports_process_manual
->>>>>>> main
       requestBody:
         required: true
         content:
@@ -11893,11 +11883,68 @@ paths:
                 data:
                   type: array
                   items:
-<<<<<<< HEAD
                     $ref: '#/components/schemas/mark_paid_bulk_in'
-=======
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/process_manual/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Process Manual
+      description: |
+        Process reports manually
+      operationId: reports_process_manual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
                     $ref: '#/components/schemas/process_manual_in'
->>>>>>> main
       responses:
         '200':
           description: OK
