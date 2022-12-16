@@ -258,6 +258,13 @@ components:
             $ref: '#/components/schemas/user_out_embed'
           description: |
             List of users who are approvers for this project.
+        category_ids:
+          type: array
+          nullable: true
+          items:
+            type: integer
+            example: 16570
+          description: List of categories that are applicable for the project.
     project_in:
       type: object
       additionalProperties: false
@@ -3693,17 +3700,17 @@ components:
     process_summary_out:
       type: object
       properties:
-        total_reimbursable_amount:
+        selected_reimbursable_amount:
           allOf:
             - $ref: '#/components/schemas/amount'
           description: |
             This field indicates the final reimbursable amount.
-          example: 10.1
+          example: 101
         selected_count:
           type: integer
           description: |
             This field indicates the count of selected reports.
-          example: 153.97
+          example: 1
         unverified_count:
           type: integer
           description: |
@@ -3713,7 +3720,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/amount'
           description: |
-            This field indicates the total amount of unverified reports.  
+            This field indicates the total amount of unverified reports.
+          example: 100
         missing_bank_details_count:
           type: integer
           description: >
@@ -3726,17 +3734,38 @@ components:
           description: >
             This field indicates the total amount of reports with missing users
             bank account details.
+          example: 101
         missing_bank_details_employee_count:
           type: integer
           description: >
             This field indicates the count of employees with missing users bank
             account details.
           example: 2
-        final_reimbursable_amount:
+        reimbursable_amount:
           allOf:
             - $ref: '#/components/schemas/amount'
           description: |
             This field indicates the Final amount to be reimbursement. 
+          example: 101
+        reimbursable_report_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - re1234423
+          description: |
+            This field contains list of reimbursable report_ids. 
+        closable_report_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - re123453
+          description: >
+            This field contains list of report_ids that can directly be
+            closed(with reimbursable amount as 0). 
     corporate_card_out:
       type: object
       properties:
@@ -6709,9 +6738,6 @@ components:
           example: true
         paid_at:
           $ref: '#/components/schemas/timestamptz_utc'
-        settlement_number:
-          type: integer
-          example: 2
         total_opening_balance:
           type: number
           example: 100.1
@@ -8084,6 +8110,10 @@ components:
             `expense_annual_distance_max` for `expense_vehicle_type`, this rate
             will be applied afterwards.
           example: 20
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
     expense_policy_in:
       type: object
       required:
