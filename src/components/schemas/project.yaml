@@ -99,7 +99,43 @@ project_in:
     restricted_spender_user_ids:
       $ref: './fields.yaml#/restricted_spender_user_ids'
     approver_user_ids:
-      $ref: './fields.yaml#/approver_user_ids'
+      allOf:
+        - $ref: './fields.yaml#/approver_user_ids'
+      description: |
+        - List of IDs of users who are approvers of the project.
+        - Either `approver_user_ids` or `approver_emails` can be used but not both.
+        - The default value for approver_user_ids is `[]` and it is applicable only when creating the project.
+    approver_emails:
+      type: array
+      maxItems: 2
+      nullable: False
+      items:
+        type: string
+        # format: email
+        maxLength: 127
+        nullable: True
+        example: john.doe@example.com
+        description: >
+          An immutable field that represents the email address of the employee.
+
+          Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+          822.</a>
+      example: [ 'approver1@example.com', 'approver2@example.com' ]
+      description: |
+        - List of emails of employees that are approvers for the project.
+        - Either `approver_user_ids` or `approver_emails` can be used but not both.
+        - The default value for approver_emails is `[]` and it is applicable only when creating the project.
+    category_ids:
+      type: array
+      nullable: True
+      items:
+        $ref: './fields.yaml#/id_integer'
+      example: [ 87291, 78322, 492 ]
+      description: |
+        - List of IDs of categories which can be used with the project.
+        - `null` value indicates that all categories in the org are applicable for the project.
+        - `[]` value indicates that no category in the org is applicable for the project.
+        - The default value of `category_ids` is `null`
 
 admin_approver_project_out:
   type: object
