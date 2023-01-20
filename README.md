@@ -50,7 +50,7 @@ You can check the version by running
 
 ## To preview changes ##
 
-    openapi preview-docs src/admin/openapi.yaml
+    openapi preview-docs src/spender/openapi.yaml
 
 ## Mock Server ##
 
