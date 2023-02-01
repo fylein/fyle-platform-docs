@@ -1,0 +1,106 @@
+expense_rule_if:
+  type: object
+  nullable: false
+  additionalProperties: false
+  required:
+    - merchant_contains
+  properties:
+    merchant_contains:
+      type: string
+      example: amaz
+      description: substring to check in merchant for applying this expense rule
+    department_ids:
+      type: array
+      nullable: true
+      items:
+        - allOf:
+            - $ref: './fields.yaml#/department_id'
+            - nullable: false
+      example: ["deptTqSvgYSlMk", "depthGKLxUmG5l"]
+      description: |
+          List of department ids
+
+expense_rule_data:
+  type: object
+  nullable: false
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the merchant to which the Expense was made.
+      example: Amazon
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 49058
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 92895
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 1049
+    custom_fields:
+      allOf:
+        - $ref: './fields.yaml#/custom_fields'
+      nullable: true
+
+
+expense_rule_in:
+  type: object
+  additionalProperties: false
+  required:
+    - if
+    - set
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: eprFswn7SHbCa
+    if:
+      $ref: '#/expense_rule_if'
+    set: 
+      $ref: '#/expense_rule_data'
+
+expense_rule_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - created_at
+    - updated_at
+    - creator_user_id
+    - creator_user
+    - if
+    - set
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: eprFswn7SHbCa
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    creator_user_id: 
+      $ref: './fields.yaml#/user_id'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed'
+    if:
+      $ref: '#/expense_rule_if'
+    set: 
+      $ref: '#/expense_rule_data'
+
+
+expense_rule_delete_in:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'

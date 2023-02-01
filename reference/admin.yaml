@@ -2445,6 +2445,36 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+    expense_rule_data:
+      type: object
+      nullable: false
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        merchant:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: >
+            String denoting the name of the merchant to which the Expense was
+            made.
+          example: Amazon
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 92895
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 1049
+        custom_fields:
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+          nullable: true
     expense_out:
       type: object
       additionalProperties: false
@@ -2910,6 +2940,10 @@ components:
             Signifies if and when the physical bill for this report was
             submitted.
           nullable: true
+        expense_rule_data:
+          allOf:
+            - $ref: '#/components/schemas/expense_rule_data'
+            - nullable: true
     amount:
       type: number
       description: |
@@ -9659,6 +9693,79 @@ components:
         - no_of_debit
         - no_of_credit
         - no_of_transactions
+    expense_rule_if:
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - merchant_contains
+      properties:
+        merchant_contains:
+          type: string
+          example: amaz
+          description: substring to check in merchant for applying this expense rule
+        department_ids:
+          type: array
+          nullable: true
+          items:
+            - allOf:
+                - $ref: '#/components/schemas/department_id'
+                - nullable: false
+          example:
+            - deptTqSvgYSlMk
+            - depthGKLxUmG5l
+          description: |
+            List of department ids
+    expense_rule_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - created_at
+        - updated_at
+        - creator_user_id
+        - creator_user
+        - if
+        - set
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: eprFswn7SHbCa
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
+        if:
+          $ref: '#/components/schemas/expense_rule_if'
+        set:
+          $ref: '#/components/schemas/expense_rule_data'
+    expense_rule_in:
+      type: object
+      additionalProperties: false
+      required:
+        - if
+        - set
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: eprFswn7SHbCa
+        if:
+          $ref: '#/components/schemas/expense_rule_if'
+        set:
+          $ref: '#/components/schemas/expense_rule_data'
+    expense_rule_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
   parameters:
     created_at:
       in: query
@@ -9887,6 +9994,9 @@ tags:
   - name: Expense Policies
     description: |
       This API gives you access to your organisation's Expense Policies
+  - name: Expense Rules
+    description: |
+      This API gives you access to your organisation's Expense Rules
   - name: Files
     description: |
       This API gives you access to creates a file in Fyle
@@ -14792,6 +14902,152 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses_rules:
+    post:
+      tags:
+        - Expense Rules
+      summary: Create or Update expense rules
+      description: |
+        Create or Update expense rules
+      operationId: expense_rules_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_rule_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_rule_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Expense Rules
+      summary: List expense rules
+      operationId: expense_rules_list
+      description: >
+        This API supports very rich filtering on all response fields and
+        pagination via query parameters. To understand how to use these
+        parameters, please see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_rule_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/expense_rules/delete:
+    post:
+      tags:
+        - Expense Rules
+      summary: Delete an expense rule
+      description: |
+        Delete an expense rule.
+      operationId: expense_rules_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_rule_delete_in'
+      responses:
+        '200':
+          description: The expense was deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_rule_out'
         '400':
           description: Bad request
           content:
