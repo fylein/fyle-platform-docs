@@ -2462,7 +2462,7 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
-    expense_rule_data:
+    expense_rule_data_in:
       type: object
       nullable: false
       additionalProperties: false
@@ -2962,7 +2962,7 @@ components:
           nullable: true
         expense_rule_data:
           allOf:
-            - $ref: '#/components/schemas/expense_rule_data'
+            - $ref: '#/components/schemas/expense_rule_data_in'
             - nullable: true
     amount:
       type: number
@@ -9715,7 +9715,7 @@ components:
         - no_of_debit
         - no_of_credit
         - no_of_transactions
-    expense_rule_if:
+    expense_rule_if_out:
       type: object
       nullable: false
       additionalProperties: false
@@ -9739,6 +9739,50 @@ components:
             - depthGKLxUmG5l
           description: |
             List of department ids
+        departments:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/department_out_embed'
+    expense_rule_data_out:
+      type: object
+      nullable: false
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        merchant:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: >
+            String denoting the name of the merchant to which the Expense was
+            made.
+          example: Amazon
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 49058
+        category:
+          $ref: '#/components/schemas/category_out_embed'
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 92895
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 1049
+        cost_center:
+          $ref: '#/components/schemas/cost_center_out_embed'
+        custom_fields:
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
     expense_rule_out:
       type: object
       additionalProperties: false
@@ -9767,9 +9811,33 @@ components:
         creator_user:
           $ref: '#/components/schemas/user_out_embed'
         if:
-          $ref: '#/components/schemas/expense_rule_if'
+          $ref: '#/components/schemas/expense_rule_if_out'
         set:
-          $ref: '#/components/schemas/expense_rule_data'
+          $ref: '#/components/schemas/expense_rule_data_out'
+    expense_rule_if_in:
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - merchant_contains
+      properties:
+        merchant_contains:
+          type: string
+          example: amaz
+          description: substring to check in merchant for applying this expense rule
+        department_ids:
+          type: array
+          nullable: true
+          items:
+            allOf:
+              - $ref: '#/components/schemas/department_id'
+              - type: string
+              - nullable: false
+          example:
+            - deptTqSvgYSlMk
+            - depthGKLxUmG5l
+          description: |
+            List of department ids
     expense_rule_in:
       type: object
       additionalProperties: false
@@ -9782,9 +9850,9 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: eprFswn7SHbCa
         if:
-          $ref: '#/components/schemas/expense_rule_if'
+          $ref: '#/components/schemas/expense_rule_if_in'
         set:
-          $ref: '#/components/schemas/expense_rule_data'
+          $ref: '#/components/schemas/expense_rule_data_in'
     expense_rule_delete_in:
       type: object
       required:
