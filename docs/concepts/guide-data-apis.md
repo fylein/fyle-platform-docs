@@ -59,21 +59,21 @@ Here's the full list of operators supported:
 | lte | Less than or equal to  | integer, string, timestamp | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
 | gt | Greater than  | integer, string, timestamp | amount=gt.100 |
 | gte | Greater than or equal to  | integer, string, timestamp| updated_at=gte.2020-06-01T00:00:00.000-08:00 |
-| in | Is one of  | integer, string | id=in.(id1,id2,id3) |
-| not_in | Is not one of  | integer, string | creator_user_id=not_in.("usyKlnkmSVw9") |
-| is | Is equals  | null, boolean | is_reimbursable=is.true |
-| is_not | Is not equals  | null, boolean | is_reimbursable=is_not.true |
-| like | Pattern matches with case sensitive  | integer, string | cost_center->name=like.%porate% |
-| not_like | Pattern not matches with case sensitive  | integer, string | cost_center->name=not_like.%porate% |
-| ilike | Pattern matches by ignoring case sensitive  | integer, string | creator_user_id=ilike.%usyKlnkmsvw9% |
-| not_ilike | Pattern not matches by ignoring case sensitive  | integer, string | creator_user_id=not_ilike.%usyKlnkmsvw9% |
-| cs | Does it contains  | array, jsonb | category_ids=cs.[115260, 115257], cost_center=cs.{"code":"13597", "name": "Corporate", "id": 6632} |
-| csn | Does it contains or None  | restricted array, restricted jsonb | restricted_category_ids=csn.[115260, 115257], restricted_cost_center=csn.{"code":"13597", "name": "Corporate", "id": 6632} |
+| in | Is one of | integer, string | id=in.(id1,id2,id3) |
+| not_in | Is not one of | integer, string | id=not_in.(id1,id2,id3) |
+| is | Is equals to | null, boolean | is_reimbursable=is.true |
+| is_not | Is not equals to | null, boolean | is_reimbursable=is_not.true |
+| like | Matches case-sensitively with pattern  | integer, string | cost_center->name=like.%porate%, cost_center->name=like.Corporate |
+| not_like | Doesn't match case-sensitively with pattern  | integer, string | cost_center->name=not_like.%porate%, cost_center->name=not_like.Corporate |
+| ilike | Matches pattern while ignoring case sensitivity  | integer, string | creator_user_id=ilike.%Klnkmsvw9%, creator_user_id=ilike.usyKlnkmsvw9 |
+| not_ilike | Doesn't match pattern while ignoring case sensitivity  | integer, string | creator_user_id=not_ilike.%Klnkmsvw9%, creator_user_id=not_ilike.usyKlnkmSVw9 |
+| cs | Contains  | array, jsonb | category_ids=cs.[115260, 115257], cost_center=cs.{"code":"13597", "name": "Corporate", "id": 6632} |
+| csn | Contains or is Null  | restricted array, restricted jsonb | restricted_category_ids=csn.[115260, 115257], restricted_cost_center=csn.{"code":"13597", "name": "Corporate", "id": 6632} |
 | cd | Contained by  | array, jsonb | category_ids=cd.[115260, 115257], cost_center=cd.{"code":"13597", "name": "Corporate", "id": 6632} |
 | not_cd | Not contained by | array, jsonb | category_ids=not_cd.[115260, 115257], cost_center=not_cd.{"code":"13597", "name": "Corporate", "id": 6632}|
 | ov | Have elements in common | array | category_ids=ov.[115249, 115248] |
-| any | Contain element inside it | array | any.115257, any."KM"/any.KM |
-| not_any | Doesn't contain element inside it | array | not_any.115257, not_any."KM"/not_any.KM |
+| any | Any of the elements are equal to | array | any.115257, any."KM"/any.KM |
+| not_any | Doesn't equal to any of the elements | array | not_any.115257, not_any."KM"/not_any.KM |
 
 Sometimes one of the columns is a JSON object and you want to apply a filter on a nested field. If you wanted to filter all expenses with cost center name CC123, you would use something like this:
 
