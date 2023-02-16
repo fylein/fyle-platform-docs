@@ -73,7 +73,7 @@ Here's the full list of operators supported:
 | not_cd | Not contained by | array, jsonb | category_ids=not_cd.[115260, 115257], cost_center=not_cd.{"code":"13597", "name": "Corporate", "id": 6632}|
 | ov | Have elements in common | array | category_ids=ov.[115249, 115248] |
 | any | Any of the elements are equal to | array | any.115257, any."KM"/any.KM |
-| not_any | Doesn't equal to any of the elements | array | not_any.115257, not_any."KM"/not_any.KM |
+| not_any | None of the elements are equal to | array | not_any.115257, not_any."KM"/not_any.KM |
 
 Sometimes one of the columns is a JSON object and you want to apply a filter on a nested field. If you wanted to filter all expenses with cost center name CC123, you would use something like this:
 
