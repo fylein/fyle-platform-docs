@@ -673,15 +673,47 @@ process_summary_out:
 
 reports_stats_in:
   properties:
-    id:
-      $ref: ./fields.yaml#/id_string
-    org_id:
-      $ref: ./fields.yaml#/org_id
+    query_params:
+      type: string
+      description: | 
+        This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
+      example: state=eq.PAYMENT_PROCESSING&report_ids=in.('rp123', 'rep1234')
+      nullable: True
 
 reports_stats_out:
+  type: object 
   properties:
-    id:
-      $ref: ./fields.yaml#/id_string
-    org_id:
-      $ref: ./fields.yaml#/org_id
+    count:
+      type: integer
+      description: |
+        This field indicates the count of reports.
+      example: 1     
+    total_amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: |
+        This field indicates the sum of amount of reports.
+      example: 100  
+    processing_amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: |
+        This field indicates the sum of reimbursable amount of reports in Processing state.
+      example: 101
+    processing_count:
+      type: integer
+      description: |
+         This field indicates the count of reports in Processing state.
+      example: 2  
+    failed_amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: |
+        This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
+      example: 101
+    failed_count:
+      type: integer
+      description: |
+        This field indicates the count of reports in processing state for which ACH has failed.
+      example: 1 
 
