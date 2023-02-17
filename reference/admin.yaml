@@ -3693,6 +3693,54 @@ components:
             - re123453
           description: |
             This field contains list of report_ids that can directly be closed(with reimbursable amount as 0). 
+    reports_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
+          example: state=eq.PAYMENT_PROCESSING&report_id=in.('rp123', 'rep1234')
+    reports_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of reports.
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of reports.
+          example: 100
+        processing_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of reimbursable amount of reports in Processing state.
+          example: 101
+        processing_count:
+          type: integer
+          description: |
+            This field indicates the count of reports in Processing state.
+          example: 2
+        failed_amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
+          example: 101
+        failed_count:
+          type: integer
+          nullable: true
+          description: |
+            This field indicates the count of reports in processing state for which ACH has failed.
+          example: 1
     corporate_card_out:
       type: object
       properties:
@@ -11672,6 +11720,61 @@ paths:
                       data:
                         type: object
                         nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/stats:
+    post:
+      tags:
+        - Reports
+      summary: Reports Stats
+      description: |
+        Reports Stats
+      operationId: reports_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reports_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reports_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
           content:
