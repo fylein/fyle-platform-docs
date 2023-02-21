@@ -710,6 +710,40 @@ components:
           description: |
             This specifies the `id` of the parent expense field and denotes that the expense field is a dependent custom field. NOTE: `type` must be `DEPENDENT_SELECT`.
           example: 1234
+    dependent_expense_field_values_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        parent_expense_field_value:
+          type: string
+          description: |
+            This specifies the text value of the parent expense field.
+          example: Project 1
+        expense_field_value:
+          type: string
+          description: |
+            This specifies the text value of the dependent expense field.
+          example: Cost Code 1
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     employee_field_out:
       type: object
       additionalProperties: false
@@ -10030,6 +10064,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/dependent_expense_field_values:
+    get:
+      tags:
+        - Expenses
+      summary: List dependent expense field values
+      operationId: dependent_expense_field_values_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - in: query
+          name: limit
+          description: |
+            A limit on the number of objects to be returned. Allowed values are from 1 to 200.
+          schema:
+            type: integer
+            example: 10
+            default: 100
+            maximum: 200
+        - in: query
+          name: is_enabled
+          schema:
+            type: string
+            default: eq.true
+        - in: query
+          name: parent_expense_field_id
+          required: true
+          schema:
+            type: string
+            example: eq.123
+        - in: query
+          name: expense_field_id
+          required: true
+          schema:
+            type: string
+            example: eq.123
+        - in: query
+          name: parent_expense_field_value
+          required: true
+          schema:
+            type: string
+            example: ilike.abc%
+        - in: query
+          name: expense_field_value
+          schema:
+            type: string
+            example: ilike.abc%
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/employee_fields:
     get:
       tags:
