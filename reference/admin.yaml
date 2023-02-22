@@ -710,9 +710,14 @@ components:
           description: |
             This specifies the `id` of the parent expense field and denotes that the expense field is a dependent custom field. NOTE: `type` must be `DEPENDENT_SELECT`.
           example: 1234
-    dependent_expense_field_values_out:
+    dependent_expense_field_values_in:
       type: object
       additionalProperties: false
+      required:
+        - parent_expense_field_id
+        - expense_field_id
+        - parent_expense_field_value
+        - expense_field_value
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -10067,80 +10072,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/dependent_expense_field_values:
-    get:
+  /admin/dependent_expense_field_values/bulk:
+    post:
       tags:
-        - Expenses
-      summary: List dependent expense field values
-      operationId: dependent_expense_field_values_list
-      description: |
-        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      parameters:
-        - in: query
-          name: limit
-          description: |
-            A limit on the number of objects to be returned. Allowed values are from 1 to 200.
-          schema:
-            type: integer
-            example: 10
-            default: 100
-            maximum: 200
-        - in: query
-          name: is_enabled
-          schema:
-            type: string
-            default: eq.true
-        - in: query
-          name: parent_expense_field_id
-          required: true
-          schema:
-            type: string
-            example: eq.123
-        - in: query
-          name: expense_field_id
-          required: true
-          schema:
-            type: string
-            example: eq.123
-        - in: query
-          name: parent_expense_field_value
-          required: true
-          schema:
-            type: string
-            example: ilike.abc%
-        - in: query
-          name: expense_field_value
-          schema:
-            type: string
-            example: ilike.abc%
+        - Dependent Expenses Field Values
+      summary: Create or update dependent expense field values
+      operationId: dependent_expense_field_values_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/dependent_expense_field_values_in'
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/dependent_expense_field_values_out'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/400'
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/employee_fields:
     get:
       tags:
