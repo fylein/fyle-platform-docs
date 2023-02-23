@@ -783,6 +783,72 @@ components:
           example: Cost Code 1
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+    dependent_expense_field_values_upload_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        file_id:
+          type: string
+          nullable: false
+          description: |
+            File `id` of the uploaded excel file.
+          example: fiit3pX9gzzP
+        error_file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the error excel file generated after processing the uploaded file.
+          example: fiit3pX9gzzQ
+        state:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          example: PENDING
+    dependent_expense_field_values_upload_in:
+      type: object
+      additionalProperties: false
+      required:
+        - parent_expense_field_id
+        - expense_field_id
+        - file_id
+      properties:
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        file_id:
+          type: string
+          nullable: false
+          description: |
+            File `id` of the uploaded excel file.
+          example: fiit3pX9gzzP
     employee_field_out:
       type: object
       additionalProperties: false
@@ -9521,9 +9587,6 @@ tags:
   - name: Expenses
     description: |
       This API gives you access to your organisation's Expenses
-  - name: Dependent Expenses Field Values
-    description: |
-      This API gives you access to your organisation's Dependent Expenses Fields
   - name: Expense Policies
     description: |
       This API gives you access to your organisation's Expense Policies
@@ -10233,6 +10296,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/dependent_expense_field_values/uploads:
+    get:
+      tags:
+        - Dependent Expenses Field Values
+      summary: List dependent expense field values upload requests
+      operationId: dependent_expense_field_values_uploads_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Dependent Expenses Field Values
+      summary: Create an upload excel file request for dependent expense field values
+      description: |
+        Create a request to upload excel file containing dependent expense field values mappings
+      operationId: dependent_expense_field_values_uploads_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/dependent_expense_field_values_upload_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/dependent_expense_field_values_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employee_fields:
     get:
       tags:
