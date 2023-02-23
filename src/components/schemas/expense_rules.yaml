@@ -1,4 +1,4 @@
-expense_rule_if:
+expense_rule_if_in:
   type: object
   nullable: false
   additionalProperties: false
@@ -21,9 +21,37 @@ expense_rule_if:
       description: |
           List of department ids
 
-expense_rule_data:
+expense_rule_if_out:
   type: object
-  nullable: false
+  additionalProperties: false
+  required:
+    - merchant_contains
+  properties:
+    merchant_contains:
+      type: string
+      example: amaz
+      description: substring to check in merchant for applying this expense rule
+    department_ids:
+      type: array
+      nullable: true
+      items:
+        allOf:
+          - $ref: './fields.yaml#/department_id'
+          - type: string
+          - nullable: false
+      example: ["deptTqSvgYSlMk", "depthGKLxUmG5l"]
+      description: |
+          List of department ids
+    departments:
+      type: array
+      nullable: true
+      items:
+        $ref: ../../components/schemas/department.yaml#/department_out_embed
+
+
+expense_rule_data_in:
+  type: object
+  nullable: true
   additionalProperties: false
   minProperties: 1
   properties:
@@ -54,6 +82,45 @@ expense_rule_data:
       items:
         $ref: './fields.yaml#/custom_field'
 
+expense_rule_data_out:
+  type: object
+  nullable: false
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the merchant to which the Expense was made.
+      example: Amazon
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 49058
+    category:
+      $ref: './category.yaml#/category_out_embed'
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 92895
+    project:
+      $ref: './project.yaml#/project_out_embed'
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      example: 1049
+    cost_center:
+      $ref: './cost_center.yaml#/cost_center_out_embed'
+    custom_fields:
+      type: array
+      nullable: true
+      description: |
+        Custom fields
+      items:
+        $ref: './fields.yaml#/custom_field'
+
 
 expense_rule_in:
   type: object
@@ -66,10 +133,13 @@ expense_rule_in:
       allOf:
         - $ref: './fields.yaml#/id_string'
       example: eprFswn7SHbCa
-    if:
-      $ref: '#/expense_rule_if'
+    if: 
+      $ref: '#/expense_rule_if_in'
     set: 
-      $ref: '#/expense_rule_data'
+      allOf:
+        - $ref: '#/expense_rule_data_in'
+        - type: object
+          nullable: false
 
 expense_rule_out:
   type: object
@@ -99,9 +169,9 @@ expense_rule_out:
     creator_user:
       $ref: './user.yaml#/user_out_embed'
     if:
-      $ref: '#/expense_rule_if'
+      $ref: '#/expense_rule_if_out'
     set: 
-      $ref: '#/expense_rule_data'
+      $ref: '#/expense_rule_data_out'
 
 
 expense_rule_delete_in:
