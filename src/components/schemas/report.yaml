@@ -158,6 +158,10 @@ report_out:
           - $ref: '#/components/schemas/id_string'
       example:
         - us123heh98
+    state_display_name:
+      type: string
+      example: Sent Back
+      description: readable state name
 
 admin_report_out:
   type: object
@@ -330,6 +334,10 @@ admin_report_out:
       example: reimntGt9ju6qP
     reimbursement:
       $ref: './reimbursement.yaml#/reimbursement_out_minimal'
+    state_display_name:
+      type: string
+      example: Sent Back
+      description: readable state name
 
 
 spender_report_in:
@@ -669,3 +677,55 @@ process_summary_out:
       example: [ 're123453' ]
       description: |
         This field contains list of report_ids that can directly be closed(with reimbursable amount as 0). 
+
+
+reports_stats_in:
+  properties:
+    query_params:
+      nullable: False
+      type: string
+      description: | 
+        This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
+      example: state=eq.PAYMENT_PROCESSING&report_id=in.('rp123', 'rep1234')
+
+reports_stats_out:
+  type: object 
+  properties:
+    count:
+      type: integer
+      nullable: False
+      description: |
+        This field indicates the count of reports.
+      example: 1     
+    total_amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: |
+        This field indicates the sum of amount of reports.
+      example: 100  
+    processing_amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: |
+        This field indicates the sum of reimbursable amount of reports in Processing state.
+      example: 101
+    processing_count:
+      type: integer
+      description: |
+         This field indicates the count of reports in Processing state.
+      example: 2  
+    failed_amount:
+      nullable: true
+      anyOf:
+        - $ref: './fields.yaml#/amount'
+        - $ref: './fields.yaml#/null_field'
+      description: |
+        This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
+      example: 101
+    failed_count:
+      type: integer
+      nullable: true
+      description: |
+        This field indicates the count of reports in processing state for which ACH has failed.
+      example: 1 
+
