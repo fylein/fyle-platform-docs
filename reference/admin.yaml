@@ -493,7 +493,6 @@ components:
       type: object
       required:
         - name
-        - is_enabled
       additionalProperties: false
       properties:
         id:
@@ -508,7 +507,7 @@ components:
           type: string
           maxLength: 255
           example: Turbo charged
-          description: Represents the name of the sub_category.
+          description: Represents the sub category of the category. Note that the name and sub category cannot be same.
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         system_category:
@@ -529,6 +528,15 @@ components:
             - 1221
           description: |
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project
+    system_category_out:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the system category.
     category_ids:
       type: array
       description: |
@@ -783,6 +791,159 @@ components:
           example: Cost Code 1
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+    dependent_expense_field_values_preview_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        parent_expense_field_value:
+          type: string
+          description: |
+            This specifies the text value of the parent expense field.
+          example: Project 1
+        expense_field_values:
+          type: array
+          nullable: false
+          description: |
+            This specifies the text values of the dependent expense field upto 20 items.
+          items:
+            type: string
+            nullable: false
+            description: |
+              This specifies the text value of the dependent expense field.
+            example: Cost Code 1
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+    dependent_expense_field_values_upload_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        file_id:
+          type: string
+          nullable: false
+          description: |
+            File `id` of the uploaded excel file.
+          example: fiit3pX9gzzP
+        error_file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the error excel file generated after processing the uploaded file.
+          example: fiit3pX9gzzQ
+        state:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          example: PENDING
+    dependent_expense_field_values_upload_in:
+      type: object
+      additionalProperties: false
+      required:
+        - parent_expense_field_id
+        - expense_field_id
+        - file_id
+      properties:
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        file_id:
+          type: string
+          nullable: false
+          description: |
+            File `id` of the uploaded excel file.
+          example: fiit3pX9gzzP
+    dependent_expense_field_values_download_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the uploaded excel file.
+          example: fiit3pX9gzzP
+        state:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          example: PENDING
+    dependent_expense_field_values_download_in:
+      type: object
+      additionalProperties: false
+      required:
+        - parent_expense_field_id
+        - expense_field_id
+      properties:
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
     employee_field_out:
       type: object
       additionalProperties: false
@@ -1074,6 +1235,11 @@ components:
           $ref: '#/components/schemas/code'
     mileage_rate_in:
       type: object
+      required:
+        - unit
+        - rate
+        - vehicle_type
+        - is_enabled
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1094,6 +1260,9 @@ components:
           type: array
           items:
             type: object
+            required:
+              - rate
+              - limit
             properties:
               rate:
                 type: number
@@ -2402,6 +2571,11 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+    is_billable:
+      type: boolean
+      nullable: true
+      example: true
+      description: This field marks whether a given expense is billable or not.
     expense_rule_data_in:
       type: object
       nullable: true
@@ -2415,6 +2589,12 @@ components:
           description: |
             String denoting the name of the merchant to which the Expense was made.
           example: Amazon
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
         category_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -3435,6 +3615,21 @@ components:
               type: boolean
               description: |
                 This field indicates whether employee's ach account is verified.
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
     ach_transfer_state:
       type: string
       enum:
@@ -3657,6 +3852,10 @@ components:
           example: reimntGt9ju6qP
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_minimal'
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
     process_ach_in:
       type: object
       properties:
@@ -9210,6 +9409,12 @@ components:
           description: |
             String denoting the name of the merchant to which the Expense was made.
           example: Amazon
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
         category_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -9316,6 +9521,13 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
   parameters:
+    q:
+      in: query
+      name: q
+      description: A search query to filter the results.
+      schema:
+        type: string
+        example: Ritas
     created_at:
       in: query
       name: created_at
@@ -10015,6 +10227,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/categories/system_categories:
+    get:
+      tags:
+        - Categories
+      summary: List system categories
+      operationId: system_categories_list
+      description: |
+        This APIs gives you the list of system categories. Note that this API does not support any query params like order, limit, offset or name.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/system_category_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/expense_fields:
     get:
       tags:
@@ -10230,6 +10477,246 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/dependent_expense_field_values/preview:
+    get:
+      tags:
+        - Expenses
+      summary: List dependent expense field values preview
+      operationId: dependent_expense_field_values_preview_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - in: query
+          name: limit
+          description: |
+            A limit on the number of objects to be returned. Allowed values are from 1 to 10.
+          schema:
+            type: integer
+            example: 10
+            default: 10
+            maximum: 10
+        - in: query
+          name: parent_expense_field_id
+          required: true
+          schema:
+            type: string
+            example: eq.123
+        - in: query
+          name: expense_field_id
+          required: true
+          schema:
+            type: string
+            example: eq.123
+        - in: query
+          name: parent_expense_field_value
+          required: true
+          schema:
+            type: string
+            example: ilike.abc%
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_preview_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/dependent_expense_field_values/uploads:
+    get:
+      tags:
+        - Expenses
+      summary: List dependent expense field values upload requests
+      operationId: dependent_expense_field_values_uploads_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create an upload excel file request for dependent expense field values
+      description: |
+        Create a request to upload excel file containing dependent expense field values mappings
+      operationId: dependent_expense_field_values_uploads_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/dependent_expense_field_values_upload_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/dependent_expense_field_values_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/dependent_expense_field_values/downloads:
+    get:
+      tags:
+        - Expenses
+      summary: List dependent expense field values download requests
+      operationId: dependent_expense_field_values_downloads_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_download_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create a request to download an excel file for dependent expense field values
+      description: |
+        Create a request to download an excel file containing dependent expense field values mappings
+      operationId: dependent_expense_field_values_downloads_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/dependent_expense_field_values_download_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/dependent_expense_field_values_download_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employee_fields:
     get:
       tags:
@@ -11658,6 +12145,8 @@ paths:
       operationId: reports_list
       description: |
         This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/q'
       responses:
         '200':
           description: OK
