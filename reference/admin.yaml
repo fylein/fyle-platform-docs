@@ -1873,6 +1873,56 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    employees_upload_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: euo2bn4brep
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fi3ou3hg3l
+        state:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          description: |
+            State of this upload.
+        error_file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the error excel file generated after processing the uploaded file.
+          example: fi1yut1owo3
+    employees_upload_in:
+      type: object
+      properties:
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fi3ou3hg3l
+      required:
+        - file_id
     file_in:
       type: object
       required:
@@ -2058,12 +2108,6 @@ components:
                   nullable: true
                   type: string
                   example: '2021-05-12T10:16:50.410Z'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     automate_report_submission_out:
       type: object
       required:
@@ -11278,6 +11322,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/employees/upload:
+    get:
+      tags:
+        - Employees
+      summary: List Employees upload requests
+      operationId: employees_upload_list
+      description: |
+        You can check the status of the Employees upload requests.
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employees_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Upload Employees data via excel file.
+      description: |
+        Upload Employees data via excel file to Fyle system.
+      operationId: employees_upload_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employees_upload_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/files:
     post:
       operationId: files_post
