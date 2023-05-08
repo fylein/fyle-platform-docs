@@ -1562,6 +1562,32 @@ components:
       description: |
         phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
       pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    delegatees:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        start_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Date and time from which the delegation is active.
+          nullable: false
+        end_at:
+          type: string
+          format: date-time
+          example: '2020-07-11T13:14:55.201598+00:00'
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
+          nullable: true
     employee_out:
       type: object
       additionalProperties: false
@@ -1738,6 +1764,80 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        locale:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            abbreviation:
+              type: String
+              nullable: false
+              maxLength: 4
+              example: IST
+              description: |
+                Represents the abbreviation of the employee's locale.
+            offset:
+              type: String
+              nullable: false
+              maxLength: 9
+              example: '05:30:00'
+              description: |
+                Represents the offset of the employee's timezone from UTC.
+            timezone:
+              type: String
+              nullable: false
+              maxLength: 19
+              example: Asia/Kolkata
+              description: |
+                Represents the timezone of the employee.
+          description: |
+            Location and timezone settings of the employee.
+        mileage_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            mileage_rate_labels:
+              type: array
+              nullable: true
+              items:
+                type: string
+                example: four_wheeler
+              example:
+                - four_wheeler
+                - two_wheeler
+            annual_mileage_of_user_before_joining_fyle:
+              type: object
+              nullable: true
+              items:
+                type: object
+              example:
+                two_wheeler: 44
+          description: |
+            Mileage settings of the employee.
+        ach_account:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            added:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee has added ach account
+            verified:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee's ach account is verified.
+        delegatees:
+          type: array
+          nullable: true
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
     name_nullable:
       type: string
       maxLength: 255
@@ -1873,12 +1973,6 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     employees_upload_out:
       type: object
       additionalProperties: false
