@@ -1562,6 +1562,32 @@ components:
       description: |
         phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
       pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    delegatees:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        start_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Date and time from which the delegation is active.
+          nullable: false
+        end_at:
+          type: string
+          format: date-time
+          example: '2020-07-11T13:14:55.201598+00:00'
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
+          nullable: true
     employee_out:
       type: object
       additionalProperties: false
@@ -1738,6 +1764,82 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        locale:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            abbreviation:
+              type: string
+              nullable: false
+              maxLength: 4
+              example: IST
+              description: |
+                Represents the abbreviation of the employee's locale.
+            offset:
+              type: string
+              nullable: false
+              maxLength: 9
+              example: '05:30:00'
+              description: |
+                Represents the offset of the employee's timezone from UTC.
+            timezone:
+              type: string
+              nullable: false
+              maxLength: 19
+              example: Asia/Kolkata
+              description: |
+                Represents the timezone of the employee.
+          description: |
+            Location and timezone settings of the employee.
+        mileage_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            mileage_rate_labels:
+              type: array
+              nullable: true
+              items:
+                type: string
+                example: four_wheeler
+              example:
+                - four_wheeler
+                - two_wheeler
+            annual_mileage_of_user_before_joining_fyle:
+              type: object
+              nullable: true
+              items:
+                type: object
+              example:
+                two_wheeler: 44
+          description: |
+            Mileage settings of the employee.
+        ach_account:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            added:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee has added ach account
+            verified:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee's ach account is verified.
+          description: |
+            ACH account details of the employee.
+        delegatees:
+          type: array
+          nullable: true
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
     name_nullable:
       type: string
       maxLength: 255
@@ -1873,6 +1975,50 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+    employees_upload_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: euo2bn4brep
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fi3ou3hg3l
+        state:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          description: |
+            State of this upload.
+        error_file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the error excel file generated after processing the uploaded file.
+          example: fi1yut1owo3
+    employees_upload_in:
+      type: object
+      properties:
+        file_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: fi3ou3hg3l
+      required:
+        - file_id
     file_in:
       type: object
       required:
@@ -2058,12 +2204,6 @@ components:
                   nullable: true
                   type: string
                   example: '2021-05-12T10:16:50.410Z'
-    user_id:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      example: uswjwgnwwgo
     automate_report_submission_out:
       type: object
       required:
@@ -3656,6 +3796,20 @@ components:
           description: |
             Description of current status of the payment.
           example: Kindly ask the employee to add a valid bank account in their Settings. You'll then be able to see the bank icon next to the payment number, after which you can retry the payment.
+        initiated_at:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            signifies when the ach payment was initiated.
+        completed_at:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            signifies when the ach payment was completed.
     reimbursement_out_minimal:
       type: object
       nullable: true
@@ -3902,6 +4056,7 @@ components:
         - id
     process_summary_out:
       type: object
+      additionalProperties: true
       properties:
         selected_reimbursable_amount:
           allOf:
@@ -3940,6 +4095,26 @@ components:
           type: integer
           description: |
             This field indicates the count of employees with missing users bank account details.
+          example: 2
+        missing_bank_details_employee_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - ouN7x27CwrwC
+          description: |
+            This field contains list of employee_ids whose bank accounts are missing.
+        payment_initiated_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the total amount of reports that are in payment_processing and ach_initiated state.
+          example: 101
+        payment_initiated_count:
+          type: integer
+          description: |
+            This field indicates the count of reports that are in payment_processing and ach_initiated state.
           example: 2
         reimbursable_amount:
           allOf:
@@ -11257,6 +11432,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/employees/uploads:
+    get:
+      tags:
+        - Employees
+      summary: List Employees upload requests
+      operationId: employees_upload_list
+      description: |
+        You can check the status of the Employees upload requests. <br>
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employees_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Upload Employees data via excel file.
+      description: |
+        Upload Employees data via excel file to Fyle system.
+      operationId: employees_upload_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employees_upload_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/files:
     post:
       operationId: files_post
