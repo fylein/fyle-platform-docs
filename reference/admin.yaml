@@ -4027,6 +4027,26 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    add_approvers_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_emails
+      properties:
+        id:
+          type: string
+          description: |
+            id of report, from which the approvers need to be removed
+          example: rpa21A2rdj2
+        approver_emails:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/email'
+          example:
+            - adb@gmail.com
+            - kartikey.rajvaidya@fyle.in
     process_ach_in:
       type: object
       properties:
@@ -12517,6 +12537,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/add_approvers:
+    post:
+      tags:
+        - Reports
+      summary: Add Approvers
+      description: |
+        Add Approvers
+      operationId: report_add_approvers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approvers_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
