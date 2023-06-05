@@ -452,6 +452,7 @@ components:
       enum:
         - FYLER
         - APPROVER
+        - ACCOUNTANT
         - TRAVEL_ADMIN
         - VERIFIER
         - PAYMENT_PROCESSOR
@@ -1701,6 +1702,34 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                oneOf:
+                  - type: string
+                  - type: integer
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     expense_add_comment_action_in:
       type: object
       required:
@@ -2770,6 +2799,11 @@ components:
             Specifies the masked number of the card.
             Add only masked card-numbers, last four digits of the card.
           example: xxxx-4543
+        masked_number:
+          type: string
+          description: |
+            Specifies the last 4 digits of the card number.
+          example: '4543'
         cardholder_name:
           type: string
           maxLength: 255
@@ -2792,6 +2826,8 @@ components:
         - foreign_amount
         - state
         - seq_num
+        - no_of_files
+        - category_display_name
       properties:
         id:
           allOf:
@@ -2840,6 +2876,16 @@ components:
             This is user visible identifier for an expense.
             This field can be used as reference in UI.
           example: E/2020/10/T/95
+        no_of_files:
+          type: integer
+          description: |
+            Number of files attached to the expense.
+          example: 1
+        category_display_name:
+          type: string
+          description: |
+            Category of the expense.
+          example: Travel
     double_precision_detail:
       type: number
       description: Additional floating point numeric details of the card transaction. Same as double precision.
@@ -6170,6 +6216,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/delete/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Delete Expenses in Bulk
+      description: |
+        Delete multiple expenses in bulk.
+      operationId: expenses_delete_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_delete_in'
+      responses:
+        '200':
+          description: The expenses were deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/expenses/add_comment:
     post:
       tags:
