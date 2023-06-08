@@ -1563,6 +1563,57 @@ components:
       description: |
         phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
       pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    locale:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          nullable: false
+          maxLength: 4
+          example: IST
+          description: |
+            Represents the abbreviation of the employee's locale.
+        offset:
+          type: string
+          nullable: false
+          maxLength: 9
+          example: '05:30:00'
+          description: |
+            Represents the offset of the employee's timezone from UTC.
+        timezone:
+          type: string
+          nullable: false
+          maxLength: 19
+          example: Asia/Kolkata
+          description: |
+            Represents the timezone of the employee.
+      description: |
+        Location and timezone settings of the employee.
+    mileage_settings:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        mileage_rate_labels:
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: four_wheeler
+          example:
+            - four_wheeler
+            - two_wheeler
+        annual_mileage_of_user_before_joining_fyle:
+          type: object
+          nullable: true
+          items:
+            type: object
+          example:
+            two_wheeler: 44
+      description: |
+        Mileage settings of the employee.
     user_id:
       type: string
       description: |
@@ -1766,56 +1817,9 @@ components:
           description: |
             Mobile number of the employee
         locale:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            abbreviation:
-              type: string
-              nullable: false
-              maxLength: 4
-              example: IST
-              description: |
-                Represents the abbreviation of the employee's locale.
-            offset:
-              type: string
-              nullable: false
-              maxLength: 9
-              example: '05:30:00'
-              description: |
-                Represents the offset of the employee's timezone from UTC.
-            timezone:
-              type: string
-              nullable: false
-              maxLength: 19
-              example: Asia/Kolkata
-              description: |
-                Represents the timezone of the employee.
-          description: |
-            Location and timezone settings of the employee.
+          $ref: '#/components/schemas/locale'
         mileage_settings:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            mileage_rate_labels:
-              type: array
-              nullable: true
-              items:
-                type: string
-                example: four_wheeler
-              example:
-                - four_wheeler
-                - two_wheeler
-            annual_mileage_of_user_before_joining_fyle:
-              type: object
-              nullable: true
-              items:
-                type: object
-              example:
-                two_wheeler: 44
-          description: |
-            Mileage settings of the employee.
+          $ref: '#/components/schemas/mileage_settings'
         ach_account:
           type: object
           nullable: true
@@ -1906,7 +1910,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
         approver_emails:
           type: array
-          maxLength: 3
+          maxItems: 3
           nullable: true
           items:
             $ref: '#/components/schemas/email'
@@ -1976,6 +1980,20 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        locale:
+          $ref: '#/components/schemas/locale'
+        mileage_settings:
+          $ref: '#/components/schemas/mileage_settings'
+        delegatee_emails:
+          type: array
+          maxItems: 1
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          example:
+            - delegatee@example.com
+          description: |
+            List of emails of employees that are delegatees for this employee.
     employees_upload_out:
       type: object
       additionalProperties: false
