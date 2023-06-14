@@ -1563,6 +1563,57 @@ components:
       description: |
         phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
       pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    locale:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          nullable: false
+          maxLength: 4
+          example: IST
+          description: |
+            Represents the abbreviation of the employee's locale.
+        offset:
+          type: string
+          nullable: false
+          maxLength: 9
+          example: '05:30:00'
+          description: |
+            Represents the offset of the employee's timezone from UTC.
+        timezone:
+          type: string
+          nullable: false
+          maxLength: 19
+          example: Asia/Kolkata
+          description: |
+            Represents the timezone of the employee.
+      description: |
+        Location and timezone settings of the employee.
+    mileage_settings:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        mileage_rate_labels:
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: four_wheeler
+          example:
+            - four_wheeler
+            - two_wheeler
+        annual_mileage_of_user_before_joining_fyle:
+          type: object
+          nullable: true
+          items:
+            type: object
+          example:
+            two_wheeler: 44
+      description: |
+        Mileage settings of the employee.
     user_id:
       type: string
       description: |
@@ -1766,56 +1817,9 @@ components:
           description: |
             Mobile number of the employee
         locale:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            abbreviation:
-              type: string
-              nullable: false
-              maxLength: 4
-              example: IST
-              description: |
-                Represents the abbreviation of the employee's locale.
-            offset:
-              type: string
-              nullable: false
-              maxLength: 9
-              example: '05:30:00'
-              description: |
-                Represents the offset of the employee's timezone from UTC.
-            timezone:
-              type: string
-              nullable: false
-              maxLength: 19
-              example: Asia/Kolkata
-              description: |
-                Represents the timezone of the employee.
-          description: |
-            Location and timezone settings of the employee.
+          $ref: '#/components/schemas/locale'
         mileage_settings:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            mileage_rate_labels:
-              type: array
-              nullable: true
-              items:
-                type: string
-                example: four_wheeler
-              example:
-                - four_wheeler
-                - two_wheeler
-            annual_mileage_of_user_before_joining_fyle:
-              type: object
-              nullable: true
-              items:
-                type: object
-              example:
-                two_wheeler: 44
-          description: |
-            Mileage settings of the employee.
+          $ref: '#/components/schemas/mileage_settings'
         ach_account:
           type: object
           nullable: true
@@ -1906,7 +1910,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
         approver_emails:
           type: array
-          maxLength: 3
+          maxItems: 3
           nullable: true
           items:
             $ref: '#/components/schemas/email'
@@ -1976,6 +1980,20 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        locale:
+          $ref: '#/components/schemas/locale'
+        mileage_settings:
+          $ref: '#/components/schemas/mileage_settings'
+        delegatee_emails:
+          type: array
+          maxItems: 1
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          example:
+            - delegatee@example.com
+          description: |
+            List of emails of employees that are delegatees for this employee.
     employees_upload_out:
       type: object
       additionalProperties: false
@@ -4023,11 +4041,55 @@ components:
               - $ref: '#/components/schemas/id_string'
           example:
             - txelntgwgwll
-    reason:
-      type: string
-      description: |
-        Explanation to the action if provided by the user
-      example: All bills are in order
+    admin_report_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - report_id
+        - creator_user_id
+        - creator_user
+        - created_at
+        - org_id
+        - updated_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        report_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          nullable: true
+          $ref: '#/components/schemas/user_out_embed'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/id_string'
+    report_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          type: string
+          description: |
+            id of the report, on which need to add comment
+          example: rpa21A2rdj2
+        comment:
+          type: string
+          description: |
+            comment on the report
+          example: We don't accept laundry bil
     process_ach_in:
       type: object
       properties:
@@ -12495,8 +12557,6 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/report_action_with_expenses_ids_to_eject'
-                reason:
-                  $ref: '#/components/schemas/reason'
       responses:
         '200':
           description: OK
@@ -12508,6 +12568,90 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/comments:
+    get:
+      tags:
+        - Reports
+      summary: List report comments
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: report_comments_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/admin_report_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Reports
+      summary: Comments on a report
+      description: Comments on a report
+      operationId: report_comments_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_comments_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_comments_out'
         '400':
           description: Unauthorised request
           content:
@@ -12982,6 +13126,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/corporate_cards/bank_names:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card bank names
+      description: |
+        This API just returns all the bank names associated with the corporate cards in the org
+      operationId: corporate_cards_bank_names_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      bank_names:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Amex
+                          - Bank of America
+                        description: |
+                          Holds the bank names of all the corporate cards present in the org
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/corporate_cards/masked_card_numbers:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card masked card numbers
+      description: |
+        This API just returns all the maksed card numbers (last 4 digits) associated with the corporate cards in the org
+      operationId: corporate_cards_masked_card_numbers_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      masked_card_numbers:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - 1234
+                          - 5678
+                        description: |
+                          Holds the masked card numbers (last 4 digits) of all the corporate cards present in the org
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/corporate_cards/assign:
     post:
       tags:
