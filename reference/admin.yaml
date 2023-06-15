@@ -5333,6 +5333,35 @@ components:
         - last_user_matched_at
         - is_exported
         - metadata
+    corporate_card_transactions_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in corporate card transactions GET call for displaying transactions in the list view.
+          example: amount=gt.0&amount=lt.1000&created_at=gt.2021-01-01T00:00:00.000Z&created_at=lt.2021-12-31T23:59:59.999Z
+    corporate_card_transactions_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of corporate card transactions.
+          example: 1
+        debit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the debit type corporate card transactions.
+          example: 1239
+        credit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the credit type corporate card transactions.
+          example: 101
     corporate_card_transaction_assign_in:
       type: object
       properties:
@@ -13592,6 +13621,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/corporate_card_transactions/stats:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Corporate Card Transaction Stats
+      description: |
+        Corporate Card Transaction Stats
+      operationId: corporate_card_transactions_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transactions_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transactions_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/assign:
     post:
       tags:
