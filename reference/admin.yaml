@@ -2030,19 +2030,6 @@ components:
       description: |
         This represents a query string which will be used to filter employees.
       example: code.eq.'E0101'
-    employee_filters_in:
-      type: object
-      additionalProperties: false
-      required:
-        - name
-        - query_string
-      properties:
-        name:
-          $ref: '#/components/schemas/employee_filter_name'
-        shared:
-          $ref: '#/components/schemas/shared'
-        query_string:
-          $ref: '#/components/schemas/query_string'
     employee_filters_out:
       type: object
       additionalProperties: false
@@ -2065,6 +2052,19 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    employee_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/employee_filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
     employees_upload_out:
       type: object
       additionalProperties: false
@@ -11833,7 +11833,7 @@ paths:
     post:
       tags:
         - Employees
-      summary: Employees Saved Filters
+      summary: Create Employees saved filters
       description: |
         Save employees filters for personal use or share with other admins.
       operationId: employees_filters_post
@@ -11876,6 +11876,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Employees
+      summary: List Employees saved filters
+      operationId: employees_filters_get
+      description: |
+        List filters saved by the admin or shared with the admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/employees/uploads:
     get:
       tags:
