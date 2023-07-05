@@ -1,10 +1,10 @@
 get:
   tags:
-    - Organisations
-  summary: List Organisations
-  operationId: orgs_list
+    - Reports
+  summary: List report comments
   description: |
     This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: report_comments_list
   responses:
     '200':
       description: OK
@@ -21,9 +21,9 @@ get:
               data:
                 type: array
                 items:
-                  $ref: ../../components/schemas/org.yaml#/org_rov_out
+                  $ref: ../../components/schemas/report.yaml#/admin_report_comments_out
     '400':
-      description: Bad Request
+      description: Bad request
       content:
         application/json:
           schema:
@@ -34,13 +34,13 @@ get:
         application/json:
           schema:
             $ref: ../../components/schemas/401.yaml
+
 post:
   tags:
-    - Organisations
-  summary: Create Organisation
-  operationId: org_create
-  description: |
-    This API is used to create a new org with an owner
+    - Reports
+  summary: Comments on a report
+  description: Comments on a report
+  operationId: report_comments_post
   requestBody:
     required: true
     content:
@@ -49,22 +49,11 @@ post:
           type: object
           additionalProperties: False
           required:
-            - owner_email
-            - currency
-            - name
+            - data
           properties:
-            owner_email:
-              $ref: ../../components/schemas/fields.yaml#/email
-            owner_full_name:
-              $ref: ../../components/schemas/fields.yaml#/user_full_name
-            currency:
-              $ref: ../../components/schemas/fields.yaml#/currency
-            code:
-              $ref: ../../components/schemas/fields.yaml#/code
-            name:
-              $ref: ../../components/schemas/fields.yaml#/org_name
-            domain:
-              $ref: ../../components/schemas/fields.yaml#/domain
+            data:
+              $ref: '../../components/schemas/report.yaml#/report_comments_in'
+
   responses:
     '200':
       description: OK
@@ -74,23 +63,23 @@ post:
             type: object
             additionalProperties: False
             properties:
-              refresh_token:
-                $ref: ../../components/schemas/fields.yaml#/refresh_token
-              org_id:
-                $ref: ../../components/schemas/fields.yaml#/org_id
-              user_id:
-                $ref: ../../components/schemas/fields.yaml#/user_id
-              redirect_uri:
-                $ref: ../../components/schemas/fields.yaml#/redirect_uri
-    '400':
-      description: Bad Request
-      content:
-        application/json:
-          schema:
-            $ref: ../../components/schemas/400.yaml
+              data:
+                $ref: '../../components/schemas/report.yaml#/admin_report_comments_out'
     '401':
-      description: Unauthorized request
+      description: Unauthorised request
       content:
         application/json:
           schema:
-            $ref: ../../components/schemas/401.yaml
+            $ref: '../../components/schemas/401.yaml'
+    '400':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'

@@ -1408,6 +1408,7 @@ components:
       enum:
         - FYLER
         - APPROVER
+        - ACCOUNTANT
         - TRAVEL_ADMIN
         - VERIFIER
         - PAYMENT_PROCESSOR
@@ -1562,6 +1563,57 @@ components:
       description: |
         phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
       pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    locale:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          nullable: false
+          maxLength: 4
+          example: IST
+          description: |
+            Represents the abbreviation of the employee's locale.
+        offset:
+          type: string
+          nullable: false
+          maxLength: 9
+          example: '05:30:00'
+          description: |
+            Represents the offset of the employee's timezone from UTC.
+        timezone:
+          type: string
+          nullable: false
+          maxLength: 19
+          example: Asia/Kolkata
+          description: |
+            Represents the timezone of the employee.
+      description: |
+        Location and timezone settings of the employee.
+    mileage_settings:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        mileage_rate_labels:
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: four_wheeler
+          example:
+            - four_wheeler
+            - two_wheeler
+        annual_mileage_of_user_before_joining_fyle:
+          type: object
+          nullable: true
+          items:
+            type: object
+          example:
+            two_wheeler: 44
+      description: |
+        Mileage settings of the employee.
     user_id:
       type: string
       description: |
@@ -1765,56 +1817,9 @@ components:
           description: |
             Mobile number of the employee
         locale:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            abbreviation:
-              type: string
-              nullable: false
-              maxLength: 4
-              example: IST
-              description: |
-                Represents the abbreviation of the employee's locale.
-            offset:
-              type: string
-              nullable: false
-              maxLength: 9
-              example: '05:30:00'
-              description: |
-                Represents the offset of the employee's timezone from UTC.
-            timezone:
-              type: string
-              nullable: false
-              maxLength: 19
-              example: Asia/Kolkata
-              description: |
-                Represents the timezone of the employee.
-          description: |
-            Location and timezone settings of the employee.
+          $ref: '#/components/schemas/locale'
         mileage_settings:
-          type: object
-          nullable: true
-          additionalProperties: false
-          properties:
-            mileage_rate_labels:
-              type: array
-              nullable: true
-              items:
-                type: string
-                example: four_wheeler
-              example:
-                - four_wheeler
-                - two_wheeler
-            annual_mileage_of_user_before_joining_fyle:
-              type: object
-              nullable: true
-              items:
-                type: object
-              example:
-                two_wheeler: 44
-          description: |
-            Mileage settings of the employee.
+          $ref: '#/components/schemas/mileage_settings'
         ach_account:
           type: object
           nullable: true
@@ -1905,7 +1910,7 @@ components:
           $ref: '#/components/schemas/custom_fields'
         approver_emails:
           type: array
-          maxLength: 3
+          maxItems: 3
           nullable: true
           items:
             $ref: '#/components/schemas/email'
@@ -1975,6 +1980,101 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        locale:
+          $ref: '#/components/schemas/locale'
+        mileage_settings:
+          $ref: '#/components/schemas/mileage_settings'
+        delegatee_emails:
+          type: array
+          maxItems: 1
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          example:
+            - delegatee@example.com
+          description: |
+            List of emails of employees that are delegatees for this employee.
+    employee_id:
+      type: string
+      maxLength: 255
+      description: |
+        This id provided by Fyle to uniquely identify an employee within an organization.
+        This id is always prefixed with `ou`.
+      example: outGt9ju6qP
+    reinvitation_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/employee_id'
+    employee_filter_name:
+      type: string
+      nullable: false
+      maxLength: 255
+      description: |
+        This represents the name of the filter.
+      example: Code E0101
+    shared:
+      type: boolean
+      nullable: true
+      description: |
+        This indicates if the filter should be shared with other admins in the org.
+      default: false
+      example: true
+    query_string:
+      type: string
+      nullable: false
+      maxLength: 255
+      description: |
+        This represents a query string which will be used to filter employees.
+      example: code.eq.'E0101'
+    employee_filters_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: efilumWHrlPf7K
+        name:
+          $ref: '#/components/schemas/employee_filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    employee_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/employee_filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    employee_filters_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: efilumWHrlPf7K
     employees_upload_out:
       type: object
       additionalProperties: false
@@ -2584,13 +2684,6 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
-    employee_id:
-      type: string
-      maxLength: 255
-      description: |
-        This id provided by Fyle to uniquely identify an employee within an organization.
-        This id is always prefixed with `ou`.
-      example: outGt9ju6qP
     department_id:
       type: string
       maxLength: 255
@@ -3193,6 +3286,16 @@ components:
           example: ervgnwlgw34
         expense_rule_data:
           $ref: '#/components/schemas/expense_rule_data_in'
+    expense_assign_in:
+      type: object
+      required:
+        - id
+        - assignee_user_email
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        assignee_user_email:
+          $ref: '#/components/schemas/email'
     amount:
       type: number
       description: |
@@ -3803,6 +3906,18 @@ components:
             - $ref: '#/components/schemas/null_field'
           description: |
             signifies when the ach payment was initiated.
+        source_account_ach_reference_id:
+          nullable: true
+          type: string
+          description: |
+            Signifies the source of ach transfer reference code.
+          example: IMJYXG4G
+        destination_account_ach_reference_id:
+          nullable: true
+          type: string
+          description: |
+            Signifies the destination of ach transfer reference code.
+          example: II7P2228Z
     reimbursement_out_minimal:
       type: object
       nullable: true
@@ -4022,6 +4137,71 @@ components:
               - $ref: '#/components/schemas/id_string'
           example:
             - txelntgwgwll
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+    admin_report_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - report_id
+        - creator_user_id
+        - creator_user
+        - created_at
+        - org_id
+        - updated_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        report_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/id_string'
+    report_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          type: string
+          description: |
+            id of the report, on which need to add comment
+          example: rpa21A2rdj2
+        comment:
+          type: string
+          description: |
+            comment on the report
+          example: We don't accept laundry bills
     reason:
       type: string
       description: |
@@ -4562,23 +4742,6 @@ components:
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
       nullable: true
       example: sample string
-    user_out_embed_nullable:
-      type: object
-      nullable: true
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: |
-            Represents the full name of the Employee. Must be at least 3 characters.
-          example: John Doe
     corporate_card_out_embed:
       type: object
       additionalProperties: false
@@ -5290,6 +5453,35 @@ components:
         - last_user_matched_at
         - is_exported
         - metadata
+    corporate_card_transactions_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in corporate card transactions GET call for displaying transactions in the list view.
+          example: amount=gt.0&amount=lt.1000&created_at=gt.2021-01-01T00:00:00.000Z&created_at=lt.2021-12-31T23:59:59.999Z
+    corporate_card_transactions_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of corporate card transactions.
+          example: 1
+        debit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the debit type corporate card transactions.
+          example: 1239
+        credit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the credit type corporate card transactions.
+          example: 101
     corporate_card_transaction_assign_in:
       type: object
       properties:
@@ -9757,6 +9949,16 @@ components:
       schema:
         type: string
         example: Ritas
+    limit:
+      in: query
+      name: limit
+      description: |
+        A limit on the number of objects to be returned. Allowed values are from 1 to 200.
+      schema:
+        type: integer
+        example: 20
+        default: 50
+        maximum: 200
     created_at:
       in: query
       name: created_at
@@ -9790,16 +9992,6 @@ components:
       schema:
         type: integer
         example: 10
-    limit:
-      in: query
-      name: limit
-      description: |
-        A limit on the number of objects to be returned. Allowed values are from 1 to 200.
-      schema:
-        type: integer
-        example: 20
-        default: 50
-        maximum: 200
     time_interval_granularity:
       in: query
       name: time_interval_granularity
@@ -11402,6 +11594,8 @@ paths:
       operationId: employees_list
       description: |
         This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/q'
       responses:
         '200':
           description: OK
@@ -11419,6 +11613,135 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/business_units:
+    get:
+      tags:
+        - Employees
+      summary: List employees business units
+      operationId: employees_business_units_list
+      description: |
+        This API returns the list of business units of employees based on the query parameters.
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      business_units:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Marketing
+                          - Management
+                        description: |
+                          List of business units of the employees based on the query parameters.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/titles:
+    get:
+      tags:
+        - Employees
+      summary: List employees titles
+      operationId: employees_titles_list
+      description: |
+        This API returns the list of titles of employees based on the query parameters.
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      titles:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Branch Manager
+                          - Branch Head
+                        description: |
+                          List of titles of the employees based on the query parameters.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/locations:
+    get:
+      tags:
+        - Employees
+      summary: List employees locations
+      operationId: employees_locations_list
+      description: |
+        This API returns the list of locations of employees based on the query parameters.
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      locations:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - India
+                          - Indonesia
+                        description: |
+                          List of locations of the employees based on the query parameters.
         '400':
           description: Bad request
           content:
@@ -11486,6 +11809,193 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/employees/reinvite/bulk:
+    post:
+      tags:
+        - Employees
+      summary: Reinvite employees
+      description: |
+        Reinvite employees
+      operationId: reinvitations_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/reinvitation_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/employees/filters:
+    post:
+      tags:
+        - Employees
+      summary: Create Employees saved filters
+      description: |
+        Save employees filters for personal use or share with other admins.
+      operationId: employees_filters_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_filters_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Employees
+      summary: List Employees saved filters
+      operationId: employees_filters_get
+      description: |
+        List filters saved by the admin or shared with the admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/filters/delete:
+    post:
+      tags:
+        - Employees
+      summary: Delete Employees saved filter
+      description: |
+        Delete Employees saved filter having the provided id.
+      operationId: employees_filters_post_action_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_filters_delete_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employees/uploads:
     get:
       tags:
@@ -12118,6 +12628,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/expenses/assign:
+    post:
+      tags:
+        - Expenses
+      summary: Assign expense
+      description: |
+        This API Assigns an existing expense to a user of same organization
+      operationId: expenses_add_comment_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_assign_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/advance_requests:
     get:
       tags:
@@ -12513,7 +13072,11 @@ paths:
                 data:
                   $ref: '#/components/schemas/report_action_with_expenses_ids_to_eject'
                 reason:
-                  $ref: '#/components/schemas/reason'
+                  type: string
+                  description: |
+                    Reason for ejecting the expense \
+                    Note: When ejecting own expense, reason is not required. However, if another spender's expense are ejected reason is mandatory.
+                  example: All bills are in order
       responses:
         '200':
           description: OK
@@ -12543,26 +13106,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/reports/add_approvers:
-    post:
+  /admin/reports/comments:
+    get:
       tags:
         - Reports
-      summary: Add Approvers
+      summary: List report comments
       description: |
-        Add Approvers
-      operationId: report_add_approvers
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/add_approvers_bulk_in'
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: report_comments_list
       responses:
         '200':
           description: OK
@@ -12572,8 +13123,14 @@ paths:
                 type: object
                 additionalProperties: false
                 properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
                   data:
-                    $ref: '#/components/schemas/admin_report_out'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/admin_report_comments_out'
         '400':
           description: Bad request
           content:
@@ -12586,12 +13143,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
+    post:
+      tags:
+        - Reports
+      summary: Comments on a report
+      description: Comments on a report
+      operationId: report_comments_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_comments_in'
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/403'
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_comments_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
@@ -13054,6 +13646,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/corporate_cards/bank_names:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card bank names
+      description: |
+        This API just returns all the bank names associated with the corporate cards in the org
+      operationId: corporate_cards_bank_names_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      bank_names:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Amex
+                          - Bank of America
+                        description: |
+                          Holds the bank names of all the corporate cards present in the org
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/corporate_cards/masked_card_numbers:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card masked card numbers
+      description: |
+        This API just returns all the maksed card numbers (last 4 digits) associated with the corporate cards in the org
+      operationId: corporate_cards_masked_card_numbers_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      masked_card_numbers:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - 1234
+                          - 5678
+                        description: |
+                          Holds the masked card numbers (last 4 digits) of all the corporate cards present in the org
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/corporate_cards/assign:
     post:
       tags:
@@ -13176,6 +13848,7 @@ paths:
         - $ref: '#/components/parameters/order'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/q'
       responses:
         '200':
           description: OK
@@ -13310,6 +13983,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/corporate_card_transactions/stats:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Corporate Card Transaction Stats
+      description: |
+        Corporate Card Transaction Stats
+      operationId: corporate_card_transactions_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transactions_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transactions_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions/assign:
     post:
       tags:
