@@ -698,6 +698,9 @@ custom_fields_flattened:
     NOTE: Key name is converted to snake case and spaces are replaced with underscores.
   nullable: false
   additionalProperties: true
+  example:
+    cf1: string1
+    custom_field_2: Value 2
 
 currency:
   type: string
@@ -1350,3 +1353,59 @@ query_string:
   description: |
     This represents a query string which will be used to filter employees.
   example: code.eq.'E0101'
+
+tax_group:
+  type: object
+  nullable: true
+  description: |
+    Tax group details.
+  properties:
+    name:
+      type: string
+      description: |
+        Name of the tax group.
+      example: GST
+    percentage:
+      type: number
+      description: |
+        Tax percentage.
+      example: 5
+
+policy_checks:
+  type: object
+  description: |
+    Policy checks details
+  properties:
+    is_amount_limit_applied:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense amount is capped based on the policy calculation.
+      example: true
+    are_approvers_added:
+      type: boolean
+      description: |
+        A true value here means, approvers are added to the expense based on the policy calculation.
+      example: true
+    is_flagged_ever:
+      type: boolean
+      description: |
+        A true value here means, that as per policy calculation this expense is flagged.
+      example: true
+    violations:
+      type: array
+      description: |
+        List of policy violations on this expense.
+      items:
+        type: object
+        properties:
+          policy_rule_description:
+            type: string
+            description: |
+              Description of the policy rule.
+            example: 'Expense amount is greater than the policy limit'
+          policy_rule_id:
+            allOf:
+              - $ref: './fields.yaml#/id_string'
+            description: |
+              ID of the policy rule.
+            example: 'tprCCiQiiuJZs'
