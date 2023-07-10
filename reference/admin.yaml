@@ -2009,7 +2009,7 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/employee_id'
-    employee_filter_name:
+    filter_name:
       type: string
       nullable: false
       maxLength: 255
@@ -2028,7 +2028,7 @@ components:
       nullable: false
       maxLength: 255
       description: |
-        This represents a query string which will be used to filter employees.
+        This represents a query string which will be used to filter the data.
       example: code.eq.'E0101'
     employee_filters_out:
       type: object
@@ -2039,7 +2039,7 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: efilumWHrlPf7K
         name:
-          $ref: '#/components/schemas/employee_filter_name'
+          $ref: '#/components/schemas/filter_name'
         shared:
           $ref: '#/components/schemas/shared'
         org_id:
@@ -2060,7 +2060,7 @@ components:
         - query_string
       properties:
         name:
-          $ref: '#/components/schemas/employee_filter_name'
+          $ref: '#/components/schemas/filter_name'
         shared:
           $ref: '#/components/schemas/shared'
         query_string:
@@ -5477,6 +5477,41 @@ components:
           description: |
             This field indicates the sum of amount of the credit type corporate card transactions.
           example: 101
+    corporate_card_transaction_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    corporate_card_transaction_filters_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: cctfilumWHrlPf7K
+        name:
+          $ref: '#/components/schemas/filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     corporate_card_transaction_assign_in:
       type: object
       properties:
@@ -14094,6 +14129,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_card_transactions/filters:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Corporate card transactions saved filters
+      description: |
+        Save Corporate Card Transaction filters for personal use or share with other admins.
+      operationId: corporate_card_transaction_filters_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transaction_filters_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transaction_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/corporate_card_transactions/assign:
     post:
       tags:
