@@ -2009,7 +2009,7 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/employee_id'
-    employee_filter_name:
+    filter_name:
       type: string
       nullable: false
       maxLength: 255
@@ -2028,21 +2028,8 @@ components:
       nullable: false
       maxLength: 255
       description: |
-        This represents a query string which will be used to filter employees.
+        This represents a query string which will be used to filter the data.
       example: code.eq.'E0101'
-    employee_filters_in:
-      type: object
-      additionalProperties: false
-      required:
-        - name
-        - query_string
-      properties:
-        name:
-          $ref: '#/components/schemas/employee_filter_name'
-        shared:
-          $ref: '#/components/schemas/shared'
-        query_string:
-          $ref: '#/components/schemas/query_string'
     employee_filters_out:
       type: object
       additionalProperties: false
@@ -2052,7 +2039,7 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: efilumWHrlPf7K
         name:
-          $ref: '#/components/schemas/employee_filter_name'
+          $ref: '#/components/schemas/filter_name'
         shared:
           $ref: '#/components/schemas/shared'
         org_id:
@@ -2065,6 +2052,29 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    employee_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    employee_filters_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: efilumWHrlPf7K
     employees_upload_out:
       type: object
       additionalProperties: false
@@ -4192,6 +4202,26 @@ components:
           description: |
             comment on the report
           example: We don't accept laundry bills
+    add_approvers_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_emails
+      properties:
+        id:
+          type: string
+          description: |
+            id of the report, to which approvers need to be added
+          example: rpa21A2rdj2
+        approver_emails:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/email'
+          example:
+            - adb@gmail.com
+            - kartikey.rajvaidya@fyle.in
     process_ach_in:
       type: object
       properties:
@@ -5447,6 +5477,41 @@ components:
           description: |
             This field indicates the sum of amount of the credit type corporate card transactions.
           example: 101
+    corporate_card_transaction_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    corporate_card_transaction_filters_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: cctfilumWHrlPf7K
+        name:
+          $ref: '#/components/schemas/filter_name'
+        shared:
+          $ref: '#/components/schemas/shared'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     corporate_card_transaction_assign_in:
       type: object
       properties:
@@ -11833,7 +11898,7 @@ paths:
     post:
       tags:
         - Employees
-      summary: Employees Saved Filters
+      summary: Create Employees saved filters
       description: |
         Save employees filters for personal use or share with other admins.
       operationId: employees_filters_post
@@ -11876,6 +11941,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Employees
+      summary: List Employees saved filters
+      operationId: employees_filters_get
+      description: |
+        List filters saved by the admin or shared with the admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/filters/delete:
+    post:
+      tags:
+        - Employees
+      summary: Delete Employees saved filter
+      description: |
+        Delete Employees saved filter having the provided id.
+      operationId: employees_filters_post_action_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_filters_delete_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employees/uploads:
     get:
       tags:
@@ -13070,6 +13220,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/add_approvers:
+    post:
+      tags:
+        - Reports
+      summary: Add Approvers
+      description: |
+        Add Approvers
+      operationId: report_add_approvers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+                - reason
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approvers_in'
+                reason:
+                  type: string
+                  description: |
+                    Reason for adding approvers to the report
+                  example: added approver
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/process_ach/bulk:
     post:
       tags:
@@ -13918,6 +14129,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_card_transactions/filters:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Corporate card transactions saved filters
+      description: |
+        Save Corporate Card Transaction filters for personal use or share with other admins.
+      operationId: corporate_card_transaction_filters_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transaction_filters_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transaction_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/corporate_card_transactions/assign:
     post:
       tags:
