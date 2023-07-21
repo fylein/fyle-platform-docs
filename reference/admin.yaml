@@ -2119,6 +2119,35 @@ components:
           example: fi3ou3hg3l
       required:
         - file_id
+    employees_download_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: emdo2bn4jbrep
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        file_id:
+          type: string
+          nullable: true
+          description: |
+            File `id` of the excel file generated after processing the download request.
+          example: fi3ou3hg3l
+        state:
+          type: string
+          enum:
+            - SUCCESS
+            - ERROR
+            - PENDING
+            - PROCESSING
+          description: |
+            State of this download.
     file_in:
       type: object
       required:
@@ -12135,6 +12164,95 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/employees_upload_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/employees/downloads:
+    get:
+      tags:
+        - Employees
+      summary: List Employees download requests
+      operationId: employees_download_list
+      description: |
+        Check the status of the Employees download requests.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employees_download_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create a request to download an excel file for employees
+      description: |
+        Create a request to download an excel file containing employees columns.
+      operationId: employees_download_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_download_out'
         '400':
           description: Bad request
           content:
