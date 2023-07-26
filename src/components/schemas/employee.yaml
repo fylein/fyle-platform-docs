@@ -63,6 +63,8 @@ employee_out:
       example: Branch Manager
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+    flattened_custom_field:
+      $ref: './fields.yaml#/flattened_custom_field'
 
     project_ids:
       type: array
@@ -225,54 +227,6 @@ employee_out_embed:
         employee id in a HRMS system.
     org_id:
       $ref: ./fields.yaml#/org_id
-    department_id:
-      nullable: True
-      $ref: './fields.yaml#/department_id'
-    department:
-      nullable: True
-      $ref: './department.yaml#/department_out_embed'
-#    level:
-#      $ref: './level.yaml#/level_out_embed'
-#    location:
-#      type: string
-#      maxLength: 255
-#      nullable: True
-#      example: Bangalore Ofc
-#    title:
-#      type: string
-#      maxLength: 255
-#      nullable: True
-#      example: Branch Manager
-#    business_unit:
-#      type: string
-#      maxLength: 255
-#      nullable: true
-#      example: Finance ops
-
-
-employee_out_embed_for_expense:
-  type: object
-  additionalProperties: False
-  properties:
-    id:
-      $ref: ./fields.yaml#/id_string
-    user_id:
-      $ref: './fields.yaml#/user_id'
-    user:
-      $ref: ./user.yaml#/user_out_embed
-    code:
-      type: string
-      maxLength: 255
-      nullable: True
-      example: E84122
-      description: >
-        This field refers to any string that the client programs can use to refer
-        to an employee's unique id.
-
-        This could be any field such as an UUID from an Active Directory server or
-        employee id in a HRMS system.
-    org_id:
-      $ref: ./fields.yaml#/org_id
     org_name:
       $ref: ./fields.yaml#/org_name
     department_id:
@@ -300,8 +254,8 @@ employee_out_embed_for_expense:
       example: Finance ops
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
-    custom_fields_flattened:
-      $ref: './fields.yaml#/custom_fields_flattened'
+    flattened_custom_field:
+      $ref: './fields.yaml#/flattened_custom_field'
     has_accepted_invite:
       type: boolean
       description: >
@@ -516,3 +470,34 @@ employees_upload_out:
       description: |
         File `id` of the error excel file generated after processing the uploaded file.
       example: fi1yut1owo3
+
+
+employees_download_out:
+  type: object
+  additionalProperties: False
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: emdo2bn4jbrep
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    file_id:
+      type: string
+      nullable: true
+      description: |
+        File `id` of the excel file generated after processing the download request.
+      example: fi3ou3hg3l
+    state:
+      type: string
+      enum:
+        - SUCCESS
+        - ERROR
+        - PENDING
+        - PROCESSING
+      description: |
+        State of this download.
