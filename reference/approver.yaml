@@ -647,7 +647,20 @@ components:
         Custom fields
       items:
         $ref: '#/components/schemas/custom_field'
-    report_out_embed:
+    custom_fields_flattened:
+      type: object
+      description: |
+        Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
+
+        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened to `{"custom_field_1": "Value 1"}`
+
+        NOTE: Key name is converted to snake case and spaces are replaced with underscores.
+      nullable: false
+      additionalProperties: true
+      example:
+        cf1: string1
+        custom_field_2: Value 2
+    report_out_embed_for_expense_out:
       type: object
       nullable: true
       additionalProperties: false
@@ -701,6 +714,9 @@ components:
             - APPROVED
             - PAYMENT_PENDING
             - PAID
+        amount:
+          $ref: '#/components/schemas/amount'
+          nullable: false
         settlement_id:
           type: string
           nullable: true
@@ -714,6 +730,20 @@ components:
           example: '2020-06-11T13:14:55.201598+00:00'
           description: |
             Signifies if and when this report was reimbursed.
+        last_verified_at:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was verified.
+        settlement_locked_at:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was locked for settlement.
         reimbursement_id:
           type: string
           nullable: true
@@ -728,6 +758,12 @@ components:
             A unique, organization wide identifier for a particular reimbursement.<br>
             This id is always prefixed with `P/`.
           example: P/2020/11/29
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
     file_out_embed:
       type: object
       properties:
@@ -1098,6 +1134,60 @@ components:
             Custom fields
           items:
             $ref: '#/components/schemas/custom_field'
+    tax_group:
+      type: object
+      nullable: true
+      description: |
+        Tax group details.
+      properties:
+        name:
+          type: string
+          description: |
+            Name of the tax group.
+          example: GST
+        percentage:
+          type: number
+          description: |
+            Tax percentage.
+          example: 5
+    policy_checks:
+      type: object
+      description: |
+        Policy checks details
+      properties:
+        is_amount_limit_applied:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense amount is capped based on the policy calculation.
+          example: true
+        are_approvers_added:
+          type: boolean
+          description: |
+            A true value here means, approvers are added to the expense based on the policy calculation.
+          example: true
+        is_flagged_ever:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense is flagged.
+          example: true
+        violations:
+          type: array
+          description: |
+            List of policy violations on this expense.
+          items:
+            type: object
+            properties:
+              policy_rule_description:
+                type: string
+                description: |
+                  Description of the policy rule.
+                example: Expense amount is greater than the policy limit
+              policy_rule_id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                description: |
+                  ID of the policy rule.
+                example: tprCCiQiiuJZs
     expense_out:
       type: object
       additionalProperties: false
@@ -1376,6 +1466,8 @@ components:
             $ref: '#/components/schemas/location'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        custom_fields_flattened:
+          $ref: '#/components/schemas/custom_fields_flattened'
         code:
           type: string
           nullable: true
@@ -1420,7 +1512,7 @@ components:
             signifies when this expense was added to a report.
             If this expense is not added to a report, then this could be null.
         report:
-          $ref: '#/components/schemas/report_out_embed'
+          $ref: '#/components/schemas/report_out_embed_for_expense_out'
         is_verified:
           type: boolean
           nullable: true
@@ -1540,6 +1632,44 @@ components:
           example: ervgnwlgw34
         expense_rule_data:
           $ref: '#/components/schemas/expense_rule_data_in'
+        days_spend_before:
+          type: integer
+          nullable: true
+          description: |
+            Number of days spent before the expense spent date.
+          example: 2
+        is_weekend_spend:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the expense was spent on a weekend.
+          example: true
+        is_split:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the expense is split.
+          example: true
+        tax_group:
+          $ref: '#/components/schemas/tax_group'
+        approver_comments:
+          type: array
+          description: |
+            Comments added by approvers.
+          items:
+            type: string
+          example:
+            - This is a comment by approver
+        verifier_comments:
+          type: array
+          description: |
+            Comments added by verifiers.
+          items:
+            type: string
+          example:
+            - This is a comment by verifier
+        policy_checks:
+          $ref: '#/components/schemas/policy_checks'
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
