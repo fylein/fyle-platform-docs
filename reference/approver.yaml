@@ -647,7 +647,7 @@ components:
         Custom fields
       items:
         $ref: '#/components/schemas/custom_field'
-    custom_fields_flattened:
+    flattened_custom_field:
       type: object
       description: |
         Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
@@ -657,6 +657,23 @@ components:
         NOTE: Key name is converted to snake case and spaces are replaced with underscores.
       nullable: false
       additionalProperties: true
+      properties:
+        cf1:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - string1
+                - string2
       example:
         cf1: string1
         custom_field_2: Value 2
@@ -815,27 +832,6 @@ components:
         - id
         - name
         - band
-    flattened_custom_field:
-      type: object
-      description: |
-        Custom fields array transformed into key value pairs
-      properties:
-        cf1:
-          nullable: true
-          oneOf:
-            - type: string
-              example: string1
-            - type: boolean
-              example: true
-            - type: integer
-              example: 123
-            - $ref: '#/components/schemas/location'
-            - type: array
-              items:
-                type: string
-              example:
-                - string1
-                - string2
     is_enabled:
       type: boolean
       description: |
@@ -1467,7 +1463,7 @@ components:
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
         custom_fields_flattened:
-          $ref: '#/components/schemas/custom_fields_flattened'
+          $ref: '#/components/schemas/flattened_custom_field'
         code:
           type: string
           nullable: true

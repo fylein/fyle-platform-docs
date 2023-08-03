@@ -1486,7 +1486,13 @@ components:
     flattened_custom_field:
       type: object
       description: |
-        Custom fields array transformed into key value pairs
+        Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
+
+        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened to `{"custom_field_1": "Value 1"}`
+
+        NOTE: Key name is converted to snake case and spaces are replaced with underscores.
+      nullable: false
+      additionalProperties: true
       properties:
         cf1:
           nullable: true
@@ -1504,6 +1510,9 @@ components:
               example:
                 - string1
                 - string2
+      example:
+        cf1: string1
+        custom_field_2: Value 2
     project_out_embed:
       type: object
       nullable: true
@@ -2619,19 +2628,6 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    custom_fields_flattened:
-      type: object
-      description: |
-        Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
-
-        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened to `{"custom_field_1": "Value 1"}`
-
-        NOTE: Key name is converted to snake case and spaces are replaced with underscores.
-      nullable: false
-      additionalProperties: true
-      example:
-        cf1: string1
-        custom_field_2: Value 2
     amount:
       type: number
       description: |
@@ -3405,7 +3401,7 @@ components:
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
         custom_fields_flattened:
-          $ref: '#/components/schemas/custom_fields_flattened'
+          $ref: '#/components/schemas/flattened_custom_field'
         code:
           type: string
           nullable: true
