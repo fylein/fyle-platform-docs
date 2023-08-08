@@ -3488,6 +3488,51 @@ components:
           $ref: '#/components/schemas/id_string'
         assignee_user_email:
           $ref: '#/components/schemas/email'
+    expense_filters_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: exfilumWHrlPf7K
+        name:
+          $ref: '#/components/schemas/filter_name'
+        is_shared:
+          $ref: '#/components/schemas/shared'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    expense_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/filter_name'
+        is_shared:
+          $ref: '#/components/schemas/shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    expense_filters_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: exfilumWHrlPf7K
     expenses_stats_in:
       properties:
         query_params:
@@ -13061,6 +13106,138 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/filters:
+    post:
+      tags:
+        - Expenses
+      summary: Create Expenses saved filters
+      description: |
+        Save expenses filters for personal use or share with other admins.
+      operationId: expenses_filters_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_filters_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Expenses
+      summary: List Expenses saved filters
+      operationId: expenses_filters_get
+      description: |
+        List filters saved by the admin or shared with the admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/expenses/filters/delete:
+    post:
+      tags:
+        - Expenses
+      summary: Delete Expenses saved filter
+      description: |
+        Delete Expenses saved filter having the provided id.
+      operationId: expenses_filters_post_action_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_filters_delete_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
