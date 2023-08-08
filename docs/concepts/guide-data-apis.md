@@ -57,8 +57,10 @@ Here's the full list of operators supported:
 | neq  | Not Equals     | integer, string, timestamp | amount=neq.531 |
 | lt  | Less than  | integer, string, timestamp | amount=lt.100 |
 | lte | Less than or equal to  | integer, string, timestamp | updated_at=lte.2020-06-01T00:00:00.000-08:00 |
+| alte | Less than or equal to absolute value | integer, string, timestamp | amount=alte.0 |
 | gt | Greater than  | integer, string, timestamp | amount=gt.100 |
 | gte | Greater than or equal to  | integer, string, timestamp| updated_at=gte.2020-06-01T00:00:00.000-08:00 |
+| agte | Greater than or equal to absolute value | integer| amount=agte.0 |
 | in | Is one of | integer, string | id=in.(id1,id2,id3) |
 | not_in | Is not one of | integer, string | id=not_in.(id1,id2,id3) |
 | is | Is equals to | null, boolean | is_reimbursable=is.true |
