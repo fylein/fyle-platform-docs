@@ -137,6 +137,12 @@ name_nullable:
     This represents the name of the resource. This should be unique in an organization
   example: foo123
 
+bank_name:
+  type: string
+  description: |
+    Specifies the name of bank who issued the card.
+  example: Bank of America
+
 description:
   type: string
   nullable: true
@@ -688,6 +694,27 @@ custom_fields:
   items:
     $ref: '#/custom_field'
 
+flattened_custom_field:
+  type: object
+  description: |
+    Custom fields array transformed into key value pairs
+  properties:
+    cf1:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: '#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'string1', 'string2' ]
+  
+
 currency:
   type: string
   description: >
@@ -1220,6 +1247,19 @@ ach_transfer:
         - $ref: '#/null_field'
       description: |
         signifies when the ach payment was initiated.
+    source_account_ach_reference_id:
+      nullable: true
+      type: string
+      description: | 
+       Signifies the source of ach transfer reference code.
+      example: IMJYXG4G
+    destination_account_ach_reference_id:
+      nullable: true
+      type: string
+      description: | 
+       Signifies the destination of ach transfer reference code.
+      example: II7P2228Z
+    
 
 ach_transfer_state:
   type: string
@@ -1303,3 +1343,34 @@ mileage_settings:
         "two_wheeler": 44
   description: |
     Mileage settings of the employee.
+
+filter_name:
+  type: string
+  nullable: false
+  maxLength: 255
+  description: |
+    This represents the name of the filter.
+  example: Code E0101
+
+shared:
+  type: boolean
+  nullable: true
+  description: |
+    This indicates if the filter should be shared with other admins in the org.
+  default: false
+  example: true
+
+query_string:
+  type: string
+  nullable: false
+  maxLength: 255
+  description: |
+    This represents a query string which will be used to filter the data.
+  example: code.eq.'E0101'
+
+split_group_amount:
+  type: number
+  nullable: true
+  description: |
+    The amount of expense before splitting.
+  example: 3768.00

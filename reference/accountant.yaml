@@ -107,6 +107,11 @@ components:
           type: string
           description: |
             Link to download this file
+        thumbnail_200_200_download_url:
+          nullable: true
+          type: string
+          description: |
+            Link to download thumbnail related to this file
     org_rov_out:
       type: object
       additionalProperties: false
@@ -188,6 +193,55 @@ components:
         logo_file:
           nullable: true
           $ref: '#/components/schemas/file_generate_urls_action_out'
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: |
+        An immutable field that represents the email address of the employee.
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the full name of an employee.
+      example: Jon Snow
+    code:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        This represents a code that is typically used for syncing with other systems.
+      example: C1234
+    org_name:
+      type: string
+      maxLength: 255
+      description: |
+        This represents the name of the organization. This should be unique for all organizations
+      example: foo123
+    domain:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        This represents a tld domain name
+      example: somebusineess.com
+    refresh_token:
+      type: string
+      description: |
+        This is user refresh token, and is used to generate access_token
+      example: xxxyyy.aaaa.aaa
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    redirect_uri:
+      type: string
+      description: |
+        URL where user needs to be redirected
+      example: https://app.fylehq.com/app/...
 tags: []
 paths:
   /accountant/orgs:
@@ -215,6 +269,66 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/org_rov_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Organisations
+      summary: Create Organisation
+      operationId: org_create
+      description: |
+        This API is used to create a new org with an owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - owner_email
+                - currency
+                - name
+              properties:
+                owner_email:
+                  $ref: '#/components/schemas/email'
+                owner_full_name:
+                  $ref: '#/components/schemas/user_full_name'
+                currency:
+                  $ref: '#/components/schemas/currency'
+                code:
+                  $ref: '#/components/schemas/code'
+                name:
+                  $ref: '#/components/schemas/org_name'
+                domain:
+                  $ref: '#/components/schemas/domain'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  refresh_token:
+                    $ref: '#/components/schemas/refresh_token'
+                  org_id:
+                    $ref: '#/components/schemas/org_id'
+                  user_id:
+                    $ref: '#/components/schemas/user_id'
+                  redirect_uri:
+                    $ref: '#/components/schemas/redirect_uri'
         '400':
           description: Bad Request
           content:
