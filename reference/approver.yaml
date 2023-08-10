@@ -427,6 +427,20 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+    approver_report_in:
+      type: object
+      additionalProperties: false
+      required:
+        - purpose
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        purpose:
+          type: string
+          description: |
+            Indicates purpose of the reports. It can only be updated for an existing report when the report is in `APPROVER_PENDING` state.
+          example: '#1: Jun 2020'
     report_action_in:
       type: object
       additionalProperties: false
@@ -870,8 +884,40 @@ components:
         Specifies the masked number of the card.
         Add only masked card-numbers, last four digits of the card.
       example: xxxx-4543
+    bank_name:
+      type: string
+      description: |
+        Specifies the name of bank who issued the card.
+      example: Bank of America
+    name_nullable:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        This represents the name of the resource. This should be unique in an organization
+      example: foo123
+    timestamptz_pst:
+      type: string
+      format: date-time
+      nullable: true
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T01:18:19.292-08:00'
+    spent_at:
+      allOf:
+        - $ref: '#/components/schemas/timestamptz_pst'
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
     matched_corporate_card_transaction_out_embed:
       type: object
+      nullable: true
       required:
         - id
         - corporate_card_id
@@ -887,6 +933,70 @@ components:
           example: bawownwrng
         corporate_card_number:
           $ref: '#/components/schemas/card_number'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        cardholder_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          description: |
+            String denoting the card holder's name
+          example: John Doe
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Fyle but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Fyle but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@fyle.in
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -1954,6 +2064,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Reports
+      summary: Update Purpose
+      operationId: update_purpose
+      description: |
+        This API is used to update the the purpose of an report by Approver. 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/approver_report_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/reports/partially_approve:
     post:
       tags:
