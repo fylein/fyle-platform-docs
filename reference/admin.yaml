@@ -4853,6 +4853,20 @@ components:
           description: |
             This field indicates the count of reports in processing state for which ACH has failed.
           example: 1
+    report_create_and_submit_expenses:
+      type: object
+      additionalProperties: false
+      required:
+        - expense_ids
+      properties:
+        expense_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - txelntgwgwll
+            - txavbdabass
     corporate_card_out:
       type: object
       properties:
@@ -14477,6 +14491,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/create_and_submit:
+    post:
+      tags:
+        - Reports
+      summary: Create and submit reports for employees
+      description: Create and submit reports for employees
+      operationId: report_create_and_submit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_create_and_submit_expenses'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
