@@ -5979,6 +5979,129 @@ components:
           nullable: true
           description: Signifies the time when the next automate report submission will run for the organization. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
           example: '2021-06-01T13:14:54.804+00:00'
+    spender_expense_check_mandatory_fields_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This represents the id of the expense.<br><br>
+            _Note: This field is required when you are updating an already created expense and want to check it again for missing mandatory fields._
+          example: tx0agOdICdbV
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            It signifies when this expense was made. This date cannot be in future.<br><br>
+            _Note: This field is mandatory when you are creating an expense and want to check it again for missing mandatory fields._
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        claim_amount:
+          allOf:
+            - $ref: '#/components/schemas/claim_amount'
+          description: |
+            The expense amount as claimed by user.<br><br>
+            _Note: This field is mandatory when you are creating an expense and want to check it again for missing mandatory fields._
+          example: 1984.18
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        num_files:
+          type: integer
+          description: |
+            Number of files/reciepts attached to expense
+          example: 4
+    expense_check_mandatory_fields_out:
+      type: object
+      additionalProperties: false
+      required:
+        - missing_amount
+        - missing_currency
+        - missing_receipt
+        - missing_expense_field_ids
+      properties:
+        missing_amount:
+          type: boolean
+          description: |
+            If this is set to true, then you need to send currency field with expense object.
+          example: false
+        missing_currency:
+          type: boolean
+          description: |
+            If this is set to true, then you need to send currency field with expense object.
+          example: false
+        missing_receipt:
+          type: boolean
+          description: |
+            If this is set to true, then you need to attach receipt to the expense.
+          example: false
+        missing_expense_field_ids:
+          type: array
+          nullable: false
+          items:
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an expense field.
+            example: 123
+          example:
+            - 123
+            - 12423
+          description: |
+            List of IDs of expense fields which are mandatory but are missing.
   parameters:
     q:
       in: query
@@ -8366,3 +8489,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/expenses/check_mandatory_fields:
+    post:
+      tags:
+        - Expenses
+      summary: Check expense for missing mandatory fields
+      description: |
+        Before creating or updating an [expense object](https://docs.fylehq.com/docs/fyle-platform-docs/b5ec89140e06b-create-or-update-expense)
+        into Fyle, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
+        You can easily do that by passing the same expense object with some extra optional fields documented below.
+      operationId: check_mandatory_fields_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_expense_check_mandatory_fields_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_mandatory_fields_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
