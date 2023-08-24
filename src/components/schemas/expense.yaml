@@ -276,6 +276,8 @@ expense_out:
         $ref: './fields.yaml#/location'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+    custom_fields_flattened:
+      $ref: './fields.yaml#/flattened_custom_field'
     code:
       type: string
       nullable: true
@@ -392,6 +394,9 @@ expense_out:
       type: array
       items:
         $ref: '#/matched_corporate_card_transaction_out_embed'
+      description: |
+        Holds the corporate card transactions which are matched to this expense.
+        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
     last_settled_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -447,7 +452,39 @@ expense_out:
       example: ervgnwlgw34
     expense_rule_data:
       $ref: './expense_rules.yaml#/expense_rule_data_in'
-    
+    is_weekend_spend:
+      type: boolean
+      nullable: true
+      description: |
+        Whether the expense was spent on a weekend.
+      example: true
+    is_split:
+      type: boolean
+      nullable: true
+      description: |
+        Whether the expense is split.
+      example: true
+    tax_group:
+      $ref: './fields.yaml#/tax_group'
+    approver_comments:
+      type: array
+      description: |
+        Comments added by approvers.
+      items:
+        type: string
+      example:
+        - 'This is a comment by approver'
+    verifier_comments:
+      type: array
+      description: |
+        Comments added by verifiers.
+      items:
+        type: string
+      example:
+        - 'This is a comment by verifier'
+    policy_checks:
+      $ref: './fields.yaml#/policy_checks'
+
 expense_in:
   type: object
   additionalProperties: false
