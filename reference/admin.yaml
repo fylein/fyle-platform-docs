@@ -440,7 +440,7 @@ components:
                   - _While creating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions defaults to `"restricted_spender_user_group": {"with_no_cost_center_restrictions": "true"}`_
                   - _While updating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions remains unchanged._
               example: true
-    category_out:
+    admin_approver_category_out:
       type: object
       additionalProperties: false
       properties:
@@ -489,6 +489,8 @@ components:
             - 1221
           description: |
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
     category_in:
       type: object
       required:
@@ -2005,10 +2007,11 @@ components:
           items:
             $ref: '#/components/schemas/name'
           example:
-            - Formula 1
-            - Dream work
+            - Project / Sub Project
+            - Only Project
           description: |
-            List of project names that this employee is allowed to access.
+            List of project names that this employee is allowed to access. If null, then there are no restrictions.
+            Individual list item should be in the format of `project_name / sub_project`. If there is no sub project, then simply pass `project_name`.
         cost_center_names:
           type: array
           nullable: false
@@ -4206,11 +4209,13 @@ components:
           $ref: '#/components/schemas/employee_out_embed'
     advance_in:
       type: object
+      required:
+        - user_id
+        - currency
+        - amount
+        - payment_mode
+        - advance_account_id
       properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: advwrlAGwjr2
         user_id:
           type: string
           description: |
@@ -4227,7 +4232,6 @@ components:
         payment_mode:
           type: string
           enum:
-            - CARD
             - BANK_TRANSFER
             - CHEQUE_DD
             - FOREX
@@ -11532,7 +11536,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/category_out'
+                      $ref: '#/components/schemas/admin_approver_category_out'
         '400':
           description: Bad request
           content:
@@ -11574,7 +11578,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: '#/components/schemas/category_out'
+                    $ref: '#/components/schemas/admin_approver_category_out'
         '400':
           description: Bad request
           content:
@@ -14153,9 +14157,9 @@ paths:
     post:
       tags:
         - Advances
-      summary: Create or update an advances
+      summary: Create advances
       description: |
-        Create or update an advances.
+        Create advances.
       operationId: advances_post
       requestBody:
         required: true
