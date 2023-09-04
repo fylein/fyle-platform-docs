@@ -276,6 +276,8 @@ expense_out:
         $ref: './fields.yaml#/location'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+    custom_fields_flattened:
+      $ref: './fields.yaml#/flattened_custom_field'
     code:
       type: string
       nullable: true
@@ -392,6 +394,9 @@ expense_out:
       type: array
       items:
         $ref: '#/matched_corporate_card_transaction_out_embed'
+      description: |
+        Holds the corporate card transactions which are matched to this expense.
+        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
     last_settled_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -447,7 +452,71 @@ expense_out:
       example: ervgnwlgw34
     expense_rule_data:
       $ref: './expense_rules.yaml#/expense_rule_data_in'
-    
+    is_weekend_spend:
+      type: boolean
+      nullable: true
+      description: |
+        Whether the expense was spent on a weekend.
+      example: true
+    is_split:
+      type: boolean
+      nullable: true
+      description: |
+        Whether the expense is split.
+      example: true
+    tax_group:
+      $ref: './fields.yaml#/tax_group'
+    approver_comments:
+      type: array
+      description: |
+        Comments added by approvers.
+      items:
+        type: string
+      example:
+        - 'This is a comment by approver'
+    verifier_comments:
+      type: array
+      description: |
+        Comments added by verifiers.
+      items:
+        type: string
+      example:
+        - 'This is a comment by verifier'
+    policy_checks:
+      $ref: './fields.yaml#/policy_checks'
+    accounting_export_summary:
+      type: object
+      description: |
+        Summary of accounting export for this expense.
+      properties:
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - ERROR
+            - IN_PROGRESS
+            - SKIPPED
+            - INITIATED
+          example: COMPLETE
+        error_type:
+          type: string
+          nullable: true
+          enum:
+            - ACCOUNTING_INTEGRATION_ERROR
+            - MAPPING
+            - null
+          example: ACCOUNTING_INTEGRATION_ERROR
+        url:
+          type: string
+          description: URL Endpoint for exported / failed expense
+          example: https://app.example.com/expense/txwownwrng
+        tpa_id:
+          type: string
+          nullable: false
+          description: |
+            Third party app id.
+          example: tpa_1234567890
+
 expense_in:
   type: object
   additionalProperties: false
@@ -1115,3 +1184,167 @@ expenses_stats_out:
       description: |
         This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
       example: 100
+
+accounting_export_summary_in:
+  type: object
+  required: [ id, state, error_type, url ]
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - ERROR
+        - IN_PROGRESS
+        - SKIPPED
+        - INITIATED
+      example: COMPLETE
+    error_type:
+      type: string
+      nullable: true
+      enum:
+        - ACCOUNTING_INTEGRATION_ERROR
+        - MAPPING
+        - null
+      example: ACCOUNTING_INTEGRATION_ERROR
+    url:
+      type: string
+      description: URL Endpoint for exported / failed expense
+      example: https://app.example.com/expense/txwownwrng      
+spender_expense_check_mandatory_fields_in:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: ./fields.yaml#/id_string
+      description: |
+        This represents the id of the expense.<br><br>
+        _Note: This field is required when you are updating an already created expense and want to check it again for missing mandatory fields._
+      example: 'tx0agOdICdbV'
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/spent_at'
+      description: |
+        It signifies when this expense was made. This date cannot be in future.<br><br>
+        _Note: This field is mandatory when you are creating an expense and want to check it again for missing mandatory fields._
+    source:
+      $ref: './fields.yaml#/source'
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    claim_amount:
+      allOf:
+        - $ref: './fields.yaml#/claim_amount'
+      description: |
+        The expense amount as claimed by user.<br><br>
+        _Note: This field is mandatory when you are creating an expense and want to check it again for missing mandatory fields._
+      example: 1984.18
+    purpose:
+      type: string
+      example: Team lunch
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 49058
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
+    tax_amount:
+      type: number
+      nullable: true
+      description: Tax amount as setup by your organization.
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      $ref: './fields.yaml#/is_reimbursable'
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+    num_files:
+      type: integer
+      description: |
+        Number of files/reciepts attached to expense
+      example: 4
+
+expense_check_mandatory_fields_out:
+  type: object
+  additionalProperties: False
+  required:
+    - missing_amount
+    - missing_currency
+    - missing_receipt
+    - missing_expense_field_ids
+  properties:
+    missing_amount:
+      type: boolean
+      description: |
+        If this is set to true, then you need to send currency field with expense object.
+      example: false
+    missing_currency:
+      type: boolean
+      description: |
+        If this is set to true, then you need to send currency field with expense object.
+      example: false
+    missing_receipt:
+      type: boolean
+      description: |
+        If this is set to true, then you need to attach receipt to the expense.
+      example: false
+    missing_expense_field_ids:
+      type: array
+      nullable: False
+      items:
+        type: integer
+        nullable: True
+        description: |
+          This id provided by Fyle to identify an expense field.
+        example: 123
+      example: [ 123, 12423 ]
+      description: |
+        List of IDs of expense fields which are mandatory but are missing.
+
+expense_check_mandatory_fields_in:
+  required:
+    - id
+  properties: # For admin & approver, expense will always be checked for mandatory fields in update case.
+    id:
+      $ref: ./fields.yaml#/id_string
+    spent_at:
+      $ref: './fields.yaml#/spent_at'
+    claim_amount:
+      $ref: './fields.yaml#/claim_amount'
+  allOf:
+    - $ref: ./expense.yaml#/spender_expense_check_mandatory_fields_in
+    
