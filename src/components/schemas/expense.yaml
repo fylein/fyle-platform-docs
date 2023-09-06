@@ -484,6 +484,38 @@ expense_out:
         - 'This is a comment by verifier'
     policy_checks:
       $ref: './fields.yaml#/policy_checks'
+    accounting_export_summary:
+      type: object
+      description: |
+        Summary of accounting export for this expense.
+      properties:
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - ERROR
+            - IN_PROGRESS
+            - SKIPPED
+            - INITIATED
+          example: COMPLETE
+        error_type:
+          type: string
+          nullable: true
+          enum:
+            - ACCOUNTING_INTEGRATION_ERROR
+            - MAPPING
+            - null
+          example: ACCOUNTING_INTEGRATION_ERROR
+        url:
+          type: string
+          description: URL Endpoint for exported / failed expense
+          example: https://app.example.com/expense/txwownwrng
+        tpa_id:
+          type: string
+          nullable: false
+          description: |
+            Third party app id.
+          example: tpa_1234567890
 
 expense_in:
   type: object
@@ -1153,6 +1185,33 @@ expenses_stats_out:
         This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
       example: 100
 
+accounting_export_summary_in:
+  type: object
+  required: [ id, state, error_type, url ]
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - ERROR
+        - IN_PROGRESS
+        - SKIPPED
+        - INITIATED
+      example: COMPLETE
+    error_type:
+      type: string
+      nullable: true
+      enum:
+        - ACCOUNTING_INTEGRATION_ERROR
+        - MAPPING
+        - null
+      example: ACCOUNTING_INTEGRATION_ERROR
+    url:
+      type: string
+      description: URL Endpoint for exported / failed expense
+      example: https://app.example.com/expense/txwownwrng      
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false

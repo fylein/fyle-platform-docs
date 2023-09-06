@@ -427,6 +427,51 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this report.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            skipped:
+              type: number
+              description: |
+                Number of skipped expenses.
+              example: 2
+            failed:
+              type: number
+              description: |
+                Number of failed expenses.
+              example: 0
+            complete:
+              type: number
+              description: |
+                Number of complete expenses.
+              example: 5
+            in_progress:
+              type: number
+              description: |
+                Number of in progress expenses.
+              example: 0
+            initiate:
+              type: number
+              description: |
+                Number of initiated expenses.
+              example: 0
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
     approver_report_in:
       type: object
       additionalProperties: false
@@ -1697,6 +1742,38 @@ components:
             - This is a comment by verifier
         policy_checks:
           $ref: '#/components/schemas/policy_checks'
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this expense.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            error_type:
+              type: string
+              nullable: true
+              enum:
+                - ACCOUNTING_INTEGRATION_ERROR
+                - MAPPING
+                - null
+              example: ACCOUNTING_INTEGRATION_ERROR
+            url:
+              type: string
+              description: URL Endpoint for exported / failed expense
+              example: https://app.example.com/expense/txwownwrng
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -1878,7 +1955,7 @@ components:
             type: integer
             example: 16570
           description: List of categories that are applicable for the project.
-    category_out:
+    admin_approver_category_out:
       type: object
       additionalProperties: false
       properties:
@@ -1927,6 +2004,8 @@ components:
             - 1221
           description: |
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
     expense_policy_rule_embed:
       type: object
       additionalProperties: false
@@ -2748,7 +2827,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/category_out'
+                      $ref: '#/components/schemas/admin_approver_category_out'
         '400':
           description: Bad request
           content:
