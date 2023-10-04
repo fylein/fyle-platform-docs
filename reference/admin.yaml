@@ -11039,6 +11039,18 @@ components:
         - statement_mapping
         - ignored_line_item_ids
         - reconciliation_method
+    rtf_stats_out:
+      type: object
+      properties:
+        last_uploaded_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Timestamp of the last uploaded statement.
+        rtf_confidence:
+          type: string
+          description: |
+            Confidence of the statement being RTF statement.
+          example: 99.22
     expense_rule_if_out:
       type: object
       additionalProperties: false
@@ -18589,6 +18601,51 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statements/rtf_stats:
+    get:
+      tags:
+        - Statements
+      summary: Get RTF Stats of the last uploaded statement
+      description: |
+        This API is used to get the RTF stats of the last uploaded statement for an organization.
+      operationId: get_rtf_stats
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    items:
+                      $ref: '#/components/schemas/rtf_stats_out'
         '400':
           description: Bad request
           content:
