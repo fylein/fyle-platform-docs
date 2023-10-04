@@ -10791,6 +10791,118 @@ components:
       required:
         - missing_transactions_count
         - is_rtf_statement
+    rtf_missing_transaction_from_statement_out:
+      type: object
+      properties:
+        error:
+          type: string
+          description: |
+            Error message if any error occurred while processing the statement.
+          example: null
+          nullable: true
+        missing_rtf_transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              amount:
+                type: number
+                description: |
+                  Specifies the amount on the statement.
+                example: 30
+              bank_name:
+                type: string
+                description: |
+                  Specifies the bank name of the statement
+                example: American Express
+              card_number:
+                type: string
+                description: |
+                  Specifies the card number on the statement.
+                example: xxxx-3343
+              currency:
+                type: string
+                description: |
+                  Specifies the currency on the statement.
+                example: USD
+              description:
+                type: string
+                description: |
+                  Specifies the description of the transaction on the statement.
+                nullable: true
+                example: description
+              foreign_amount:
+                type: string
+                description: |
+                  Specifies the foreign amount on the statement.
+                nullable: true
+                example: 48
+              foreign_currency:
+                type: string
+                description: |
+                  Specifies the foreign currency on the statement.
+                nullable: true
+                example: USD
+              merchant:
+                type: string
+                description: |
+                  Specifies the merchant of the statement
+                example: Amazon
+              post_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the post date on the statement.
+                nullable: true
+              statement_line_item_id:
+                type: string
+                description: |
+                  Specifies the statement line item id of the statement.
+                example: stliLtfjqvyYGv
+              transaction_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the transaction date on the statement.
+              transaction_id:
+                type: string
+                description: |
+                  Specifies the transaction id / unique id on the statement.
+                nullable: true
+                example: USD
+              transaction_type:
+                type: string
+                description: |
+                  Specifies the transaction type of the transactions on the statement (credit / debit).
+                example: debit
+              unique_id:
+                type: string
+                description: |
+                  Specifies the unique code / transaction id on the statement.
+                example: ed0b2aa913c
+        rtf_confidence:
+          type: number
+          description: |
+            Confidence of the statement being RTF statement.
+          example: 0.987012987012987
+        rtf_count:
+          type: integer
+          description: |
+            Number of transactions in the statement that are already existing in Fyle via RTF.
+          example: 76
+        status:
+          type: string
+          description: |
+            Status of the statement reconciliation.
+          example: SUCCESS
+          enum:
+            - INITIALIZED
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+        total_count:
+          type: integer
+          description: |
+            Total number of transactions in the statement.
+          example: 77
     rtf_missing_transaction_from_statement_in:
       type: object
       properties:
@@ -11433,6 +11545,15 @@ components:
       schema:
         type: string
         example: in.(bacc1234,bacc4567)
+    id:
+      in: query
+      name: id
+      description: |
+        A resource ID
+      schema:
+        type: string
+        example:
+          - eq.ouwruogwnngg
 tags:
   - name: Accounting Exports
     description: |
@@ -18365,7 +18486,7 @@ paths:
       summary: Process RTF Missing Transactions Reconciliation
       description: |
         This API is used to start processing RTF missing transactions reconciliation of a statement.
-      operationId: missing_transactions
+      operationId: post_missing_transactions
       requestBody:
         required: true
         content:
@@ -18404,6 +18525,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+    get:
+      tags:
+        - Statements
+      summary: Get RTF Missing Transactions Reconciliation Data
+      description: |
+        This API is used to get the data for RTF missing transactions reconciliation of a statement.
+      operationId: get_missing_transactions
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    items:
+                      $ref: '#/components/schemas/rtf_missing_transaction_from_statement_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/statements/create_card_transactions:
     post:
       tags:
