@@ -8467,6 +8467,44 @@ components:
           type: string
           nullable: true
           example: report.created
+    scheduled_callback_url:
+      type: string
+      description: |
+        URL Endpoint for scheduled callback
+      example: https://api.custom.com/expenses/export/
+    scheduled_callback_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        url:
+          $ref: '#/components/schemas/scheduled_callback_url'
+        payload:
+          $ref: '#/components/schemas/event_payload'
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+    scheduled_callback_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        url:
+          $ref: '#/components/schemas/scheduled_callback_url'
+        payload:
+          $ref: '#/components/schemas/event_payload'
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     time_interval_granularity:
       type: string
       nullable: false
@@ -17088,6 +17126,90 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/schedule_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/scheduled_callbacks:
+    post:
+      tags:
+        - Scheduled Callbacks
+      summary: Create or update a Scheduled Callback
+      description: |
+        Create or update a Scheduled Callback.
+      operationId: schedules_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/scheduled_callback_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/scheduled_callback_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+    get:
+      tags:
+        - Scheduled Callbacks
+      summary: List Scheduled Callback
+      operationId: schedules_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/scheduled_callback_out'
         '401':
           description: Unauthorized request
           content:
