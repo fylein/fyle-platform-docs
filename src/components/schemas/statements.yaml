@@ -257,6 +257,14 @@ card_transaction_from_statement_in:
         This specifies list of statement line items to be ignored in the statement.
       example:
         - stlisfdfadssd
+    rtf_missing_line_item_ids:
+      type: array
+      items: 
+        type: string
+      description: >
+        This specifies list of statement line items which are to be created as RTF missing transactions.
+      example:
+        - stlisfdfadssd
   required:
     - id
     - statement_mapping
@@ -391,6 +399,131 @@ rtf_missing_transaction_from_statement_in:
     - ignored_line_item_ids
     - reconciliation_method
 
+rtf_missing_transaction_from_statement_out:
+  type: object
+  properties:
+    error:
+      type: string
+      description: |
+        Error message if any error occurred while processing the statement.
+      example: null
+      nullable: true
+    missing_rtf_transactions:
+      type: array
+      items:
+        type: object
+        properties:
+          amount:
+            type: number
+            description: |
+              Specifies the amount on the statement.
+            example: 30
+          bank_name:
+            type: string
+            description: |
+              Specifies the bank name of the statement
+            example: American Express
+          card_number:
+            type: string
+            description: |
+              Specifies the card number on the statement.
+            example: xxxx-3343
+          currency:
+            type: string
+            description: |
+              Specifies the currency on the statement.
+            example: USD
+          description:
+            type: string
+            description: |
+              Specifies the description of the transaction on the statement.
+            nullable: true
+            example: description
+          foreign_amount:
+            type: string
+            description: |
+              Specifies the foreign amount on the statement.
+            nullable: true
+            example: 48
+          foreign_currency:
+            type: string
+            description: |
+              Specifies the foreign currency on the statement.
+            nullable: true
+            example: USD
+          merchant:
+            type: string
+            description: |
+              Specifies the merchant of the statement
+            example: Amazon
+          post_date:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Specifies the post date on the statement.
+            nullable: true
+          statement_line_item_id:
+            type: string
+            description: |
+              Specifies the statement line item id of the statement.
+            example: stliLtfjqvyYGv
+          transaction_date:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Specifies the transaction date on the statement.
+          transaction_id:
+            type: string
+            description: |
+              Specifies the transaction id / unique id on the statement.
+            nullable: true
+            example: USD
+          transaction_type:
+            type: string
+            description: |
+              Specifies the transaction type of the transactions on the statement (credit / debit).
+            example: debit
+          unique_id:
+            type: string
+            description: |
+              Specifies the unique code / transaction id on the statement.
+            example: ed0b2aa913c
+    rtf_confidence:
+      type: string
+      description: |
+        RTF Confidence percentage - `rtf_count` to the `total_count`, indicates what % of statement transactions are already existing in Fyle via RTF.
+      example: 99.22
+    rtf_count:
+      type: integer
+      description: |
+        Number of transactions in the statement that are already existing in Fyle via RTF.
+      example: 76
+    total_count:
+      type: integer
+      description: |
+        Total number of transactions in the statement.
+      example: 77
+    status:
+      type: string
+      description: |
+        Status of the statement reconciliation.
+      example: SUCCESS
+      enum:
+        - INITIALIZED
+        - PROCESSING
+        - SUCCESS
+        - ERROR
+
+rtf_stats_out:
+  type: object
+  properties:
+    last_uploaded_at:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Timestamp of the last uploaded statement.
+    rtf_confidence:
+      type: string
+      description: |
+        RTF Confidence percentage indicates what % of the transactions in last uploaded statement are already existing in Fyle via RTF.
+      example: 99.22
 
 preview_out:
   properties:
