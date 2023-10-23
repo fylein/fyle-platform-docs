@@ -5004,7 +5004,7 @@ components:
               description: |
                 Number of skipped expenses.
               example: 2
-            failed:
+            error:
               type: number
               description: |
                 Number of failed expenses.
@@ -5323,6 +5323,13 @@ components:
             - re123453
           description: |
             This field contains list of report_ids that can directly be closed(with reimbursable amount as 0). 
+    report_accounting_export_summary_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     reports_stats_in:
       properties:
         query_params:
@@ -8361,6 +8368,285 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    webhook_url:
+      type: string
+      description: |
+        URL Endpoint for webhook
+      example: https://api.custom.com/webhook1
+    admin_subscriptions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        org_id:
+          $ref: '#/components/schemas/fk_string'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+    report_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - user_id
+        - user
+        - purpose
+        - currency
+        - amount
+        - tax
+        - state
+        - num_expenses
+        - is_manually_flagged
+        - is_policy_flagged
+        - last_paid_at
+        - last_approved_at
+        - last_submitted_at
+        - last_resubmitted_at
+        - seq_num
+        - source
+        - approvals
+        - employee
+        - next_approver_user_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report has been verified by a verifier
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: set5nlgnwgwl
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            If physical has been collected for this report
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when the physical bill for this report was submitted.
+          nullable: true
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this expense has been exported to external accounting system or not.
+        last_paid_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed_for_report'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this report.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            skipped:
+              type: number
+              description: |
+                Number of skipped expenses.
+              example: 2
+            error:
+              type: number
+              description: |
+                Number of failed expenses.
+              example: 0
+            complete:
+              type: number
+              description: |
+                Number of complete expenses.
+              example: 5
+            in_progress:
+              type: number
+              description: |
+                Number of in progress expenses.
+              example: 0
+            initiate:
+              type: number
+              description: |
+                Number of initiated expenses.
+              example: 0
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
+    report_out_subscriptions:
+      type: object
+      additionalProperties: false
+      required:
+        - resource
+        - action
+        - data
+        - reason
+      properties:
+        resource:
+          type: string
+          example: REPORT
+        action:
+          type: string
+          enum:
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
+            - APPROVED
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
+          example: APPROVED
+        data:
+          allOf:
+            - $ref: '#/components/schemas/report_out'
+            - type: object
+              additionalProperties: false
+              properties:
+                updated_by_user:
+                  $ref: '#/components/schemas/user_out_embed'
+        reason:
+          type: string
+          example: comment given by Approver while approving the report.
     settlement_out:
       type: object
       additionalProperties: false
@@ -15739,6 +16025,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/accounting_export_summary/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Update accounting export summary and initiate export
+      description: |
+        Update accounting export summary and initiate export
+      operationId: reports_accounting_export_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_accounting_export_summary_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/stats:
     post:
       tags:
@@ -17047,6 +17394,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Create a subscription
+      description: subscribe to different events using this API
+      operationId: admin_subscriptions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/subscriptions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              operationId: report_subscriptions_callback
+              summary: Object that will be sent to the callback url
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/report_out_subscriptions'
+              responses:
+                '200':
+                  description: OK
+    get:
+      tags:
+        - Subscriptions
+      summary: List Admin Subscriptions
+      operationId: subscriptions_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/settlements:
     get:
       tags:
