@@ -3385,7 +3385,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organisation.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3732,6 +3735,147 @@ components:
           nullable: true
           description: |
             Signifies if and when report of this expense was approved.
+    source:
+      type: string
+      enum:
+        - WEBAPP
+        - SLACK
+        - TPA
+        - CORPORATE_CARD
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    distance_unit:
+      type: string
+      nullable: true
+      description: Unit of distance travelled.
+      enum:
+        - KM
+        - MILES
+      example: MILES
+    travel_classes:
+      description: |
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
+        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
+      type: array
+      minItems: 0
+      maxItems: 2
+      nullable: true
+      items:
+        type: string
+      example:
+        - ECONOMY
+        - BUSINESS
+    locations:
+      description: |
+        This field will be present for travel related categories.
+        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 10
+      items:
+        $ref: '#/components/schemas/location'
+    admin_expense_in:
+      type: object
+      additionalProperties: false
+      required:
+        - admin_amount
+        - spent_at
+        - assignee_user_email
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object
+            - When `id` is sent, default action is to update the expense
+        admin_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by admin or approver.
+          example: 1900
+        spent_at:
+          $ref: '#/components/schemas/spent_at'
+        assignee_user_email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            An immutable field that represents the email address of the employee.
+            Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+            822.</a>
+            - _Note:_
+              - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+              - Admins can't assign the expense to self.
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     expense_assign_in:
       type: object
       required:
@@ -9408,10 +9552,6 @@ components:
         - LIFETIME
         - null
       example: MONTHLY
-    distance:
-      type: number
-      nullable: true
-      description: Actual distance travelled by employee in travel related expenses.
     contains_operator:
       nullable: true
       type: string
@@ -11557,57 +11697,11 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-    source:
-      type: string
-      enum:
-        - WEBAPP
-        - SLACK
-        - TPA
-        - CORPORATE_CARD
-      description: |
-        Enum value signifying the client from which this expense was created
-      example: SLACK
     claim_amount:
       type: number
       description: |
         The expense amount as claimed by user.
       example: 1984.18
-    is_reimbursable:
-      type: boolean
-      nullable: true
-      description: This field marks whether a given expense is reimbursable or not.
-      example: true
-    distance_unit:
-      type: string
-      nullable: true
-      description: Unit of distance travelled.
-      enum:
-        - KM
-        - MILES
-      example: MILES
-    travel_classes:
-      description: |
-        This field is applicable only for `Flight`, `Train`, `Bus` category.
-        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-      type: array
-      minItems: 0
-      maxItems: 2
-      nullable: true
-      items:
-        type: string
-      example:
-        - ECONOMY
-        - BUSINESS
-    locations:
-      description: |
-        This field will be present for travel related categories.
-        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
-      type: array
-      nullable: true
-      minItems: 0
-      maxItems: 10
-      items:
-        $ref: '#/components/schemas/location'
     spender_expense_check_mandatory_fields_in:
       type: object
       additionalProperties: false
@@ -11665,7 +11759,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organization.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -14530,6 +14627,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create or update an expense
+      description: |
+        Create or update an expense.
+      operationId: expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/assign:
     post:
       tags:

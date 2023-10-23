@@ -184,7 +184,10 @@ expense_out:
     tax_amount:
       type: number
       nullable: true
-      description: Tax amount as setup by your organisation.
+      description: |
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
@@ -735,7 +738,10 @@ spender_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: Tax amount as setup by your organization.
+      description: |
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
@@ -760,17 +766,96 @@ spender_expense_in:
       $ref: './fields.yaml#/custom_fields'
 
 admin_expense_in:
-  allOf:
-    - type: object
-      required: [ 'admin_amount', 'user_id' ]
-      properties:
-        admin_amount:
-          $ref: './fields.yaml#/amount'
-        user_id:
-          allOf:
-            - $ref: './fields.yaml#/user_id'
-          readOnly: false
-    - $ref: '#/expense_in'
+  type: object
+  additionalProperties: false
+  required:
+    - admin_amount
+    - spent_at
+    - assignee_user_email
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+       This id is provided by Fyle to identify an object
+       - When `id` is sent, default action is to update the expense
+    admin_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount which is added or modified by admin or approver.
+      example: 1900
+    spent_at:
+      $ref: './fields.yaml#/spent_at'
+    assignee_user_email:
+      allOf:
+        - $ref: './fields.yaml#/email'
+      description: |
+        An immutable field that represents the email address of the employee.
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+        822.</a>
+        - _Note:_
+          - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+          - Admins can't assign the expense to self.
+    source:
+      $ref: './fields.yaml#/source'
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    purpose:
+      type: string
+      example: Team lunch
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 49058
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
+    tax_amount:
+      type: number
+      nullable: true
+      description: | 
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      $ref: './fields.yaml#/is_reimbursable'
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
 
 expense_out_embed:
   type: object
@@ -1082,7 +1167,10 @@ expense_check_policies_in:
     tax_amount:
       type: number
       nullable: true
-      description: Tax amount as setup by your organization.
+      description: |
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
@@ -1301,7 +1389,10 @@ spender_expense_check_mandatory_fields_in:
     tax_amount:
       type: number
       nullable: true
-      description: Tax amount as setup by your organization.
+      description: |
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
     tax_group_id:
       allOf:
         - $ref: './fields.yaml#/fk_string'
