@@ -2018,7 +2018,8 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
         spent_at:
-          $ref: '#/components/schemas/spent_at'
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
           description: |
             Date on which the expense was made.
             This date cannot be in future.
@@ -2032,7 +2033,11 @@ components:
         foreign_amount:
           $ref: '#/components/schemas/foreign_amount'
         claim_amount:
-          $ref: '#/components/schemas/claim_amount'
+          allOf:
+            - $ref: '#/components/schemas/claim_amount'
+          description: |
+            The expense amount as claimed by user. <br>
+            For Per Diem Expenses this amount should be equal to per diem rate rounded to two decimal places multiplied by number of days.
         purpose:
           type: string
           example: Team lunch
@@ -2091,14 +2096,16 @@ components:
           example: 583
           description: |
             Specific to per diem expense. This represents the per diem's rate id given by Fyle
-            during creation of per diem rate for which this expense is created.
+            during creation of per diem rate for which this expense is created. <br>
+            This field is required for creating Per Diem Expenses.
         per_diem_num_days:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
           nullable: true
           example: 2
           description: |
-            Specific to per diem related expenses, number of days for which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+            This field is required for creating Per Diem Expenses.
     expense_add_comment_action_in:
       type: object
       required:
@@ -6735,7 +6742,7 @@ paths:
         - Expenses
       summary: Create or update expense
       description: |
-        Create or update an expense.
+        Create or update an expense.<br> To create/edit per diem expenses, please send category id of per diem category, along with some required additional fields mentioned below
       operationId: expenses_post
       requestBody:
         required: true
