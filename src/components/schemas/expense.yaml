@@ -714,7 +714,11 @@ spender_expense_in:
     foreign_amount:
       $ref: './fields.yaml#/foreign_amount'
     claim_amount:
-      $ref: './fields.yaml#/claim_amount'
+      allOf:
+        - $ref: './fields.yaml#/claim_amount'
+        description: |
+          The expense amount as claimed by user. <br>
+          For Per Diem Expenses this amount should be equal to per diem rate rounded to two decimal places multiplied by number of days.
     purpose:
       type: string
       example: Team lunch
@@ -770,14 +774,16 @@ spender_expense_in:
       example: 583
       description: |
         Specific to per diem expense. This represents the per diem's rate id given by Fyle
-        during creation of per diem rate for which this expense is created.
+        during creation of per diem rate for which this expense is created. <br>
+        This field is required for creating Per Diem Expenses.
     per_diem_num_days:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
       nullable: true
       example: 2
       description: |
-        Specific to per diem related expenses, number of days for which per diem claim is made.
+        Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+        This field is required for creating Per Diem Expenses.
 
 admin_expense_in:
   allOf:
@@ -1263,7 +1269,8 @@ accounting_export_summary_in:
     url:
       type: string
       description: URL Endpoint for exported / failed expense
-      example: https://app.example.com/expense/txwownwrng      
+      example: https://app.example.com/expense/txwownwrng  
+    
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false
