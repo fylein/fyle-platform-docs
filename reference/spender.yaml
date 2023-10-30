@@ -6192,6 +6192,40 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+  expense_dismiss_duplicates_in:
+      required:
+        - duplicate_set_expense_ids
+        - expense_ids
+      properties:
+        duplicate_set_expense_ids:
+          type: array
+          nullable: false
+          items:
+            type: string
+            nullable: false
+            maxLength: 15
+            description: |
+              These are set of duplicate expense IDs
+            example: txAiQ8IzMOpD
+          example:
+            - txc9fgsbgAdQ
+            - txiMbOvKuFz1
+          description: |
+            These are set of duplicate expense IDs
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            type: string
+            nullable: false
+            maxLength: 15
+            description: |
+              These are expense ID(s) which needs to be dismissed as a duplicate from set of duplicate expense IDs
+            example: txAiQ8IzMOpD
+          example:
+            - txc9fgsbgAdQ
+          description: |
+            These are expense ID(s) which needs to be dismissed as a duplicate from set of duplicate expense IDs
   parameters:
     q:
       in: query
@@ -8521,3 +8555,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/dismiss_duplicates:
+    post:
+      tags:
+        - Expenses
+      summary: Dismiss expenses as duplicates
+      description: |
+        This API removes expense as a duplicate of other expense.
+      operationId: expenses_dismiss_duplicates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: The expense(s) were dismissed as a duplicate
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
