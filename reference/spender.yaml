@@ -8166,6 +8166,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/dismiss_duplicates/bulk:
+  post:
+  tags:
+    - Expenses
+  summary: Dismiss Duplicate expenses
+  description: |
+    This API helps dismissing similar expenses as a duplicates.
+  operationId: dismiss_duplicates_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items: 
+                $ref: '../../components/schemas/expenses.yaml#/spender_expense_dismiss_duplicates_in'
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/bulk_error.yaml'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: True
+                  message:  
+                    type: string
+                    nullable: True
+                  data: 
+                    type: string
+                    nullable: True
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
   /spender/files/generate_urls/bulk:
     post:
       operationId: files_generate_urls_bulk_post
