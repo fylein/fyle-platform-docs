@@ -676,10 +676,19 @@ components:
           type: number
           nullable: true
           example: 77.594566
-    custom_field:
+    null_field:
+      type: string
+      nullable: true
+    is_enabled:
+      type: boolean
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
+      default: true
+      example: true
+    expense_custom_field:
       type: object
       description: |
-        Custom field
+        Expense custom field
       properties:
         name:
           type: string
@@ -700,12 +709,34 @@ components:
               example:
                 - v1
                 - v2
-    custom_fields:
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
       type: array
       description: |
-        Custom fields
+        Expense custom fields
       items:
-        $ref: '#/components/schemas/custom_field'
+        $ref: '#/components/schemas/expense_custom_field'
     flattened_custom_field:
       type: object
       description: |
@@ -736,9 +767,6 @@ components:
       example:
         cf1: string1
         custom_field_2: Value 2
-    null_field:
-      type: string
-      nullable: true
     report_out_embed:
       type: object
       nullable: true
@@ -906,12 +934,36 @@ components:
         - id
         - name
         - band
-    is_enabled:
-      type: boolean
+    custom_field:
+      type: object
       description: |
-        This indicates if the resource is enabled for use within the organisation.
-      default: true
-      example: true
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
@@ -1555,7 +1607,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:

@@ -2678,6 +2678,58 @@ components:
     null_field:
       type: string
       nullable: true
+    expense_custom_field:
+      type: object
+      description: |
+        Expense custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
+      type: array
+      description: |
+        Expense custom fields
+      items:
+        $ref: '#/components/schemas/expense_custom_field'
     amount:
       type: number
       description: |
@@ -3481,7 +3533,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:
