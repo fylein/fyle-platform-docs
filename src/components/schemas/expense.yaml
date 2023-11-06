@@ -770,10 +770,13 @@ spender_expense_in:
 admin_expense_in:
   type: object
   additionalProperties: false
-  required:
-    - admin_amount
-    - spent_at
-    - assignee_user_email
+  anyOf:
+    - required:
+      - admin_amount
+      - spent_at
+      - assignee_user_email
+    - required: 
+      - id
   properties:
     id:
       allOf:
@@ -786,9 +789,21 @@ admin_expense_in:
       nullable: false
       description: |
         The expense amount which is added or modified by admin or approver.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
       example: 1900
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
     assignee_user_email:
       allOf:
         - $ref: './fields.yaml#/email'
@@ -796,8 +811,10 @@ admin_expense_in:
         An immutable field that represents the email address of the employee.
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
-        - _Note:_
-          - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+        - **Note:**
+          - The expense will be assigned/re-assigned to this particular `employee`. 
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
           - Admins can't assign the expense to self.
     source:
       $ref: './fields.yaml#/source'
