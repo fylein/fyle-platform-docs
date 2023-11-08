@@ -2678,6 +2678,58 @@ components:
     null_field:
       type: string
       nullable: true
+    expense_custom_field:
+      type: object
+      description: |
+        Expense custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
+      type: array
+      description: |
+        Expense custom fields
+      items:
+        $ref: '#/components/schemas/expense_custom_field'
     amount:
       type: number
       description: |
@@ -2910,7 +2962,7 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
       description: |
-        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
       type: string
       description: |
@@ -2958,12 +3010,13 @@ components:
         bank_name:
           nullable: true
           $ref: '#/components/schemas/bank_name'
-        cardholder_name:
+        corporate_card_user_full_name:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
           description: |
-            String denoting the card holder's name
+            String denoting the card holder's full name
           example: John Doe
         amount:
           $ref: '#/components/schemas/amount'
@@ -3163,7 +3216,8 @@ components:
     policy_checks:
       type: object
       description: |
-        Policy checks details
+        Policy checks details.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       properties:
         is_amount_limit_applied:
           type: boolean
@@ -3479,7 +3533,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:
@@ -3667,6 +3721,7 @@ components:
           type: array
           description: |
             Comments added by approvers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3675,6 +3730,7 @@ components:
           type: array
           description: |
             Comments added by verifiers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3788,10 +3844,13 @@ components:
     admin_expense_in:
       type: object
       additionalProperties: false
-      required:
-        - admin_amount
-        - spent_at
-        - assignee_user_email
+      anyOf:
+        - required:
+            - admin_amount
+            - spent_at
+            - assignee_user_email
+        - required:
+            - id
       properties:
         id:
           allOf:
@@ -3804,9 +3863,21 @@ components:
           nullable: false
           description: |
             The expense amount which is added or modified by admin or approver.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
           example: 1900
         spent_at:
-          $ref: '#/components/schemas/spent_at'
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
         assignee_user_email:
           allOf:
             - $ref: '#/components/schemas/email'
@@ -3814,8 +3885,10 @@ components:
             An immutable field that represents the email address of the employee.
             Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
             822.</a>
-            - _Note:_
-              - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+            - **Note:**
+              - The expense will be assigned/re-assigned to this particular `employee`. 
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
               - Admins can't assign the expense to self.
         source:
           $ref: '#/components/schemas/source'
@@ -10026,6 +10099,33 @@ components:
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
+        expense_without_receipt_allowed:
+          type: boolean
+          description: |
+            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated. <br>
+            **Note: If this field is set to false i.e. receipts are mandatory, only following conditions & actions are allowed =>**
+            - expense_category_ids
+            - expense_category_ids_op
+            - expense_project_ids
+            - expense_project_ids_op
+            - expense_cost_center_ids
+            - expense_cost_center_ids_op
+            - expense_limit_type (only `INIDIVIDUAL` type is allowed)
+            - expense_currency
+            - expense_amount_max
+            - employee_department_ids
+            - employee_department_ids_op
+            - employee_locations
+            - employee_user_ids
+            - employee_user_ids_op
+            - employee_titles
+            - employee_titles_op
+            - action_flag
+            - action_show_warning
+            - action_make_unreportable
+            - description
+          default: true
+          example: true
         expense_limit_type:
           oneOf:
             - $ref: '#/components/schemas/expense_policy_limit_type'
@@ -10197,12 +10297,6 @@ components:
           type: boolean
           description: |
             If this is set to false, then for all such expenses that are created on holidays, this policy rule will be violated.
-          default: true
-          example: true
-        expense_without_receipt_allowed:
-          type: boolean
-          description: |
-            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated.
           default: true
           example: true
         expense_spent_at_max:
@@ -11840,6 +11934,25 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    expense_dismiss_duplicates_in:
+      type: object
+      required:
+        - id
+        - duplicate_expense_ids
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        duplicate_expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that needs to be dismissed as a duplicate from the target expense
   parameters:
     q:
       in: query
@@ -14671,6 +14784,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/assign:
     post:
       tags:
@@ -19607,3 +19726,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/dismiss_duplicates/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Dismiss Duplicate expenses
+      description: |
+        This API helps dismissing similar expenses as a duplicates.
+      operationId: dismiss_duplicates_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'

@@ -278,7 +278,7 @@ expense_out:
       items:
         $ref: './fields.yaml#/location'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: './fields.yaml#/expense_custom_fields'
     custom_fields_flattened:
       $ref: './fields.yaml#/flattened_custom_field'
     code:
@@ -473,6 +473,7 @@ expense_out:
       type: array
       description: |
         Comments added by approvers.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       items:
         type: string
       example:
@@ -481,6 +482,7 @@ expense_out:
       type: array
       description: |
         Comments added by verifiers.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       items:
         type: string
       example:
@@ -768,10 +770,13 @@ spender_expense_in:
 admin_expense_in:
   type: object
   additionalProperties: false
-  required:
-    - admin_amount
-    - spent_at
-    - assignee_user_email
+  anyOf:
+    - required:
+      - admin_amount
+      - spent_at
+      - assignee_user_email
+    - required: 
+      - id
   properties:
     id:
       allOf:
@@ -784,9 +789,21 @@ admin_expense_in:
       nullable: false
       description: |
         The expense amount which is added or modified by admin or approver.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
       example: 1900
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
     assignee_user_email:
       allOf:
         - $ref: './fields.yaml#/email'
@@ -794,8 +811,10 @@ admin_expense_in:
         An immutable field that represents the email address of the employee.
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
-        - _Note:_
-          - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+        - **Note:**
+          - The expense will be assigned/re-assigned to this particular `employee`. 
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
           - Admins can't assign the expense to self.
     source:
       $ref: './fields.yaml#/source'
@@ -972,12 +991,13 @@ matched_corporate_card_transaction_out_embed:
     bank_name:
       nullable: true
       $ref: './fields.yaml#/bank_name'
-    cardholder_name:
+    corporate_card_user_full_name:
       nullable: true
       allOf:
        - $ref: './fields.yaml#/name_nullable'
+      maxLength: 255
       description: |
-        String denoting the card holder's name
+        String denoting the card holder's full name
       example: John Doe
     amount:
       $ref: './fields.yaml#/amount'
@@ -1471,3 +1491,20 @@ expense_check_mandatory_fields_in:
   allOf:
     - $ref: ./expense.yaml#/spender_expense_check_mandatory_fields_in
     
+expense_dismiss_duplicates_in:
+  type: object
+  required:
+    - id
+    - duplicate_expense_ids
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    duplicate_expense_ids:
+      type: array
+      nullable: False
+      items:
+        $ref: './fields.yaml#/id_string'
+      example: ['txwoirwlwwg', 'txwlgwkgw42']
+      description: |
+        List of expense IDs that needs to be dismissed as a duplicate from the target expense
