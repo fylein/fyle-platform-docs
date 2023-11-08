@@ -6291,6 +6291,65 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    page_configuration_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        key:
+          type: string
+          description: |
+            This specifies the key of the page configuration.
+          example: COMPANY_EXPENSE_MANAGE_COLUMNS
+        value:
+          description: |
+            This specifies the value of the page configuration.
+          example: |
+            {
+              "columns": [
+                {
+                  "id": "Date",
+                  "is_visible": true,
+                  "order": 1
+                }
+              ]
+            }
+    page_configuration_in:
+      type: object
+      additionalProperties: false
+      required:
+        - key
+        - value
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        key:
+          type: string
+          description: |
+            This specifies the key of the page configuration.
+          example: COMPANY_EXPENSE_MANAGE_COLUMNS
+        value:
+          description: |
+            This specifies the value of the page configuration.
+          example: |
+            {
+              "columns": [
+                {
+                  "id": "Date",
+                  "is_visible": true,
+                  "order": 1
+                }
+              ]
+            }
   parameters:
     q:
       in: query
@@ -6404,6 +6463,9 @@ tags:
   - name: Tax Groups
     description: |
       These APIs gives you access to manage your organisation's Tax Groups data.
+  - name: Page Configurations
+    description: |
+      These APIs gives you access to manage your page configurations.
 paths:
   /spender/projects:
     get:
@@ -8642,6 +8704,97 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/page_configurations:
+    get:
+      tags:
+        - Page Configurations
+      summary: List page configurations
+      operationId: page_configurations_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/page_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/page_configurations/bulk:
+    post:
+      tags:
+        - Page Configurations
+      summary: Create or update page configurations
+      description: |
+        This API allows you to create or update page configurations.
+      operationId: page_configurations_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/page_configuration_in'
       responses:
         '200':
           description: OK
