@@ -1,7 +1,7 @@
 
 # OAuth 2.0 Application
 
-This type of application is generally built by partners and are used by multiple organizations. Here is a non-boring blog that explains OAuth 2.0 in detail https://stories.fylehq.com/posts/the-non-boring-guide-to-oauth-2-0
+This type of application is generally built by partners and are used by multiple organizations. Here is a non-boring blog that explains OAuth 2.0 in detail https://stories.fylehq.com/p/the-non-boring-guide-to-oauth-20
 
 > #### 💡 Talk to us if you're interested in a partnership
 >
