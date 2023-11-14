@@ -244,7 +244,7 @@ expense_out:
       type: integer
       nullable: true
       description: |
-        Specific to per diem related expenses, number of days ofr which per diem claim is made.
+        Specific to per diem related expenses, number of days for which per diem claim is made.
       example: 2
     started_at:
       $ref: './fields.yaml#/timestamptz_utc'
@@ -654,7 +654,7 @@ expense_in:
       type: integer
       nullable: true
       description: |
-        Specific to per diem related expenses, number of days ofr which per diem claim is made.
+        Specific to per diem related expenses, number of days for which per diem claim is made.
       example: 2
     started_at:
       $ref: './fields.yaml#/timestamptz_pst'
@@ -704,7 +704,12 @@ spender_expense_in:
     id:
       $ref: './fields.yaml#/id_string'
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      allOf:
+      - $ref: './fields.yaml#/spent_at'
+      description: |
+        Date on which the expense was made.
+        This date cannot be in future.
+        This field is not required for creating Per Diem Expenses
     source:
       $ref: './fields.yaml#/source'
     merchant:
@@ -714,7 +719,11 @@ spender_expense_in:
     foreign_amount:
       $ref: './fields.yaml#/foreign_amount'
     claim_amount:
-      $ref: './fields.yaml#/claim_amount'
+      allOf:
+      - $ref: './fields.yaml#/claim_amount'
+      description: |
+        The expense amount as claimed by user. <br>
+        For Per Diem Expenses this amount should be equal to per diem rate rounded to two decimal places multiplied by number of days.
     purpose:
       type: string
       example: Team lunch
@@ -766,6 +775,23 @@ spender_expense_in:
       $ref: './fields.yaml#/locations'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+    per_diem_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 583
+      description: |
+        Specific to per diem expense. This represents the per diem's rate id given by Fyle
+        during creation of per diem rate for which this expense is created. <br>
+        This field is required for creating Per Diem Expenses.
+    per_diem_num_days:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 2
+      description: |
+        Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+        This field is required for creating Per Diem Expenses.
 
 admin_expense_in:
   type: object
@@ -1340,7 +1366,7 @@ accounting_export_summary_in:
     url:
       type: string
       description: URL Endpoint for exported / failed expense
-      example: https://app.example.com/expense/txwownwrng      
+      example: https://app.example.com/expense/txwownwrng  
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false
