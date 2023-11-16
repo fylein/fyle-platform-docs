@@ -1394,12 +1394,22 @@ components:
           example: Sales / Outbound Sales
           description: |
             This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    null_field:
+      type: string
+      nullable: true
     timestamptz_utc:
       type: string
       format: date-time
       nullable: true
       description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     level_out_embed:
       type: object
       additionalProperties: false
@@ -1756,7 +1766,7 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          $ref: '#/components/schemas/joined_at'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -1894,6 +1904,7 @@ components:
         mobile:
           type: string
           nullable: true
+          example: '+12131234567'
           items:
             $ref: '#/components/schemas/phone_number'
           description: |
@@ -2675,9 +2686,6 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    null_field:
-      type: string
-      nullable: true
     expense_custom_field:
       type: object
       description: |
@@ -2961,6 +2969,16 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
         NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
@@ -3499,7 +3517,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -3949,16 +3967,6 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
-    expense_assign_in:
-      type: object
-      required:
-        - id
-        - assignee_user_email
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        assignee_user_email:
-          $ref: '#/components/schemas/email'
     accounting_export_summary_in:
       type: object
       required:
@@ -11953,6 +11961,20 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that needs to be dismissed as a duplicate from the target expense
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
   parameters:
     q:
       in: query
@@ -14320,6 +14342,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/files/download:
+    get:
+      operationId: files_download_get
+      tags:
+        - Files
+      summary: Download a file
+      description: |
+        Generates a download URL for a file and redirects client to that URL.
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: fiNhunGsCQJb
+      responses:
+        '302':
+          description: Redirect to file download URL
+          headers:
+            Location:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/automations/report_submissions:
     post:
       tags:
@@ -14784,55 +14852,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /admin/expenses/assign:
-    post:
-      tags:
-        - Expenses
-      summary: Assign expense
-      description: |
-        This API Assigns an existing expense to a user of same organization
-      operationId: expenses_add_comment_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/expense_assign_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
@@ -19781,3 +19800,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/expenses/duplicate_sets:
+    get:
+      tags:
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
+      description: |
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'

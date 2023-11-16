@@ -1108,6 +1108,20 @@ components:
         Custom fields
       items:
         $ref: '#/components/schemas/custom_field'
+    phone_number:
+      type: string
+      example: '+12131234567'
+      maxLength: 16
+      description: |
+        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
@@ -1166,6 +1180,16 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
         NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
@@ -1717,7 +1741,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -2074,7 +2098,12 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
         spent_at:
-          $ref: '#/components/schemas/spent_at'
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Date on which the expense was made.
+            This date cannot be in future.
+            This field is not required for creating Per Diem Expenses
         source:
           $ref: '#/components/schemas/source'
         merchant:
@@ -2084,7 +2113,11 @@ components:
         foreign_amount:
           $ref: '#/components/schemas/foreign_amount'
         claim_amount:
-          $ref: '#/components/schemas/claim_amount'
+          allOf:
+            - $ref: '#/components/schemas/claim_amount'
+          description: |
+            The expense amount as claimed by user. <br>
+            For Per Diem Expenses this amount should be equal to per diem rate rounded to two decimal places multiplied by number of days.
         purpose:
           type: string
           example: Team lunch
@@ -2136,6 +2169,23 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+          description: |
+            Specific to per diem expense. This represents the per diem's rate id given by Fyle
+            during creation of per diem rate for which this expense is created. <br>
+            This field is required for creating Per Diem Expenses.
+        per_diem_num_days:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 2
+          description: |
+            Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+            This field is required for creating Per Diem Expenses.
     expense_add_comment_action_in:
       type: object
       required:
@@ -6291,81 +6341,20 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
-    any_type:
-      anyOf:
-        - type: string
-        - type: number
-        - type: integer
-        - type: boolean
-        - type: array
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
           items:
-            $ref: '#/components/schemas/any_type'
-        - type: object
-    page_configuration_out:
-      type: object
-      additionalProperties: false
-      properties:
-        org_id:
-          $ref: '#/components/schemas/org_id'
-        user_id:
-          $ref: '#/components/schemas/user_id'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        key:
-          type: string
-          nullable: false
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
           description: |
-            This specifies the key of the page configuration.
-          example: COMPANY_EXPENSE_MANAGE_COLUMNS
-        value:
-          anyOf:
-            - $ref: '#/components/schemas/any_type'
-            - $ref: '#/components/schemas/null_field'
-          nullable: true
-          description: |
-            This specifies the value of the page configuration.
-          example: |
-            {
-              "columns": [
-                {
-                  "id": "Date",
-                  "is_visible": true,
-                  "order": 1
-                }
-              ]
-            }
-    page_configuration_in:
-      type: object
-      additionalProperties: false
-      required:
-        - key
-        - value
-      properties:
-        key:
-          type: string
-          nullable: false
-          description: |
-            This specifies the key of the page configuration.
-          example: COMPANY_EXPENSE_MANAGE_COLUMNS
-        value:
-          anyOf:
-            - $ref: '#/components/schemas/any_type'
-            - $ref: '#/components/schemas/null_field'
-          nullable: true
-          description: |
-            This specifies the value of the page configuration key.
-          example: |
-            {
-              "columns": [
-                {
-                  "id": "Date",
-                  "is_visible": true,
-                  "order": 1
-                }
-              ]
-            }
+            List of expense IDs that are part of the duplicate set
   parameters:
     q:
       in: query
@@ -6897,7 +6886,7 @@ paths:
         - Expenses
       summary: Create or update expense
       description: |
-        Create or update an expense.
+        Create or update an expense.<br> To create/edit per diem expenses, please send category id of per diem category, along with some required additional fields mentioned below
       operationId: expenses_post
       requestBody:
         required: true
@@ -8753,14 +8742,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /spender/page_configurations:
+  /spender/expenses/duplicate_sets:
     get:
       tags:
-        - Page Configurations
-      summary: List page configurations
-      operationId: page_configurations_list
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
       description: |
-        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
       responses:
         '200':
           description: OK
@@ -8769,14 +8765,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/page_configuration_out'
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
         '400':
           description: Bad request
           content:
@@ -8789,58 +8781,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /spender/page_configurations/bulk:
-    post:
-      tags:
-        - Page Configurations
-      summary: Create or update page configurations
-      description: |
-        This API allows you to create or update page configurations.
-      operationId: page_configurations_bulk_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/page_configuration_in'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/bulk_error'
-                  - type: object
-                    properties:
-                      error:
-                        type: string
-                        nullable: true
-                      message:
-                        type: string
-                        nullable: true
-                      data:
-                        type: string
-                        nullable: true
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
