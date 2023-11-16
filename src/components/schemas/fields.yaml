@@ -700,6 +700,59 @@ custom_fields:
   items:
     $ref: '#/custom_field'
 
+expense_custom_field:
+  type: object
+  description: |
+    Expense custom field
+  properties:
+    name:
+      type: string
+      example: cf1
+    value:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: '#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'v1', 'v2' ]
+    type:
+      type: string
+      nullable: true
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - BOOLEAN
+        - MULTI_SELECT
+        - LOCATION
+        - USER_LIST
+        - DATE
+        - DEPENDENT_SELECT
+        - null
+      description: |
+        This field specifies the type of the expense field.
+      example: SELECT
+    is_enabled:
+      anyOf:
+        - $ref: '#/null_field'
+        - $ref: '#/is_enabled'
+      nullable: true
+
+expense_custom_fields:
+  type: array
+  description: |
+    Expense custom fields
+  items:
+    $ref: '#/expense_custom_field'
+
+
 flattened_custom_field:
   type: object
   description: |
@@ -1404,7 +1457,8 @@ tax_group:
 policy_checks:
   type: object
   description: |
-    Policy checks details
+    Policy checks details.
+    NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
   properties:
     is_amount_limit_applied:
       type: boolean
@@ -1453,3 +1507,11 @@ query_params:
   description: | 
     This field contains the query param string similar to the query params passed in GET call for displaying data in the list view.
   example: state=eq.PAID
+
+joined_at:
+  anyOf:
+    - $ref: ./fields.yaml#/null_field
+    - $ref: './fields.yaml#/timestamptz_utc'
+  nullable: true
+  description: |
+    Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).

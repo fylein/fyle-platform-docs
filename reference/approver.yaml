@@ -446,7 +446,7 @@ components:
               description: |
                 Number of skipped expenses.
               example: 2
-            failed:
+            error:
               type: number
               description: |
                 Number of failed expenses.
@@ -676,10 +676,19 @@ components:
           type: number
           nullable: true
           example: 77.594566
-    custom_field:
+    null_field:
+      type: string
+      nullable: true
+    is_enabled:
+      type: boolean
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
+      default: true
+      example: true
+    expense_custom_field:
       type: object
       description: |
-        Custom field
+        Expense custom field
       properties:
         name:
           type: string
@@ -700,12 +709,34 @@ components:
               example:
                 - v1
                 - v2
-    custom_fields:
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
       type: array
       description: |
-        Custom fields
+        Expense custom fields
       items:
-        $ref: '#/components/schemas/custom_field'
+        $ref: '#/components/schemas/expense_custom_field'
     flattened_custom_field:
       type: object
       description: |
@@ -736,9 +767,6 @@ components:
       example:
         cf1: string1
         custom_field_2: Value 2
-    null_field:
-      type: string
-      nullable: true
     report_out_embed:
       type: object
       nullable: true
@@ -906,12 +934,50 @@ components:
         - id
         - name
         - band
-    is_enabled:
-      type: boolean
+    custom_field:
+      type: object
       description: |
-        This indicates if the resource is enabled for use within the organisation.
-      default: true
-      example: true
+        Custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
+    phone_number:
+      type: string
+      example: '+12131234567'
+      maxLength: 16
+      description: |
+        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
@@ -970,8 +1036,18 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
-        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
       type: string
       description: |
@@ -1032,12 +1108,13 @@ components:
         bank_name:
           nullable: true
           $ref: '#/components/schemas/bank_name'
-        cardholder_name:
+        corporate_card_user_full_name:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
           description: |
-            String denoting the card holder's name
+            String denoting the card holder's full name
           example: John Doe
         amount:
           $ref: '#/components/schemas/amount'
@@ -1056,6 +1133,16 @@ components:
           description: |
             Signifies post date of a card transaction.
             This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
         description:
           type: string
           nullable: true
@@ -1227,7 +1314,8 @@ components:
     policy_checks:
       type: object
       description: |
-        Policy checks details
+        Policy checks details.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       properties:
         is_amount_limit_applied:
           type: boolean
@@ -1449,7 +1537,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organisation.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -1506,7 +1597,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -1540,7 +1631,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:
@@ -1728,6 +1819,7 @@ components:
           type: array
           description: |
             Comments added by approvers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -1736,6 +1828,7 @@ components:
           type: array
           description: |
             Comments added by verifiers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -1782,6 +1875,20 @@ components:
           maxLength: 255
           description: |
             An unique ID, generated by Fyle, for identifying the Settlement.
+        report_last_paid_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was reimbursed.
+        report_last_approved_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was approved.
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2333,7 +2440,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organization.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -2411,6 +2521,67 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    expense_dismiss_duplicates_in:
+      type: object
+      required:
+        - id
+        - duplicate_expense_ids
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        duplicate_expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that needs to be dismissed as a duplicate from the target expense
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                oneOf:
+                  - type: string
+                  - type: integer
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
   parameters:
     limit:
       in: query
@@ -2965,3 +3136,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/expenses/dismiss_duplicates/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Dismiss Duplicate expenses
+      description: |
+        This API helps dismissing similar expenses as a duplicates.
+      operationId: dismiss_duplicates_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /approver/expenses/duplicate_sets:
+    get:
+      tags:
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
+      description: |
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'

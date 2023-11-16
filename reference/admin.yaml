@@ -1394,12 +1394,22 @@ components:
           example: Sales / Outbound Sales
           description: |
             This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    null_field:
+      type: string
+      nullable: true
     timestamptz_utc:
       type: string
       format: date-time
       nullable: true
       description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     level_out_embed:
       type: object
       additionalProperties: false
@@ -1756,7 +1766,7 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          $ref: '#/components/schemas/joined_at'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -1894,6 +1904,7 @@ components:
         mobile:
           type: string
           nullable: true
+          example: '+12131234567'
           items:
             $ref: '#/components/schemas/phone_number'
           description: |
@@ -2676,9 +2687,58 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    null_field:
-      type: string
-      nullable: true
+    expense_custom_field:
+      type: object
+      description: |
+        Expense custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
+      type: array
+      description: |
+        Expense custom fields
+      items:
+        $ref: '#/components/schemas/expense_custom_field'
     amount:
       type: number
       description: |
@@ -2910,8 +2970,18 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
-        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
       type: string
       description: |
@@ -2959,12 +3029,13 @@ components:
         bank_name:
           nullable: true
           $ref: '#/components/schemas/bank_name'
-        cardholder_name:
+        corporate_card_user_full_name:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
           description: |
-            String denoting the card holder's name
+            String denoting the card holder's full name
           example: John Doe
         amount:
           $ref: '#/components/schemas/amount'
@@ -2983,6 +3054,16 @@ components:
           description: |
             Signifies post date of a card transaction.
             This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
         description:
           type: string
           nullable: true
@@ -3154,7 +3235,8 @@ components:
     policy_checks:
       type: object
       description: |
-        Policy checks details
+        Policy checks details.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       properties:
         is_amount_limit_applied:
           type: boolean
@@ -3376,7 +3458,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organisation.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3433,7 +3518,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -3467,7 +3552,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:
@@ -3655,6 +3740,7 @@ components:
           type: array
           description: |
             Comments added by approvers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3663,6 +3749,7 @@ components:
           type: array
           description: |
             Comments added by verifiers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3709,16 +3796,178 @@ components:
           maxLength: 255
           description: |
             An unique ID, generated by Fyle, for identifying the Settlement.
-    expense_assign_in:
+        report_last_paid_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was reimbursed.
+        report_last_approved_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was approved.
+    source:
+      type: string
+      enum:
+        - WEBAPP
+        - SLACK
+        - TPA
+        - CORPORATE_CARD
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    distance_unit:
+      type: string
+      nullable: true
+      description: Unit of distance travelled.
+      enum:
+        - KM
+        - MILES
+      example: MILES
+    travel_classes:
+      description: |
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
+        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
+      type: array
+      minItems: 0
+      maxItems: 2
+      nullable: true
+      items:
+        type: string
+      example:
+        - ECONOMY
+        - BUSINESS
+    locations:
+      description: |
+        This field will be present for travel related categories.
+        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 10
+      items:
+        $ref: '#/components/schemas/location'
+    admin_expense_in:
       type: object
-      required:
-        - id
-        - assignee_user_email
+      additionalProperties: false
+      anyOf:
+        - required:
+            - admin_amount
+            - spent_at
+            - assignee_user_email
+        - required:
+            - id
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object
+            - When `id` is sent, default action is to update the expense
+        admin_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by admin or approver.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: 1900
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
         assignee_user_email:
-          $ref: '#/components/schemas/email'
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            An immutable field that represents the email address of the employee.
+            Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+            822.</a>
+            - **Note:**
+              - The expense will be assigned/re-assigned to this particular `employee`. 
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+              - Admins can't assign the expense to self.
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     accounting_export_summary_in:
       type: object
       required:
@@ -4837,7 +5086,7 @@ components:
               description: |
                 Number of skipped expenses.
               example: 2
-            failed:
+            error:
               type: number
               description: |
                 Number of failed expenses.
@@ -5156,6 +5405,13 @@ components:
             - re123453
           description: |
             This field contains list of report_ids that can directly be closed(with reimbursable amount as 0). 
+    report_accounting_export_summary_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     reports_stats_in:
       properties:
         query_params:
@@ -8194,6 +8450,285 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    webhook_url:
+      type: string
+      description: |
+        URL Endpoint for webhook
+      example: https://api.custom.com/webhook1
+    admin_subscriptions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        org_id:
+          $ref: '#/components/schemas/fk_string'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+    report_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - user_id
+        - user
+        - purpose
+        - currency
+        - amount
+        - tax
+        - state
+        - num_expenses
+        - is_manually_flagged
+        - is_policy_flagged
+        - last_paid_at
+        - last_approved_at
+        - last_submitted_at
+        - last_resubmitted_at
+        - seq_num
+        - source
+        - approvals
+        - employee
+        - next_approver_user_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report has been verified by a verifier
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: set5nlgnwgwl
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            If physical has been collected for this report
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when the physical bill for this report was submitted.
+          nullable: true
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this expense has been exported to external accounting system or not.
+        last_paid_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed_for_report'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this report.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            skipped:
+              type: number
+              description: |
+                Number of skipped expenses.
+              example: 2
+            error:
+              type: number
+              description: |
+                Number of failed expenses.
+              example: 0
+            complete:
+              type: number
+              description: |
+                Number of complete expenses.
+              example: 5
+            in_progress:
+              type: number
+              description: |
+                Number of in progress expenses.
+              example: 0
+            initiate:
+              type: number
+              description: |
+                Number of initiated expenses.
+              example: 0
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
+    report_out_subscriptions:
+      type: object
+      additionalProperties: false
+      required:
+        - resource
+        - action
+        - data
+        - reason
+      properties:
+        resource:
+          type: string
+          example: REPORT
+        action:
+          type: string
+          enum:
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
+            - APPROVED
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
+          example: APPROVED
+        data:
+          allOf:
+            - $ref: '#/components/schemas/report_out'
+            - type: object
+              additionalProperties: false
+              properties:
+                updated_by_user:
+                  $ref: '#/components/schemas/user_out_embed'
+        reason:
+          type: string
+          example: comment given by Approver while approving the report.
     settlement_out:
       type: object
       additionalProperties: false
@@ -9099,10 +9634,6 @@ components:
         - LIFETIME
         - null
       example: MONTHLY
-    distance:
-      type: number
-      nullable: true
-      description: Actual distance travelled by employee in travel related expenses.
     contains_operator:
       nullable: true
       type: string
@@ -9577,6 +10108,33 @@ components:
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
+        expense_without_receipt_allowed:
+          type: boolean
+          description: |
+            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated. <br>
+            **Note: If this field is set to false i.e. receipts are mandatory, only following conditions & actions are allowed =>**
+            - expense_category_ids
+            - expense_category_ids_op
+            - expense_project_ids
+            - expense_project_ids_op
+            - expense_cost_center_ids
+            - expense_cost_center_ids_op
+            - expense_limit_type (only `INIDIVIDUAL` type is allowed)
+            - expense_currency
+            - expense_amount_max
+            - employee_department_ids
+            - employee_department_ids_op
+            - employee_locations
+            - employee_user_ids
+            - employee_user_ids_op
+            - employee_titles
+            - employee_titles_op
+            - action_flag
+            - action_show_warning
+            - action_make_unreportable
+            - description
+          default: true
+          example: true
         expense_limit_type:
           oneOf:
             - $ref: '#/components/schemas/expense_policy_limit_type'
@@ -9748,12 +10306,6 @@ components:
           type: boolean
           description: |
             If this is set to false, then for all such expenses that are created on holidays, this policy rule will be violated.
-          default: true
-          example: true
-        expense_without_receipt_allowed:
-          type: boolean
-          description: |
-            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated.
           default: true
           example: true
         expense_spent_at_max:
@@ -10805,6 +11357,12 @@ components:
           description: |
             Indicates whether the statement has atleast one card enrolled in RTF.
           example: true
+        rtf_card_network:
+          type: string
+          description: |
+            Card network of the statement if the statement has atleast one card enrolled in RTF.
+          example: VISA
+          nullable: true
         missing_corporate_card_details:
           type: array
           items:
@@ -11242,57 +11800,11 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-    source:
-      type: string
-      enum:
-        - WEBAPP
-        - SLACK
-        - TPA
-        - CORPORATE_CARD
-      description: |
-        Enum value signifying the client from which this expense was created
-      example: SLACK
     claim_amount:
       type: number
       description: |
         The expense amount as claimed by user.
       example: 1984.18
-    is_reimbursable:
-      type: boolean
-      nullable: true
-      description: This field marks whether a given expense is reimbursable or not.
-      example: true
-    distance_unit:
-      type: string
-      nullable: true
-      description: Unit of distance travelled.
-      enum:
-        - KM
-        - MILES
-      example: MILES
-    travel_classes:
-      description: |
-        This field is applicable only for `Flight`, `Train`, `Bus` category.
-        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-      type: array
-      minItems: 0
-      maxItems: 2
-      nullable: true
-      items:
-        type: string
-      example:
-        - ECONOMY
-        - BUSINESS
-    locations:
-      description: |
-        This field will be present for travel related categories.
-        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
-      type: array
-      nullable: true
-      minItems: 0
-      maxItems: 10
-      items:
-        $ref: '#/components/schemas/location'
     spender_expense_check_mandatory_fields_in:
       type: object
       additionalProperties: false
@@ -11350,7 +11862,10 @@ components:
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organization.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -11428,6 +11943,39 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    expense_dismiss_duplicates_in:
+      type: object
+      required:
+        - id
+        - duplicate_expense_ids
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        duplicate_expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that needs to be dismissed as a duplicate from the target expense
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
   parameters:
     q:
       in: query
@@ -13795,6 +14343,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/files/download:
+    get:
+      operationId: files_download_get
+      tags:
+        - Files
+      summary: Download a file
+      description: |
+        Generates a download URL for a file and redirects client to that URL.
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: fiNhunGsCQJb
+      responses:
+        '302':
+          description: Redirect to file download URL
+          headers:
+            Location:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/automations/report_submissions:
     post:
       tags:
@@ -14215,26 +14809,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /admin/expenses/assign:
     post:
       tags:
         - Expenses
-      summary: Assign expense
+      summary: Create or update an expense
       description: |
-        This API Assigns an existing expense to a user of same organization
-      operationId: expenses_add_comment_post
+        Create or update an expense.
+      operationId: expenses_post
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required:
-                - data
               properties:
                 data:
-                  $ref: '#/components/schemas/expense_assign_in'
+                  $ref: '#/components/schemas/admin_expense_in'
       responses:
         '200':
           description: OK
@@ -14242,22 +14832,27 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: false
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_out'
         '400':
-          description: Unauthorised request
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
         '401':
-          description: Unauthorised request
+          description: Unauthorized request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
@@ -15533,6 +16128,67 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/process_summary_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/accounting_export_summary/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Update accounting export summary and initiate export
+      description: |
+        Update accounting export summary and initiate export
+      operationId: reports_accounting_export_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_accounting_export_summary_in'
+      responses:
+        '200':
+          description: OK
         '400':
           description: Bad request
           content:
@@ -16877,6 +17533,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Create a subscription
+      description: subscribe to different events using this API
+      operationId: admin_subscriptions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/subscriptions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              operationId: report_subscriptions_callback
+              summary: Object that will be sent to the callback url
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/report_out_subscriptions'
+              responses:
+                '200':
+                  description: OK
+    get:
+      tags:
+        - Subscriptions
+      summary: List Admin Subscriptions
+      operationId: subscriptions_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/settlements:
     get:
       tags:
@@ -18989,3 +19746,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/dismiss_duplicates/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Dismiss Duplicate expenses
+      description: |
+        This API helps dismissing similar expenses as a duplicates.
+      operationId: dismiss_duplicates_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/expenses/duplicate_sets:
+    get:
+      tags:
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
+      description: |
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
