@@ -1394,12 +1394,22 @@ components:
           example: Sales / Outbound Sales
           description: |
             This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    null_field:
+      type: string
+      nullable: true
     timestamptz_utc:
       type: string
       format: date-time
       nullable: true
       description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     level_out_embed:
       type: object
       additionalProperties: false
@@ -1756,7 +1766,7 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          $ref: '#/components/schemas/joined_at'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -1894,6 +1904,7 @@ components:
         mobile:
           type: string
           nullable: true
+          example: '+12131234567'
           items:
             $ref: '#/components/schemas/phone_number'
           description: |
@@ -2010,14 +2021,15 @@ components:
         approver_emails:
           type: array
           maxItems: 3
-          nullable: true
+          nullable: false
           items:
             $ref: '#/components/schemas/email'
           example:
             - approver1@example.com
             - approver2@example.com
+            - null
           description: |
-            List of emails of employees that are approvers for this employee.
+            List of emails of employees that are approvers for this employee. Use null in case of no approver or to remove the approver.
         project_names:
           type: array
           nullable: false
@@ -2675,9 +2687,6 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    null_field:
-      type: string
-      nullable: true
     expense_custom_field:
       type: object
       description: |
@@ -2961,6 +2970,16 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
         NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
@@ -3330,6 +3349,7 @@ components:
         - split_group_id
         - is_physical_bill_submitted
         - physical_bill_submitted_at
+        - invoice_number
       properties:
         id:
           allOf:
@@ -3499,7 +3519,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -3791,6 +3811,13 @@ components:
           nullable: true
           description: |
             Signifies if and when report of this expense was approved.
+        invoice_number:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Invoice number of the expense.
+          example: 123456
     source:
       type: string
       enum:
@@ -11874,6 +11901,13 @@ components:
           description: |
             Number of files/reciepts attached to expense
           example: 4
+        invoice_number:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Invoice number of the expense.
+          example: 123456
     expense_check_mandatory_fields_in:
       required:
         - id
@@ -14324,6 +14358,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/files/download:
+    get:
+      operationId: files_download_get
+      tags:
+        - Files
+      summary: Download a file
+      description: |
+        Generates a download URL for a file and redirects client to that URL.
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: fiNhunGsCQJb
+      responses:
+        '302':
+          description: Redirect to file download URL
+          headers:
+            Location:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/automations/report_submissions:
     post:
       tags:
