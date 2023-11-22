@@ -5095,6 +5095,57 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    commute_location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        address:
+          type: string
+          nullable: true
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    commute_details:
+      type: object
+      nullable: false
+      additionalProperties: false
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        home:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+        work:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee in kilometers.
+          example: 10
     spender_employee_out:
       type: object
       additionalProperties: false
@@ -5109,6 +5160,8 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
     tax_group_out:
       type: object
       additionalProperties: false
