@@ -11991,6 +11991,122 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that are part of the duplicate set
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+    feature_config_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
+    feature_config_in:
+      type: object
+      additionalProperties: false
+      required:
+        - target_client
+        - feature
+        - key
+        - value
+        - is_shared
+      properties:
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
   parameters:
     q:
       in: query
@@ -12262,6 +12378,9 @@ tags:
   - name: Statement mappings
     description: |
       These APIs gives you access to manage statement mappings which is used for statement uploads.
+  - name: Feature Configs
+    description: |
+      These APIs gives you access to manage feature configs.
 paths:
   /admin/projects:
     get:
@@ -19855,3 +19974,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/feature_configs:
+    get:
+      tags:
+        - Feature Configs
+      summary: List feature configs.
+      operationId: feature_configs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/feature_config_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/feature_configs/bulk:
+    post:
+      tags:
+        - Feature Configs
+      summary: Create or update feature configs.
+      description: |
+        This API allows you to create or update feature configs.
+      operationId: feature_configs_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/feature_config_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
