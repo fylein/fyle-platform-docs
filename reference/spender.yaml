@@ -713,7 +713,7 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    mileage_rate_out_embed:
+    mileage_rate_out_embed_for_expense:
       type: object
       nullable: true
       additionalProperties: false
@@ -725,6 +725,11 @@ components:
           example: Audi
         code:
           $ref: '#/components/schemas/code'
+        rate:
+          type: number
+          example: 10
+          nullable: true
+          description: Amount (in Home currency) per unit.
     per_diem_rate_out_embed:
       type: object
       nullable: true
@@ -1016,6 +1021,16 @@ components:
         content_type:
           type: string
           example: application/pdf
+    expense_verification_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        verifier_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        verifier_user:
+          $ref: '#/components/schemas/user_out_embed'
     employee_id:
       type: string
       maxLength: 255
@@ -1726,7 +1741,7 @@ components:
           nullable: true
           example: 9080
         mileage_rate:
-          $ref: '#/components/schemas/mileage_rate_out_embed'
+          $ref: '#/components/schemas/mileage_rate_out_embed_for_expense'
         mileage_is_round_trip:
           type: boolean
           nullable: true
@@ -1866,6 +1881,12 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        verifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_verification_out_embed'
+          description: |
+            List of verification objects
         employee_id:
           $ref: '#/components/schemas/employee_id'
         employee:
