@@ -713,7 +713,7 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    mileage_rate_out_embed:
+    mileage_rate_out_embed_for_expense:
       type: object
       nullable: true
       additionalProperties: false
@@ -725,6 +725,11 @@ components:
           example: Audi
         code:
           $ref: '#/components/schemas/code'
+        rate:
+          type: number
+          example: 10
+          nullable: true
+          description: Amount (in Home currency) per unit.
     per_diem_rate_out_embed:
       type: object
       nullable: true
@@ -1016,6 +1021,16 @@ components:
         content_type:
           type: string
           example: application/pdf
+    expense_verification_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        verifier_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        verifier_user:
+          $ref: '#/components/schemas/user_out_embed'
     employee_id:
       type: string
       maxLength: 255
@@ -1726,7 +1741,7 @@ components:
           nullable: true
           example: 9080
         mileage_rate:
-          $ref: '#/components/schemas/mileage_rate_out_embed'
+          $ref: '#/components/schemas/mileage_rate_out_embed_for_expense'
         mileage_is_round_trip:
           type: boolean
           nullable: true
@@ -1866,6 +1881,12 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        verifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_verification_out_embed'
+          description: |
+            List of verification objects
         employee_id:
           $ref: '#/components/schemas/employee_id'
         employee:
@@ -5095,6 +5116,57 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    commute_location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: false
+          example: London
+        state:
+          type: string
+          nullable: false
+          example: London
+        country:
+          type: string
+          nullable: false
+          example: United Kingdom
+        address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
+    commute_details:
+      type: object
+      nullable: false
+      additionalProperties: false
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        home:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+        work:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee in kilometers.
+          example: 10
     spender_employee_out:
       type: object
       additionalProperties: false
@@ -5109,6 +5181,8 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
     tax_group_out:
       type: object
       additionalProperties: false
@@ -6384,6 +6458,29 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that are part of the duplicate set
+    expenses_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
+          example: id=in.('tx1263', 'tx1569')
+    expenses_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
+          example: 100
   parameters:
     q:
       in: query
@@ -8807,3 +8904,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/expenses/stats:
+    post:
+      tags:
+        - Expenses
+      summary: Expenses Stats
+      description: |
+        Expenses Stats
+      operationId: expenses_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expenses_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
