@@ -1117,12 +1117,6 @@ components:
               example:
                 - v1
                 - v2
-    custom_fields:
-      type: array
-      description: |
-        Custom fields
-      items:
-        $ref: '#/components/schemas/custom_field'
     phone_number:
       type: string
       example: '+12131234567'
@@ -1184,7 +1178,12 @@ components:
           nullable: true
           example: Finance ops
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
         flattened_custom_field:
           $ref: '#/components/schemas/flattened_custom_field'
         has_accepted_invite:
@@ -2117,6 +2116,12 @@ components:
       maxItems: 10
       items:
         $ref: '#/components/schemas/location'
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
     spender_expense_in:
       type: object
       additionalProperties: false
@@ -6481,6 +6486,72 @@ components:
           description: |
             This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
           example: 100
+    filter_name:
+      type: string
+      nullable: false
+      maxLength: 255
+      description: |
+        This represents the name of the filter.
+      example: Code E0101
+    is_shared:
+      type: boolean
+      nullable: true
+      description: |
+        This indicates if the filter should be shared with others in the org.
+      default: false
+      example: true
+    query_string:
+      type: string
+      nullable: false
+      maxLength: 255
+      description: |
+        This represents a query string which will be used to filter the data.
+      example: code.eq.'E0101'
+    expense_filters_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: exfilumWHrlPf7K
+        name:
+          $ref: '#/components/schemas/filter_name'
+        is_shared:
+          $ref: '#/components/schemas/is_shared'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    expense_filters_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - query_string
+      properties:
+        name:
+          $ref: '#/components/schemas/filter_name'
+        is_shared:
+          $ref: '#/components/schemas/is_shared'
+        query_string:
+          $ref: '#/components/schemas/query_string'
+    expense_filters_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: exfilumWHrlPf7K
   parameters:
     q:
       in: query
@@ -8873,13 +8944,6 @@ paths:
       operationId: expense_duplicate_sets
       description: |
         This API provides the sets of the duplicate expenses for a particular employee.
-      parameters:
-        - in: query
-          name: expense_id
-          description: An expense_id for what we need to fetch the duplicate expenses.
-          schema:
-            type: string
-            example: txdsjkF453kh
       responses:
         '200':
           description: OK
@@ -8935,6 +8999,142 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/expenses_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/filters:
+    post:
+      tags:
+        - Expenses
+      summary: Create Expenses saved filters
+      description: |
+        Save expenses filters for personal use or share with other spenders.
+      operationId: expenses_filters_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_filters_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    get:
+      tags:
+        - Expenses
+      summary: List Expenses saved filters
+      operationId: expenses_filters_get
+      description: |
+        List filters saved by the admin or shared with the admin.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_filters_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/expenses/filters/delete:
+    post:
+      tags:
+        - Expenses
+      summary: Delete Expenses saved filter
+      description: |
+        Delete Expenses saved filter having the provided id.
+      operationId: expenses_filters_post_action_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_filters_delete_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_filters_out'
         '400':
           description: Bad request
           content:
