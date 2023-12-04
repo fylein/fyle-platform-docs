@@ -11981,7 +11981,7 @@ components:
         missing_amount:
           type: boolean
           description: |
-            If this is set to true, then you need to send currency field with expense object.
+            If this is set to true, then you need to send amount field with expense object.
           example: false
         missing_currency:
           type: boolean
@@ -20248,6 +20248,61 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/split/check_mandatory_fields:
+    post:
+      tags:
+        - Expenses
+      summary: Check mandatory fields before splitting an expense
+      description: |
+        Before splitting an employee's expense object
+        into Fyle, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
+        You can easily do that by passing the same expense split object documented below.
+      operationId: expenses_split_check_mandatory_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_split_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_check_mandatory_fields_out'
         '400':
           description: Bad request
           content:
