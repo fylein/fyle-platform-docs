@@ -1751,3 +1751,57 @@ admin_split_expense_in:
         null or default value will be taken for that attribute in the resultant split.
       allOf:
         - $ref: ./expense.yaml#/admin_expense_split_object
+
+spender_expense_split_object:
+  type: array
+  items:
+    required:
+      - claim_amount
+    allOf:
+      - $ref: ./expense.yaml#/expense_split_object
+    properties:
+      claim_amount:
+        type: number
+        nullable: false
+        description: |
+          The expense amount which is added or modified by spender.
+        example: 1900
+
+spender_split_expense_in:
+  type: object
+  required:
+    - claim_amount
+    - splits
+  allOf:
+    - $ref: ./expense.yaml#/split_expense_in
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+       This id is provided by Fyle to identify an object
+       - When `id` is sent, default action is to update the expense
+    claim_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount which is added or modified by spender.
+      example: 1900
+    splits:
+      description: |
+        This array contains the number of split expenses spender wants to create for the expense.
+        The `claim_amount` provided for the original expense should be equal to the sum of
+        `claim_amount` provided for each split. Each attribute in the splits array will take precedence
+        to the original expense object. If any attribute is not provided in the split object, then
+        null or default value will be taken for that attribute in the resultant split.
+      allOf:
+        - $ref: ./expense.yaml#/spender_expense_split_object
+    report_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      description: |
+        Unique id given by Fyle to identify an Expense Report. <br>
+        Sending this field will add the expense to the report. If the expense is already attached to a report,
+        the expense will be removed from the old report and added to the new report if it is not yet approved.
+      example: rpvgnwlgw34

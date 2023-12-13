@@ -6730,6 +6730,173 @@ components:
           description: |
             Status of the export.
           example: PENDING
+    split_expense_in:
+      type: object
+      properties:
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        source:
+          $ref: '#/components/schemas/source'
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          description: |
+            List of file IDs to be attached to the expense.
+          example:
+            - fisjfwlrglw
+            - fisjfwlrglw
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        purpose:
+          type: string
+          example: Team lunch
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+    expense_split_object:
+      type: object
+      properties:
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+    spender_expense_split_object:
+      type: array
+      items:
+        required:
+          - claim_amount
+        allOf:
+          - $ref: '#/components/schemas/expense_split_object'
+        properties:
+          claim_amount:
+            type: number
+            nullable: false
+            description: |
+              The expense amount which is added or modified by spender.
+            example: 1900
+    spender_split_expense_in:
+      type: object
+      required:
+        - claim_amount
+        - splits
+      allOf:
+        - $ref: '#/components/schemas/split_expense_in'
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object
+            - When `id` is sent, default action is to update the expense
+        claim_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by spender.
+          example: 1900
+        splits:
+          description: |
+            This array contains the number of split expenses spender wants to create for the expense.
+            The `claim_amount` provided for the original expense should be equal to the sum of
+            `claim_amount` provided for each split. Each attribute in the splits array will take precedence
+            to the original expense object. If any attribute is not provided in the split object, then
+            null or default value will be taken for that attribute in the resultant split.
+          allOf:
+            - $ref: '#/components/schemas/spender_expense_split_object'
+        report_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          description: |
+            Unique id given by Fyle to identify an Expense Report. <br>
+            Sending this field will add the expense to the report. If the expense is already attached to a report,
+            the expense will be removed from the old report and added to the new report if it is not yet approved.
+          example: rpvgnwlgw34
   parameters:
     q:
       in: query
@@ -9430,3 +9597,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/expenses/split:
+    post:
+      tags:
+        - Expenses
+      summary: Split an expense
+      description: |
+        Spender can split an existing expense or create splits for a new expense object.
+      operationId: expenses_split_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_split_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
