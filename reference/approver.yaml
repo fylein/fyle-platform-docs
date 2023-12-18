@@ -1917,6 +1917,150 @@ components:
           description: |
             Invoice number of the expense.
           example: 123456
+    source:
+      type: string
+      enum:
+        - WEBAPP
+        - SLACK
+        - TPA
+        - CORPORATE_CARD
+      description: |
+        Enum value signifying the client from which this expense was created
+      example: SLACK
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    distance_unit:
+      type: string
+      nullable: true
+      description: Unit of distance travelled.
+      enum:
+        - KM
+        - MILES
+      example: MILES
+    travel_classes:
+      description: |
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
+        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
+      type: array
+      minItems: 0
+      maxItems: 2
+      nullable: true
+      items:
+        type: string
+      example:
+        - ECONOMY
+        - BUSINESS
+    locations:
+      description: |
+        This field will be present for travel related categories.
+        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 10
+      items:
+        $ref: '#/components/schemas/location'
+    custom_fields:
+      type: array
+      description: |
+        Custom fields
+      items:
+        $ref: '#/components/schemas/custom_field'
+    approver_expense_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object.
+        admin_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by admin or approver.
+            - **Note:**
+              - _This field is non-nullable_. 
+          example: 1900
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - _This field is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -2356,67 +2500,11 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
-    source:
-      type: string
-      enum:
-        - WEBAPP
-        - SLACK
-        - TPA
-        - CORPORATE_CARD
-      description: |
-        Enum value signifying the client from which this expense was created
-      example: SLACK
     claim_amount:
       type: number
       description: |
         The expense amount as claimed by user.
       example: 1984.18
-    is_reimbursable:
-      type: boolean
-      nullable: true
-      description: This field marks whether a given expense is reimbursable or not.
-      example: true
-    distance:
-      type: number
-      nullable: true
-      description: Actual distance travelled by employee in travel related expenses.
-    distance_unit:
-      type: string
-      nullable: true
-      description: Unit of distance travelled.
-      enum:
-        - KM
-        - MILES
-      example: MILES
-    travel_classes:
-      description: |
-        This field is applicable only for `Flight`, `Train`, `Bus` category.
-        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-      type: array
-      minItems: 0
-      maxItems: 2
-      nullable: true
-      items:
-        type: string
-      example:
-        - ECONOMY
-        - BUSINESS
-    locations:
-      description: |
-        This field will be present for travel related categories.
-        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
-      type: array
-      nullable: true
-      minItems: 0
-      maxItems: 10
-      items:
-        $ref: '#/components/schemas/location'
-    custom_fields:
-      type: array
-      description: |
-        Custom fields
-      items:
-        $ref: '#/components/schemas/custom_field'
     spender_expense_check_mandatory_fields_in:
       type: object
       additionalProperties: false
@@ -3224,6 +3312,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Update an expense
+      description: |
+        Approver can update an expense already reported by an employee. Please note that the expense in `APPROVER_PENDING` or `APPROVED` state for the approver to be able to update it.
+      operationId: expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/approver_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/reports/eject_expenses:
     post:
       tags:
