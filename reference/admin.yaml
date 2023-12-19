@@ -12021,6 +12021,20 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that needs to be dismissed as a duplicate from the target expense
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
     any_type:
       anyOf:
         - type: string
@@ -20241,6 +20255,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/expenses/duplicate_sets:
+    get:
+      tags:
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
+      description: |
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/feature_configs:
     get:
       tags:
