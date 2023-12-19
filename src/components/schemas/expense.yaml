@@ -75,6 +75,7 @@ expense_out:
     - split_group_id
     - is_physical_bill_submitted
     - physical_bill_submitted_at
+    - invoice_number
   properties:
     id:
       allOf:
@@ -228,7 +229,7 @@ expense_out:
       nullable: true
       example: 9080
     mileage_rate:
-      $ref: './mileage_rate.yaml#/mileage_rate_out_embed'
+      $ref: './mileage_rate.yaml#/mileage_rate_out_embed_for_expense'
     mileage_is_round_trip:
       type: boolean
       nullable: true
@@ -244,7 +245,7 @@ expense_out:
       type: integer
       nullable: true
       description: |
-        Specific to per diem related expenses, number of days ofr which per diem claim is made.
+        Specific to per diem related expenses, number of days for which per diem claim is made.
       example: 2
     started_at:
       $ref: './fields.yaml#/timestamptz_utc'
@@ -278,7 +279,7 @@ expense_out:
       items:
         $ref: './fields.yaml#/location'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: './fields.yaml#/expense_custom_fields'
     custom_fields_flattened:
       $ref: './fields.yaml#/flattened_custom_field'
     code:
@@ -375,6 +376,12 @@ expense_out:
         $ref: ./report_approval.yaml#/report_approval_out_embed
       description: |
         List of report_approval objects
+    verifications:
+      type: array
+      items:
+        $ref: '#/expense_verification_out_embed'
+      description: |
+        List of verification objects
     employee_id:
       $ref: './fields.yaml#/employee_id'
     employee:
@@ -543,6 +550,13 @@ expense_out:
       nullable: true
       description: |
         Signifies if and when report of this expense was approved.
+    invoice_number:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        Invoice number of the expense.
+      example: 123456
 
 expense_in:
   type: object
@@ -654,7 +668,7 @@ expense_in:
       type: integer
       nullable: true
       description: |
-        Specific to per diem related expenses, number of days ofr which per diem claim is made.
+        Specific to per diem related expenses, number of days for which per diem claim is made.
       example: 2
     started_at:
       $ref: './fields.yaml#/timestamptz_pst'
@@ -704,7 +718,12 @@ spender_expense_in:
     id:
       $ref: './fields.yaml#/id_string'
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      allOf:
+      - $ref: './fields.yaml#/spent_at'
+      description: |
+        Date on which the expense was made.
+        This date cannot be in future.
+        This field is not required for creating Per Diem Expenses
     source:
       $ref: './fields.yaml#/source'
     merchant:
@@ -714,7 +733,11 @@ spender_expense_in:
     foreign_amount:
       $ref: './fields.yaml#/foreign_amount'
     claim_amount:
-      $ref: './fields.yaml#/claim_amount'
+      allOf:
+      - $ref: './fields.yaml#/claim_amount'
+      description: |
+        The expense amount as claimed by user. <br>
+        For Per Diem Expenses this amount should be equal to per diem rate rounded to two decimal places multiplied by number of days.
     purpose:
       type: string
       example: Team lunch
@@ -766,14 +789,50 @@ spender_expense_in:
       $ref: './fields.yaml#/locations'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
+    per_diem_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 583
+      description: |
+        Specific to per diem expense. This represents the per diem's rate id given by Fyle
+        during creation of per diem rate for which this expense is created. <br>
+        This field is required for creating Per Diem Expenses.
+    per_diem_num_days:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 2
+      description: |
+        Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+        This field is required for creating Per Diem Expenses.
+    report_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      description: |
+        Unique id given by Fyle to identify an Expense Report. <br>
+        Sending this field will add the expense to the report. If the expense is already attached to a report,
+        the expense will be removed from the old report and added to the new report if it is not yet approved.
+      example: rpvgnwlgw34
+    invoice_number:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        Invoice number of the expense.
+      example: 123456
 
 admin_expense_in:
   type: object
   additionalProperties: false
-  required:
-    - admin_amount
-    - spent_at
-    - assignee_user_email
+  anyOf:
+    - required:
+      - admin_amount
+      - spent_at
+      - assignee_user_email
+    - required: 
+      - id
   properties:
     id:
       allOf:
@@ -786,9 +845,21 @@ admin_expense_in:
       nullable: false
       description: |
         The expense amount which is added or modified by admin or approver.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
       example: 1900
     spent_at:
-      $ref: './fields.yaml#/spent_at'
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
     assignee_user_email:
       allOf:
         - $ref: './fields.yaml#/email'
@@ -796,9 +867,100 @@ admin_expense_in:
         An immutable field that represents the email address of the employee.
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
-        - _Note:_
-          - The expense will be assigned/re-assigned to this particular `employee`. _Not required when updating an expense, but is non-nullable_. 
+        - **Note:**
+          - The expense will be assigned/re-assigned to this particular `employee`. 
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
           - Admins can't assign the expense to self.
+    source:
+      $ref: './fields.yaml#/source'
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    purpose:
+      type: string
+      example: Team lunch
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 49058
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
+    tax_amount:
+      type: number
+      nullable: true
+      description: | 
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      $ref: './fields.yaml#/is_reimbursable'
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+
+approver_expense_in:
+  type: object
+  additionalProperties: false
+  required: 
+    - id
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+       This id is provided by Fyle to identify an object.
+    admin_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount which is added or modified by admin or approver.
+        - **Note:**
+          - _This field is non-nullable_. 
+      example: 1900
+    spent_at:
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - _This field is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
     source:
       $ref: './fields.yaml#/source'
     merchant:
@@ -1238,6 +1400,13 @@ expense_check_policies_in:
       description: |
         Specific to per diem related expenses. Number of days for which per diem claim is made.
       example: 2
+    invoice_number:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        Invoice number of the expense.
+      example: 123456
 
     # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations 
     # when mileage support comes to platform world. If we will give APIs for distance and amount calculation, 
@@ -1270,17 +1439,6 @@ expense_delete_in:
   properties:
     id:
       $ref: './fields.yaml#/id_string'
-
-expense_assign_in:
-  type: object
-  required:
-    - id
-    - assignee_user_email
-  properties:
-    id:
-      $ref: './fields.yaml#/id_string'
-    assignee_user_email:
-      $ref: './fields.yaml#/email'
 
 
 expenses_stats_in:
@@ -1334,7 +1492,7 @@ accounting_export_summary_in:
     url:
       type: string
       description: URL Endpoint for exported / failed expense
-      example: https://app.example.com/expense/txwownwrng      
+      example: https://app.example.com/expense/txwownwrng  
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false
@@ -1423,6 +1581,13 @@ spender_expense_check_mandatory_fields_in:
       description: |
         Number of files/reciepts attached to expense
       example: 4
+    invoice_number:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        Invoice number of the expense.
+      example: 123456
 
 expense_check_mandatory_fields_out:
   type: object
@@ -1436,7 +1601,7 @@ expense_check_mandatory_fields_out:
     missing_amount:
       type: boolean
       description: |
-        If this is set to true, then you need to send currency field with expense object.
+        If this is set to true, then you need to send amount field with expense object.
       example: false
     missing_currency:
       type: boolean
@@ -1474,3 +1639,258 @@ expense_check_mandatory_fields_in:
   allOf:
     - $ref: ./expense.yaml#/spender_expense_check_mandatory_fields_in
     
+expense_dismiss_duplicates_in:
+  type: object
+  required:
+    - id
+    - duplicate_expense_ids
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    duplicate_expense_ids:
+      type: array
+      nullable: False
+      items:
+        $ref: './fields.yaml#/id_string'
+      example: ['txwoirwlwwg', 'txwlgwkgw42']
+      description: |
+        List of expense IDs that needs to be dismissed as a duplicate from the target expense
+  
+expense_duplicate_sets_out:
+  type: object
+  additionalProperties: false
+  properties:
+    expense_ids:
+      type: array
+      nullable: False
+      items:
+        $ref: './fields.yaml#/id_string'
+      example: ['txwoirwlwwg', 'txwlgwkgw42']
+      description: |
+        List of expense IDs that are part of the duplicate set
+
+expense_verification_out_embed:
+  type: object
+  additionalProperties: false
+  properties:
+    verifier_user_id:
+      allOf:
+        - $ref: ./fields.yaml#/id_string
+      example: usge49ielgel
+    verifier_user:
+      $ref: ./user.yaml#/user_out_embed
+
+expense_split_object:
+  type: object
+  properties:
+    spent_at:
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 49058
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    purpose:
+      type: string
+      example: Team lunch
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+
+split_expense_in:
+  type: object
+  properties:
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 49058
+    source:
+      $ref: './fields.yaml#/source'
+    spent_at:
+      type: string
+      format: date-time
+      nullable: False
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+        - **Note:**
+          - This field is required while creating an expense.
+          - _Not required when updating an expense, but is non-nullable_. 
+      example: '2020-06-01T01:18:19.292-08:00'
+    is_reimbursable:
+      $ref: './fields.yaml#/is_reimbursable'
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    file_ids:
+      type: array
+      items:
+        allOf:
+          - $ref: './fields.yaml#/id_string'
+      description: |
+        List of file IDs to be attached to the expense.
+      example: ['fisjfwlrglw', 'fisjfwlrglw']
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      example: acwbl222wlg
+    tax_amount:
+      type: number
+      nullable: true
+      description: | 
+        Tax amount as setup by your organization.
+        - _Note:_
+          - Tax amount cannot be greater than the expense amount.
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    purpose:
+      type: string
+      example: Team lunch
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+
+admin_expense_split_object:
+  type: array
+  items:
+    required:
+      - admin_amount
+    allOf:
+      - $ref: ./expense.yaml#/expense_split_object
+    properties:
+      admin_amount:
+        type: number
+        nullable: false
+        description: |
+          The expense amount which is added or modified by admin or approver.
+        example: 1900
+
+admin_split_expense_in:
+  type: object
+  required:
+    - id
+    - admin_amount
+  allOf:
+    - $ref: ./expense.yaml#/split_expense_in
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+       This id is provided by Fyle to identify an object
+       - When `id` is sent, default action is to update the expense
+    admin_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount which is added or modified by admin or approver.
+      example: 1900
+    splits:
+      description: |
+        This array contains the number of split expenses admin wants to create for the expense.
+        The `admin_amount` provided for the original expense should be equal to the sum of
+        `admin_amount` provided for each split. Each attribute in the splits array will take precedence
+        to the original expense object. If any attribute is not provided in the split object, then
+        null or default value will be taken for that attribute in the resultant split.
+      allOf:
+        - $ref: ./expense.yaml#/admin_expense_split_object
+
+spender_expense_split_object:
+  type: array
+  items:
+    required:
+      - claim_amount
+    allOf:
+      - $ref: ./expense.yaml#/expense_split_object
+    properties:
+      claim_amount:
+        type: number
+        nullable: false
+        description: |
+          The expense amount which is added or modified by spender.
+        example: 1900
+
+spender_split_expense_in:
+  type: object
+  required:
+    - claim_amount
+    - splits
+  allOf:
+    - $ref: ./expense.yaml#/split_expense_in
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+       This id is provided by Fyle to identify an object
+       - When `id` is sent, default action is to update the expense
+    claim_amount:
+      type: number
+      nullable: false
+      description: |
+        The expense amount which is added or modified by spender.
+      example: 1900
+    splits:
+      description: |
+        This array contains the number of split expenses spender wants to create for the expense.
+        The `claim_amount` provided for the original expense should be equal to the sum of
+        `claim_amount` provided for each split. Each attribute in the splits array will take precedence
+        to the original expense object. If any attribute is not provided in the split object, then
+        null or default value will be taken for that attribute in the resultant split.
+      allOf:
+        - $ref: ./expense.yaml#/spender_expense_split_object
+    report_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      description: |
+        Unique id given by Fyle to identify an Expense Report. <br>
+        Sending this field will add the expense to the report. If the expense is already attached to a report,
+        the expense will be removed from the old report and added to the new report if it is not yet approved.
+      example: rpvgnwlgw34

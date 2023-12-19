@@ -700,6 +700,59 @@ custom_fields:
   items:
     $ref: '#/custom_field'
 
+expense_custom_field:
+  type: object
+  description: |
+    Expense custom field
+  properties:
+    name:
+      type: string
+      example: cf1
+    value:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: '#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'v1', 'v2' ]
+    type:
+      type: string
+      nullable: true
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - BOOLEAN
+        - MULTI_SELECT
+        - LOCATION
+        - USER_LIST
+        - DATE
+        - DEPENDENT_SELECT
+        - null
+      description: |
+        This field specifies the type of the expense field.
+      example: SELECT
+    is_enabled:
+      anyOf:
+        - $ref: '#/null_field'
+        - $ref: '#/is_enabled'
+      nullable: true
+
+expense_custom_fields:
+  type: array
+  description: |
+    Expense custom fields
+  items:
+    $ref: '#/expense_custom_field'
+
+
 flattened_custom_field:
   type: object
   description: |
@@ -1370,7 +1423,7 @@ is_shared:
   type: boolean
   nullable: true
   description: |
-    This indicates if the filter should be shared with other admins in the org.
+    This indicates if the filter should be shared with others in the org.
   default: false
   example: true
 
@@ -1454,3 +1507,75 @@ query_params:
   description: | 
     This field contains the query param string similar to the query params passed in GET call for displaying data in the list view.
   example: state=eq.PAID
+
+joined_at:
+  anyOf:
+    - $ref: ./fields.yaml#/null_field
+    - $ref: './fields.yaml#/timestamptz_utc'
+  nullable: true
+  description: |
+    Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+
+any_type:
+  anyOf:
+    - type: string
+    - type: number
+    - type: integer
+    - type: boolean
+    - type: array
+      items:
+        $ref: './fields.yaml#/any_type'
+    - type: object
+
+commute_location:
+  type: object
+  nullable: true
+  properties:
+    city:
+      type: string
+      nullable: false
+      example: London
+    state:
+      type: string
+      nullable: false
+      example: London
+    country:
+      type: string
+      nullable: false
+      example: United Kingdom
+    address:
+      type: string
+      nullable: false
+      example: '221 Baker St, Marylebone, London, United Kingdom'
+    latitude:
+      type: number
+      nullable: false
+      example: 12.971599
+    longitude:
+      type: number
+      nullable: false
+      example: 77.594566
+
+commute_details:
+  type: object
+  nullable: False
+  additionalProperties: False
+  description: |
+    Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+  properties:
+    home:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Home location of the employee.
+    work:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Work location of the employee.
+    distance:
+      type: number
+      nullable: true
+      description: |
+        Distance between home and work location of the employee in kilometers.
+      example: 10.0
