@@ -2231,6 +2231,15 @@ components:
           description: |
             Invoice number of the expense.
           example: 123456
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+          description: |
+            List of file ids to attach to the expense. <br>
+            To add new files to the expense, send the list of file ids to be attached. <br>
+            To remove files from the expense, send the list of all file ids except which you want to remove. <br>
     expense_add_comment_action_in:
       type: object
       required:
@@ -5255,6 +5264,56 @@ components:
             - null
           example: MILES
     spender_employee_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee.
+          example: John Doe
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+    commute_details_in:
+      type: object
+      nullable: false
+      additionalProperties: false
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        home_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+          nullable: true
+        work_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+          nullable: true
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee.
+          example: 10.55
+        distance_unit:
+          type: string
+          nullable: true
+          description: |
+            Unit of distance.
+          enum:
+            - KM
+            - MILES
+          example: MILES
+    spender_commute_details_out:
       type: object
       additionalProperties: false
       properties:
@@ -8834,6 +8893,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/employees/commute_details:
+    post:
+      tags:
+        - Employees
+      summary: Update Commute Details
+      description: |
+        Update spender's commute details to use commute deduction feature in mileage expenses.
+      operationId: employee_commute_details_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  required:
+                    - commute_details
+                  properties:
+                    commute_details:
+                      $ref: '#/components/schemas/commute_details_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_commute_details_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/tax_groups:
     get:
       tags:
