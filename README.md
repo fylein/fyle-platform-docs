@@ -47,6 +47,7 @@ You can check the version by running
     openapi bundle -o reference/common.yaml src/common/openapi.yaml
     openapi bundle -o reference/accountant.yaml src/accountant/openapi.yaml
     openapi bundle -o reference/super_admin.yaml src/super_admin/openapi.yaml
+    openapi bundle -o reference/owner.yaml src/owner/openapi.yaml
 
 ## To preview changes ##
 
