@@ -2231,6 +2231,15 @@ components:
           description: |
             Invoice number of the expense.
           example: 123456
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+          description: |
+            List of file ids to attach to the expense. <br>
+            To add new files to the expense, send the list of file ids to be attached. <br>
+            To remove files from the expense, send the list of all file ids except which you want to remove. <br>
     expense_add_comment_action_in:
       type: object
       required:
@@ -3342,6 +3351,26 @@ components:
             - VERIFIED
             - NOT_VERIFIED
             - READY_FOR_VERIFICATION
+        virtual_card_id:
+          type: string
+          description: |
+            The unique id of the virtual card, if the card is created from virtual card.
+          nullable: true
+          example: viasdfasdfddd
+        virtual_card_state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
       required:
         - id
         - org_id
@@ -3363,6 +3392,8 @@ components:
         - last_verification_attempt_at
         - last_verified_at
         - verification_status
+        - virtual_card_id
+        - virtual_card_state
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
