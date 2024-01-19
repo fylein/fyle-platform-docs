@@ -8620,7 +8620,7 @@ components:
         - valid_from_at
         - valid_till_at
         - creator_user_id
-    virtual_cards_get_current_balance_in:
+    virtual_cards_id_in:
       type: object
       properties:
         id:
@@ -8641,6 +8641,29 @@ components:
           example: 1000
       required:
         - current_amount
+    virtual_cards_show_card_details_out:
+      type: object
+      properties:
+        full_card_number:
+          type: string
+          description: |
+            Full card number of the virtual card
+          example: 1234567890123456
+        expiry_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the expiry date of the card.
+          example: '2022-02-01'
+        cvv:
+          type: string
+          description: |
+            CVV of the virtual card
+          example: 123
+      required:
+        - full_card_number
+        - expiry_date
+        - cvv
     webhook_url:
       type: string
       description: |
@@ -18184,7 +18207,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/virtual_cards_get_current_balance_in'
+                  $ref: '#/components/schemas/virtual_cards_id_in'
               required:
                 - data
               additionalProperties: false
@@ -18198,6 +18221,114 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/virtual_cards_get_current_balance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/show_card_details:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Show full card details
+      description: |
+        To get the card details of the virtual card
+      operationId: virtual_cards_show_card_details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_cards_show_card_details_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/delete:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Delete a virtual card
+      description: |
+        To delete a virtual card
+      operationId: virtual_cards_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_card_out'
         '400':
           description: Bad request
           content:
