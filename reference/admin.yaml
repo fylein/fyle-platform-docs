@@ -3308,6 +3308,73 @@ components:
                 description: |
                   ID of the policy rule.
                 example: tprCCiQiiuJZs
+    commute_location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: false
+          example: London
+        state:
+          type: string
+          nullable: false
+          example: London
+        country:
+          type: string
+          nullable: false
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
+    commute_details:
+      type: object
+      nullable: false
+      additionalProperties: false
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+        home_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+          nullable: true
+        work_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+          nullable: true
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee.
+          example: 10.55
+        distance_unit:
+          type: string
+          nullable: true
+          description: |
+            Unit of distance.
+          enum:
+            - KM
+            - MILES
+            - null
+          example: MILES
     expense_out:
       type: object
       additionalProperties: false
@@ -3860,6 +3927,29 @@ components:
           description: |
             Invoice number of the expense.
           example: 123456
+        commute_deduction:
+          type: string
+          nullable: true
+          maxLength: 12
+          description: |
+            Commute deduction type of the expense.
+          example: ONE_WAY
+          enum:
+            - ONE_WAY
+            - ROUND_TRIP
+            - NO_DEDUCTION
+            - null
+        commute_details_id:
+          type: integer
+          nullable: true
+          description: |
+            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+          example: 1234
+        commute_details:
+          allOf:
+            - $ref: '#/components/schemas/commute_details'
+          description: |
+            Commute details of the employee, used for deducting commute for the expense.
     source:
       type: string
       description: |
@@ -4656,6 +4746,36 @@ components:
           example: XXXXXXXXXXXX1234
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    advance_wallet_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance_amount:
+          $ref: '#/components/schemas/amount'
+    advance_wallet_in:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
     reminder_type:
       type: string
       enum:
@@ -8562,6 +8682,129 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    virtual_card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: viwownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        last_five:
+          type: string
+          description: |
+            Specifies the last 5 digits of the card.
+          example: '4543'
+        state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
+        expiry_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the expiry date of the card.
+          example: '2022-02-01'
+        amex_account_id:
+          type: string
+          description: |
+            The unique id of the amex account to which the card is assigned
+          example: amactr7NhV9Qn6
+        valid_from_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the valid from date of the card, ie from when the card would be active.
+          example: '2022-02-01'
+        valid_till_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the valid till date of the card, ie till when the card would be active.
+          example: '2022-02-01'
+        creator_user_id:
+          type: string
+          description: |
+            The unique id of an user who created the card.
+          example: useradfasd
+      required:
+        - id
+        - org_id
+        - user_id
+        - created_at
+        - updated_at
+        - last_five
+        - state
+        - expiry_date
+        - amex_account_id
+        - valid_from_at
+        - valid_till_at
+        - creator_user_id
+    virtual_cards_id_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique id of the virtual card
+          example: viwownwrng
+      required:
+        - id
+    virtual_cards_get_current_balance_out:
+      type: object
+      properties:
+        current_amount:
+          type: number
+          description: |
+            The current balance amount of the virtual card
+          example: 1000
+      required:
+        - current_amount
+    virtual_cards_show_card_details_out:
+      type: object
+      properties:
+        full_card_number:
+          type: string
+          description: |
+            Full card number of the virtual card
+          example: 1234567890123456
+        expiry_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the expiry date of the card.
+          example: '2022-02-01'
+        cvv:
+          type: string
+          description: |
+            CVV of the virtual card
+          example: 123
+      required:
+        - full_card_number
+        - expiry_date
+        - cvv
     webhook_url:
       type: string
       description: |
@@ -15858,6 +16101,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_wallets:
+    get:
+      tags:
+        - Advances
+      summary: List advance wallets
+      operationId: advance_wallets_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advance wallets
+      summary: Create advance wallets
+      description: |
+        Create advance wallets.
+      operationId: advance_wallets_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_wallet_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reminders:
     get:
       tags:
@@ -18023,6 +18362,210 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/corporate_card_transaction_unmatch_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards:
+    get:
+      tags:
+        - Virtual Cards
+      summary: List virtual cards
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: virtual_cards_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/virtual_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/virtual_cards/get_current_amount:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Get current balance amount of the virtual card
+      description: |
+        To get the current balance amount of the virtual card
+      operationId: virtual_cards_get_current_balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_cards_get_current_balance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/show_card_details:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Show full card details
+      description: |
+        To get the card details of the virtual card
+      operationId: virtual_cards_show_card_details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_cards_show_card_details_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/delete:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Delete a virtual card
+      description: |
+        To delete a virtual card
+      operationId: virtual_cards_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_card_out'
         '400':
           description: Bad request
           content:
