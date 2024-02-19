@@ -5072,6 +5072,45 @@ components:
           example: ACH
         ach_transfer:
           $ref: '#/components/schemas/ach_transfer'
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+    report_comments_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - creator_user_id
+        - creator_user
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
     admin_report_out:
       type: object
       additionalProperties: false
@@ -5101,6 +5140,7 @@ components:
         - next_approver_user_ids
         - reimbursement_id
         - reimbursement
+        - comments
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -5247,6 +5287,12 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_comments_out_embed'
+          description: |
+            List of comments on the report
         accounting_export_summary:
           type: object
           description: |
@@ -5370,24 +5416,24 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: rpfilumWHrlPf7K
-    user_out_embed_nullable:
+    report_comments_in:
       type: object
-      nullable: true
       additionalProperties: false
+      required:
+        - id
+        - comment
       properties:
         id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
           type: string
-          maxLength: 255
           description: |
-            Represents the full name of the Employee. Must be at least 3 characters.
-          example: John Doe
-    admin_report_comments_out:
+            id of the report, on which need to add comment
+          example: rpa21A2rdj2
+        comment:
+          type: string
+          description: |
+            comment on the report
+          example: We don't accept laundry bills
+    report_comments_out:
       type: object
       additionalProperties: false
       required:
@@ -5418,23 +5464,6 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
-    report_comments_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - comment
-      properties:
-        id:
-          type: string
-          description: |
-            id of the report, on which need to add comment
-          example: rpa21A2rdj2
-        comment:
-          type: string
-          description: |
-            comment on the report
-          example: We don't accept laundry bills
     add_approvers_in:
       type: object
       additionalProperties: false
@@ -8877,6 +8906,7 @@ components:
         - approvals
         - employee
         - next_approver_user_ids
+        - comments
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -9014,6 +9044,12 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_comments_out_embed'
+          description: |
+            List of comments on the report
         accounting_export_summary:
           type: object
           description: |
@@ -16634,42 +16670,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/404'
   /admin/reports/comments:
-    get:
-      tags:
-        - Reports
-      summary: List report comments
-      description: |
-        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      operationId: report_comments_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/admin_report_comments_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
     post:
       tags:
         - Reports
@@ -16698,7 +16698,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: '#/components/schemas/admin_report_comments_out'
+                    $ref: '#/components/schemas/report_comments_out'
         '400':
           description: Unauthorised request
           content:
