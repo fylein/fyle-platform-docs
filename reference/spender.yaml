@@ -2551,6 +2551,45 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+    report_comments_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - creator_user_id
+        - creator_user
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
     report_out:
       type: object
       additionalProperties: false
@@ -2578,6 +2617,7 @@ components:
         - approvals
         - employee
         - next_approver_user_ids
+        - comments
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -2715,6 +2755,12 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_comments_out_embed'
+          description: |
+            List of comments on the report
         accounting_export_summary:
           type: object
           description: |
@@ -3167,6 +3213,54 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: rpfilumWHrlPf7K
+    report_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          type: string
+          description: |
+            id of the report, on which need to add comment
+          example: rpa21A2rdj2
+        comment:
+          type: string
+          description: |
+            comment on the report
+          example: We don't accept laundry bills
+    report_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - report_id
+        - creator_user_id
+        - creator_user
+        - created_at
+        - org_id
+        - updated_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        report_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/id_string'
     advance_out_embed:
       type: object
       nullable: true
@@ -3610,23 +3704,6 @@ components:
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
       nullable: true
       example: sample string
-    user_out_embed_nullable:
-      type: object
-      nullable: true
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: |
-            Represents the full name of the Employee. Must be at least 3 characters.
-          example: John Doe
     corporate_card_out_embed:
       type: object
       additionalProperties: false
@@ -8835,6 +8912,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/comments:
+    post:
+      tags:
+        - Reports
+      summary: Comment on a report
+      description: Comment on a report
+      operationId: report_comments_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_comments_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_comments_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:

@@ -25,6 +25,7 @@ report_out:
     - approvals
     - employee
     - next_approver_user_ids
+    - comments
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -162,6 +163,12 @@ report_out:
       type: string
       example: Sent Back
       description: readable state name
+    comments:
+      type: array
+      items:
+        $ref: '#/report_comments_out_embed'
+      description: |
+        List of comments on the report
     accounting_export_summary:
       type: object
       description: |
@@ -244,6 +251,7 @@ admin_report_out:
     - next_approver_user_ids
     - reimbursement_id
     - reimbursement
+    - comments
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -390,6 +398,12 @@ admin_report_out:
       type: string
       example: Sent Back
       description: readable state name
+    comments:
+      type: array
+      items:
+        $ref: '#/report_comments_out_embed'
+      description: |
+        List of comments on the report
     accounting_export_summary:
       type: object
       description: |
@@ -679,7 +693,7 @@ report_comments_in:
         comment on the report
       example: We don't accept laundry bills
 
-admin_report_comments_out:
+report_comments_out:
   type: object
   additionalProperties: False
   required:
@@ -710,6 +724,29 @@ admin_report_comments_out:
       $ref: './fields.yaml#/updated_at'
     org_id:
       $ref: ./fields.yaml#/id_string
+
+report_comments_out_embed:
+  type: object
+  additionalProperties: False
+  required:
+    - id
+    - comment
+    - creator_user_id
+    - creator_user
+    - created_at
+  properties:
+    id:
+      $ref: ./fields.yaml#/id_string
+    comment:
+      type: string
+      description: comment on the report
+      example: We don't accept laundry bills
+    creator_user_id:
+      $ref: ./fields.yaml#/id_string
+    creator_user:
+      $ref: ./user.yaml#/user_out_embed_nullable
+    created_at:
+      $ref: './fields.yaml#/created_at'
 
 add_approvers_in:
   type: object
