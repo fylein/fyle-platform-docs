@@ -5107,6 +5107,16 @@ components:
           $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
+    advance_wallet_report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        amount:
+          $ref: '#/components/schemas/amount'
     admin_report_out:
       type: object
       additionalProperties: false
@@ -5137,6 +5147,8 @@ components:
         - reimbursement_id
         - reimbursement
         - comments
+        - applied_advance_wallets
+        - can_apply_advances
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -5334,6 +5346,18 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
+        can_apply_advances:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether advances can be applied to this report
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
     admin_report_in:
       type: object
       additionalProperties: false
@@ -5679,6 +5703,27 @@ components:
           example:
             - txelntgwgwll
             - txavbdabass
+    apply_advance_wallets_in:
+      type: object
+      required:
+        - id
+        - advance_wallet_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        advance_wallet_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - awfgRr8YA6KK
+    remove_advance_wallets_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     corporate_card_out:
       type: object
       properties:
@@ -9091,6 +9136,13 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
     report_out_subscriptions:
       type: object
       additionalProperties: false
@@ -17164,6 +17216,103 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/apply_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Settle report with advance wallets
+      description: Settle report with advance wallets
+      operationId: report_apply_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/apply_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/remove_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Undo settling of report with advance wallets
+      description: |
+        This will undo the settling of the report with advance wallets
+      operationId: report_remove_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/remove_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
         '400':
           description: Unauthorised request
           content:
