@@ -547,6 +547,33 @@ components:
             - List of IDs of users who can access this category. Default value is `[]`.
             - `null` value indicates that all users in the org can access this category.
             - `[]` value indicates that no users in the org can access this category.
+    category_in_only_id:
+      type: object
+      required:
+        - name
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    category_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of categories that could be deleted from input categories.
+              example: 2
+            categories:
+              type: array
+              description: Categories that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/category_in_only_id'
     system_category_out:
       type: object
       additionalProperties: false
@@ -13569,6 +13596,48 @@ paths:
                       data:
                         type: string
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/categories/delete_summary/bulk:
+    post:
+      tags:
+        - Categories
+      summary: Create delete summary for categories
+      description: |
+        Delete summary tells that how many categories could be deleted from given categories, it also
+        returns categories that could be deleted.
+      operationId: categories_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/category_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category_delete_summary_out'
         '401':
           description: Unauthorised request
           content:
