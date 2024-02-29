@@ -94,14 +94,14 @@ A few more examples below:
 ```
 GET /spender/expense_fields?or=(column_name.in.(project_id, cost_center_id), is_custom.eq.true)
 ```
-This request fetches data from `/spender/expense_fields` where either the `column_name` is in the list of values (`project_id`, `cost_center_id`) or `is_custom` is equal to `true`.
+This request fetches data where either the `column_name` is in the list of values (`project_id`, `cost_center_id`) or `is_custom` is equal to `true`.
 
 Using both `and` & `or`:
 
 ```
 GET /admin/corporate_card_transactions?and=(or=(currency.eq.USD, currency.eq.EUR), amount.lt.50)
 ```
-This request retrieves data from the /admin/corporate_card_transactions endpoint where the `currency` of the transaction is either `USD` or `EUR` and the `amount` of the transaction is less than `50`.
+This request retrieves data from the endpoint where the `currency` of the transaction is either `USD` or `EUR` and the `amount` of the transaction is less than `50`.
 
 ## Pagination
 
