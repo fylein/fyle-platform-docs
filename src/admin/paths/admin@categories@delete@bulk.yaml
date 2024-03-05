@@ -1,0 +1,59 @@
+post:
+  tags:
+    - Categories
+  summary: Deletes categories
+  description: |
+    Deletes unused categories. If any of the category in input is used in other resources or it is a mileage/per diem 
+    category then validation error is raised.
+  operationId: categories_delete_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items: 
+                $ref: '../../components/schemas/category.yaml#/category_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                nullable: true
+                example: |
+                  Can not delete per diem and mileage categorie(s) or categorie(s) used in other resources like expense, expense policy, expense rules, budgets, custom expense fields.
+              data:
+                type: object
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
