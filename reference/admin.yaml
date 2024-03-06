@@ -547,6 +547,33 @@ components:
             - List of IDs of users who can access this category. Default value is `[]`.
             - `null` value indicates that all users in the org can access this category.
             - `[]` value indicates that no users in the org can access this category.
+    category_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    category_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of categories that could be deleted from input categories.
+              example: 2
+            categories:
+              type: array
+              description: Categories that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/category_in_only_id'
     system_category_out:
       type: object
       additionalProperties: false
@@ -3402,6 +3429,7 @@ components:
         - project_id
         - project
         - source_account_id
+        - advance_wallet_id
         - source_account
         - tax_amount
         - tax_group_id
@@ -3556,6 +3584,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         source_account:
           $ref: '#/components/schemas/account_out_embed'
         tax_amount:
@@ -4070,6 +4103,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         tax_amount:
           type: number
           nullable: true
@@ -4099,6 +4137,15 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+          description: |
+            List of file ids to attach to the expense. <br>
+            To add new files to the expense, send the list of file ids to be attached. <br>
+            To remove files from the expense, send the list of all file ids except which you want to remove. <br>
     accounting_export_summary_in:
       type: object
       required:
@@ -4130,6 +4177,14 @@ components:
           type: string
           description: URL Endpoint for exported / failed expense
           example: https://app.example.com/expense/txwownwrng
+    sub_feature:
+      type: string
+      description: |
+        This field can be used to setup a collection of filters. For example, if you have multiple filters
+        for a single page, this can be used as an identifier to fetch all the filters for that page. <br>
+        **Note: Only combination of alphabets, numbers and _(underscore) is allowed**
+      nullable: true
+      example: flagged_expenses
     expense_filters_out:
       type: object
       additionalProperties: false
@@ -4148,6 +4203,8 @@ components:
           $ref: '#/components/schemas/user_id'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -4165,6 +4222,8 @@ components:
           $ref: '#/components/schemas/is_shared'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
     expense_filters_delete_in:
       type: object
       additionalProperties: false
@@ -5107,6 +5166,16 @@ components:
           $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
+    advance_wallet_report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        amount:
+          $ref: '#/components/schemas/amount'
     admin_report_out:
       type: object
       additionalProperties: false
@@ -5137,6 +5206,8 @@ components:
         - reimbursement_id
         - reimbursement
         - comments
+        - applied_advance_wallets
+        - can_apply_advances
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -5334,6 +5405,18 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
+        can_apply_advances:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether advances can be applied to this report
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
     admin_report_in:
       type: object
       additionalProperties: false
@@ -5679,6 +5762,92 @@ components:
           example:
             - txelntgwgwll
             - txavbdabass
+    report_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    report_permissions_out:
+      type: object
+      additionalProperties: false
+      required:
+        - can_edit
+        - can_admin_or_approver_edit
+        - can_delete
+        - can_submit
+        - can_export
+        - can_resubmit
+        - can_approve
+        - can_admin_approve
+        - can_send_back
+        - can_verify
+        - can_move_to_payment_pending
+        - can_add_approver
+        - can_remove_approver
+      properties:
+        can_edit:
+          type: boolean
+          example: true
+        can_admin_or_approver_edit:
+          type: boolean
+          example: true
+        can_delete:
+          type: boolean
+          example: true
+        can_submit:
+          type: boolean
+          example: true
+        can_export:
+          type: boolean
+          example: true
+        can_resubmit:
+          type: boolean
+          example: true
+        can_approve:
+          type: boolean
+          example: true
+        can_admin_approve:
+          type: boolean
+          example: true
+        can_send_back:
+          type: boolean
+          example: true
+        can_verify:
+          type: boolean
+          example: true
+        can_move_to_payment_pending:
+          type: boolean
+          example: true
+        can_add_approver:
+          type: boolean
+          example: true
+        can_remove_approver:
+          type: boolean
+          example: true
+    apply_advance_wallets_in:
+      type: object
+      required:
+        - id
+        - advance_wallet_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        advance_wallet_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - awfgRr8YA6KK
+    remove_advance_wallets_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     corporate_card_out:
       type: object
       properties:
@@ -9091,6 +9260,13 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
     report_out_subscriptions:
       type: object
       additionalProperties: false
@@ -12259,6 +12435,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         tax_amount:
           type: number
           nullable: true
@@ -12554,6 +12735,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         tax_amount:
           type: number
           nullable: true
@@ -13484,6 +13670,48 @@ paths:
                       data:
                         type: string
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/categories/delete_summary/bulk:
+    post:
+      tags:
+        - Categories
+      summary: Create delete summary for categories
+      description: |
+        Delete summary tells that how many categories could be deleted from given categories, it also
+        returns categories that could be deleted.
+      operationId: categories_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/category_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category_delete_summary_out'
         '401':
           description: Unauthorised request
           content:
@@ -16146,6 +16374,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advances/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Create advances in bulk
+      description: |
+        Create advances in bulk.
+      operationId: advances_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/advance_wallets:
     get:
       tags:
@@ -17164,6 +17447,158 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/permissions:
+    post:
+      tags:
+        - Reports
+      summary: Reports Permissions
+      description: |
+        Reports Permissions for a user
+      operationId: reports_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/apply_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Settle report with advance wallets
+      description: Settle report with advance wallets
+      operationId: report_apply_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/apply_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/remove_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Undo settling of report with advance wallets
+      description: |
+        This will undo the settling of the report with advance wallets
+      operationId: report_remove_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/remove_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
         '400':
           description: Unauthorised request
           content:

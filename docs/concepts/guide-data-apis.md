@@ -83,6 +83,26 @@ Sometimes one of the columns is a JSON object and you want to apply a filter on 
 GET /admin/expenses?cost_center->name=eq.CC123
 ```
 
+Filtering can also be accomplished using logical operators like `and`, `or`, and a combination of both. When using the `or` operator, it allows for specifying multiple conditions where at least one must be met. For instance:
+
+```
+GET /admin/corporate_card_transactions?or=(amount.lt.100, id.eq.abc)
+```
+
+A few more examples below:
+
+```
+GET /spender/expense_fields?or=(column_name.in.(project_id, cost_center_id), is_custom.eq.true)
+```
+This request fetches data where either the `column_name` is in the list of values (`project_id`, `cost_center_id`) or `is_custom` is equal to `true`.
+
+Using both `and` & `or`:
+
+```
+GET /admin/corporate_card_transactions?and=(or=(currency.eq.USD, currency.eq.EUR), amount.lt.50)
+```
+This request retrieves data from the endpoint where the `currency` of the transaction is either `USD` or `EUR` and the `amount` of the transaction is less than `50`.
+
 ## Pagination
 
 Every GET API call is paginated. Each page can contain a maximum of 200 elements. To indicate exactly which elements you want, you'll need to pass three additional parameters;
