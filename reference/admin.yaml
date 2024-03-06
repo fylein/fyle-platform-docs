@@ -2603,7 +2603,9 @@ components:
             - fi123819sa
           description: List of file ids which holds reference to export files
         exported_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+            - nullable: false
         name:
           type: string
           description: This represents name of the resource.
@@ -2660,7 +2662,9 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
         object_id:
-          $ref: '#/components/schemas/fk_string'
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+            - nullable: false
         object_type:
           type: string
           enum:
@@ -2676,7 +2680,9 @@ components:
           description: |
             Optional metadata about the Export operation. For example, newly created Accounting Entry numbers in Quickbooks.
         accounting_export_id:
-          $ref: '#/components/schemas/fk_string'
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+            - nullable: false
     currency:
       type: string
       description: |
@@ -4599,6 +4605,8 @@ components:
           $ref: '#/components/schemas/employee_out_embed'
     advance_request_in:
       type: object
+      required:
+        - id
       properties:
         id:
           allOf:
@@ -4751,6 +4759,14 @@ components:
         - currency
         - amount
         - payment_mode
+        - custom_fields
+        - advance_request_id
+        - project_id
+        - card_number
+        - foreign_currency
+        - foreign_amount
+        - purpose
+        - code
       properties:
         user_id:
           type: string
@@ -4813,7 +4829,9 @@ components:
           nullable: true
           example: XXXXXXXXXXXX1234
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          allOf:
+            - $ref: '#/components/schemas/custom_fields'
+            - nullable: true
     advance_wallet_out:
       type: object
       additionalProperties: false
@@ -6015,12 +6033,6 @@ components:
             Id given by external systems like Gmail. To identify whether that entity
             has been already added to Fyle or not.
           example: wgjwgo3ihwljnlsww
-        last_synced_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies when this card was last synced.
       required:
         - bank_name
         - card_number
