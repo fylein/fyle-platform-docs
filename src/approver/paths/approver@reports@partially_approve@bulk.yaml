@@ -1,0 +1,57 @@
+post:
+  tags:
+    - Reports
+  summary: Approve reports bulk
+  description: Approve reports in bulk
+  operationId: reports_approve_post_bulk
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/report.yaml#/report_action_in'
+            reason:
+              type: array
+              items:
+                $ref: '../../components/schemas/fields.yaml#/reason'
+  responses:
+    '200':
+      description: OK
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/bulk_error.yaml'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: True
+                  message:  
+                    type: string
+                    nullable: True
+                  data: 
+                    type: string
+                    nullable: True
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
