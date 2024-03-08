@@ -1,0 +1,58 @@
+post:
+  tags:
+    - Projects
+  summary: Deletes projects
+  description: |
+    Deletes unused projects. If any of the project in input is used in other resources then validation error is raised.
+  operationId: projects_delete_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items: 
+                $ref: '../../components/schemas/project.yaml#/project_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                nullable: true
+                example: |
+                  Can not delete project(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+              data:
+                type: object
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
