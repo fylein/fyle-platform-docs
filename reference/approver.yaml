@@ -565,6 +565,34 @@ components:
       description: |
         Explanation to the action if provided by the user
       example: All bills are in order
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                oneOf:
+                  - type: string
+                  - type: integer
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     timestamptz_utc:
       type: string
       format: date-time
@@ -3056,34 +3084,6 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that needs to be dismissed as a duplicate from the target expense
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                oneOf:
-                  - type: string
-                  - type: integer
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
     expense_duplicate_sets_out:
       type: object
       additionalProperties: false
@@ -3791,6 +3791,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/reports/partially_approve/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Approve reports bulk
+      description: Approve reports in bulk
+      operationId: reports_approve_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_action_in'
+                reason:
+                  $ref: '#/components/schemas/reason'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/expenses:
     get:
       tags:
