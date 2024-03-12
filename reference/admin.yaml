@@ -4845,6 +4845,138 @@ components:
           description: |
             The unique id of an user to which the object is associated.
           example: uswjwgnwwgo
+    advance_refund_out:
+      type: object
+      additionalProperties: false
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        collector_user_id:
+          $ref: '#/components/schemas/user_id'
+        refunded_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this advance refund was completed.
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+          nullable: true
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          nullable: true
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+            - CASH
+          example: CASH
+        code:
+          allOf:
+            - $ref: '#/components/schemas/code'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance refund.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance refund was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        card_number:
+          type: string
+          nullable: true
+          example: XXXXXXXXXXXX1234
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: awfgRr8YA6KK
+    advance_refund_in:
+      type: object
+      required:
+        - currency
+        - amount
+        - payment_mode
+        - advance_wallet_id
+      properties:
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+          nullable: true
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          nullable: true
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+            - CASH
+          example: CASH
+        code:
+          allOf:
+            - $ref: '#/components/schemas/code'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance refund.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance refund was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        card_number:
+          type: string
+          nullable: true
+          example: XXXXXXXXXXXX1234
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: awfgRr8YA6KK
     reminder_type:
       type: string
       enum:
@@ -16707,6 +16839,157 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_refunds:
+    get:
+      tags:
+        - Advances
+      summary: List advance refunds
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: advance_refunds_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_refund_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advances
+      summary: Create an advance refund
+      description: |
+        Create an advance refund.
+      operationId: advance_refunds_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_refund_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_refund_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_refunds/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Create advance refund in bulk
+      description: |
+        Create advance refund in bulk.
+      operationId: advance_refunds_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_refund_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/reminders:
     get:
       tags:
