@@ -3285,6 +3285,71 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    report_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    report_permissions_out:
+      type: object
+      additionalProperties: false
+      required:
+        - can_edit
+        - can_admin_or_approver_edit
+        - can_delete
+        - can_submit
+        - can_export
+        - can_resubmit
+        - can_approve
+        - can_admin_approve
+        - can_send_back
+        - can_verify
+        - can_move_to_payment_pending
+        - can_add_approver
+        - can_remove_approver
+      properties:
+        can_edit:
+          type: boolean
+          example: true
+        can_admin_or_approver_edit:
+          type: boolean
+          example: true
+        can_delete:
+          type: boolean
+          example: true
+        can_submit:
+          type: boolean
+          example: true
+        can_export:
+          type: boolean
+          example: true
+        can_resubmit:
+          type: boolean
+          example: true
+        can_approve:
+          type: boolean
+          example: true
+        can_admin_approve:
+          type: boolean
+          example: true
+        can_send_back:
+          type: boolean
+          example: true
+        can_verify:
+          type: boolean
+          example: true
+        can_move_to_payment_pending:
+          type: boolean
+          example: true
+        can_add_approver:
+          type: boolean
+          example: true
+        can_remove_approver:
+          type: boolean
+          example: true
     advance_out_embed:
       type: object
       nullable: true
@@ -9011,6 +9076,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/reports/permissions:
+    post:
+      tags:
+        - Reports
+      summary: Reports Permissions
+      description: |
+        Reports Permissions for a user
+      operationId: reports_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
