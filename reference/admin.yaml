@@ -357,6 +357,33 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    project_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    project_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of projects that could be deleted from input projects.
+              example: 2
+            projects:
+              type: array
+              description: Projects that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/project_in_only_id'
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -679,27 +706,6 @@ components:
           description: |
             This specifies the name of the expense field.
           example: Vendor description
-        column_name:
-          type: string
-          enum:
-            - purpose
-            - txn_dt
-            - vendor_id
-            - cost_center_id
-            - distance
-            - distance_unit
-            - location1
-            - location2
-            - from_dt
-            - to_dt
-            - per_diem_num_days
-            - flight_journey_travel_class
-            - flight_return_travel_class
-            - train_travel_class
-            - bus_travel_class
-          description: |
-            This specifies the name of column to which this expense field mapped to.
-          example: purpose
         type:
           type: string
           enum:
@@ -713,7 +719,7 @@ components:
             - DATE
             - DEPENDENT_SELECT
           description: |
-            This field specifies the type of the expense field.
+            This field  specifies the type of the expense field.
           example: SELECT
         options:
           type: array
@@ -746,11 +752,6 @@ components:
             example: 16570
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
-        is_custom:
-          type: boolean
-          description: |
-            This field indicates if the expense field is custom or not.
-          example: false
         is_mandatory:
           type: boolean
           description: |
@@ -10104,9 +10105,49 @@ components:
         fiscal_year_start_month:
           type: number
           example: 10
-          description: Month number of start of fisical year
+          description: Month number of start of fiscal year
           minimum: 1
           maximum: 12
+        budget_start_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-01T00:00:00+00:00'
+          description: Start date of the current budget interval
+        budget_end_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-30T00:00:00+00:00'
+          description: End date of the current budget interval
+        budget_creator:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/id_string'
+            name:
+              $ref: '#/components/schemas/name'
+            email:
+              $ref: '#/components/schemas/email'
+          example:
+            id: usq8rwZj2POy
+            name: John Brown
+            email: admin1@company.com
+        amount_spent:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount spent from the budget interval
+        amount_remaining:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount remaining in the budget interval
+        utilisation_percentage:
+          type: number
+          nullable: true
+          example: 50
+          description: Utilisation percentage of the budget interval
     budget_in:
       type: object
       required:
@@ -13496,6 +13537,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/projects/delete/bulk:
+    post:
+      tags:
+        - Projects
+      summary: Deletes projects
+      description: |
+        Deletes unused projects. If any of the project in input is used in other resources then validation error is raised.
+      operationId: projects_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete project(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/projects/delete_summary/bulk:
+    post:
+      tags:
+        - Projects
+      summary: Create delete summary for projects
+      description: |
+        Delete summary tells that how many projects could be deleted from given projects, it also
+        returns projects that could be deleted.
+      operationId: projects_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project_delete_summary_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/cost_centers:
     get:
       operationId: cost_centers_list
@@ -13835,7 +13977,7 @@ paths:
                     type: string
                     nullable: true
                     example: |
-                      Can not delete per diem and mileage categorie(s) or categorie(s) used in other resources like expense, expense policy, expense rules, budgets, custom expense fields.
+                      Can not delete per diem and mileage categorie(s) or categorie(s) used in other resources like expense, expense policy, expense rules, budgets.
                   data:
                     type: object
                     example: null
