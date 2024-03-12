@@ -357,6 +357,33 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    project_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    project_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of projects that could be deleted from input projects.
+              example: 2
+            projects:
+              type: array
+              description: Projects that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/project_in_only_id'
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -13392,6 +13419,48 @@ paths:
                       data:
                         type: object
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/projects/delete_summary/bulk:
+    post:
+      tags:
+        - Projects
+      summary: Create delete summary for projects
+      description: |
+        Delete summary tells that how many projects could be deleted from given projects, it also
+        returns projects that could be deleted.
+      operationId: projects_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project_delete_summary_out'
         '401':
           description: Unauthorised request
           content:
