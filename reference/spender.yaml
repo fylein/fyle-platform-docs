@@ -3530,6 +3530,29 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advance_requests_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in advance_requests GET call for displaying advance_requests in the list view.
+          nullable: false
+          example: id=in.('adr1263', 'adr1569')
+    advance_requests_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            This field represents the total number of advance_requests that match the criteria specified in the query_params within the body of the request.
+          nullable: false
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
+          example: 100
     advance_out:
       type: object
       additionalProperties: false
@@ -3639,6 +3662,29 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advances_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in advances GET call for displaying advances in the list view.
+          nullable: false
+          example: id=in.('adv1263', 'adv1569')
+    advances_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            This field represents the total number of advances that match the criteria specified in the query_params within the body of the request.
+          nullable: false
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of advances that match the criteria specified in the query_params within the body of the request.
+          example: 100
     corporate_card_out:
       type: object
       properties:
@@ -9179,6 +9225,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/advance_requests/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advance Requests Stats
+      description: |
+        Advance Requests Stats
+      operationId: advance_requests_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_requests_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_requests_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advances:
     get:
       tags:
@@ -9221,6 +9322,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/advances/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Stats
+      description: |
+        Advances Stats
+      operationId: advances_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advances_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advances_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/corporate_cards:
     get:
       tags:
