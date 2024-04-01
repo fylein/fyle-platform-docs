@@ -168,6 +168,12 @@ components:
         The unique id of an user to which the object is associated.
       readOnly: true
       example: uswjwgnwwgo
+    org_name:
+      type: string
+      maxLength: 255
+      description: |
+        This represents the name of the organization. This should be unique for all organizations
+      example: foo123
     department_id:
       type: string
       maxLength: 255
@@ -208,6 +214,57 @@ components:
           example: Sales / Outbound Sales
           description: |
             This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    level_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Level name of the employees
+          example: Associate I
+        band:
+          type: string
+          nullable: true
+          description: |
+            Band in which this level belongs to, you can group multiple levels into a single band.
+          example: Associate
+      required:
+        - id
+        - name
+        - band
+    is_enabled:
+      type: boolean
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
+      default: true
+      example: true
+    phone_number:
+      type: string
+      example: '+12131234567'
+      maxLength: 16
+      description: |
+        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    null_field:
+      type: string
+      nullable: true
+    timestamptz_utc:
+      type: string
+      format: date-time
+      nullable: true
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T13:14:54.804+00:00'
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     employee_out_embed_for_report:
       type: object
       additionalProperties: false
@@ -228,12 +285,16 @@ components:
             This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         org_id:
           $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
         department_id:
           nullable: true
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
         ach_account:
           additionalProperties: false
           type: object
@@ -263,6 +324,24 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        has_accepted_invite:
+          type: boolean
+          description: |
+            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
+          default: true
+          example: true
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -593,12 +672,6 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
-    timestamptz_utc:
-      type: string
-      format: date-time
-      nullable: true
-      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
-      example: '2020-06-01T13:14:54.804+00:00'
     foreign_currency:
       type: string
       nullable: true
@@ -772,15 +845,6 @@ components:
           type: number
           nullable: true
           example: 77.594566
-    null_field:
-      type: string
-      nullable: true
-    is_enabled:
-      type: boolean
-      description: |
-        This indicates if the resource is enabled for use within the organisation.
-      default: true
-      example: true
     expense_custom_field:
       type: object
       description: |
@@ -1012,34 +1076,6 @@ components:
           example: usge49ielgel
         verifier_user:
           $ref: '#/components/schemas/user_out_embed'
-    org_name:
-      type: string
-      maxLength: 255
-      description: |
-        This represents the name of the organization. This should be unique for all organizations
-      example: foo123
-    level_out_embed:
-      type: object
-      additionalProperties: false
-      nullable: true
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        name:
-          type: string
-          description: |
-            Level name of the employees
-          example: Associate I
-        band:
-          type: string
-          nullable: true
-          description: |
-            Band in which this level belongs to, you can group multiple levels into a single band.
-          example: Associate
-      required:
-        - id
-        - name
-        - band
     custom_field:
       type: object
       description: |
@@ -1064,20 +1100,6 @@ components:
               example:
                 - v1
                 - v2
-    phone_number:
-      type: string
-      example: '+12131234567'
-      maxLength: 16
-      description: |
-        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
-      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
-    joined_at:
-      anyOf:
-        - $ref: '#/components/schemas/null_field'
-        - $ref: '#/components/schemas/timestamptz_utc'
-      nullable: true
-      description: |
-        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
