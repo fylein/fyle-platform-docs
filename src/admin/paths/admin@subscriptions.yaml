@@ -1,0 +1,101 @@
+post:
+  tags:
+    - Subscriptions
+  summary: Create a subscription
+  description: subscribe to different events using this API
+  operationId: admin_subscriptions_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            data:
+              $ref: '../../components/schemas/subscriptions.yaml#/subscriptions_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              data:
+                $ref: '../../components/schemas/subscriptions.yaml#/admin_subscriptions_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+  callbacks:
+    'REPORT.*':
+      '{$request.body#/data/webhook_url}':
+        post:
+          operationId: report_subscriptions_callback
+          summary: Object that will be sent to the callback url
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '../../components/schemas/report.yaml#/report_out_subscriptions'
+          responses:
+            '200':
+              description: OK
+
+get:
+  tags:
+    - Subscriptions
+  summary: List Admin Subscriptions
+  operationId: subscriptions_list
+  description: |
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/subscriptions.yaml#/admin_subscriptions_out
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml

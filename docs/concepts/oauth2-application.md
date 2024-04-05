@@ -1,7 +1,7 @@
 
 # OAuth 2.0 Application
 
-This type of application is generally built by partners and are used by multiple organizations. Here is a non-boring blog that explains OAuth 2.0 in detail https://stories.fylehq.com/posts/the-non-boring-guide-to-oauth-2-0
+This type of application is generally built by partners and are used by multiple organizations. Here is a non-boring blog that explains OAuth 2.0 in detail https://stories.fylehq.com/p/the-non-boring-guide-to-oauth-20
 
 > #### 💡 Talk to us if you're interested in a partnership
 >
@@ -33,6 +33,12 @@ You can add the redirect URIs that you want to allow in the OAuth 2.0 flows. Aft
 * client_secret
 
 We currently support the "Authorization Code" flow and "Refresh Token Flow" of OAuth 2.0. If you want a primer on these flows, head to this great [blogpost](https://darutk.medium.com/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85), but come back soon! We plan on adding support for PKCE Authorization request in the near future.
+
+To authorize the app:
+* use the following URL: `https://app.fylehq.com/app/developers/#/oauth/authorize?client_id=<client_id>&redirect_uri=<redirect_uri>`
+* replace the `<client_id>` with your `client_id`
+* replace the `<redirect_uri>` with your redirect URI
+  * if no redirect URI is setup for your app, you may remove the following from the above URL `&redirect_uri=<redirect_uri>`
 
 When a user authorizes the app, they will be redirected to the redirect URI above with the `code` and `state` parameter. At this point, your web application will need to pass this to your server which stores the `client_id` and `client_secret`.
 

@@ -46,6 +46,15 @@ org_id:
   readOnly: true
   example: orwruogwnngg
 
+sub_feature:
+  type: string
+  description: |
+    This field can be used to setup a collection of filters. For example, if you have multiple filters
+    for a single page, this can be used as an identifier to fetch all the filters for that page. <br>
+    **Note: Only combination of alphabets, numbers and _(underscore) is allowed**
+  nullable: true
+  example: flagged_expenses
+
 org_id_in:
   type: string
   nullable: true
@@ -246,13 +255,8 @@ null_field:
 
 source:
   type: string
-  enum:
-    - WEBAPP
-    - SLACK
-    - TPA
-    - CORPORATE_CARD
   description: >
-    Enum value signifying the client from which this expense was created
+    This value signifies the client from which this expense was created
   example: SLACK
 
 expense_policy_limit_type:
@@ -700,6 +704,59 @@ custom_fields:
   items:
     $ref: '#/custom_field'
 
+expense_custom_field:
+  type: object
+  description: |
+    Expense custom field
+  properties:
+    name:
+      type: string
+      example: cf1
+    value:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: '#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'v1', 'v2' ]
+    type:
+      type: string
+      nullable: true
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - BOOLEAN
+        - MULTI_SELECT
+        - LOCATION
+        - USER_LIST
+        - DATE
+        - DEPENDENT_SELECT
+        - null
+      description: |
+        This field specifies the type of the expense field.
+      example: SELECT
+    is_enabled:
+      anyOf:
+        - $ref: '#/null_field'
+        - $ref: '#/is_enabled'
+      nullable: true
+
+expense_custom_fields:
+  type: array
+  description: |
+    Expense custom fields
+  items:
+    $ref: '#/expense_custom_field'
+
+
 flattened_custom_field:
   type: object
   description: |
@@ -917,10 +974,6 @@ schedule_config:
               nullable: true
               type: string
               example: '2020-11-11T16:29:30.965869Z'
-            timezone:
-              nullable: true
-              type: string
-              example: UTC
             jitter:
               nullable: true
               type: number
@@ -1370,7 +1423,7 @@ is_shared:
   type: boolean
   nullable: true
   description: |
-    This indicates if the filter should be shared with other admins in the org.
+    This indicates if the filter should be shared with others in the org.
   default: false
   example: true
 
@@ -1404,7 +1457,8 @@ tax_group:
 policy_checks:
   type: object
   description: |
-    Policy checks details
+    Policy checks details.
+    NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
   properties:
     is_amount_limit_applied:
       type: boolean
@@ -1453,3 +1507,125 @@ query_params:
   description: | 
     This field contains the query param string similar to the query params passed in GET call for displaying data in the list view.
   example: state=eq.PAID
+
+joined_at:
+  anyOf:
+    - $ref: ./fields.yaml#/null_field
+    - $ref: './fields.yaml#/timestamptz_utc'
+  nullable: true
+  description: |
+    Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+
+any_type:
+  anyOf:
+    - type: string
+    - type: number
+    - type: integer
+    - type: boolean
+    - type: array
+      items:
+        $ref: './fields.yaml#/any_type'
+    - type: object
+
+commute_location:
+  type: object
+  nullable: true
+  properties:
+    city:
+      type: string
+      nullable: false
+      example: London
+    state:
+      type: string
+      nullable: false
+      example: London
+    country:
+      type: string
+      nullable: false
+      example: United Kingdom
+    formatted_address:
+      type: string
+      nullable: false
+      example: '221 Baker St, Marylebone, London, United Kingdom'
+    latitude:
+      type: number
+      nullable: false
+      example: 12.971599
+    longitude:
+      type: number
+      nullable: false
+      example: 77.594566
+
+commute_details:
+  type: object
+  nullable: true
+  description: |
+    Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: True
+    home_location:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Home location of the employee.
+      nullable: True
+    work_location:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Work location of the employee.
+      nullable: True
+    distance:
+      type: number
+      nullable: True
+      description: |
+        Distance between home and work location of the employee.
+      example: 10.55
+    distance_unit:
+      type: string
+      nullable: True
+      description: |
+        Unit of distance.
+      enum:
+        - KM
+        - MILES
+        - null
+      example: MILES
+
+commute_details_in:
+  type: object
+  nullable: False
+  additionalProperties: False
+  description: |
+    Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+  properties:
+    home_location:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Home location of the employee.
+      nullable: True
+    work_location:
+      allOf:
+        - $ref: '#/commute_location'
+      description: |
+        Work location of the employee.
+      nullable: True
+    distance:
+      type: number
+      nullable: True
+      description: |
+        Distance between home and work location of the employee.
+      example: 10.55
+    distance_unit:
+      type: string
+      nullable: True
+      description: |
+        Unit of distance.
+      enum:
+        - KM
+        - MILES
+      example: MILES

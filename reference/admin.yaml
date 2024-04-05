@@ -357,6 +357,33 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    project_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    project_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of projects that could be deleted from input projects.
+              example: 2
+            projects:
+              type: array
+              description: Projects that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/project_in_only_id'
     admin_cost_center_out:
       type: object
       additionalProperties: false
@@ -547,6 +574,33 @@ components:
             - List of IDs of users who can access this category. Default value is `[]`.
             - `null` value indicates that all users in the org can access this category.
             - `[]` value indicates that no users in the org can access this category.
+    category_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    category_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of categories that could be deleted from input categories.
+              example: 2
+            categories:
+              type: array
+              description: Categories that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/category_in_only_id'
     system_category_out:
       type: object
       additionalProperties: false
@@ -652,27 +706,6 @@ components:
           description: |
             This specifies the name of the expense field.
           example: Vendor description
-        column_name:
-          type: string
-          enum:
-            - purpose
-            - txn_dt
-            - vendor_id
-            - cost_center_id
-            - distance
-            - distance_unit
-            - location1
-            - location2
-            - from_dt
-            - to_dt
-            - per_diem_num_days
-            - flight_journey_travel_class
-            - flight_return_travel_class
-            - train_travel_class
-            - bus_travel_class
-          description: |
-            This specifies the name of column to which this expense field mapped to.
-          example: purpose
         type:
           type: string
           enum:
@@ -686,7 +719,7 @@ components:
             - DATE
             - DEPENDENT_SELECT
           description: |
-            This field specifies the type of the expense field.
+            This field  specifies the type of the expense field.
           example: SELECT
         options:
           type: array
@@ -719,11 +752,6 @@ components:
             example: 16570
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
-        is_custom:
-          type: boolean
-          description: |
-            This field indicates if the expense field is custom or not.
-          example: false
         is_mandatory:
           type: boolean
           description: |
@@ -1394,12 +1422,22 @@ components:
           example: Sales / Outbound Sales
           description: |
             This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    null_field:
+      type: string
+      nullable: true
     timestamptz_utc:
       type: string
       format: date-time
       nullable: true
       description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     level_out_embed:
       type: object
       additionalProperties: false
@@ -1756,7 +1794,7 @@ components:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         joined_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          $ref: '#/components/schemas/joined_at'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -1894,6 +1932,7 @@ components:
         mobile:
           type: string
           nullable: true
+          example: '+12131234567'
           items:
             $ref: '#/components/schemas/phone_number'
           description: |
@@ -2010,14 +2049,15 @@ components:
         approver_emails:
           type: array
           maxItems: 3
-          nullable: true
+          nullable: false
           items:
             $ref: '#/components/schemas/email'
           example:
             - approver1@example.com
             - approver2@example.com
+            - null
           description: |
-            List of emails of employees that are approvers for this employee.
+            List of emails of employees that are approvers for this employee. Use null in case of no approver or to remove the approver.
         project_names:
           type: array
           nullable: false
@@ -2130,7 +2170,7 @@ components:
       type: boolean
       nullable: true
       description: |
-        This indicates if the filter should be shared with other admins in the org.
+        This indicates if the filter should be shared with others in the org.
       default: false
       example: true
     query_string:
@@ -2324,6 +2364,15 @@ components:
         content_type:
           type: string
           example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          nullable: true
+          type: string
+          description: |
+            Link to upload contents of this file
     file_generate_urls_action_in:
       type: object
       properties:
@@ -2351,12 +2400,7 @@ components:
           nullable: true
           type: string
           description: |
-            Link to download this file
-        thumbnail_200_200_download_url:
-          nullable: true
-          type: string
-          description: |
-            Link to download thumbnail related to this file
+            Link to upload contents of this file
     schedule_config:
       type: object
       nullable: false
@@ -2398,10 +2442,6 @@ components:
                   nullable: true
                   type: string
                   example: '2020-11-11T16:29:30.965869Z'
-                timezone:
-                  nullable: true
-                  type: string
-                  example: UTC
                 jitter:
                   nullable: true
                   type: number
@@ -2675,9 +2715,75 @@ components:
             - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
             - COMPANY_CATEGORY_ACCOUNT
           example: PERSONAL_CASH_ACCOUNT
-    null_field:
-      type: string
+    mileage_rate_out_embed_for_expense:
+      type: object
       nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        vehicle_type:
+          type: string
+          example: Audi
+        code:
+          $ref: '#/components/schemas/code'
+        rate:
+          type: number
+          example: 10
+          nullable: true
+          description: Amount (in Home currency) per unit.
+    expense_custom_field:
+      type: object
+      description: |
+        Expense custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
+      type: array
+      description: |
+        Expense custom fields
+      items:
+        $ref: '#/components/schemas/expense_custom_field'
     amount:
       type: number
       description: |
@@ -2840,6 +2946,16 @@ components:
         content_type:
           type: string
           example: application/pdf
+    expense_verification_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        verifier_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        verifier_user:
+          $ref: '#/components/schemas/user_out_embed'
     org_name:
       type: string
       maxLength: 255
@@ -2898,7 +3014,12 @@ components:
           nullable: true
           example: Finance ops
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
         flattened_custom_field:
           $ref: '#/components/schemas/flattened_custom_field'
         has_accepted_invite:
@@ -2909,8 +3030,18 @@ components:
           example: true
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
       description: |
-        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
       type: string
       description: |
@@ -2958,12 +3089,13 @@ components:
         bank_name:
           nullable: true
           $ref: '#/components/schemas/bank_name'
-        cardholder_name:
+        corporate_card_user_full_name:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
           description: |
-            String denoting the card holder's name
+            String denoting the card holder's full name
           example: John Doe
         amount:
           $ref: '#/components/schemas/amount'
@@ -2982,6 +3114,16 @@ components:
           description: |
             Signifies post date of a card transaction.
             This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
         description:
           type: string
           nullable: true
@@ -3153,7 +3295,8 @@ components:
     policy_checks:
       type: object
       description: |
-        Policy checks details
+        Policy checks details.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       properties:
         is_amount_limit_applied:
           type: boolean
@@ -3189,6 +3332,72 @@ components:
                 description: |
                   ID of the policy rule.
                 example: tprCCiQiiuJZs
+    commute_location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: false
+          example: London
+        state:
+          type: string
+          nullable: false
+          example: London
+        country:
+          type: string
+          nullable: false
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
+    commute_details:
+      type: object
+      nullable: true
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+        home_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+          nullable: true
+        work_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+          nullable: true
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee.
+          example: 10.55
+        distance_unit:
+          type: string
+          nullable: true
+          description: |
+            Unit of distance.
+          enum:
+            - KM
+            - MILES
+            - null
+          example: MILES
     expense_out:
       type: object
       additionalProperties: false
@@ -3217,6 +3426,7 @@ components:
         - project_id
         - project
         - source_account_id
+        - advance_wallet_id
         - source_account
         - tax_amount
         - tax_group_id
@@ -3266,6 +3476,7 @@ components:
         - split_group_id
         - is_physical_bill_submitted
         - physical_bill_submitted_at
+        - invoice_number
       properties:
         id:
           allOf:
@@ -3370,12 +3581,20 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         source_account:
           $ref: '#/components/schemas/account_out_embed'
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organisation.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3416,7 +3635,7 @@ components:
           nullable: true
           example: 9080
         mileage_rate:
-          $ref: '#/components/schemas/mileage_rate_out_embed'
+          $ref: '#/components/schemas/mileage_rate_out_embed_for_expense'
         mileage_is_round_trip:
           type: boolean
           nullable: true
@@ -3432,7 +3651,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Specific to per diem related expenses, number of days ofr which per diem claim is made.
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
@@ -3466,7 +3685,7 @@ components:
           items:
             $ref: '#/components/schemas/location'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/expense_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         code:
@@ -3556,6 +3775,12 @@ components:
             $ref: '#/components/schemas/report_approval_out_embed'
           description: |
             List of report_approval objects
+        verifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_verification_out_embed'
+          description: |
+            List of verification objects
         employee_id:
           $ref: '#/components/schemas/employee_id'
         employee:
@@ -3654,6 +3879,7 @@ components:
           type: array
           description: |
             Comments added by approvers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3662,6 +3888,7 @@ components:
           type: array
           description: |
             Comments added by verifiers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3708,16 +3935,214 @@ components:
           maxLength: 255
           description: |
             An unique ID, generated by Fyle, for identifying the Settlement.
-    expense_assign_in:
+        report_last_paid_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was reimbursed.
+        report_last_approved_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was approved.
+        invoice_number:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Invoice number of the expense.
+          example: 123456
+        commute_deduction:
+          type: string
+          nullable: true
+          maxLength: 12
+          description: |
+            Commute deduction type of the expense.
+          example: ONE_WAY
+          enum:
+            - ONE_WAY
+            - ROUND_TRIP
+            - NO_DEDUCTION
+            - null
+        commute_details_id:
+          type: integer
+          nullable: true
+          description: |
+            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+          example: 1234
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+    source:
+      type: string
+      description: |
+        This value signifies the client from which this expense was created
+      example: SLACK
+    is_reimbursable:
+      type: boolean
+      nullable: true
+      description: This field marks whether a given expense is reimbursable or not.
+      example: true
+    distance:
+      type: number
+      nullable: true
+      description: Actual distance travelled by employee in travel related expenses.
+    distance_unit:
+      type: string
+      nullable: true
+      description: Unit of distance travelled.
+      enum:
+        - KM
+        - MILES
+      example: MILES
+    travel_classes:
+      description: |
+        This field is applicable only for `Flight`, `Train`, `Bus` category.
+        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
+      type: array
+      minItems: 0
+      maxItems: 2
+      nullable: true
+      items:
+        type: string
+      example:
+        - ECONOMY
+        - BUSINESS
+    locations:
+      description: |
+        This field will be present for travel related categories.
+        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 10
+      items:
+        $ref: '#/components/schemas/location'
+    admin_expense_in:
       type: object
-      required:
-        - id
-        - assignee_user_email
+      additionalProperties: false
+      anyOf:
+        - required:
+            - admin_amount
+            - spent_at
+            - assignee_user_email
+        - required:
+            - id
       properties:
         id:
-          $ref: '#/components/schemas/id_string'
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object
+            - When `id` is sent, default action is to update the expense
+        admin_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by admin or approver.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: 1900
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
         assignee_user_email:
-          $ref: '#/components/schemas/email'
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            An immutable field that represents the email address of the employee.
+            Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
+            822.</a>
+            - **Note:**
+              - The expense will be assigned/re-assigned to this particular `employee`. 
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+              - Admins can't assign the expense to self.
+        source:
+          $ref: '#/components/schemas/source'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+          description: |
+            List of file ids to attach to the expense. <br>
+            To add new files to the expense, send the list of file ids to be attached. <br>
+            To remove files from the expense, send the list of all file ids except which you want to remove. <br>
     accounting_export_summary_in:
       type: object
       required:
@@ -3749,6 +4174,14 @@ components:
           type: string
           description: URL Endpoint for exported / failed expense
           example: https://app.example.com/expense/txwownwrng
+    sub_feature:
+      type: string
+      description: |
+        This field can be used to setup a collection of filters. For example, if you have multiple filters
+        for a single page, this can be used as an identifier to fetch all the filters for that page. <br>
+        **Note: Only combination of alphabets, numbers and _(underscore) is allowed**
+      nullable: true
+      example: flagged_expenses
     expense_filters_out:
       type: object
       additionalProperties: false
@@ -3767,6 +4200,8 @@ components:
           $ref: '#/components/schemas/user_id'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -3784,6 +4219,8 @@ components:
           $ref: '#/components/schemas/is_shared'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
     expense_filters_delete_in:
       type: object
       additionalProperties: false
@@ -3945,6 +4382,8 @@ components:
           example: eefilumWHrlPf7K
         org_id:
           $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
         query_params:
           allOf:
             - $ref: '#/components/schemas/query_params'
@@ -4182,6 +4621,46 @@ components:
           $ref: '#/components/schemas/fk_integer'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    advance_requests_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in advance_requests GET call for displaying advance_requests in the list view.
+          nullable: false
+          example: id=in.('adr1263', 'adr1569')
+    advance_requests_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            This field represents the total number of advance_requests that match the criteria specified in the query_params within the body of the request.
+          nullable: false
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
+          example: 100
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
     advance_out:
       type: object
       additionalProperties: false
@@ -4225,7 +4704,14 @@ components:
         advance_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          nullable: true
           example: accwiofowiww
+          deprecated: true
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: awfgRr8YA6KK
         seq_num:
           type: string
           description: |
@@ -4284,6 +4770,8 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
     advance_in:
       type: object
       required:
@@ -4291,7 +4779,6 @@ components:
         - currency
         - amount
         - payment_mode
-        - advance_account_id
       properties:
         user_id:
           type: string
@@ -4322,7 +4809,14 @@ components:
         advance_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          deprecated: true
           example: accwiofowiww
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: awfgRr8YA6KK
         purpose:
           type: string
           nullable: true
@@ -4348,6 +4842,214 @@ components:
           example: XXXXXXXXXXXX1234
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    advances_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in advances GET call for displaying advances in the list view.
+          nullable: false
+          example: id=in.('adv1263', 'adv1569')
+    advances_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            This field represents the total number of advances that match the criteria specified in the query_params within the body of the request.
+          nullable: false
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of advances that match the criteria specified in the query_params within the body of the request.
+          example: 100
+    advance_wallet_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance_amount:
+          $ref: '#/components/schemas/amount'
+    advance_wallet_in:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+    advance_refund_out:
+      type: object
+      additionalProperties: false
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        collector_user_id:
+          $ref: '#/components/schemas/user_id'
+        refunded_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this advance refund was completed.
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+          nullable: true
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          nullable: true
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+            - CASH
+          example: CASH
+        code:
+          allOf:
+            - $ref: '#/components/schemas/code'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance refund.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance refund was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        card_number:
+          type: string
+          nullable: true
+          example: XXXXXXXXXXXX1234
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: awfgRr8YA6KK
+    advance_refund_in:
+      type: object
+      required:
+        - currency
+        - amount
+        - payment_mode
+        - advance_wallet_id
+      properties:
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        foreign_currency:
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+          nullable: true
+        foreign_amount:
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+          nullable: true
+        payment_mode:
+          type: string
+          enum:
+            - CARD
+            - BANK_TRANSFER
+            - CHEQUE_DD
+            - FOREX
+            - CASH
+          example: CASH
+        code:
+          allOf:
+            - $ref: '#/components/schemas/code'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance refund.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance refund was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        card_number:
+          type: string
+          nullable: true
+          example: XXXXXXXXXXXX1234
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: awfgRr8YA6KK
+    advance_refunds_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in advance_refunds GET call for displaying advance_refunds in the list view.
+          nullable: false
+          example: id=in.('adr1263', 'adr1569')
+    advance_refunds_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            This field represents the total number of advance_refunds that match the criteria specified in the query_params within the body of the refund.
+          nullable: false
+          example: 1
+        total_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of advance_refunds that match the criteria specified in the query_params within the body of the refund.
+          example: 100
     reminder_type:
       type: string
       enum:
@@ -4528,12 +5230,16 @@ components:
             This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         org_id:
           $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
         department_id:
           nullable: true
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
         ach_account:
           additionalProperties: false
           type: object
@@ -4563,6 +5269,24 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        has_accepted_invite:
+          type: boolean
+          description: |
+            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
+          default: true
+          example: true
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
     ach_transfer_state:
       type: string
       enum:
@@ -4631,6 +5355,38 @@ components:
           example: ACH
         ach_transfer:
           $ref: '#/components/schemas/ach_transfer'
+    report_comments_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - creator_user_id
+        - creator_user
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        creator_user_id:
+          $ref: '#/components/schemas/id_string'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+    advance_wallet_report_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        amount:
+          $ref: '#/components/schemas/amount'
     admin_report_out:
       type: object
       additionalProperties: false
@@ -4660,6 +5416,9 @@ components:
         - next_approver_user_ids
         - reimbursement_id
         - reimbursement
+        - comments
+        - applied_advance_wallets
+        - can_apply_advances
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -4806,6 +5565,12 @@ components:
           type: string
           example: Sent Back
           description: readable state name
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_comments_out_embed'
+          description: |
+            List of comments on the report
         accounting_export_summary:
           type: object
           description: |
@@ -4825,7 +5590,7 @@ components:
               description: |
                 Number of skipped expenses.
               example: 2
-            failed:
+            error:
               type: number
               description: |
                 Number of failed expenses.
@@ -4851,6 +5616,18 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
+        can_apply_advances:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether advances can be applied to this report
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
     admin_report_in:
       type: object
       additionalProperties: false
@@ -4929,24 +5706,24 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: rpfilumWHrlPf7K
-    user_out_embed_nullable:
+    report_comments_in:
       type: object
-      nullable: true
       additionalProperties: false
+      required:
+        - id
+        - comment
       properties:
         id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
           type: string
-          maxLength: 255
           description: |
-            Represents the full name of the Employee. Must be at least 3 characters.
-          example: John Doe
-    admin_report_comments_out:
+            id of the report, on which need to add comment
+          example: rpa21A2rdj2
+        comment:
+          type: string
+          description: |
+            comment on the report
+          example: We don't accept laundry bills
+    report_comments_out:
       type: object
       additionalProperties: false
       required:
@@ -4977,43 +5754,6 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
-    report_comments_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - comment
-      properties:
-        id:
-          type: string
-          description: |
-            id of the report, on which need to add comment
-          example: rpa21A2rdj2
-        comment:
-          type: string
-          description: |
-            comment on the report
-          example: We don't accept laundry bills
-    add_approvers_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - approver_emails
-      properties:
-        id:
-          type: string
-          description: |
-            id of the report, to which approvers need to be added
-          example: rpa21A2rdj2
-        approver_emails:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/email'
-          example:
-            - adb@gmail.com
-            - kartikey.rajvaidya@fyle.in
     process_ach_in:
       type: object
       properties:
@@ -5144,6 +5884,13 @@ components:
             - re123453
           description: |
             This field contains list of report_ids that can directly be closed(with reimbursable amount as 0). 
+    report_accounting_export_summary_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     reports_stats_in:
       properties:
         query_params:
@@ -5206,6 +5953,92 @@ components:
           example:
             - txelntgwgwll
             - txavbdabass
+    report_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    report_permissions_out:
+      type: object
+      additionalProperties: false
+      required:
+        - can_edit
+        - can_admin_or_approver_edit
+        - can_delete
+        - can_submit
+        - can_export
+        - can_resubmit
+        - can_approve
+        - can_admin_approve
+        - can_send_back
+        - can_verify
+        - can_move_to_payment_pending
+        - can_add_approver
+        - can_remove_approver
+      properties:
+        can_edit:
+          type: boolean
+          example: true
+        can_admin_or_approver_edit:
+          type: boolean
+          example: true
+        can_delete:
+          type: boolean
+          example: true
+        can_submit:
+          type: boolean
+          example: true
+        can_export:
+          type: boolean
+          example: true
+        can_resubmit:
+          type: boolean
+          example: true
+        can_approve:
+          type: boolean
+          example: true
+        can_admin_approve:
+          type: boolean
+          example: true
+        can_send_back:
+          type: boolean
+          example: true
+        can_verify:
+          type: boolean
+          example: true
+        can_move_to_payment_pending:
+          type: boolean
+          example: true
+        can_add_approver:
+          type: boolean
+          example: true
+        can_remove_approver:
+          type: boolean
+          example: true
+    apply_advance_wallets_in:
+      type: object
+      required:
+        - id
+        - advance_wallet_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        advance_wallet_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - awfgRr8YA6KK
+    remove_advance_wallets_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     corporate_card_out:
       type: object
       properties:
@@ -5312,6 +6145,26 @@ components:
             - VERIFIED
             - NOT_VERIFIED
             - READY_FOR_VERIFICATION
+        virtual_card_id:
+          type: string
+          description: |
+            The unique id of the virtual card, if the card is created from virtual card.
+          nullable: true
+          example: viasdfasdfddd
+        virtual_card_state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
       required:
         - id
         - org_id
@@ -5333,6 +6186,8 @@ components:
         - last_verification_attempt_at
         - last_verified_at
         - verification_status
+        - virtual_card_id
+        - virtual_card_state
     corporate_card_in:
       type: object
       properties:
@@ -5514,6 +6369,26 @@ components:
             Signifies when the card was verified
           example: '2022-02-01T07:20:39.207250+00:00'
           nullable: true
+        virtual_card_id:
+          type: string
+          description: |
+            The unique id of the virtual card, if the card is created from virtual card.
+          nullable: true
+          example: viasdfasdfddd
+        virtual_card_state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
       required:
         - id
         - org_id
@@ -5535,6 +6410,8 @@ components:
         - last_verification_attempt_at
         - verification_status
         - last_verified_at
+        - virtual_card_id
+        - virtual_card_state
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -5799,6 +6676,13 @@ components:
           description: |
             signifies post date of a card transaction.
             This date cannot be in future.
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: |
+            Holds the status of the Corporate Card Transaction, whether posted or still pending.
         description:
           type: string
           nullable: true
@@ -7531,6 +8415,13 @@ components:
           description: |
             signifies post date of a card transaction.
             This date cannot be in future.
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: |
+            Holds the status of the Corporate Card Transaction, whether posted or still pending.
         description:
           type: string
           nullable: true
@@ -8000,6 +8891,13 @@ components:
           description: |
             signifies post date of a card transaction.
             This date cannot be in future.
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: |
+            Holds the status of the Corporate Card Transaction, whether posted or still pending.
         description:
           type: string
           nullable: true
@@ -8182,6 +9080,434 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    virtual_card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: viwownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        last_five:
+          type: string
+          description: |
+            Specifies the last 5 digits of the card.
+          example: '4543'
+        state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
+        expiry_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the expiry date of the card.
+          example: '2022-02-01'
+        amex_account_id:
+          type: string
+          description: |
+            The unique id of the amex account to which the card is assigned
+          example: amactr7NhV9Qn6
+        valid_from_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the valid from date of the card, ie from when the card would be active.
+          example: '2022-02-01'
+        valid_till_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the valid till date of the card, ie till when the card would be active.
+          example: '2022-02-01'
+        creator_user_id:
+          type: string
+          description: |
+            The unique id of an user who created the card.
+          example: useradfasd
+        virtual_card_user_id:
+          type: string
+          description: |
+            This id refers to the virtual card user to whom the virtual card is assigned.
+          example: vcg2Bl78jstf
+        nick_name:
+          type: string
+          description: |
+            Represents user defined nick name associated with the virtual card for easier recognition.
+          example: john
+      required:
+        - id
+        - org_id
+        - user_id
+        - created_at
+        - updated_at
+        - last_five
+        - state
+        - expiry_date
+        - amex_account_id
+        - valid_from_at
+        - valid_till_at
+        - creator_user_id
+        - virtual_card_user_id
+        - nick_name
+    virtual_cards_id_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique id of the virtual card
+          example: viwownwrng
+      required:
+        - id
+    virtual_cards_get_current_balance_out:
+      type: object
+      properties:
+        current_amount:
+          type: number
+          description: |
+            The current balance amount of the virtual card
+          example: 1000
+      required:
+        - current_amount
+    virtual_cards_show_card_details_out:
+      type: object
+      properties:
+        full_card_number:
+          type: string
+          description: |
+            Full card number of the virtual card
+          example: 1234567890123456
+        expiry_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Specifies the expiry date of the card.
+          example: '2022-02-01'
+        cvv:
+          type: string
+          description: |
+            CVV of the virtual card
+          example: 123
+      required:
+        - full_card_number
+        - expiry_date
+        - cvv
+    webhook_url:
+      type: string
+      description: |
+        URL Endpoint for webhook
+      example: https://api.custom.com/webhook1
+    admin_subscriptions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        org_id:
+          $ref: '#/components/schemas/fk_string'
+    subscriptions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_enabled
+        - webhook_url
+      properties:
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        webhook_url:
+          $ref: '#/components/schemas/webhook_url'
+    report_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - user_id
+        - user
+        - purpose
+        - currency
+        - amount
+        - tax
+        - state
+        - num_expenses
+        - is_manually_flagged
+        - is_policy_flagged
+        - last_paid_at
+        - last_approved_at
+        - last_submitted_at
+        - last_resubmitted_at
+        - seq_num
+        - source
+        - approvals
+        - employee
+        - next_approver_user_ids
+        - comments
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/id_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        purpose:
+          type: string
+          description: purpose for creating the report
+          example: Business trip to London
+          nullable: true
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        tax:
+          type: number
+          description: |
+            Tax value of the object.
+          example: 18.23
+          nullable: true
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+        num_expenses:
+          type: integer
+          description: |
+            Number of expenses part of this report
+          example: 3
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this report has been verified by a verifier
+        settlement_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: set5nlgnwgwl
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            If physical has been collected for this report
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when the physical bill for this report was submitted.
+          nullable: true
+        is_manually_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged manually
+        is_policy_flagged:
+          type: boolean
+          description: |
+            Determines whether this report was flagged from a policy
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this expense has been exported to external accounting system or not.
+        last_paid_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was reimbursed.
+          nullable: true
+        last_approved_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was approved.
+          nullable: true
+        last_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was submitted.
+          nullable: true
+        last_resubmitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when this report was resubmitted.
+          nullable: true
+        seq_num:
+          type: string
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        source:
+          type: string
+          description: |
+            where was this report object created from
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed_for_report'
+        next_approver_user_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          example:
+            - us123heh98
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_comments_out_embed'
+          description: |
+            List of comments on the report
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this report.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            skipped:
+              type: number
+              description: |
+                Number of skipped expenses.
+              example: 2
+            error:
+              type: number
+              description: |
+                Number of failed expenses.
+              example: 0
+            complete:
+              type: number
+              description: |
+                Number of complete expenses.
+              example: 5
+            in_progress:
+              type: number
+              description: |
+                Number of in progress expenses.
+              example: 0
+            initiate:
+              type: number
+              description: |
+                Number of initiated expenses.
+              example: 0
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
+        applied_advance_wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_wallet_report_out'
+          nullable: true
+          description: |
+            List of applied advance wallets
+    report_out_subscriptions:
+      type: object
+      additionalProperties: false
+      required:
+        - resource
+        - action
+        - data
+        - reason
+      properties:
+        resource:
+          type: string
+          example: REPORT
+        action:
+          type: string
+          enum:
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
+            - APPROVED
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
+          example: APPROVED
+        data:
+          allOf:
+            - $ref: '#/components/schemas/report_out'
+            - type: object
+              additionalProperties: false
+              properties:
+                updated_by_user:
+                  $ref: '#/components/schemas/user_out_embed'
+        reason:
+          type: string
+          example: comment given by Approver while approving the report.
     settlement_out:
       type: object
       additionalProperties: false
@@ -8311,8 +9637,6 @@ components:
             Determines whether this reimbursement has been exported to external
             accounting system or not.
         settlement_id:
-          $ref: '#/components/schemas/id_string'
-        payment_id:
           $ref: '#/components/schemas/id_string'
         code:
           $ref: '#/components/schemas/code'
@@ -8869,9 +10193,49 @@ components:
         fiscal_year_start_month:
           type: number
           example: 10
-          description: Month number of start of fisical year
+          description: Month number of start of fiscal year
           minimum: 1
           maximum: 12
+        budget_start_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-01T00:00:00+00:00'
+          description: Start date of the current budget interval
+        budget_end_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-30T00:00:00+00:00'
+          description: End date of the current budget interval
+        budget_creator:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/id_string'
+            name:
+              $ref: '#/components/schemas/name'
+            email:
+              $ref: '#/components/schemas/email'
+          example:
+            id: usq8rwZj2POy
+            name: John Brown
+            email: admin1@company.com
+        amount_spent:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount spent from the budget interval
+        amount_remaining:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount remaining in the budget interval
+        utilisation_percentage:
+          type: number
+          nullable: true
+          example: 50
+          description: Utilisation percentage of the budget interval
     budget_in:
       type: object
       required:
@@ -9087,10 +10451,6 @@ components:
         - LIFETIME
         - null
       example: MONTHLY
-    distance:
-      type: number
-      nullable: true
-      description: Actual distance travelled by employee in travel related expenses.
     contains_operator:
       nullable: true
       type: string
@@ -9565,6 +10925,33 @@ components:
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
+        expense_without_receipt_allowed:
+          type: boolean
+          description: |
+            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated. <br>
+            **Note: If this field is set to false i.e. receipts are mandatory, only following conditions & actions are allowed =>**
+            - expense_category_ids
+            - expense_category_ids_op
+            - expense_project_ids
+            - expense_project_ids_op
+            - expense_cost_center_ids
+            - expense_cost_center_ids_op
+            - expense_limit_type (only `INIDIVIDUAL` type is allowed)
+            - expense_currency
+            - expense_amount_max
+            - employee_department_ids
+            - employee_department_ids_op
+            - employee_locations
+            - employee_user_ids
+            - employee_user_ids_op
+            - employee_titles
+            - employee_titles_op
+            - action_flag
+            - action_show_warning
+            - action_make_unreportable
+            - description
+          default: true
+          example: true
         expense_limit_type:
           oneOf:
             - $ref: '#/components/schemas/expense_policy_limit_type'
@@ -9736,12 +11123,6 @@ components:
           type: boolean
           description: |
             If this is set to false, then for all such expenses that are created on holidays, this policy rule will be violated.
-          default: true
-          example: true
-        expense_without_receipt_allowed:
-          type: boolean
-          description: |
-            If this is set to false, then for all such expenses that doesn't have receipt, this policy rule will be violated.
           default: true
           example: true
         expense_spent_at_max:
@@ -10793,6 +12174,12 @@ components:
           description: |
             Indicates whether the statement has atleast one card enrolled in RTF.
           example: true
+        rtf_card_network:
+          type: string
+          description: |
+            Card network of the statement if the statement has atleast one card enrolled in RTF.
+          example: VISA
+          nullable: true
         missing_corporate_card_details:
           type: array
           items:
@@ -11230,57 +12617,11 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-    source:
-      type: string
-      enum:
-        - WEBAPP
-        - SLACK
-        - TPA
-        - CORPORATE_CARD
-      description: |
-        Enum value signifying the client from which this expense was created
-      example: SLACK
     claim_amount:
       type: number
       description: |
         The expense amount as claimed by user.
       example: 1984.18
-    is_reimbursable:
-      type: boolean
-      nullable: true
-      description: This field marks whether a given expense is reimbursable or not.
-      example: true
-    distance_unit:
-      type: string
-      nullable: true
-      description: Unit of distance travelled.
-      enum:
-        - KM
-        - MILES
-      example: MILES
-    travel_classes:
-      description: |
-        This field is applicable only for `Flight`, `Train`, `Bus` category.
-        Index 0 holds onward journey travel class, index 1 holds return journey travel class.
-      type: array
-      minItems: 0
-      maxItems: 2
-      nullable: true
-      items:
-        type: string
-      example:
-        - ECONOMY
-        - BUSINESS
-    locations:
-      description: |
-        This field will be present for travel related categories.
-        For travel between Place A to Place B, this array will contain two items. From location at array index i and To location at array index i+1.
-      type: array
-      nullable: true
-      minItems: 0
-      maxItems: 10
-      items:
-        $ref: '#/components/schemas/location'
     spender_expense_check_mandatory_fields_in:
       type: object
       additionalProperties: false
@@ -11335,10 +12676,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
         tax_amount:
           type: number
           nullable: true
-          description: Tax amount as setup by your organization.
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
         tax_group_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -11366,6 +12715,13 @@ components:
           description: |
             Number of files/reciepts attached to expense
           example: 4
+        invoice_number:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Invoice number of the expense.
+          example: 123456
     expense_check_mandatory_fields_in:
       required:
         - id
@@ -11390,7 +12746,7 @@ components:
         missing_amount:
           type: boolean
           description: |
-            If this is set to true, then you need to send currency field with expense object.
+            If this is set to true, then you need to send amount field with expense object.
           example: false
         missing_currency:
           type: boolean
@@ -11416,6 +12772,438 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    expense_dismiss_duplicates_in:
+      type: object
+      required:
+        - id
+        - duplicate_expense_ids
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        duplicate_expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that needs to be dismissed as a duplicate from the target expense
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+    feature_config_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
+    feature_config_in:
+      type: object
+      additionalProperties: false
+      required:
+        - target_client
+        - feature
+        - key
+        - value
+        - is_shared
+      properties:
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
+    split_expense_in:
+      type: object
+      properties:
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        source:
+          $ref: '#/components/schemas/source'
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
+        is_reimbursable:
+          $ref: '#/components/schemas/is_reimbursable'
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+          description: |
+            List of file IDs to be attached to the expense.
+          example:
+            - fisjfwlrglw
+            - fisjfwlrglw
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        purpose:
+          type: string
+          example: Team lunch
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+    expense_split_object:
+      type: object
+      properties:
+        spent_at:
+          type: string
+          format: date-time
+          nullable: false
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+            - **Note:**
+              - This field is required while creating an expense.
+              - _Not required when updating an expense, but is non-nullable_. 
+          example: '2020-06-01T01:18:19.292-08:00'
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          example: Team lunch
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+    admin_expense_split_object:
+      type: array
+      items:
+        required:
+          - admin_amount
+        allOf:
+          - $ref: '#/components/schemas/expense_split_object'
+        properties:
+          admin_amount:
+            type: number
+            nullable: false
+            description: |
+              The expense amount which is added or modified by admin or approver.
+            example: 1900
+    admin_split_expense_in:
+      type: object
+      required:
+        - id
+        - admin_amount
+      allOf:
+        - $ref: '#/components/schemas/split_expense_in'
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            This id is provided by Fyle to identify an object
+            - When `id` is sent, default action is to update the expense
+        admin_amount:
+          type: number
+          nullable: false
+          description: |
+            The expense amount which is added or modified by admin or approver.
+          example: 1900
+        splits:
+          description: |
+            This array contains the number of split expenses admin wants to create for the expense.
+            The `admin_amount` provided for the original expense should be equal to the sum of
+            `admin_amount` provided for each split. Each attribute in the splits array will take precedence
+            to the original expense object. If any attribute is not provided in the split object, then
+            null or default value will be taken for that attribute in the resultant split.
+          allOf:
+            - $ref: '#/components/schemas/admin_expense_split_object'
+    expense_check_policies_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        expense_policy_rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: |
+            This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
+            If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+            it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved.
+            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was
+            missing or not set up properly, it will fail to take action on the expense when it is saved.
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+            case some approver was not setup properly for the given violation, this array will contain description of
+            missing approvers. For example, Department head, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_check_policies_final_desired_state:
+      type: object
+      properties:
+        flag:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        is_receipt_mandatory:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_check_policies_out:
+      type: object
+      additionalProperties: false
+      properties:
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_check_policies_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_check_policies_final_desired_state'
   parameters:
     q:
       in: query
@@ -11687,6 +13475,9 @@ tags:
   - name: Statement mappings
     description: |
       These APIs gives you access to manage statement mappings which is used for statement uploads.
+  - name: Feature Configs
+    description: |
+      These APIs gives you access to manage feature configs.
 paths:
   /admin/projects:
     get:
@@ -11822,6 +13613,107 @@ paths:
                       data:
                         type: object
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/projects/delete/bulk:
+    post:
+      tags:
+        - Projects
+      summary: Deletes projects
+      description: |
+        Deletes unused projects. If any of the project in input is used in other resources then validation error is raised.
+      operationId: projects_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete project(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/projects/delete_summary/bulk:
+    post:
+      tags:
+        - Projects
+      summary: Create delete summary for projects
+      description: |
+        Delete summary tells that how many projects could be deleted from given projects, it also
+        returns projects that could be deleted.
+      operationId: projects_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/project_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/project_delete_summary_out'
         '401':
           description: Unauthorised request
           content:
@@ -12120,6 +14012,108 @@ paths:
                       data:
                         type: string
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/categories/delete/bulk:
+    post:
+      tags:
+        - Categories
+      summary: Deletes categories
+      description: |
+        Deletes unused categories. If any of the category in input is used in other resources or it is a mileage/per diem 
+        category then validation error is raised.
+      operationId: categories_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/category_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete per diem and mileage categorie(s) or categorie(s) used in other resources like expense, expense policy, expense rules, budgets.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/categories/delete_summary/bulk:
+    post:
+      tags:
+        - Categories
+      summary: Create delete summary for categories
+      description: |
+        Delete summary tells that how many categories could be deleted from given categories, it also
+        returns categories that could be deleted.
+      operationId: categories_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/category_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/category_delete_summary_out'
         '401':
           description: Unauthorised request
           content:
@@ -13758,13 +15752,11 @@ paths:
                         content_type: application/pdf
                         download_url: https://aaa.bbb.cc/x232sds
                         upload_url: https://aaa.bbb.cc/x232sds
-                        thumbnail_200_200_download_url: https://aaa.bbb.cc/x232sds
                       - id: sdfd2392
                         name: lyft_expenses_vmrpw.pdf
                         content_type: application/pdf
                         download_url: https://aaa.bbb.cc/x22ddsds
                         upload_url: https://aaa.bbb.cc/x2sdssds
-                        thumbnail_200_200_download_url: https://aaa.bbb.cc/x2sdssds
         '400':
           description: Bad request
           content:
@@ -13783,6 +15775,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/files/download:
+    get:
+      operationId: files_download_get
+      tags:
+        - Files
+      summary: Download a file
+      description: |
+        Generates a download URL for a file and redirects client to that URL.
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+            example: fiNhunGsCQJb
+      responses:
+        '302':
+          description: Redirect to file download URL
+          headers:
+            Location:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/automations/report_submissions:
     post:
       tags:
@@ -14203,26 +16241,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /admin/expenses/assign:
     post:
       tags:
         - Expenses
-      summary: Assign expense
+      summary: Create or update an expense
       description: |
-        This API Assigns an existing expense to a user of same organization
-      operationId: expenses_add_comment_post
+        Create or update an expense.
+      operationId: expenses_post
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required:
-                - data
               properties:
                 data:
-                  $ref: '#/components/schemas/expense_assign_in'
+                  $ref: '#/components/schemas/admin_expense_in'
       responses:
         '200':
           description: OK
@@ -14230,22 +16264,27 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: false
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_out'
         '400':
-          description: Unauthorised request
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
         '401':
-          description: Unauthorised request
+          description: Unauthorized request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
@@ -14641,6 +16680,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_requests/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Requests Stats
+      description: |
+        Advances Requests Stats
+      operationId: advance_requests_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_requests_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_requests_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/advances:
     get:
       tags:
@@ -14713,6 +16807,418 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/advance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advances/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Create advances in bulk
+      description: |
+        Create advances in bulk.
+      operationId: advances_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/advances/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Stats
+      description: |
+        Advances Stats
+      operationId: advances_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advances_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advances_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_wallets:
+    get:
+      tags:
+        - Advances
+      summary: List advance wallets
+      operationId: advance_wallets_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advance wallets
+      summary: Create advance wallets
+      description: |
+        Create advance wallets.
+      operationId: advance_wallets_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_wallet_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_refunds:
+    get:
+      tags:
+        - Advances
+      summary: List advance refunds
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: advance_refunds_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_refund_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advances
+      summary: Create an advance refund
+      description: |
+        Create an advance refund.
+      operationId: advance_refunds_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_refund_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_refund_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_refunds/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Create advance refund in bulk
+      description: |
+        Create advance refund in bulk.
+      operationId: advance_refunds_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              additionalProperties: false
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_refund_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/advance_refunds/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Refunds Stats
+      description: |
+        Advances Refunds Stats
+      operationId: advance_refunds_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_refunds_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_refunds_stats_out'
         '400':
           description: Bad request
           content:
@@ -15161,42 +17667,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/404'
   /admin/reports/comments:
-    get:
-      tags:
-        - Reports
-      summary: List report comments
-      description: |
-        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      operationId: report_comments_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/admin_report_comments_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
     post:
       tags:
         - Reports
@@ -15225,7 +17695,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: '#/components/schemas/admin_report_comments_out'
+                    $ref: '#/components/schemas/report_comments_out'
         '400':
           description: Unauthorised request
           content:
@@ -15238,67 +17708,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /admin/reports/add_approvers:
-    post:
-      tags:
-        - Reports
-      summary: Add Approvers
-      description: |
-        Add Approvers
-      operationId: report_add_approvers
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-                - reason
-              properties:
-                data:
-                  $ref: '#/components/schemas/add_approvers_in'
-                reason:
-                  type: string
-                  description: |
-                    Reason for adding approvers to the report
-                  example: added approver
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/admin_report_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
@@ -15557,6 +17966,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/accounting_export_summary/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Update accounting export summary and initiate export
+      description: |
+        Update accounting export summary and initiate export
+      operationId: reports_accounting_export_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_accounting_export_summary_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/stats:
     post:
       tags:
@@ -15634,6 +18104,158 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/permissions:
+    post:
+      tags:
+        - Reports
+      summary: Reports Permissions
+      description: |
+        Reports Permissions for a user
+      operationId: reports_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/apply_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Settle report with advance wallets
+      description: Settle report with advance wallets
+      operationId: report_apply_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/apply_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/remove_advance_wallets:
+    post:
+      tags:
+        - Reports
+      summary: Undo settling of report with advance wallets
+      description: |
+        This will undo the settling of the report with advance wallets
+      operationId: report_remove_advance_wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/remove_advance_wallets_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
         '400':
           description: Unauthorised request
           content:
@@ -16865,6 +19487,311 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/virtual_cards:
+    get:
+      tags:
+        - Virtual Cards
+      summary: List virtual cards
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: virtual_cards_list
+      parameters:
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/virtual_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/virtual_cards/get_current_amount:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Get current balance amount of the virtual card
+      description: |
+        To get the current balance amount of the virtual card
+      operationId: virtual_cards_get_current_balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_cards_get_current_balance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/show_card_details:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Show full card details
+      description: |
+        To get the card details of the virtual card
+      operationId: virtual_cards_show_card_details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_cards_show_card_details_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/virtual_cards/delete:
+    post:
+      tags:
+        - Virtual Cards
+      summary: Delete a virtual card
+      description: |
+        To delete a virtual card
+      operationId: virtual_cards_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/virtual_cards_id_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/virtual_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Create a subscription
+      description: subscribe to different events using this API
+      operationId: admin_subscriptions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/subscriptions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+      callbacks:
+        REPORT.*:
+          '{$request.body#/data/webhook_url}':
+            post:
+              operationId: report_subscriptions_callback
+              summary: Object that will be sent to the callback url
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/report_out_subscriptions'
+              responses:
+                '200':
+                  description: OK
+    get:
+      tags:
+        - Subscriptions
+      summary: List Admin Subscriptions
+      operationId: subscriptions_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/admin_subscriptions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/settlements:
     get:
       tags:
@@ -18971,6 +21898,355 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/dismiss_duplicates/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Dismiss Duplicate expenses
+      description: |
+        This API helps dismissing similar expenses as a duplicates.
+      operationId: dismiss_duplicates_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_dismiss_duplicates_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/expenses/duplicate_sets:
+    get:
+      tags:
+        - Expenses
+      summary: List expense duplicate sets
+      operationId: expense_duplicate_sets
+      description: |
+        This API provides the sets of the duplicate expenses for a particular employee.
+      parameters:
+        - in: query
+          name: expense_id
+          description: An expense_id for what we need to fetch the duplicate expenses.
+          schema:
+            type: string
+            example: txdsjkF453kh
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_duplicate_sets_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/feature_configs:
+    get:
+      tags:
+        - Feature Configs
+      summary: List feature configs.
+      operationId: feature_configs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/feature_config_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/feature_configs/bulk:
+    post:
+      tags:
+        - Feature Configs
+      summary: Create or update feature configs.
+      description: |
+        This API allows you to create or update feature configs.
+      operationId: feature_configs_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/feature_config_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/expenses/split:
+    post:
+      tags:
+        - Expenses
+      summary: Split an expense
+      description: |
+        Admin can split an expense created by spender which is not yet paid out.
+      operationId: expenses_split_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_split_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/split/check_mandatory_fields:
+    post:
+      tags:
+        - Expenses
+      summary: Check mandatory fields before splitting an expense
+      description: |
+        Before splitting an employee's expense object
+        into Fyle, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
+        You can easily do that by passing the same expense split object documented below.
+      operationId: expenses_split_check_mandatory_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_split_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_check_mandatory_fields_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/split/check_policies:
+    post:
+      tags:
+        - Expenses
+      summary: Check for policy violations before splitting an expense
+      description: |
+        Before splitting an [expense object](https://docs.fylehq.com/docs/fyle-platform-docs/7a3407a5ef184-split-an-expense)
+        into Fyle, based on the business requirements, you might want to check the resulting 
+        expenses against the policy rules set up by your organization. You can easily do that by passing the same split expense object 
+        to this API.
+      operationId: expenses_split_check_policies_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_split_expense_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_check_policies_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
