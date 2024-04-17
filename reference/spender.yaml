@@ -3763,6 +3763,36 @@ components:
           description: |
             This field indicates the sum of amount of advances that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_wallet_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance_amount:
+          $ref: '#/components/schemas/amount'
+    advance_wallet_in:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
     corporate_card_out:
       type: object
       properties:
@@ -9497,6 +9527,102 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/advances_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_wallets:
+    get:
+      tags:
+        - Advances
+      summary: List advance wallets
+      operationId: advance_wallets_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advance wallets
+      summary: Create advance wallets
+      description: |
+        Create advance wallets.
+      operationId: advance_wallets_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_wallet_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_wallet_out'
         '400':
           description: Bad request
           content:
