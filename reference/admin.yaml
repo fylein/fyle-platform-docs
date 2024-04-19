@@ -5785,6 +5785,16 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    report_action_remove_approver_in:
+      type: object
+      required:
+        - id
+        - approver_email
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
     process_ach_in:
       type: object
       properties:
@@ -17745,6 +17755,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/remove_approver:
+    post:
+      tags:
+        - Reports
+      summary: Remove an approver from a report
+      description: |
+        Remove an approver from a report using their email.
+      operationId: report_approvers_remove
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_remove_approver_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/reports/process_ach/bulk:
     post:
       tags:
