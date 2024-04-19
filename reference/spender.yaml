@@ -3598,6 +3598,24 @@ components:
           description: |
             This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_request_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an advance requests.
+            This id is always prefixed with `adr`.
+          readOnly: true
+          example: adrkvnwrnpwi
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
     advance_out:
       type: object
       additionalProperties: false
@@ -3638,6 +3656,8 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
           example: advjrgwlk2Q
+        advance_request:
+          $ref: '#/components/schemas/advance_request_out_embed'
         advance_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3732,6 +3752,26 @@ components:
           description: |
             This field indicates the sum of amount of advances that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_wallet_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance_amount:
+          $ref: '#/components/schemas/amount'
     corporate_card_out:
       type: object
       properties:
@@ -9490,6 +9530,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/advance_wallets:
+    get:
+      tags:
+        - Advances
+      summary: List advance wallets
+      operationId: advance_wallets_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/corporate_cards:
     get:
       tags:
