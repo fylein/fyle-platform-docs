@@ -2324,7 +2324,7 @@ components:
           description: |
             Password which required to unlock the file.
           example: SuperSecretPassword
-    admin_file_in:
+    admin_and_approver_file_in:
       allOf:
         - $ref: '#/components/schemas/file_in'
         - type: object
@@ -2333,7 +2333,7 @@ components:
           properties:
             user_id:
               allOf:
-                - $ref: '#/components/schemas/fk_string'
+                - $ref: '#/components/schemas/id_string'
     file_out:
       type: object
       additionalProperties: false
@@ -4143,6 +4143,40 @@ components:
             List of file ids to attach to the expense. <br>
             To add new files to the expense, send the list of file ids to be attached. <br>
             To remove files from the expense, send the list of all file ids except which you want to remove. <br>
+    attach_files_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the expense
+    delete_files_attached_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be deleted
     accounting_export_summary_in:
       type: object
       required:
@@ -15691,7 +15725,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/admin_file_in'
+                  $ref: '#/components/schemas/admin_and_approver_file_in'
       responses:
         '200':
           description: OK
@@ -15709,6 +15743,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/files/bulk:
+    post:
+      operationId: files_post_bulk
+      tags:
+        - Files
+      summary: Bulk create files
+      description: |
+        Create files in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/admin_and_approver_file_in'
+              additionalProperties: false
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
@@ -16305,6 +16410,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/attach_files/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Attach files to an expense in bulk
+      description: |
+        This API attaches files to an expense in bulk
+      operationId: attach_files_to_expense_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/delete_files:
+    post:
+      tags:
+        - Expenses
+      summary: Delete files attached to an expense
+      description: |
+        This API deletes list of files attached to an expense
+      operationId: delete_files_attached_to_expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:

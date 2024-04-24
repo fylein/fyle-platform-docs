@@ -2266,6 +2266,40 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+    attach_files_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the expense
+    delete_files_attached_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be deleted
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -3643,6 +3677,109 @@ components:
             $ref: '#/components/schemas/expense_check_policies_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_check_policies_final_desired_state'
+    file_in:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: |
+            Indicates whether this file original size or encrypted or its thumbnail image.
+          example: RECEIPT
+        password:
+          type: string
+          description: |
+            Password which required to unlock the file.
+          example: SuperSecretPassword
+    admin_and_approver_file_in:
+      allOf:
+        - $ref: '#/components/schemas/file_in'
+        - type: object
+          required:
+            - user_id
+          properties:
+            user_id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+    file_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: |
+            Indicates whether this file original size or encrypted or its thumbnail image.
+          example: RECEIPT
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          nullable: true
+          type: string
+          description: |
+            Link to upload contents of this file
+    file_generate_urls_action_in:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    file_generate_urls_action_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        content_type:
+          type: string
+          example: text/csv
+        download_url:
+          type: string
+          description: |
+            Link to download this file
+        upload_url:
+          nullable: true
+          type: string
+          description: |
+            Link to upload contents of this file
   parameters:
     limit:
       in: query
@@ -3951,6 +4088,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/attach_files/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Attach files to an expense in bulk
+      description: |
+        This API attaches files to an expense in bulk
+      operationId: attach_files_to_expense_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/delete_files:
+    post:
+      tags:
+        - Expenses
+      summary: Delete files attached to an expense
+      description: |
+        This API deletes list of files attached to an expense
+      operationId: delete_files_attached_to_expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
@@ -5093,6 +5330,145 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/files/bulk:
+    post:
+      operationId: files_post_bulk
+      tags:
+        - Files
+      summary: Bulk create files
+      description: |
+        Create files in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/admin_and_approver_file_in'
+              additionalProperties: false
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/files/generate_urls/bulk:
+    post:
+      operationId: files_generate_urls_bulk_post
+      tags:
+        - Files
+      summary: Bulk generate download and upload URLs
+      description: |
+        Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
+        need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/file_generate_urls_action_in'
+                  example:
+                    - id: sdfd2391
+                    - id: sdfd2392
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_generate_urls_action_out'
+                    example:
+                      - id: sdfd2391
+                        name: uber_expenses_vmrpw.pdf
+                        content_type: application/pdf
+                        download_url: https://aaa.bbb.cc/x232sds
+                        upload_url: https://aaa.bbb.cc/x232sds
+                      - id: sdfd2392
+                        name: lyft_expenses_vmrpw.pdf
+                        content_type: application/pdf
+                        download_url: https://aaa.bbb.cc/x22ddsds
+                        upload_url: https://aaa.bbb.cc/x2sdssds
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/files/download:
     get:
       operationId: files_download_get

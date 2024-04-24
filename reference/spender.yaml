@@ -2425,6 +2425,40 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    attach_files_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the expense
+    delete_files_attached_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be deleted
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -8375,6 +8409,106 @@ paths:
                       data:
                         type: object
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/attach_files/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Attach files to an expense in bulk
+      description: |
+        This API attaches files to an expense in bulk
+      operationId: attach_files_to_expense_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/delete_files:
+    post:
+      tags:
+        - Expenses
+      summary: Delete files attached to an expense
+      description: |
+        This API deletes list of files attached to an expense
+      operationId: delete_files_attached_to_expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
