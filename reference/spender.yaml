@@ -5778,6 +5778,34 @@ components:
           example: John Doe
         commute_details:
           $ref: '#/components/schemas/commute_details'
+    commute_location_not_nullable:
+      type: object
+      nullable: false
+      properties:
+        city:
+          type: string
+          nullable: false
+          example: London
+        state:
+          type: string
+          nullable: false
+          example: London
+        country:
+          type: string
+          nullable: false
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
     commute_details_in:
       type: object
       nullable: false
@@ -5787,25 +5815,25 @@ components:
       properties:
         home_location:
           allOf:
-            - $ref: '#/components/schemas/commute_location'
+            - $ref: '#/components/schemas/commute_location_not_nullable'
           description: |
             Home location of the employee.
-          nullable: true
+          nullable: false
         work_location:
           allOf:
-            - $ref: '#/components/schemas/commute_location'
+            - $ref: '#/components/schemas/commute_location_not_nullable'
           description: |
             Work location of the employee.
-          nullable: true
+          nullable: false
         distance:
           type: number
-          nullable: true
+          nullable: false
           description: |
             Distance between home and work location of the employee.
           example: 10.55
         distance_unit:
           type: string
-          nullable: true
+          nullable: false
           description: |
             Unit of distance.
           enum:
@@ -7634,6 +7662,115 @@ components:
             Sending this field will add the expense to the report. If the expense is already attached to a report,
             the expense will be removed from the old report and added to the new report if it is not yet approved.
           example: rpvgnwlgw34
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+    feature_config_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
+    feature_config_spender_in:
+      type: object
+      additionalProperties: false
+      required:
+        - target_client
+        - feature
+        - key
+        - value
+      properties:
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
   parameters:
     q:
       in: query
@@ -7747,6 +7884,9 @@ tags:
   - name: Tax Groups
     description: |
       These APIs gives you access to manage your organisation's Tax Groups data.
+  - name: Feature Configs
+    description: |
+      These APIs gives you access to manage feature configs.
 paths:
   /spender/projects:
     get:
@@ -11509,3 +11649,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/feature_configs:
+    get:
+      tags:
+        - Feature Configs
+      summary: List feature configs.
+      operationId: feature_configs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/feature_config_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/feature_configs/bulk:
+    post:
+      tags:
+        - Feature Configs
+      summary: Create or update feature configs.
+      description: |
+        This API allows you to create or update feature configs.
+      operationId: feature_configs_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/feature_config_spender_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
