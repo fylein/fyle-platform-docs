@@ -628,6 +628,23 @@ components:
           description: |
             Indicates purpose of the reports. It can only be updated for an existing report when the report is in `APPROVER_PENDING` state.
           example: '#1: Jun 2020'
+    add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+        comment:
+          type: string
+          description: |
+            Specify why you are adding this approver
+          example: Extra approval from finance required
     report_action_in:
       type: object
       additionalProperties: false
@@ -3898,6 +3915,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /approver/reports/add_approver:
+    post:
+      tags:
+        - Reports
+      summary: Add Approver
+      description: |
+        Add another approver to the report
+      operationId: report_add_approver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+                - reason
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/reports/partially_approve:
     post:
       tags:
