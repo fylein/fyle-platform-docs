@@ -5816,6 +5816,17 @@ components:
           $ref: '#/components/schemas/id_string'
         approver_email:
           $ref: '#/components/schemas/email'
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
     process_ach_in:
       type: object
       properties:
@@ -17996,6 +18007,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reports/approve/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Admin approve reports in bulk
+      description: |
+        Admin approve reports in bulk
+      operationId: report_admin_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_action_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/process_ach/bulk:
     post:
       tags:
