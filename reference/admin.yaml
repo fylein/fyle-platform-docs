@@ -5806,6 +5806,23 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+        comment:
+          type: string
+          description: |
+            Specify why you are adding this approver
+          example: Extra approval from finance required
     report_action_remove_approver_in:
       type: object
       required:
@@ -5816,6 +5833,17 @@ components:
           $ref: '#/components/schemas/id_string'
         approver_email:
           $ref: '#/components/schemas/email'
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
     process_ach_in:
       type: object
       properties:
@@ -10951,7 +10979,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -11413,7 +11441,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -11555,7 +11583,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -13201,7 +13229,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -17963,6 +17991,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/add_approver:
+    post:
+      tags:
+        - Reports
+      summary: Add Approver
+      description: |
+        Add Approver to the report 
+      operationId: report_add_approver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/remove_approver:
     post:
       tags:
@@ -18010,6 +18093,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reports/approve/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Admin approve reports in bulk
+      description: |
+        Admin approve reports in bulk
+      operationId: report_admin_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_action_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/process_ach/bulk:
     post:
       tags:
