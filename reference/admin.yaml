@@ -5806,6 +5806,23 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+        comment:
+          type: string
+          description: |
+            Specify why you are adding this approver
+          example: Extra approval from finance required
     report_action_remove_approver_in:
       type: object
       required:
@@ -17954,6 +17971,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/add_approver:
+    post:
+      tags:
+        - Reports
+      summary: Add Approver
+      description: |
+        Add Approver to the report 
+      operationId: report_add_approver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
