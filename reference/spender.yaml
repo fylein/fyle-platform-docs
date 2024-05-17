@@ -2425,6 +2425,40 @@ components:
                 type: string
                 description: |
                   This explains what the error is in `human readable` text
+    attach_files_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the expense
+    delete_files_attached_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be deleted
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -2523,12 +2557,16 @@ components:
             This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         org_id:
           $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
         department_id:
           nullable: true
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
         ach_account:
           additionalProperties: false
           type: object
@@ -2558,6 +2596,24 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        has_accepted_invite:
+          type: boolean
+          description: |
+            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
+          default: true
+          example: true
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -3439,12 +3495,6 @@ components:
           $ref: '#/components/schemas/currency'
         amount:
           $ref: '#/components/schemas/amount'
-        policy_amount:
-          type: number
-          nullable: true
-          description: |
-            The advance request amount set by policy.
-          example: 1500
         advance_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3500,11 +3550,6 @@ components:
           $ref: '#/components/schemas/project_out_embed'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
-        is_policy_flagged:
-          type: boolean
-          nullable: true
-          description: |
-            Determines whether this report was flagged from a policy
         last_approved_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3526,6 +3571,44 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advance_request_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        code:
+          $ref: '#/components/schemas/code'
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
     advance_requests_stats_in:
       properties:
         query_params:
@@ -3549,6 +3632,24 @@ components:
           description: |
             This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_request_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an advance requests.
+            This id is always prefixed with `adr`.
+          readOnly: true
+          example: adrkvnwrnpwi
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
     advance_out:
       type: object
       additionalProperties: false
@@ -3589,6 +3690,8 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
           example: advjrgwlk2Q
+        advance_request:
+          $ref: '#/components/schemas/advance_request_out_embed'
         advance_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -3658,6 +3761,8 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
     advances_stats_in:
       properties:
         query_params:
@@ -3681,6 +3786,26 @@ components:
           description: |
             This field indicates the sum of amount of advances that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_wallet_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: advwrlAGwjr2
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        balance_amount:
+          $ref: '#/components/schemas/amount'
     corporate_card_out:
       type: object
       properties:
@@ -3807,6 +3932,13 @@ components:
             - USED
             - null
           example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
       required:
         - id
         - org_id
@@ -5653,6 +5785,34 @@ components:
           example: John Doe
         commute_details:
           $ref: '#/components/schemas/commute_details'
+    commute_location_not_nullable:
+      type: object
+      nullable: false
+      properties:
+        city:
+          type: string
+          nullable: false
+          example: London
+        state:
+          type: string
+          nullable: false
+          example: London
+        country:
+          type: string
+          nullable: false
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
     commute_details_in:
       type: object
       nullable: false
@@ -5662,25 +5822,25 @@ components:
       properties:
         home_location:
           allOf:
-            - $ref: '#/components/schemas/commute_location'
+            - $ref: '#/components/schemas/commute_location_not_nullable'
           description: |
             Home location of the employee.
-          nullable: true
+          nullable: false
         work_location:
           allOf:
-            - $ref: '#/components/schemas/commute_location'
+            - $ref: '#/components/schemas/commute_location_not_nullable'
           description: |
             Work location of the employee.
-          nullable: true
+          nullable: false
         distance:
           type: number
-          nullable: true
+          nullable: false
           description: |
             Distance between home and work location of the employee.
           example: 10.55
         distance_unit:
           type: string
-          nullable: true
+          nullable: false
           description: |
             Unit of distance.
           enum:
@@ -5873,8 +6033,6 @@ components:
         - name
         - type
       properties:
-        id:
-          $ref: '#/components/schemas/id_string'
         name:
           type: string
           description: |
@@ -6399,7 +6557,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -6534,7 +6692,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -6838,7 +6996,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -7511,6 +7669,115 @@ components:
             Sending this field will add the expense to the report. If the expense is already attached to a report,
             the expense will be removed from the old report and added to the new report if it is not yet approved.
           example: rpvgnwlgw34
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+    feature_config_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
+        is_shared:
+          type: boolean
+          nullable: false
+          description: |
+            This specifies whether the feature config is shared or not.
+          example: true
+    feature_config_spender_in:
+      type: object
+      additionalProperties: false
+      required:
+        - target_client
+        - feature
+        - key
+        - value
+      properties:
+        target_client:
+          type: string
+          nullable: false
+          description: |
+            This specifies the target client of the feature config.
+          example: WEBAPP
+        feature:
+          type: string
+          nullable: false
+          description: |
+            This specifies the feature name.
+          example: ADMIN_EXPENSES
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            This specifies the sub feature name.
+          example: ALL_EXPENSES
+        key:
+          type: string
+          nullable: false
+          description: |
+            This specifies the key of the feature config.
+          example: MANAGE_COLUMNS
+        value:
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
+          description: |
+            This specifies the value of the feature config.
+          example:
+            columns:
+              - id: Date
+                is_visible: true
+                order: 1
   parameters:
     q:
       in: query
@@ -7624,6 +7891,9 @@ tags:
   - name: Tax Groups
     description: |
       These APIs gives you access to manage your organisation's Tax Groups data.
+  - name: Feature Configs
+    description: |
+      These APIs gives you access to manage feature configs.
 paths:
   /spender/projects:
     get:
@@ -8284,6 +8554,108 @@ paths:
                       data:
                         type: object
                         nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/attach_files/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Attach files to an expense in bulk
+      description: |
+        This API attaches files to an expense in bulk
+      operationId: attach_files_to_expense_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/expenses/delete_files:
+    post:
+      tags:
+        - Expenses
+      summary: Delete files attached to an expense
+      description: |
+        This API deletes files attached to an expense
+      operationId: delete_files_attached_to_expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
           description: Unauthorised request
           content:
@@ -9233,6 +9605,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Advances
+      summary: Create or update an advance requests
+      description: |
+        Create or update an advance requests.
+      operationId: advance_requests_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advance_requests/stats:
     post:
       tags:
@@ -9385,6 +9811,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/advance_wallets:
+    get:
+      tags:
+        - Advances
+      summary: List advance wallets
+      operationId: advance_wallets_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_wallet_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/corporate_cards:
     get:
       tags:
@@ -11188,3 +11656,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/feature_configs:
+    get:
+      tags:
+        - Feature Configs
+      summary: List feature configs.
+      operationId: feature_configs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/feature_config_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/feature_configs/bulk:
+    post:
+      tags:
+        - Feature Configs
+      summary: Create or update feature configs.
+      description: |
+        This API allows you to create or update feature configs.
+      operationId: feature_configs_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/feature_config_spender_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'

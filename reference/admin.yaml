@@ -2304,8 +2304,6 @@ components:
         - name
         - type
       properties:
-        id:
-          $ref: '#/components/schemas/id_string'
         name:
           type: string
           description: |
@@ -2324,7 +2322,7 @@ components:
           description: |
             Password which required to unlock the file.
           example: SuperSecretPassword
-    admin_file_in:
+    admin_and_approver_file_in:
       allOf:
         - $ref: '#/components/schemas/file_in'
         - type: object
@@ -2333,7 +2331,7 @@ components:
           properties:
             user_id:
               allOf:
-                - $ref: '#/components/schemas/fk_string'
+                - $ref: '#/components/schemas/id_string'
     file_out:
       type: object
       additionalProperties: false
@@ -4143,6 +4141,40 @@ components:
             List of file ids to attach to the expense. <br>
             To add new files to the expense, send the list of file ids to be attached. <br>
             To remove files from the expense, send the list of all file ids except which you want to remove. <br>
+    attach_files_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the expense
+    delete_files_attached_to_expense_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be deleted
     accounting_export_summary_in:
       type: object
       required:
@@ -4507,12 +4539,6 @@ components:
           $ref: '#/components/schemas/currency'
         amount:
           $ref: '#/components/schemas/amount'
-        policy_amount:
-          type: number
-          nullable: true
-          description: |
-            The advance request amount set by policy.
-          example: 1500
         advance_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -4568,11 +4594,6 @@ components:
           $ref: '#/components/schemas/project_out_embed'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
-        is_policy_flagged:
-          type: boolean
-          nullable: true
-          description: |
-            Determines whether this report was flagged from a policy
         last_approved_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -4655,6 +4676,41 @@ components:
           description: |
             This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
           example: 100
+    advance_request_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an advance requests.
+            This id is always prefixed with `adr`.
+          readOnly: true
+          example: adrkvnwrnpwi
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
     advance_out:
       type: object
       additionalProperties: false
@@ -4695,6 +4751,8 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
           example: advjrgwlk2Q
+        advance_request:
+          $ref: '#/components/schemas/advance_request_out_embed'
         advance_account_id:
           allOf:
             - $ref: '#/components/schemas/fk_string'
@@ -4764,6 +4822,8 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
     advance_in:
       type: object
       required:
@@ -5222,12 +5282,16 @@ components:
             This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         org_id:
           $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
         department_id:
           nullable: true
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
         ach_account:
           additionalProperties: false
           type: object
@@ -5257,6 +5321,24 @@ components:
           maxLength: 255
           nullable: true
           example: Branch Manager
+        has_accepted_invite:
+          type: boolean
+          description: |
+            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
+          default: true
+          example: true
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
     ach_transfer_state:
       type: string
       enum:
@@ -5325,23 +5407,6 @@ components:
           example: ACH
         ach_transfer:
           $ref: '#/components/schemas/ach_transfer'
-    user_out_embed_nullable:
-      type: object
-      nullable: true
-      additionalProperties: false
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: uswjwgnwwgo
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: |
-            Represents the full name of the Employee. Must be at least 3 characters.
-          example: John Doe
     report_comments_out_embed:
       type: object
       additionalProperties: false
@@ -5741,6 +5806,44 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+        comment:
+          type: string
+          description: |
+            Specify why you are adding this approver
+          example: Extra approval from finance required
+    report_action_remove_approver_in:
+      type: object
+      required:
+        - id
+        - approver_email
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
     process_ach_in:
       type: object
       properties:
@@ -6152,6 +6255,13 @@ components:
             - USED
             - null
           example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
       required:
         - id
         - org_id
@@ -6376,6 +6486,13 @@ components:
             - USED
             - null
           example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
       required:
         - id
         - org_id
@@ -10862,7 +10979,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -11324,7 +11441,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -11466,7 +11583,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -13112,7 +13229,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -15658,7 +15775,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/admin_file_in'
+                  $ref: '#/components/schemas/admin_and_approver_file_in'
       responses:
         '200':
           description: OK
@@ -15676,6 +15793,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/files/bulk:
+    post:
+      operationId: files_post_bulk
+      tags:
+        - Files
+      summary: Bulk create files
+      description: |
+        Create files in bulk.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/admin_and_approver_file_in'
+              additionalProperties: false
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
@@ -15718,8 +15906,8 @@ paths:
                   items:
                     $ref: '#/components/schemas/file_generate_urls_action_in'
                   example:
-                    - id: sdfd2391
-                    - id: sdfd2392
+                    - id: fi123819sa
+                    - id: fi876833tu
       responses:
         '200':
           description: OK
@@ -16272,6 +16460,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/attach_files/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Attach files to an expense in bulk
+      description: |
+        This API attaches files to an expense in bulk
+      operationId: attach_files_to_expense_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/delete_files:
+    post:
+      tags:
+        - Expenses
+      summary: Delete files attached to an expense
+      description: |
+        This API deletes files attached to an expense
+      operationId: delete_files_attached_to_expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
@@ -17695,6 +17985,169 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/add_approver:
+    post:
+      tags:
+        - Reports
+      summary: Add Approver
+      description: |
+        Add Approver to the report 
+      operationId: report_add_approver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/remove_approver:
+    post:
+      tags:
+        - Reports
+      summary: Remove an approver from a report
+      description: |
+        Remove an approver from a report using their email.
+      operationId: report_approvers_remove
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/report_action_remove_approver_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reports/approve/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Admin approve reports in bulk
+      description: |
+        Admin approve reports in bulk
+      operationId: report_admin_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_action_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
