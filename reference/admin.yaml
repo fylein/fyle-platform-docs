@@ -6358,6 +6358,29 @@ components:
       required:
         - bank_name
         - card_number
+    corporate_card_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string, which can be used to fetch data for assigned and unassigned cards.
+          example: user_id=eq.null
+    corporate_card_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the total count of cards.
+          example: 100
+        transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the total count of transactions, present for the cards.
+          example: 1000
     corporate_card_assign_in:
       type: object
       properties:
@@ -19005,6 +19028,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/corporate_cards/stats:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Corporate Cards Stats
+      description: |
+        Stats for Corporate Cards
+      operationId: corporate_cards_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards/assign:
     post:
       tags:
