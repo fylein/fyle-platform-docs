@@ -3822,6 +3822,8 @@ components:
           description: |
             The unique id of an user to whom the card is assigned
           example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -3943,6 +3945,7 @@ components:
         - id
         - org_id
         - user_id
+        - user
         - created_at
         - updated_at
         - bank_name
@@ -7778,6 +7781,15 @@ components:
               - id: Date
                 is_visible: true
                 order: 1
+    personal_card_access_token_out:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: |
+            Access token to open the yodlee iframe.
+          nullable: true
+          example: uswjwgnwwgosdd==
   parameters:
     q:
       in: query
@@ -11747,3 +11759,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/personal_cards/access_token:
+    post:
+      tags:
+        - Personal Cards
+      summary: Personal card access token
+      operationId: personal_cards_access_token
+      description: |
+        Get access token for opening the yodlee Iframe.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/personal_card_access_token_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
