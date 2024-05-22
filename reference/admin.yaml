@@ -2322,7 +2322,7 @@ components:
           description: |
             Password which required to unlock the file.
           example: SuperSecretPassword
-    admin_and_approver_file_in:
+    admin_file_in:
       allOf:
         - $ref: '#/components/schemas/file_in'
         - type: object
@@ -2332,6 +2332,7 @@ components:
             user_id:
               allOf:
                 - $ref: '#/components/schemas/id_string'
+              example: us82yutrio54
     file_out:
       type: object
       additionalProperties: false
@@ -6145,6 +6146,8 @@ components:
           description: |
             The unique id of an user to whom the card is assigned
           example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -6262,10 +6265,23 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Fyle
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Fyle
+          example: 50
       required:
         - id
         - org_id
         - user_id
+        - user
         - created_at
         - updated_at
         - bank_name
@@ -6285,6 +6301,9 @@ components:
         - verification_status
         - virtual_card_id
         - virtual_card_state
+        - nickname
+        - total_transactions_count
+        - unassigned_transactions_count
     corporate_card_in:
       type: object
       properties:
@@ -6329,6 +6348,13 @@ components:
           nullable: true
           description: |
             Signifies when this card was last synced.
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Signifies the unique nickname assigned to the card
+          example: Business Card
       required:
         - bank_name
         - card_number
@@ -6356,6 +6382,24 @@ components:
           example: bawownwrng
       required:
         - id
+    user_out_nullable_example_null:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+      example: null
     corporate_card_unassign_out:
       type: object
       additionalProperties: false
@@ -6373,6 +6417,8 @@ components:
           description: |
             The unique id of an user to whom the card is assigned
           example: null
+        user:
+          $ref: '#/components/schemas/user_out_nullable_example_null'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -6493,10 +6539,23 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Fyle
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Fyle
+          example: 50
       required:
         - id
         - org_id
         - user_id
+        - user
         - created_at
         - updated_at
         - bank_name
@@ -6516,6 +6575,9 @@ components:
         - last_verified_at
         - virtual_card_id
         - virtual_card_state
+        - nickname
+        - total_transactions_count
+        - unassigned_transactions_count
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -15775,7 +15837,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/admin_and_approver_file_in'
+                  $ref: '#/components/schemas/admin_file_in'
       responses:
         '200':
           description: OK
@@ -15829,7 +15891,7 @@ paths:
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/admin_and_approver_file_in'
+                    $ref: '#/components/schemas/admin_file_in'
               additionalProperties: false
               required:
                 - data
