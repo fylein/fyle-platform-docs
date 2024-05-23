@@ -2400,6 +2400,13 @@ components:
           type: string
           description: |
             Link to upload contents of this file
+    file_delete_action_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     schedule_config:
       type: object
       nullable: false
@@ -16017,6 +16024,56 @@ paths:
                         content_type: application/pdf
                         download_url: https://aaa.bbb.cc/x22ddsds
                         upload_url: https://aaa.bbb.cc/x2sdssds
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/files/delete/bulk:
+    post:
+      operationId: files_delete
+      tags:
+        - Files
+      summary: Delete files bulk
+      description: |
+        Delete files bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/file_delete_action_in'
+                  example:
+                    - id: fi123819sa
+                    - id: fi876833tu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
         '400':
           description: Bad request
           content:
