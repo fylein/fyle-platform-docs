@@ -1261,6 +1261,13 @@ components:
           example: bawownwrng
         corporate_card_number:
           $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
         masked_corporate_card_number:
           $ref: '#/components/schemas/card_number'
         bank_name:
@@ -4004,6 +4011,13 @@ components:
             Specifies the masked number of the card.
             Add only masked card-numbers, last four digits of the card.
           example: xxxx-4543
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
         masked_number:
           type: string
           description: |
@@ -6136,6 +6150,13 @@ components:
           type: string
           description: |
             Link to upload contents of this file
+    file_delete_action_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     expense_policy_limit_type:
       nullable: true
       type: string
@@ -10838,6 +10859,56 @@ paths:
                         content_type: application/pdf
                         download_url: https://aaa.bbb.cc/x22ddsds
                         upload_url: https://aaa.bbb.cc/x22ddsds
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/files/delete/bulk:
+    post:
+      operationId: files_delete
+      tags:
+        - Files
+      summary: Delete files bulk
+      description: |
+        Delete files bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/file_delete_action_in'
+                  example:
+                    - id: fi123819sa
+                    - id: fi876833tu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
         '400':
           description: Bad request
           content:

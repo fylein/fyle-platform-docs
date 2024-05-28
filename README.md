@@ -53,6 +53,17 @@ You can check the version by running
 
     openapi preview-docs src/admin/openapi.yaml
 
+## Deployment ##
+
+  Our docs are hosted on [docs.fylehq.com](https://docs.fylehq.com). To deploy the changes, after your feature PR is merged to `main`. Merge the `main` branch into `v1` branch. This will trigger the deployment of the docs to the production environment:
+
+    git checkout main
+    git pull origin main
+    git checkout v1
+    git pull origin v1
+    git merge main
+    git push origin v1
+
 ## Mock Server ##
 
 Bring up mock server by running:
