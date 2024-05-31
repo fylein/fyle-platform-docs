@@ -7882,6 +7882,65 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_delete_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        currency:
+          type: string
+          example: USD
+        bank_name:
+          type: string
+          description: |
+            Name of the bank to which the account and card is connected with.
+          example: Dag Site TokenFMPA
+        card_number:
+          type: string
+          example: '****3464'
+        yodlee_account_id:
+          $ref: '#/components/schemas/fk_string'
+        yodlee_fastlink_params:
+          $ref: '#/components/schemas/fastlink_params'
+          type: string
+          description: |
+            Configuration to open Yodlee Fastlink
+        yodlee_is_credential_update_required:
+          type: boolean
+          nullable: false
+          default: false
+          example: false
+          description: |
+            Determines whether the user has changed the credentials and need to reconfirm the credentials when user tried to fetch the card transactions.
+        yodlee_is_mfa_required:
+          type: boolean
+          nullable: false
+          default: false
+          example: false
+          description: |
+            Determines whether the MFA is enabled by the user on the card.
+        yodlee_last_synced_at:
+          nullable: true
+          type: string
+          format: date-time
+          description: |
+            Signifies when the card was last synced at
+          example: '2020-06-01T13:14:54.804+00:00'
+        yodlee_login_id:
+          $ref: '#/components/schemas/fk_string'
+        yodlee_provider_account_id:
+          type: string
+          description: Unique ID provided by Yodlee for account identification
+          example: 1027XXXX
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     personal_card_access_token_out:
       type: object
       properties:
@@ -11900,6 +11959,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/personal_cards/delete:
+    post:
+      tags:
+        - Personal Cards
+      summary: Delete Personal Card
+      description: |
+        Delete spender's Personal Card details.
+      operationId: personal_cards_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  required:
+                    - id
+                  properties:
+                    id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_string'
+                      description: Current commute details id of the spender. This id is provided by Fyle to identify an object.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/personal_card_delete_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/personal_cards/access_token:
     post:
       tags:
