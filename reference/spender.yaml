@@ -2449,23 +2449,6 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the expense
-    delete_files_attached_to_expense_in:
-      type: object
-      required:
-        - id
-        - file_ids
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: txsjfwlrglw
-        file_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - figwiwpjww
-          description: List of files to be deleted
     per_diem_rate_out:
       type: object
       additionalProperties: false
@@ -7817,6 +7800,88 @@ components:
               - id: Date
                 is_visible: true
                 order: 1
+    fastlink_params:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        configName:
+          type: string
+          maxLength: 255
+          description: |
+            Name of the configuration for the action that would be performed while opening the Yodlee Fastlink application
+          example: Aggregation
+        flow:
+          type: string
+          maxLength: 255
+          description: |
+            Flow of the user when they open the Yodlee Fastlink
+          example: refresh
+        providerAccountId:
+          type: string
+          maxLength: 255
+          description: |
+            Provider account ID of the users bank account connected
+          example: 10273320
+    personal_card_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        currency:
+          type: string
+          example: USD
+        bank_name:
+          type: string
+          description: |
+            Name of the bank to which the account and card is connected with.
+          example: Dag Site TokenFMPA
+        card_number:
+          type: string
+          example: '****3464'
+        yodlee_account_id:
+          $ref: '#/components/schemas/fk_string'
+        yodlee_fastlink_params:
+          $ref: '#/components/schemas/fastlink_params'
+          type: string
+          description: |
+            Configuration to open Yodlee Fastlink
+        yodlee_is_credential_update_required:
+          type: boolean
+          nullable: false
+          default: false
+          example: false
+          description: |
+            Determines whether the user has changed the credentials and need to reconfirm the credentials when user tried to fetch the card transactions.
+        yodlee_is_mfa_required:
+          type: boolean
+          nullable: false
+          default: false
+          example: false
+          description: |
+            Determines whether the MFA is enabled by the user on the card.
+        yodlee_last_synced_at:
+          nullable: true
+          type: string
+          format: date-time
+          description: |
+            Signifies when the card was last synced at
+          example: '2020-06-01T13:14:54.804+00:00'
+        yodlee_login_id:
+          $ref: '#/components/schemas/fk_string'
+        yodlee_provider_account_id:
+          type: string
+          description: Unique ID provided by Yodlee for account identification
+          example: 1027XXXX
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     personal_card_access_token_out:
       type: object
       properties:
@@ -8649,55 +8714,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /spender/expenses/delete_files:
-    post:
-      tags:
-        - Expenses
-      summary: Delete files attached to an expense
-      description: |
-        This API deletes files attached to an expense
-      operationId: delete_files_attached_to_expense
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
-              required:
-                - data
-              additionalProperties: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
         '400':
           description: Unauthorised request
           content:
@@ -11845,6 +11861,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/personal_cards:
+    post:
+      operationId: personal_cards_post
+      tags:
+        - Personal Cards
+      summary: Creates Personal Cards
+      description: |
+        Creates Personal Cards.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/personal_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /spender/personal_cards/access_token:
     post:
       tags:
