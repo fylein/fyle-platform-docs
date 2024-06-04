@@ -7950,6 +7950,24 @@ components:
             Access token to open the yodlee iframe.
           nullable: true
           example: uswjwgnwwgosdd==
+    personal_card_mfa_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: baccymJEDziL9Y
+    personal_card_mfa_out:
+      type: object
+      properties:
+        is_mfa_enabled:
+          type: boolean
+          nullable: false
+          default: false
+          example: false
+          description: Determines wether the user card has MFA enabled or not
   parameters:
     q:
       in: query
@@ -12085,6 +12103,51 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/personal_card_access_token_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/personal_cards/mfa:
+    post:
+      tags:
+        - Personal Cards
+      summary: Personal card MFA
+      operationId: personal_cards_mfa
+      description: |
+        Get MFA details for opening the MFA dialog before fetching the personal card transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/personal_card_mfa_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/personal_card_mfa_out'
         '400':
           description: Bad request
           content:
