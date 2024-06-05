@@ -2567,6 +2567,14 @@ components:
         can_remove_approver:
           type: boolean
           example: true
+    round_off_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     webhook_url:
       type: string
       description: |
@@ -4633,6 +4641,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/reports/round_off_amount:
+    post:
+      tags:
+        - Reports
+      summary: Round off report amount
+      description: |
+        Round off report amount. This API first rounds of expenses and then rounds off the total amount of the report.
+      operationId: report_round_off_amount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/round_off_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/subscriptions:
     post:
       tags:
