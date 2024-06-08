@@ -41,38 +41,63 @@ post:
           schema:
             $ref: '../../components/schemas/401.yaml'
 
-# get:
-#   tags:
-#     - Personal Card Transactions
-#   summary: List Personal Card Transactions
-#   operationId: personal_card_transactions_get
-#   description: List personal card transactions fetched from the aggregator
-#   responses:
-#     '200':
-#       description: OK
-#       content:
-#         application/json:
-#           schema:
-#             type: object
-#             additionalProperties: False
-#             properties:
-#               count:
-#                 $ref: '../../components/schemas/count.yaml'
-#               offset:
-#                 $ref: '../../components/schemas/offset.yaml'
-#               data:
-#                 type: array
-#                 items:
-#                   $ref: ../../components/schemas/personal_card.yaml#/personal_card_out
-#     '400':
-#       description: Bad request
-#       content:
-#         application/json:
-#           schema:
-#             $ref: ../../components/schemas/400.yaml
-#     '401':
-#       description: Unauthorized request
-#       content:
-#         application/json:
-#           schema:
-#             $ref: ../../components/schemas/401.yaml
+get:
+  tags:
+    - Personal Card Transactions
+  summary: Get Personal Card Transactions
+  operationId: personal_card_transactions_get
+  parameters:
+    - in: query
+      name: personal_card_id
+      description: |
+        The id of the personal cards for which the transactions need to be fetched.<br>
+        Supported operators are `eq` .<br>
+        id=eq."id" <br>
+        > If no id is passed then all the personal card transactions of the user will be returned.
+      schema:
+        type: string
+        example: eq."btxnxzApu30fvX"
+    - in: query
+      name: state
+      description: |
+        Whether to fetch only INITIALIZED state personal card transactions.<br>
+        Supported operators are `eq`.<br>
+        state=eq."id" <br>
+        > If no state is passed then all the personal card transactions of the user will be returned.
+      schema:
+        type: string
+        example: eq."INITIALIZED"
+    - $ref: '../../components/parameters/limit.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+  
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/personal_card_transaction.yaml#/personal_card_transaction_out
+
+    
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml   

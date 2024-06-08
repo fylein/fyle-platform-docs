@@ -1,173 +1,150 @@
 personal_card_transaction_out:
   type: object
-  properties:
-    access_token:
-      type: string
-      description: |
-        Access token to open the yodlee iframe.
-      nullable: true
-      example: uswjwgnwwgosdd==
-
-personal_card_mfa_in:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: baccymJEDziL9Y
-
-personal_card_mfa_out:
-  type: object
-  properties:
-    is_mfa_enabled:
-      type: boolean
-      nullable: false
-      default: false
-      example: false
-      description: Determines wether the user card has MFA enabled or not
-
-fastlink_params:
-  type: object
-  nullable: true
   additionalProperties: False
   properties:
-    configName:
-      type: string
-      maxLength: 255
-      description: |
-        Name of the configuration for the action that would be performed while opening the Yodlee Fastlink application
-      example: Aggregation
-    flow:
-      type: string
-      maxLength: 255
-      description: |
-        Flow of the user when they open the Yodlee Fastlink
-      example: refresh
-    providerAccountId:
-      type: string
-      maxLength: 255
-      description: |
-        Provider account ID of the users bank account connected
-      example: 10273320
-
-personal_card_out:
-  type: object
-  additionalProperties: false
-  properties:
     id:
       $ref: './fields.yaml#/id_string'
     org_id:
-      $ref: './fields.yaml#/org_id'
+      $ref: ./fields.yaml#/org_id
     user_id:
-      $ref: './fields.yaml#/fk_string'
+      $ref: ./fields.yaml#/user_id
+    personal_card_id:
+      type: string
+      description: |
+        The unique id of an personal card to which the object is associated.
+      example: bacc9EJaJKXcvI
+    amount:
+      type: number
+      description: |
+        The expense amount as claimed by user.
+      example: 1984.18
     currency:
       type: string
-      example: 'USD'
-    bank_name:
-      type: string
-      description: >
-        Name of the bank to which the account and card is connected with.
-      example: Dag Site TokenFMPA
-    card_number:
-      type: string
-      example: '****3464'
-    yodlee_account_id:
-      $ref: './fields.yaml#/fk_string'
-    yodlee_fastlink_params:
-      $ref: '#/fastlink_params'
-      type: string
+      maxLength: 3
+      example: USD
+      description: Currency code (must be three letters only)
+    foreign_amount:
+      type: number
       description: |
-        Configuration to open Yodlee Fastlink
-    yodlee_is_credential_update_required:
-      type: boolean
-      nullable: false
-      default: false
-      example: false
-      description: |
-        Determines whether the user has changed the credentials and need to reconfirm the credentials when user tried to fetch the card transactions.
-    yodlee_is_mfa_required:
-      type: boolean
-      nullable: false
-      default: false
-      example: true
-      description: |
-        Determines whether the MFA is enabled by the user on the card.
-    yodlee_last_synced_at:
-      nullable: true
+        The expense amount as claimed by user.
+      example: 2011.76
+    foreign_currency:
       type: string
-      format: date-time
+      maxLength: 3
+      example: CAD
+      description: Currency code (must be three letters only)
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
       description: |
-        Signifies when the card was last synced at
-      example: '2020-06-01T13:14:54.804+00:00'
-    yodlee_login_id:
-      $ref: ./fields.yaml#/fk_string
-    yodlee_provider_account_id:
+        It signifies when this expense was made.
+        This date cannot be in future.
+    category:
       type: string
-      description: Unique ID provided by Yodlee for account identification
-      example: '1027XXXX'
+      example: Securities Trades
+    merchant:
+      type: string
+      example: Vanguard Target Retirement
+    state:
+      type: string
+      enum:
+        - INITIALIZED
+        - HIDDEN
+        - MATCHED
+      description: |
+        Status of ACH if this reimbursment is processed via ACH.
+      example: INITIALIZED
+    description:
+      $ref: ./fields.yaml#/description
+    external_transaction_id:
+      $ref: './fields.yaml#/id_integer'
+    matched_expense_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: |
+        Holds the expense ids which are matched to this card transaction
+      example:
+        - txwownwrng
+    matched_expenses:
+      type: array
+      items:
+        $ref: '#/matched_expense_out_embed'
     created_at:
-      $ref: './fields.yaml#/created_at'
+      $ref: ./fields.yaml#/created_at
     updated_at:
-      $ref: './fields.yaml#/updated_at'
+      $ref: ./fields.yaml#/updated_at
 
-personal_card_delete_out:
+
+
+matched_expense_out_embed:
   type: object
+  nullable: true
   additionalProperties: false
+  required:
+    - id
+    - currency
+    - amount
+    - spent_at
+    - merchant
+    - purpose
+    - foreign_currency
+    - foreign_amount
+    - state
+    - seq_num
+    - no_of_files
+    - category_display_name
   properties:
-    id:
-      $ref: './fields.yaml#/id_string'
-    org_id:
-      $ref: './fields.yaml#/org_id'
-    user_id:
-      $ref: './fields.yaml#/fk_string'
+    amount:
+      $ref: './fields.yaml#/amount'
+    category_display_name:
+      type: string
+      description: |
+        Category of the expense.
+      example: Travel
     currency:
+      $ref: './fields.yaml#/currency'
+    seq_num:
       type: string
-      example: 'USD'
-    bank_name:
-      type: string
-      description: >
-        Name of the bank to which the account and card is connected with.
-      example: Dag Site TokenFMPA
-    card_number:
-      type: string
-      example: '****3464'
-    yodlee_account_id:
-      $ref: './fields.yaml#/fk_string'
-    yodlee_fastlink_params:
-      $ref: '#/fastlink_params'
-      type: string
+      readOnly: true
       description: |
-        Configuration to open Yodlee Fastlink
-    yodlee_is_credential_update_required:
-      type: boolean
-      nullable: false
-      default: false
-      example: false
+        This is user visible identifier for an expense.
+        This field can be used as reference in UI.
+      example: E/2020/10/T/95
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: txwownwrng
+    no_of_files:
+      type: integer
       description: |
-        Determines whether the user has changed the credentials and need to reconfirm the credentials when user tried to fetch the card transactions.
-    yodlee_is_mfa_required:
-      type: boolean
-      nullable: false
-      default: false
-      example: false
-      description: |
-        Determines whether the MFA is enabled by the user on the card.
-    yodlee_last_synced_at:
+        Number of files attached to the expense.
+      example: 1
+    purpose:
+      type: string
       nullable: true
+      example: Team lunch
+    state:
       type: string
-      format: date-time
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+      description: The state of the Expense.
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
       description: |
-        Signifies when the card was last synced at
-      example: '2020-06-01T13:14:54.804+00:00'
-    yodlee_login_id:
-      $ref: ./fields.yaml#/fk_string
-    yodlee_provider_account_id:
+        signifies when this expense was made.
+        This date cannot be in future.
+    merchant:
       type: string
-      description: Unique ID provided by Yodlee for account identification
-      example: '1027XXXX'
-    created_at:
-      $ref: './fields.yaml#/created_at'
-    updated_at:
-      $ref: './fields.yaml#/updated_at'
+      nullable: true
+      maxLength: 255
+      description: |
+        String denoting the name of the merchant to which the Expense was made.
+      example: Uber
