@@ -8123,6 +8123,138 @@ components:
           default: false
           example: false
           description: Determines wether the user card has MFA enabled or not
+    personal_card_transaction_matched_expense_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        amount:
+          $ref: '#/components/schemas/amount'
+        category_display_name:
+          type: string
+          description: |
+            Category of the expense.
+          example: Travel
+        currency:
+          $ref: '#/components/schemas/currency'
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an expense.
+            This field can be used as reference in UI.
+          example: E/2020/10/T/95
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+        no_of_files:
+          type: integer
+          description: |
+            Number of files attached to the expense.
+          example: 1
+        purpose:
+          type: string
+          example: Team lunch
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - DRAFT
+            - PAID
+            - PAYMENT_PROCESSING
+            - APPROVER_PENDING
+            - PAYMENT_PENDING
+            - APPROVED
+          description: The state of the Expense.
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            signifies when this expense was made.
+            This date cannot be in future.
+        merchant:
+          type: string
+          maxLength: 255
+          description: |
+            String denoting the name of the merchant to which the Expense was made.
+          example: Uber
+    personal_card_transaction_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        personal_card_id:
+          type: string
+          description: |
+            The unique id of an personal card to which the object is associated.
+          example: bacc9EJaJKXcvI
+        amount:
+          type: number
+          description: |
+            The expense amount as claimed by user.
+          example: 1984.18
+        currency:
+          type: string
+          maxLength: 3
+          example: USD
+          description: Currency code (must be three letters only)
+        foreign_amount:
+          nullable: true
+          type: number
+          description: |
+            The expense amount as claimed by user.
+          example: 2011.76
+        foreign_currency:
+          nullable: true
+          type: string
+          maxLength: 3
+          example: CAD
+          description: Currency code (must be three letters only)
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          description: |
+            It signifies when this expense was made.
+            This date cannot be in future.
+        category:
+          type: string
+          example: Securities Trades
+        merchant:
+          type: string
+          example: Vanguard Target Retirement
+        state:
+          type: string
+          enum:
+            - INITIALIZED
+            - HIDDEN
+            - MATCHED
+          description: |
+            Status of Personal Card Transactions.
+          example: INITIALIZED
+        description:
+          $ref: '#/components/schemas/description'
+        external_transaction_id:
+          type: string
+          description: |
+            This id is provided by Yodlee to identify an object.
+          example: '2389782392032'
+        matched_expense_id:
+          nullable: true
+          type: string
+          description: |
+            Holds the expense id which is matched to this card transaction.
+          example: '2389782392032'
+        matched_expense:
+          $ref: '#/components/schemas/personal_card_transaction_matched_expense_out_embed'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
   parameters:
     q:
       in: query
@@ -12240,7 +12372,7 @@ paths:
                     id:
                       allOf:
                         - $ref: '#/components/schemas/id_string'
-                      description: Current commute details id of the spender. This id is provided by Fyle to identify an object.
+                      description: Personal card id of the spender. This id is provided by Fyle to identify an object.
       responses:
         '200':
           description: OK
@@ -12350,6 +12482,104 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/personal_card_mfa_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/personal_card_transactions:
+    post:
+      operationId: personal_card_transactions_post
+      tags:
+        - Personal Card Transactions
+      summary: Creates Personal Card Transactions
+      description: |
+        Creates Personal Card Transactions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  required:
+                    - personal_card_id
+                  properties:
+                    personal_card_id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_string'
+                      description: Personal card id of the spender. This id is provided by Fyle to identify an object.
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    get:
+      tags:
+        - Personal Card Transactions
+      summary: Get Personal Card Transactions
+      operationId: personal_card_transactions_get
+      parameters:
+        - in: query
+          name: personal_card_id
+          description: |
+            The id of the personal cards for which the transactions need to be fetched.<br>
+            Supported operators are `eq` .<br>
+            id=eq."id" <br>
+            > If no id is passed then all the personal card transactions of the user will be returned.
+          schema:
+            type: string
+            example: eq."btxnxzApu30fvX"
+        - in: query
+          name: state
+          description: |
+            Whether to fetch only INITIALIZED state personal card transactions.<br>
+            Supported operators are `eq`.<br>
+            state=eq."id" <br>
+            > If no state is passed then all the personal card transactions of the user will be returned.
+          schema:
+            type: string
+            example: eq."INITIALIZED"
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/personal_card_transaction_out'
         '400':
           description: Bad request
           content:
