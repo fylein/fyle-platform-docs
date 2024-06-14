@@ -6208,6 +6208,8 @@ components:
         - name
         - type
       properties:
+        id:
+          $ref: '#/components/schemas/id_string'
         name:
           type: string
           description: |
@@ -8205,16 +8207,8 @@ components:
           description: Currency code (must be three letters only)
         foreign_amount:
           nullable: true
-          type: number
-          description: |
-            The expense amount as claimed by user.
-          example: 2011.76
         foreign_currency:
           nullable: true
-          type: string
-          maxLength: 3
-          example: CAD
-          description: Currency code (must be three letters only)
         spent_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_pst'
@@ -8248,13 +8242,21 @@ components:
           type: string
           description: |
             Holds the expense id which is matched to this card transaction.
-          example: '2389782392032'
+          example: txwownwrng
         matched_expense:
           $ref: '#/components/schemas/personal_card_transaction_matched_expense_out_embed'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_transaction_hide_in:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
   parameters:
     q:
       in: query
@@ -12592,3 +12594,128 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/personal_card_transactions/match:
+    post:
+      tags:
+        - Personal Card Transactions
+      summary: Match Personal Card Transactions with expense
+      description: |
+        Match personal card transactions with expense
+      operationId: personal_card_transactions_match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  required:
+                    - id
+                    - expense_split_group_id
+                  properties:
+                    id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_string'
+                      description: Personal card id of the spender. This id is provided by Fyle to identify an object.
+                      example: btxnAnsad23ms
+                    expense_split_group_id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_string'
+                      description: Personal card id of the spender. This id is provided by Fyle to identify an object.
+                      example: txaisd2asdJ
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/personal_card_transaction_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/personal_card_transactions/hide/bulk:
+    post:
+      tags:
+        - Personal Card Transactions
+      summary: Hide Personal Card Transactions
+      description: |
+        Hide personal card transaction
+      operationId: personal_card_transactions_hide_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/personal_card_transaction_hide_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: string
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
