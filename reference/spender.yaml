@@ -8131,61 +8131,6 @@ components:
           default: false
           example: false
           description: Determines wether the user card has MFA enabled or not
-    personal_card_transaction_matched_expense_out_embed:
-      type: object
-      nullable: true
-      additionalProperties: false
-      properties:
-        amount:
-          $ref: '#/components/schemas/amount'
-        category_display_name:
-          type: string
-          description: |
-            Category of the expense.
-          example: Travel
-        currency:
-          $ref: '#/components/schemas/currency'
-        seq_num:
-          type: string
-          description: |
-            This is user visible identifier for an expense.
-            This field can be used as reference in UI.
-          example: E/2020/10/T/95
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: txwownwrng
-        no_of_files:
-          type: integer
-          description: |
-            Number of files attached to the expense.
-          example: 1
-        purpose:
-          type: string
-          example: Team lunch
-        state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-          description: The state of the Expense.
-        spent_at:
-          allOf:
-            - $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            signifies when this expense was made.
-            This date cannot be in future.
-        merchant:
-          type: string
-          maxLength: 255
-          description: |
-            String denoting the name of the merchant to which the Expense was made.
-          example: Uber
     personal_card_transaction_out:
       type: object
       additionalProperties: false
@@ -8243,14 +8188,18 @@ components:
           description: |
             This id is provided by Yodlee to identify an object.
           example: '2389782392032'
-        matched_expense_id:
-          nullable: true
-          type: string
+        matched_expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
           description: |
-            Holds the expense id which is matched to this card transaction.
-          example: txwownwrng
-        matched_expense:
-          $ref: '#/components/schemas/personal_card_transaction_matched_expense_out_embed'
+            Holds the expense ids which are matched to this card transaction
+          example:
+            - txwownwrng
+        matched_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_expense_out_embed'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
