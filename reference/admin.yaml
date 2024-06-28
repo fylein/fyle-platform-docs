@@ -2304,6 +2304,8 @@ components:
         - name
         - type
       properties:
+        id:
+          $ref: '#/components/schemas/id_string'
         name:
           type: string
           description: |
@@ -2322,7 +2324,7 @@ components:
           description: |
             Password which required to unlock the file.
           example: SuperSecretPassword
-    admin_and_approver_file_in:
+    admin_file_in:
       allOf:
         - $ref: '#/components/schemas/file_in'
         - type: object
@@ -2332,6 +2334,7 @@ components:
             user_id:
               allOf:
                 - $ref: '#/components/schemas/id_string'
+              example: us82yutrio54
     file_out:
       type: object
       additionalProperties: false
@@ -2399,6 +2402,13 @@ components:
           type: string
           description: |
             Link to upload contents of this file
+    file_delete_action_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     schedule_config:
       type: object
       nullable: false
@@ -3066,6 +3076,13 @@ components:
           example: bawownwrng
         corporate_card_number:
           $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
         masked_corporate_card_number:
           $ref: '#/components/schemas/card_number'
         bank_name:
@@ -4134,23 +4151,6 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the expense
-    delete_files_attached_to_expense_in:
-      type: object
-      required:
-        - id
-        - file_ids
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: txsjfwlrglw
-        file_ids:
-          type: array
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - figwiwpjww
-          description: List of files to be deleted
     accounting_export_summary_in:
       type: object
       required:
@@ -4670,6 +4670,12 @@ components:
           description: |
             Signifies if and when this advance request was approved.
           nullable: true
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advance request.
+            This field can be used as reference in UI.
+          example: AR/2020/10/T/95
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -5772,6 +5778,23 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
+    add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        approver_email:
+          $ref: '#/components/schemas/email'
+        comment:
+          type: string
+          description: |
+            Specify why you are adding this approver
+          example: Extra approval from finance required
     report_action_remove_approver_in:
       type: object
       required:
@@ -5782,6 +5805,31 @@ components:
           $ref: '#/components/schemas/id_string'
         approver_email:
           $ref: '#/components/schemas/email'
+    report_action_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            id of report that is to be approved
+          example: rpa21A2rdj2
+    send_back_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: |
+            Specify why you are sending back the report.
+          example: Amount is incorrect
     process_ach_in:
       type: object
       properties:
@@ -6067,6 +6115,169 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    round_off_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    reports_export_config_column_formula:
+      type: object
+      properties:
+        function:
+          type: string
+          example: parse-format-time
+        parameters:
+          type: array
+          items:
+            anyOf:
+              - type: object
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+          example:
+            - function: field
+              parameters:
+                - spent_at
+            - yyyy-MM-dd'T'HH:mm:ss
+            - dd-MM-yyyy
+            - error in date formatting
+      description: |
+        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+    reports_export_config:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum:
+            - xlsx
+            - csv
+          description: |
+            Type of the export file.
+          example: csv
+        is_header_visible:
+          type: boolean
+          description: |
+            Whether to show the header in the export file.
+          example: true
+        separate_line_items_entry:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              description: |
+                Whether to show the double rows for each line item in the export file.
+              example: false
+            debit_entries_only:
+              type: array
+              items:
+                type: string
+              description: |
+                Configure which columns to show for debit entries.
+              example:
+                - debit_amount
+            credit_entries_only:
+              type: array
+              items:
+                type: string
+              description: |
+                Configure which columns to show for credit entries.
+              example:
+                - credit_amount
+          description: |
+            Configure how to show the double rows for each line item in the export file, if enabled.
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: |
+                  Name of the column.
+                example: Spent Date
+              formula:
+                allOf:
+                  - $ref: '#/components/schemas/reports_export_config_column_formula'
+                description: |
+                  Formula to transform the data in the column.
+          description: |
+            Configure the columns to show in the export file.
+    reports_exports_in:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+        - notify_emails
+        - config
+      properties:
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: |
+            List of emails to notify when the export is ready.
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_config'
+          nullable: false
+          description: |
+            Configuration for the export.
+    reports_exports_out:
+      type: object
+      additionalProperties: false
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: refilumWHrlPf7K
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_config'
+          nullable: false
+        file_id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          example: filumWHrlPf7K
+        state:
+          type: string
+          nullable: false
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          description: |
+            Status of the export.
+          example: PENDING
     corporate_card_out:
       type: object
       properties:
@@ -6083,6 +6294,8 @@ components:
           description: |
             The unique id of an user to whom the card is assigned
           example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -6193,10 +6406,30 @@ components:
             - USED
             - null
           example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Fyle
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Fyle
+          example: 50
       required:
         - id
         - org_id
         - user_id
+        - user
         - created_at
         - updated_at
         - bank_name
@@ -6216,6 +6449,9 @@ components:
         - verification_status
         - virtual_card_id
         - virtual_card_state
+        - nickname
+        - total_transactions_count
+        - unassigned_transactions_count
     corporate_card_in:
       type: object
       properties:
@@ -6260,9 +6496,39 @@ components:
           nullable: true
           description: |
             Signifies when this card was last synced.
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Signifies the unique nickname assigned to the card
+          example: Business Card
       required:
         - bank_name
         - card_number
+    corporate_card_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string, which can be used to fetch data for assigned and unassigned cards.
+          example: user_id=eq.null
+    corporate_card_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the total count of cards.
+          example: 100
+        transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the total count of transactions, present for the cards.
+          example: 1000
     corporate_card_assign_in:
       type: object
       properties:
@@ -6287,6 +6553,24 @@ components:
           example: bawownwrng
       required:
         - id
+    user_out_nullable_example_null:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+      example: null
     corporate_card_unassign_out:
       type: object
       additionalProperties: false
@@ -6304,6 +6588,8 @@ components:
           description: |
             The unique id of an user to whom the card is assigned
           example: null
+        user:
+          $ref: '#/components/schemas/user_out_nullable_example_null'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -6417,10 +6703,30 @@ components:
             - USED
             - null
           example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Fyle
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Fyle
+          example: 50
       required:
         - id
         - org_id
         - user_id
+        - user
         - created_at
         - updated_at
         - bank_name
@@ -6440,6 +6746,9 @@ components:
         - last_verified_at
         - virtual_card_id
         - virtual_card_state
+        - nickname
+        - total_transactions_count
+        - unassigned_transactions_count
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -6464,6 +6773,13 @@ components:
             Specifies the masked number of the card.
             Add only masked card-numbers, last four digits of the card.
           example: xxxx-4543
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
         masked_number:
           type: string
           description: |
@@ -9832,6 +10148,13 @@ components:
           description: |
             String denoting the name on the corporate card. This can be null.
           example: Jon Snow
+        card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
         user_id:
           type: string
           nullable: true
@@ -10734,7 +11057,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -10798,6 +11121,9 @@ components:
             - expense_limit_type (only `INIDIVIDUAL` type is allowed)
             - expense_currency
             - expense_amount_max
+            - expense_payment_modes
+            - expense_payment_modes_op
+            - expense_without_ccc_match_allowed
             - employee_department_ids
             - employee_department_ids_op
             - employee_locations
@@ -11196,7 +11522,7 @@ components:
         action_add_department_head_approver:
           type: boolean
           description: |
-            If this is set to true, then the employee's department head approver will be added to the report that contains expense(s) violating this policy rule.
+            If this is set to true, then the employee's department approver will be added to the report that contains expense(s) violating this policy rule.
           default: false
           example: true
         action_cap_amount:
@@ -11338,7 +11664,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -12984,7 +13310,7 @@ components:
           description: |
             List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
             case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department head, Project head, etc.
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -13114,6 +13440,13 @@ components:
       schema:
         type: integer
         example: 10
+    q_integer:
+      in: query
+      name: q
+      description: A search query to filter the results.
+      schema:
+        type: integer
+        example: 1234
     time_interval_granularity:
       in: query
       name: time_interval_granularity
@@ -15530,7 +15863,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/admin_and_approver_file_in'
+                  $ref: '#/components/schemas/admin_file_in'
       responses:
         '200':
           description: OK
@@ -15584,7 +15917,7 @@ paths:
                 data:
                   type: array
                   items:
-                    $ref: '#/components/schemas/admin_and_approver_file_in'
+                    $ref: '#/components/schemas/admin_file_in'
               additionalProperties: false
               required:
                 - data
@@ -15687,6 +16020,56 @@ paths:
                         content_type: application/pdf
                         download_url: https://aaa.bbb.cc/x22ddsds
                         upload_url: https://aaa.bbb.cc/x2sdssds
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/files/delete/bulk:
+    post:
+      operationId: files_delete
+      tags:
+        - Files
+      summary: Delete files bulk
+      description: |
+        Delete files bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/file_delete_action_in'
+                  example:
+                    - id: fi123819sa
+                    - id: fi876833tu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
         '400':
           description: Bad request
           content:
@@ -16256,55 +16639,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /admin/expenses/delete_files:
-    post:
-      tags:
-        - Expenses
-      summary: Delete files attached to an expense
-      description: |
-        This API deletes files attached to an expense
-      operationId: delete_files_attached_to_expense
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/delete_files_attached_to_expense_in'
-              required:
-                - data
-              additionalProperties: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
         '400':
           description: Unauthorised request
           content:
@@ -17746,6 +18080,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/add_approver:
+    post:
+      tags:
+        - Reports
+      summary: Add Approver
+      description: |
+        Add Approver to the report 
+      operationId: report_add_approver
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/add_approver_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/remove_approver:
     post:
       tags:
@@ -17793,6 +18182,122 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reports/approve/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Admin approve reports in bulk
+      description: |
+        Admin approve reports in bulk
+      operationId: report_admin_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/report_action_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reports/send_back:
+    post:
+      tags:
+        - Reports
+      summary: Send back report
+      description: |
+        Send back report to the employee 
+      operationId: report_send_back
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/send_back_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports/process_ach/bulk:
     post:
       tags:
@@ -18353,6 +18858,100 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reports/round_off_amount:
+    post:
+      tags:
+        - Reports
+      summary: Round off report amount
+      description: |
+        Round off report amount. This API first rounds of expenses and then rounds off the total amount of the report.
+      operationId: report_round_off_amount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/round_off_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/admin_report_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/reports/exports:
+    post:
+      tags:
+        - Reports
+      summary: Create Reports Export
+      description: |
+        Create Reports Export Request.
+      operationId: reports_exports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/reports_exports_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reports_exports_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/corporate_cards:
     get:
       tags:
@@ -18362,6 +18961,7 @@ paths:
         This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       operationId: corporate_cards_list
       parameters:
+        - $ref: '#/components/parameters/q'
         - $ref: '#/components/parameters/created_at'
         - $ref: '#/components/parameters/updated_at'
         - $ref: '#/components/parameters/order'
@@ -18548,8 +19148,11 @@ paths:
         - Corporate Cards
       summary: List corporate card masked card numbers
       description: |
-        This API just returns all the maksed card numbers (last 4 digits) associated with the corporate cards in the org
+        This API just returns all the masked card numbers (last 4 digits) associated with the corporate cards in the org, based on the query parameters.
       operationId: corporate_cards_masked_card_numbers_list
+      parameters:
+        - $ref: '#/components/parameters/q_integer'
+        - $ref: '#/components/parameters/limit'
       responses:
         '200':
           description: OK
@@ -18569,7 +19172,7 @@ paths:
                           - 1234
                           - 5678
                         description: |
-                          Holds the masked card numbers (last 4 digits) of all the corporate cards present in the org
+                          Holds the masked card numbers (last 4 digits) of all the corporate cards present in the org.
         '400':
           description: Bad request
           content:
@@ -18582,6 +19185,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/corporate_cards/stats:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Corporate Cards Stats
+      description: |
+        Stats for Corporate Cards
+      operationId: corporate_cards_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards/assign:
     post:
       tags:

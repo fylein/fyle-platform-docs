@@ -1,10 +1,10 @@
 post:
-  operationId: files_post_bulk
+  operationId: files_upload_html
   tags:
     - Files
-  summary: Bulk create files
+  summary: Upload html
   description: |
-    Create files in bulk.
+    Upsert html file.
   requestBody:
     required: true
     content:
@@ -13,12 +13,22 @@ post:
           type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: ../../components/schemas/file.yaml#/approver_file_in
-          additionalProperties: False
+              type: object
+              properties:
+                expense_id:
+                  type: string
+                  description: ID of the expense to which this html file needs to be attached
+                  example: txdtyereJtR6
+                html_content:
+                  type: string
+                  description: Base64 encoded representation of the HTML content
+                  example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+              required:
+                    - expense_id
+                    - html_content
           required:
             - data
+              
   responses:
     '200':
       description: OK
@@ -29,27 +39,13 @@ post:
             additionalProperties: False
             properties:
               data:
-                type: array
-                items:
-                  $ref: ../../components/schemas/file.yaml#/file_out
+                $ref: ../../components/schemas/file.yaml#/file_out_download_url
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            oneOf:
-              - $ref: ../../components/schemas/bulk_error.yaml
-              - type: object
-                properties:
-                  error:
-                    type: string
-                    nullable: true
-                  message:
-                    type: string
-                    nullable: true
-                  data:
-                    type: object
-                    nullable: true
+            $ref: ../../components/schemas/400.yaml
     '401':
       description: Unauthorized request
       content:

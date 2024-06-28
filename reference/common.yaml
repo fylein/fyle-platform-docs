@@ -41,6 +41,15 @@ components:
           description: |
             This error means that the input access token is either not issued by Fyle or has expired.
             You need to generate a new access token.
+    '404':
+      type: object
+      properties:
+        message:
+          enum:
+            - Resource not found
+          type: string
+          description: |
+            This error means the requested resource was not found or the requester doesn't have sufficient access.
     count:
       type: integer
       description: |
@@ -99,6 +108,30 @@ components:
         exchange_rate:
           type: number
           example: 12.123456
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
+    logo_file_generate_download_url_action_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        content_type:
+          type: string
+          example: image/png
+        download_url:
+          type: string
+          description: |
+            Link to download this file
 tags:
   - name: Currencies
     description: |
@@ -479,3 +512,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /common/org_settings/org_logo_settings/generate_download_url:
+    post:
+      tags:
+        - Org Logo
+      summary: Generate URLs for org logo
+      description: |
+        Generate URLs for org logo file
+      operationId: org_logo_generate_urls
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/logo_file_generate_download_url_action_out'
+        '400':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'

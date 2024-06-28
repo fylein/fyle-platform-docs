@@ -1,0 +1,143 @@
+personal_card_transaction_out:
+  type: object
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    org_id:
+      $ref: ./fields.yaml#/org_id
+    user_id:
+      $ref: ./fields.yaml#/user_id
+    personal_card_id:
+      type: string
+      description: |
+        The unique id of an personal card to which the object is associated.
+      example: bacc9EJaJKXcvI
+    amount:
+      type: number
+      description: |
+        The expense amount as claimed by user.
+      example: 1984.18
+    currency:
+      type: string
+      maxLength: 3
+      example: USD
+      description: Currency code (must be three letters only)
+    foreign_amount:
+      nullable: true
+    foreign_currency:
+      nullable: true
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+    category:
+      type: string
+      example: Securities Trades
+    merchant:
+      type: string
+      example: Vanguard Target Retirement
+    state:
+      type: string
+      enum:
+        - INITIALIZED
+        - HIDDEN
+        - MATCHED
+      description: |
+        Status of Personal Card Transactions.
+      example: INITIALIZED
+    description:
+      $ref: ./fields.yaml#/description
+    external_transaction_id:
+      type: string
+      description: |
+        This id is provided by Yodlee to identify an object.
+      example: '2389782392032'
+    matched_expense_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: |
+        Holds the expense ids which are matched to this card transaction
+      example:
+        - txwownwrng
+    matched_expenses:
+      type: array
+      items:
+        $ref: './expense.yaml#/matched_expense_out_embed'
+    created_at:
+      $ref: ./fields.yaml#/created_at
+    updated_at:
+      $ref: ./fields.yaml#/updated_at
+
+matched_expense_out_embed:
+  type: object
+  nullable: true
+  additionalProperties: false
+  properties:
+    amount:
+      $ref: './fields.yaml#/amount'
+    category_display_name:
+      type: string
+      description: |
+        Category of the expense.
+      example: Travel
+    currency:
+      $ref: './fields.yaml#/currency'
+    seq_num:
+      type: string
+      description: |
+        This is user visible identifier for an expense.
+        This field can be used as reference in UI.
+      example: E/2020/10/T/95
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: txwownwrng
+    no_of_files:
+      type: integer
+      description: |
+        Number of files attached to the expense.
+      example: 1
+    purpose:
+      type: string
+      example: Team lunch
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+      description: The state of the Expense.
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        signifies when this expense was made.
+        This date cannot be in future.
+    merchant:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the name of the merchant to which the Expense was made.
+      example: Uber
+
+personal_card_transaction_hide_in:
+  type: object
+  required:
+    - id
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+
+
+personal_card_transaction_expense_suggestions:
+  type: object
+  additionalProperties: False

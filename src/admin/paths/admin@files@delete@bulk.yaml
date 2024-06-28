@@ -1,10 +1,10 @@
 post:
+  operationId: files_delete
   tags:
-    - Reports
-  summary: Add Approvers
+    - Files
+  summary: Delete files bulk
   description: |
-    Add Approvers
-  operationId: report_add_approvers
+    Delete files bulk
   requestBody:
     required: true
     content:
@@ -14,15 +14,14 @@ post:
           additionalProperties: False
           required:
             - data
-            - reason
           properties:
             data:
-              $ref: ../../components/schemas/report.yaml#/add_approvers_in
-            reason:
-              type: string
-              description: |
-                Reason for adding approvers to the report
-              example: added approver
+              type: array
+              items:
+                $ref: ../../components/schemas/file.yaml#/file_delete_action_in
+              example:
+                - id: fi123819sa
+                - id: fi876833tu
   responses:
     '200':
       description: OK
@@ -30,10 +29,6 @@ post:
         application/json:
           schema:
             type: object
-            additionalProperties: False
-            properties:
-              data:
-                $ref: '../../components/schemas/report.yaml#/admin_report_out'
     '400':
       description: Bad request
       content:
@@ -52,9 +47,4 @@ post:
         application/json:
           schema:
             $ref: ../../components/schemas/403.yaml
-    '404':
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/404.yaml'
+

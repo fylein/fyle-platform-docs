@@ -101,6 +101,8 @@ file_in:
   type: object
   required: [ name, type ]
   properties:
+    id:
+        $ref: './fields.yaml#/id_string'
     name:
       type: string
       description: |
@@ -121,7 +123,7 @@ file_in:
         Password which required to unlock the file.
       example: SuperSecretPassword
 
-admin_and_approver_file_in:
+admin_file_in:
   allOf:
     - $ref: '#/file_in'
     - type: object
@@ -130,3 +132,46 @@ admin_and_approver_file_in:
         user_id:
           allOf:
             - $ref: './fields.yaml#/id_string'
+          example: 'us82yutrio54'
+
+approver_file_in:
+  allOf:
+    - $ref: '#/file_in'
+    - type: object
+      required: [ user_id, org_id]
+      properties:
+        user_id:
+          allOf:
+            - $ref: './fields.yaml#/id_string'
+          example: 'us82yutrio54'
+        org_id:
+          allOf:
+            - $ref: './fields.yaml#/id_string'
+          example: 'ort677efgh98'
+
+file_delete_action_in:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+
+file_out_download_url:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    name:
+      type: string
+      description: |
+        Name of the uploaded file.
+      example: uber_expenses_vmrpw.pdf
+    content_type:
+      type: string
+      example: 'text/csv'
+    download_url:
+      type: string
+      description: |
+        Link to download this file.
