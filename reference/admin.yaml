@@ -6214,31 +6214,6 @@ components:
                   Formula to transform the data in the column.
           description: |
             Configure the columns to show in the export file. Only required for CSV and XLSX exports.
-    reports_exports_in:
-      type: object
-      additionalProperties: false
-      required:
-        - query_params
-        - notify_emails
-        - config
-      properties:
-        query_params:
-          allOf:
-            - $ref: '#/components/schemas/query_params'
-          nullable: false
-        notify_emails:
-          type: array
-          nullable: false
-          items:
-            $ref: '#/components/schemas/email'
-          description: |
-            List of emails to notify when the export is ready.
-        config:
-          allOf:
-            - $ref: '#/components/schemas/reports_export_config'
-          nullable: false
-          description: |
-            Configuration for the export.
     reports_exports_out:
       type: object
       additionalProperties: false
@@ -6285,6 +6260,31 @@ components:
           description: |
             Status of the export.
           example: PENDING
+    reports_exports_in:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+        - notify_emails
+        - config
+      properties:
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: |
+            List of emails to notify when the export is ready.
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_config'
+          nullable: false
+          description: |
+            Configuration for the export.
     corporate_card_out:
       type: object
       properties:
@@ -18963,6 +18963,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/403'
   /admin/reports/exports:
+    get:
+      tags:
+        - Reports
+      summary: Get Reports Export
+      description: |
+        Get reports export request details. This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/q'
+      operationId: reports_exports_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reports_exports_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
     post:
       tags:
         - Reports
