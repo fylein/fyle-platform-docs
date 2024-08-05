@@ -13004,6 +13004,24 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that are part of the duplicate set
+    expenses_duplicate_sets_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in GET call. Currently we don't 
+            process this field, this is added for future use cases. Currently empty string value should be passed.
+          example: ''
+    expenses_duplicate_sets_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field represents the total number of expense duplicate sets that match the criteria specified in the query_params within the body of the request.
+          example: 45
     any_type:
       anyOf:
         - type: string
@@ -22777,6 +22795,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/expenses/duplicate_sets/stats:
+    get:
+      tags:
+        - Expenses
+      summary: Expense duplicate sets stats
+      operationId: expense_duplicate_sets_stats
+      description: |
+        This API returns count of expenses duplicate set present in org across all employees.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_duplicate_sets_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expenses_duplicate_sets_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/feature_configs:
     get:
       tags:
