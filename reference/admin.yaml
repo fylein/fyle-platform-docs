@@ -1983,6 +1983,38 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    expense_duplicate_sets_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwoirwlwwg
+            - txwlgwkgw42
+          description: |
+            List of expense IDs that are part of the duplicate set
+    employee_out_potential_duplicate_expenses:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+        potential_duplicate_expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_duplicate_sets_out'
     name_nullable:
       type: string
       maxLength: 255
@@ -12990,20 +13022,6 @@ components:
             - txwlgwkgw42
           description: |
             List of expense IDs that needs to be dismissed as a duplicate from the target expense
-    expense_duplicate_sets_out:
-      type: object
-      additionalProperties: false
-      properties:
-        expense_ids:
-          type: array
-          nullable: false
-          items:
-            $ref: '#/components/schemas/id_string'
-          example:
-            - txwoirwlwwg
-            - txwlgwkgw42
-          description: |
-            List of expense IDs that are part of the duplicate set
     expenses_duplicate_sets_stats_in:
       properties:
         query_params:
@@ -15358,6 +15376,43 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/employees/potential_duplicate_expenses:
+    get:
+      tags:
+        - Employees
+      summary: List employees and potential duplicate expenses
+      operationId: employees_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_out_potential_duplicate_expenses'
         '400':
           description: Bad request
           content:
