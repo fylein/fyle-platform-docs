@@ -127,7 +127,6 @@ components:
       type: boolean
       description: |
         This indicates if the resource is enabled for use within the organisation.
-      default: true
       example: true
     restricted_spender_user_ids:
       type: array
@@ -1636,6 +1635,11 @@ components:
           example: Audi
         code:
           $ref: '#/components/schemas/code'
+    has_accepted_invite:
+      type: boolean
+      description: |
+        This boolean field represents whether the employee has accepted the current org's invite by verifying his/her email or not.
+      example: true
     bank_ifsc:
       type: string
       example: SBIN0007587
@@ -1707,12 +1711,42 @@ components:
         The unique id of an user to which the object is associated.
       readOnly: true
       example: uswjwgnwwgo
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the full name of an employee.
+      example: Jon Snow
     delegatees:
       type: object
       additionalProperties: false
       properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: |
+            Delegation id.
+          example: 100
+        type:
+          type: string
+          enum:
+            - SHORT_TERM
+            - PERMANENT
+          description: |
+            Type of delegation.
+          example: SHORT_TERM
         user_id:
           $ref: '#/components/schemas/user_id'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            Email of the delegatee.
+        full_name:
+          allOf:
+            - $ref: '#/components/schemas/user_full_name'
+          description: |
+            Full name of the delegatee.
         start_at:
           type: string
           format: date-time
@@ -1792,7 +1826,10 @@ components:
         department:
           $ref: '#/components/schemas/department_out_embed'
         is_enabled:
-          $ref: '#/components/schemas/is_enabled'
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
         joined_at:
           $ref: '#/components/schemas/joined_at'
         level_id:
@@ -1908,11 +1945,7 @@ components:
           description: |
             List of users who are approvers for this employee.
         has_accepted_invite:
-          type: boolean
-          description: |
-            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
-          default: true
-          example: true
+          $ref: '#/components/schemas/has_accepted_invite'
         branch_account:
           type: string
           nullable: true
@@ -3047,13 +3080,12 @@ components:
         flattened_custom_field:
           $ref: '#/components/schemas/flattened_custom_field'
         has_accepted_invite:
-          type: boolean
-          description: |
-            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
-          default: true
-          example: true
+          $ref: '#/components/schemas/has_accepted_invite'
         is_enabled:
-          $ref: '#/components/schemas/is_enabled'
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
         mobile:
           type: string
           nullable: true
@@ -5332,13 +5364,12 @@ components:
           nullable: true
           example: Branch Manager
         has_accepted_invite:
-          type: boolean
-          description: |
-            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
-          default: true
-          example: true
+          $ref: '#/components/schemas/has_accepted_invite'
         is_enabled:
-          $ref: '#/components/schemas/is_enabled'
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
         mobile:
           type: string
           nullable: true
@@ -10169,12 +10200,6 @@ components:
           $ref: '#/components/schemas/spend_overview_percentage'
         change_percentage:
           $ref: '#/components/schemas/spend_overview_change_percentage'
-    user_full_name:
-      type: string
-      maxLength: 255
-      description: |
-        String denoting the full name of an employee.
-      example: Jon Snow
     spend_overview_by_user_data_out:
       type: object
       nullable: false
