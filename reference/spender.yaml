@@ -6098,6 +6098,20 @@ components:
             $ref: '#/components/schemas/delegatees'
           description: |
             List of users who are delegatees for this employee.
+    spender_delegators_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee.
+          example: John Doe
     virtual_card_out:
       type: object
       properties:
@@ -10984,6 +10998,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/employees/delegators:
+    get:
+      tags:
+        - Employees
+      summary: Employee's Delegators
+      operationId: employees_delegators_list
+      description: |
+        Get a list of delegators for the employee. Delegators are employees who have delegated their account access to the employee.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spender_delegators_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /spender/virtual_cards:
     get:
       tags:
