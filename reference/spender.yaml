@@ -5979,7 +5979,6 @@ components:
         delegatees:
           type: array
           nullable: true
-          maxItems: 1
           items:
             $ref: '#/components/schemas/delegatees'
           description: |
@@ -6093,7 +6092,6 @@ components:
         delegatees:
           type: array
           nullable: true
-          maxItems: 1
           items:
             $ref: '#/components/schemas/delegatees'
           description: |
@@ -6118,6 +6116,57 @@ components:
           description: |
             Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
+    spender_delegatees_post_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee.
+          example: John Doe
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
+        sms_opt_out_source:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Represents if opt out is done by web app or sms
+          example: WEB_APP
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        delegatees:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
     spender_delegators_out:
       type: object
       additionalProperties: false
@@ -11050,7 +11099,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/delegatees'
+                    $ref: '#/components/schemas/spender_delegatees_post_out'
         '400':
           description: Bad request
           content:
