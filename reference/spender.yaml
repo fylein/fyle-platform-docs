@@ -6118,15 +6118,17 @@ components:
           description: |
             Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
-          $ref: '#/components/schemas/user_id'
-        email:
-          $ref: '#/components/schemas/email'
-        full_name:
-          type: string
-          maxLength: 255
-          description: |
-            Represents the full name of the Employee.
-          example: John Doe
+    spender_delegators_out:
+      user_id:
+        $ref: ./fields.yaml#/user_id
+      email:
+        $ref: ./fields.yaml#/email
+      full_name:
+        type: string
+        maxLength: 255
+        description: |
+          Represents the full name of the Employee.
+        example: John Doe
     virtual_card_out:
       type: object
       properties:
@@ -11033,6 +11035,37 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/spender_delegatees_post_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/delegatees'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/employees/delegators:
     get:
       tags:
@@ -11049,11 +11082,6 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/delegatees'
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -11075,15 +11103,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-<<<<<<< HEAD
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-=======
->>>>>>> main
   /spender/virtual_cards:
     get:
       tags:
