@@ -6112,6 +6112,30 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+    spender_delegatees_delete_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        delegator_user_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: uswoirwlwwg
+          description: |
+            User id of the delegator.
+        delegatee_user_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: uswoirwlwwg
+          description: |
+            User id of the delegatee.
+        start_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+        end_date:
+          $ref: '#/components/schemas/timestamptz_utc'
     virtual_card_out:
       type: object
       properties:
@@ -11035,6 +11059,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/employees/delegatees/delete:
+    post:
+      tags:
+        - Employees
+      summary: Remove delegatee
+      description: |
+        Remove a delegatee from the spender's account.
+      operationId: employees_delegatee_delete_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  required:
+                    - id
+                  properties:
+                    id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_integer'
+                      description: Delegation id of spender and delegatee. This id is provided by Fyle to identify an object.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_delegatees_delete_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/virtual_cards:
     get:
       tags:
