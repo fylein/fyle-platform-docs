@@ -130,13 +130,6 @@ components:
       description: |
         amount of money
       example: 47.99
-    fk_string:
-      type: string
-      nullable: true
-      maxLength: 15
-      description: |
-        This id is provided by Fyle to identify an object.
-      example: sdfd2391
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -236,11 +229,15 @@ components:
         - id
         - name
         - band
+    has_accepted_invite:
+      type: boolean
+      description: |
+        This boolean field represents whether the employee has accepted the current org's invite by verifying his/her email or not.
+      example: true
     is_enabled:
       type: boolean
       description: |
         This indicates if the resource is enabled for use within the organisation.
-      default: true
       example: true
     phone_number:
       type: string
@@ -325,13 +322,12 @@ components:
           nullable: true
           example: Branch Manager
         has_accepted_invite:
-          type: boolean
-          description: |
-            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
-          default: true
-          example: true
+          $ref: '#/components/schemas/has_accepted_invite'
         is_enabled:
-          $ref: '#/components/schemas/is_enabled'
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
         mobile:
           type: string
           nullable: true
@@ -467,11 +463,6 @@ components:
           nullable: true
           description: |
             Determines whether this report has been verified by a verifier
-        settlement_id:
-          allOf:
-            - $ref: '#/components/schemas/fk_string'
-          nullable: true
-          example: set5nlgnwgwl
         is_physical_bill_submitted:
           type: boolean
           nullable: true
@@ -741,13 +732,19 @@ components:
           enum:
             - xlsx
             - csv
+            - pdf
           description: |
             Type of the export file.
           example: csv
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the export file or not. Only required for PDF exports.
+          example: true
         is_header_visible:
           type: boolean
           description: |
-            Whether to show the header in the export file.
+            Whether to show the header in the export file. Only required for CSV and XLSX exports.
           example: true
         separate_line_items_entry:
           type: object
@@ -774,7 +771,7 @@ components:
               example:
                 - credit_amount
           description: |
-            Configure how to show the double rows for each line item in the export file, if enabled.
+            Configure how to show the double rows for each line item in the export file, if enabled. Only required for CSV and XLSX exports.
         columns:
           type: array
           items:
@@ -791,32 +788,7 @@ components:
                 description: |
                   Formula to transform the data in the column.
           description: |
-            Configure the columns to show in the export file.
-    reports_exports_in:
-      type: object
-      additionalProperties: false
-      required:
-        - query_params
-        - notify_emails
-        - config
-      properties:
-        query_params:
-          allOf:
-            - $ref: '#/components/schemas/query_params'
-          nullable: false
-        notify_emails:
-          type: array
-          nullable: false
-          items:
-            $ref: '#/components/schemas/email'
-          description: |
-            List of emails to notify when the export is ready.
-        config:
-          allOf:
-            - $ref: '#/components/schemas/reports_export_config'
-          nullable: false
-          description: |
-            Configuration for the export.
+            Configure the columns to show in the export file. Only required for CSV and XLSX exports.
     reports_exports_out:
       type: object
       additionalProperties: false
@@ -863,6 +835,31 @@ components:
           description: |
             Status of the export.
           example: PENDING
+    reports_exports_in:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+        - notify_emails
+        - config
+      properties:
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: |
+            List of emails to notify when the export is ready.
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_config'
+          nullable: false
+          description: |
+            Configuration for the export.
     foreign_currency:
       type: string
       nullable: true
@@ -958,6 +955,13 @@ components:
           description: |
             This is a combination of name and sub_project separated by a / and spaces.
             In case if no sub_project is present it is same as name of the project.
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
     account_out_embed:
       type: object
       properties:
@@ -1129,7 +1133,6 @@ components:
         - seq_num
         - title
         - state
-        - settlement_id
         - last_paid_at
         - reimbursement_id
         - reimbursement_seq_num
@@ -1182,14 +1185,6 @@ components:
             - $ref: '#/components/schemas/null_field'
             - $ref: '#/components/schemas/amount'
           nullable: true
-        settlement_id:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
-            - $ref: '#/components/schemas/id_string'
-          nullable: true
-          maxLength: 255
-          description: |
-            An unique ID, generated by Fyle, for identifying the Settlement.
         last_paid_at:
           anyOf:
             - $ref: '#/components/schemas/null_field'
@@ -1204,13 +1199,6 @@ components:
           nullable: true
           description: |
             Signifies if and when this report was verified.
-        settlement_locked_at:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
-            - $ref: '#/components/schemas/timestamptz_utc'
-          nullable: true
-          description: |
-            Signifies if and when this report was locked for settlement.
         reimbursement_id:
           anyOf:
             - $ref: '#/components/schemas/null_field'
@@ -1347,13 +1335,12 @@ components:
         flattened_custom_field:
           $ref: '#/components/schemas/flattened_custom_field'
         has_accepted_invite:
-          type: boolean
-          description: |
-            This boolean field represents whether the employee has accepted the current org's invite by veryfying his/her email or not.
-          default: true
-          example: true
+          $ref: '#/components/schemas/has_accepted_invite'
         is_enabled:
-          $ref: '#/components/schemas/is_enabled'
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
         mobile:
           type: string
           nullable: true
@@ -1428,6 +1415,13 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
         masked_corporate_card_number:
           $ref: '#/components/schemas/card_number'
         bank_name:
@@ -2205,12 +2199,6 @@ components:
           example: ervgnwlgw34
         expense_rule_data:
           $ref: '#/components/schemas/expense_rule_data_in'
-        is_weekend_spend:
-          type: boolean
-          nullable: true
-          description: |
-            Whether the expense was spent on a weekend.
-          example: true
         is_split:
           type: boolean
           nullable: true
@@ -2271,14 +2259,6 @@ components:
               description: |
                 Third party app id.
               example: tpa_1234567890
-        report_settlement_id:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
-            - $ref: '#/components/schemas/id_string'
-          nullable: true
-          maxLength: 255
-          description: |
-            An unique ID, generated by Fyle, for identifying the Settlement.
         report_last_paid_at:
           anyOf:
             - $ref: '#/components/schemas/null_field'
@@ -4314,6 +4294,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/404'
   /approver/reports/exports:
+    get:
+      tags:
+        - Reports
+      summary: Get Reports Export
+      description: |
+        Get reports export request details. This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reports_exports_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reports_exports_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
     post:
       tags:
         - Reports
