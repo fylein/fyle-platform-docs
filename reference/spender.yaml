@@ -5926,16 +5926,14 @@ components:
           description: |
             Full name of the delegatee.
         start_at:
-          type: string
-          format: date-time
-          example: '2020-06-11T13:14:55.201598+00:00'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Date and time from which the delegation is active.
           nullable: false
         end_at:
-          type: string
-          format: date-time
-          example: '2020-07-11T13:14:55.201598+00:00'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
@@ -5986,7 +5984,6 @@ components:
         delegatees:
           type: array
           nullable: true
-          maxItems: 1
           items:
             $ref: '#/components/schemas/delegatees'
           description: |
@@ -6100,7 +6097,75 @@ components:
         delegatees:
           type: array
           nullable: true
-          maxItems: 1
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
+    spender_delegatees_post_in:
+      type: object
+      additionalProperties: false
+      properties:
+        delegatee_user_id:
+          $ref: '#/components/schemas/fk_string'
+        start_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time from which the delegation is active.
+          nullable: false
+        end_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
+          nullable: true
+    spender_delegatees_post_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee.
+          example: John Doe
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
+        sms_opt_out_source:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Represents if opt out is done by web app or sms
+          example: WEB_APP
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        delegatees:
+          type: array
+          nullable: true
           items:
             $ref: '#/components/schemas/delegatees'
           description: |
@@ -11005,6 +11070,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/employees/delegatees:
+    post:
+      tags:
+        - Employees
+      summary: Assign delegatees
+      operationId: employees_delegatees_post
+      description: |
+        Assign delegatees to employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_delegatees_post_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_delegatees_post_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/employees/delegators:
     get:
       tags:
