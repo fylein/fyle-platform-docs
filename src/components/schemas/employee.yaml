@@ -198,7 +198,6 @@ employee_out:
     delegatees:
       type: array
       nullable: True
-      maxItems: 1
       items:
         $ref: ./fields.yaml#/delegatees
       description: |
@@ -579,7 +578,6 @@ spender_employee_out:
     delegatees:
       type: array
       nullable: True
-      maxItems: 1
       items:
         $ref: ./fields.yaml#/delegatees
       description: |
@@ -711,7 +709,6 @@ spender_commute_details_out:
     delegatees:
       type: array
       nullable: True
-      maxItems: 1
       items:
         $ref: ./fields.yaml#/delegatees
       description: |
@@ -731,7 +728,6 @@ spender_delegators_out:
       description: |
         Represents the full name of the Employee.
       example: John Doe
-
 
 spender_delegatees_delete_out:
   type: object
@@ -757,3 +753,75 @@ spender_delegatees_delete_out:
       $ref: './fields.yaml#/timestamptz_utc'
     end_date:
       $ref: './fields.yaml#/timestamptz_utc'
+
+
+spender_delegatees_post_in:
+  type: object
+  additionalProperties: False
+  properties:
+    delegatee_user_id:
+      $ref: ./fields.yaml#/fk_string
+    start_at:
+      allOf:
+        - $ref: ./fields.yaml#/timestamptz_utc
+      description: |
+        Date and time from which the delegation is active.
+      nullable: False
+    end_at:
+      allOf:
+        - $ref: ./fields.yaml#/timestamptz_utc
+      description: |
+        Date and time till which the delegation is active. If null, delegation is active indefinitely.
+      nullable: True
+
+spender_delegatees_post_out:
+  type: object
+  additionalProperties: False
+  properties:
+    user_id:
+      $ref: ./fields.yaml#/fk_string
+    email:
+      $ref: './fields.yaml#/email'
+    full_name:
+      type: string
+      maxLength: 255
+      description: |
+        Represents the full name of the Employee.
+      example: John Doe
+    commute_details:
+      $ref: './fields.yaml#/commute_details'
+    mobile:
+      type: string
+      nullable: true
+      example: '+12131234567'
+      items:
+        $ref: '#/components/schemas/phone_number'
+      description: |
+        Mobile number of the employee
+    is_mobile_verified:
+      type: boolean
+      nullable: true
+      description: |
+        Flag which indicates if mobile is verified or not.
+      example: false
+    sms_opt_out_source:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        Represents if opt out is done by web app or sms
+      example: WEB_APP
+    is_enabled:
+      allOf:
+        - $ref: ./fields.yaml#/is_enabled
+      description: |
+        This field indicates whether the employee is enabled in the org.
+    has_accepted_invite:
+      $ref: ./fields.yaml#/has_accepted_invite
+    delegatees:
+      type: array
+      nullable: True
+      items:
+        $ref: ./fields.yaml#/delegatees
+      description: |
+        List of users who are delegatees for this employee.
