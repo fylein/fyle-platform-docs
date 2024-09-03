@@ -1748,16 +1748,14 @@ components:
           description: |
             Full name of the delegatee.
         start_at:
-          type: string
-          format: date-time
-          example: '2020-06-11T13:14:55.201598+00:00'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Date and time from which the delegation is active.
           nullable: false
         end_at:
-          type: string
-          format: date-time
-          example: '2020-07-11T13:14:55.201598+00:00'
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
@@ -1994,7 +1992,6 @@ components:
         delegatees:
           type: array
           nullable: true
-          maxItems: 1
           items:
             $ref: '#/components/schemas/delegatees'
           description: |
@@ -2061,6 +2058,27 @@ components:
       nullable: true
       description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T01:18:19.292-08:00'
+    delegatee:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          type: string
+          description: |
+            User ID of the delegatee.
+          example: uswjwgnwwgo
+        start_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time from which the delegation is active.
+          nullable: false
+        end_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
+          nullable: true
     invitation_in:
       type: object
       additionalProperties: false
@@ -2208,7 +2226,16 @@ components:
           example:
             - delegatee@example.com
           description: |
-            List of emails of employees that are delegatees for this employee.
+            This key is in the process of being deprecated. It is recommended to use `delegatees` key instead.
+          deprecated: true
+        delegatees:
+          type: array
+          maxItems: 5
+          nullable: false
+          items:
+            $ref: '#/components/schemas/delegatee'
+          description: |
+            List of delegatees for this employee.
     employee_id:
       type: string
       maxLength: 255
@@ -3547,6 +3574,7 @@ components:
         - is_physical_bill_submitted
         - physical_bill_submitted_at
         - invoice_number
+        - is_duplicate_present
       properties:
         id:
           allOf:
@@ -4032,6 +4060,12 @@ components:
           example: 1234
         commute_details:
           $ref: '#/components/schemas/commute_details'
+        is_duplicate_present:
+          type: boolean
+          nullable: false
+          description: |
+            Whether duplicate expenses is detected for this expense or not.
+          example: true
     source:
       type: string
       description: |
