@@ -6865,6 +6865,21 @@ components:
         - nickname
         - total_transactions_count
         - unassigned_transactions_count
+    corporate_card_reassign_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        user_id:
+          type: string
+          description: |
+            The unique id of an user to whom the card should be reassigned.
+          example: uswjwgnwwgo
+      required:
+        - id
+        - user_id
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -19546,6 +19561,60 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/corporate_card_unassign_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/corporate_cards/reassign:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Reassign corporate card to another user
+      description: |
+        Reassign a corporate card to another user
+      operationId: corporate_cards_reassign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_reassign_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
         '400':
           description: Bad request
           content:
