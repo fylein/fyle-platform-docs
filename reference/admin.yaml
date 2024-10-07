@@ -12294,6 +12294,232 @@ components:
         - post_date_column
         - is_auto_created
         - card_network
+    preview_from_statement_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            description_column:
+              type: string
+              description: |
+                Specifies the mapping of description column on the statement
+              nullable: true
+              example: description
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction id / unique id on the statement.
+              example: reference number
+              nullable: true
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            merchant_column:
+              type: string
+              description: |
+                Specifies the mapping of merchant on the statement.
+              example: Amazon
+            foreign_amount_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            post_date_column:
+              type: string
+              description: |
+                Specifies the header name of the post date column in the statement.
+              example: post date
+              nullable: true
+            bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            is_debit_positive:
+              type: boolean
+              description: |
+                Specifies the representation of the the amount in the statement, if true then the amount represented by |
+                positive sign are debits, and if false then the amount represented by negative sign are debits.
+              example: true
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+              nullable: true
+            card_network:
+              type: string
+              description: |
+                Specifies the credit card network used by the card
+              example: VISA
+              nullable: true
+          required:
+            - description_column
+            - transaction_date_column
+            - transaction_id_column
+            - amount_column
+            - card_number_column
+            - merchant_column
+            - foreign_amount_column
+            - foreign_currency_column
+            - post_date_column
+            - bank_name
+            - is_debit_positive
+            - name
+            - card_network
+        ignored_line_item_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies list of statement line items to be ignored in the statement.
+          example:
+            - stlisfdfadssd
+        rtf_missing_line_item_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies list of statement line items which are to be created as RTF missing transactions.
+          example:
+            - stlisfdfadssd
+        statement_card_number:
+          type: string
+          description: |
+            Card number from statement can be passed to get transactions only from specific card
+          example: xxx5-4543
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_item_ids
+    preview_out:
+      properties:
+        no_of_debit:
+          type: integer
+          description: |
+            Number of debit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_credit:
+          type: integer
+          description: |
+            Number of credit transactions in the statement uploaded by the user.
+          example: 3
+          nullable: true
+        no_of_transactions:
+          type: integer
+          description: |
+            Number of transactions in the statement uploaded by the user.
+          example: 6
+        transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                description: |
+                  Specifies the description of the transaction on the statement.
+                nullable: true
+                example: description
+              bank_name:
+                type: string
+                description: |
+                  Specifies the bank name of the statement
+                example: American Express
+              merchant:
+                type: string
+                description: |
+                  Specifies the merchant of the statement
+                example: Amazon
+              transaction_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the transaction date on the statement.
+              amount:
+                type: string
+                description: |
+                  Specifies the amount on the statement.
+                example: 30
+              card_number:
+                type: string
+                description: |
+                  Specifies the card number on the statement.
+                example: xxxx-3343
+              unique_id:
+                type: string
+                description: |
+                  Specifies the unique code / transaction id on the statement.
+                example: ed0b2aa913c54b3f903a5030208e1872
+              foreign_amount:
+                type: string
+                description: |
+                  Specifies the foreign amount on the statement.
+                nullable: true
+                example: 48
+              foreign_currency:
+                type: string
+                description: |
+                  Specifies the foreign currency on the statement.
+                nullable: true
+                example: USD
+              transaction_id:
+                type: string
+                description: |
+                  Specifies the transaction id / unique id on the statement.
+                nullable: true
+                example: USD
+              transaction_type:
+                type: string
+                description: |
+                  Specifies the transaction type of the transactions on the statement (credit / debit).
+                example: debit
+              post_date:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Specifies the post date on the statement.
+                nullable: true
+            required:
+              - description
+              - bank_name
+              - merchant
+              - transaction_date
+              - amount
+              - card_number
+              - unique_id
+              - foreign_amount
+              - foreign_currency
+              - transaction_id
+              - post_date
+      required:
+        - transactions
+        - no_of_debit
+        - no_of_credit
+        - no_of_transactions
     card_transaction_from_statement_in:
       type: object
       properties:
@@ -12411,110 +12637,6 @@ components:
         - id
         - statement_mapping
         - ignored_line_item_ids
-    preview_out:
-      properties:
-        no_of_debit:
-          type: integer
-          description: |
-            Number of debit transactions in the statement uploaded by the user.
-          example: 3
-          nullable: true
-        no_of_credit:
-          type: integer
-          description: |
-            Number of credit transactions in the statement uploaded by the user.
-          example: 3
-          nullable: true
-        no_of_transactions:
-          type: integer
-          description: |
-            Number of transactions in the statement uploaded by the user.
-          example: 6
-        transactions:
-          type: array
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-                description: |
-                  Specifies the description of the transaction on the statement.
-                nullable: true
-                example: description
-              bank_name:
-                type: string
-                description: |
-                  Specifies the bank name of the statement
-                example: American Express
-              merchant:
-                type: string
-                description: |
-                  Specifies the merchant of the statement
-                example: Amazon
-              transaction_date:
-                $ref: '#/components/schemas/timestamptz_utc'
-                description: |
-                  Specifies the transaction date on the statement.
-              amount:
-                type: string
-                description: |
-                  Specifies the amount on the statement.
-                example: 30
-              card_number:
-                type: string
-                description: |
-                  Specifies the card number on the statement.
-                example: xxxx-3343
-              unique_id:
-                type: string
-                description: |
-                  Specifies the unique code / transaction id on the statement.
-                example: ed0b2aa913c54b3f903a5030208e1872
-              foreign_amount:
-                type: string
-                description: |
-                  Specifies the foreign amount on the statement.
-                nullable: true
-                example: 48
-              foreign_currency:
-                type: string
-                description: |
-                  Specifies the foreign currency on the statement.
-                nullable: true
-                example: USD
-              transaction_id:
-                type: string
-                description: |
-                  Specifies the transaction id / unique id on the statement.
-                nullable: true
-                example: USD
-              transaction_type:
-                type: string
-                description: |
-                  Specifies the transaction type of the transactions on the statement (credit / debit).
-                example: debit
-              post_date:
-                $ref: '#/components/schemas/timestamptz_utc'
-                description: |
-                  Specifies the post date on the statement.
-                nullable: true
-            required:
-              - description
-              - bank_name
-              - merchant
-              - transaction_date
-              - amount
-              - card_number
-              - unique_id
-              - foreign_amount
-              - foreign_currency
-              - transaction_id
-              - post_date
-      required:
-        - transactions
-        - no_of_debit
-        - no_of_credit
-        - no_of_transactions
     card_stats_out:
       properties:
         missing_transactions_count:
@@ -22541,7 +22663,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/card_transaction_from_statement_in'
+                  $ref: '#/components/schemas/preview_from_statement_in'
               required:
                 - data
       responses:
