@@ -2399,7 +2399,36 @@ components:
       minItems: 0
       maxItems: 10
       items:
-        $ref: '#/components/schemas/location'
+        type: object
+        nullable: true
+        properties:
+          city:
+            type: string
+            nullable: true
+            example: London
+          state:
+            type: string
+            nullable: true
+            example: London
+          display:
+            type: string
+            nullable: true
+          country:
+            type: string
+            nullable: true
+            example: United Kingdom
+          formatted_address:
+            type: string
+            nullable: true
+            example: 221 Baker St, Marylebone, London, United Kingdom
+          latitude:
+            type: number
+            nullable: true
+            example: 12.971599
+          longitude:
+            type: number
+            nullable: true
+            example: 77.594566
     custom_fields:
       type: array
       description: |
@@ -2437,6 +2466,8 @@ components:
           example: '2020-06-01T01:18:19.292-08:00'
         source:
           $ref: '#/components/schemas/source'
+        code:
+          $ref: '#/components/schemas/code'
         merchant:
           $ref: '#/components/schemas/merchant'
         foreign_currency:
@@ -2499,6 +2530,50 @@ components:
           $ref: '#/components/schemas/locations'
         custom_fields:
           $ref: '#/components/schemas/custom_fields'
+        file_ids:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+          description: |
+            List of file ids to attach to the expense. <br>
+            To add new files to the expense, send the list of file ids to be attached. <br>
+            To remove files from the expense, send the list of all file ids except which you want to remove. <br>
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: |
+            Specific to mileage expense. This represents the Mileage's rate id given by Fyle
+            during creation of mileage rate for which this expense is created.
+          nullable: true
+          example: 9080
+        mileage_is_round_trip:
+          type: boolean
+          nullable: true
+          description: Flag stating whether this was a round trip or not.
+        commute_details_id:
+          type: integer
+          nullable: true
+          description: |
+            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+          example: 1234
+        commute_deduction:
+          type: string
+          nullable: true
+          maxLength: 12
+          description: |
+            Commute deduction type of the expense.
+          example: ONE_WAY
+          enum:
+            - ONE_WAY
+            - ROUND_TRIP
+            - NO_DEDUCTION
+            - null
     expenses_in:
       type: array
       additionalProperties: false
