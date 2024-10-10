@@ -4281,6 +4281,25 @@ components:
             List of file ids to attach to the expense. <br>
             To add new files to the expense, send the list of file ids to be attached. <br>
             To remove files from the expense, send the list of all file ids except which you want to remove. <br>
+    expenses_in:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            description: |
+              This id is provided by Fyle to identify an object
+          admin_amount:
+            type: number
+            nullable: false
+            description: |
+              The expense amount which is added or modified by admin or approver.
+            example: 1900
     attach_files_to_expense_in:
       type: object
       required:
@@ -16854,6 +16873,59 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Update expenses in bulk
+      description: |
+        Update expenses in bulk.
+      operationId: expenses_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
         '400':
           description: Bad request
           content:
