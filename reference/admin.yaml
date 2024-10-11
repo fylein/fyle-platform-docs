@@ -12788,6 +12788,41 @@ components:
       required:
         - missing_transactions_count
         - is_rtf_statement
+    matching_cards_out:
+      properties:
+        statement_card_number:
+          type: string
+          description: |
+            Card number from statement
+          example: xxx5-4543
+        matching_cards:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: bawownwrng
+              card_number:
+                $ref: '#/components/schemas/card_number'
+              is_visa_enrolled:
+                type: boolean
+                description: |
+                  If the card is enrolled with real time feed from visa
+                nullable: false
+              is_mastercard_enrolled:
+                type: boolean
+                description: |
+                  If the card is enrolled with realtime feed from Mastercard
+                nullable: false
+              nickname:
+                type: string
+                maxLength: 25
+                nullable: true
+                description: |
+                  Unique nickname assigned to the card
+                example: Business Card
     rtf_missing_transaction_from_statement_out:
       type: object
       properties:
@@ -23098,6 +23133,61 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/card_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statements/matching_cards:
+    post:
+      tags:
+        - Statements
+      summary: Matching cards present in Fyle
+      description: |
+        Returns matching cards present in Fyle for cards in Statement
+      operationId: matching_cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/card_transaction_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/matching_cards_out'
         '400':
           description: Bad request
           content:
