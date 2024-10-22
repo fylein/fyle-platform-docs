@@ -3077,37 +3077,32 @@ components:
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
         restricted_spender_user_ids:
           $ref: '#/components/schemas/restricted_spender_user_ids'
-    per_diem_rate_out:
+    approver_cost_center_out:
       type: object
       additionalProperties: false
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        is_enabled:
-          $ref: '#/components/schemas/is_enabled'
-        name:
-          allOf:
-            - $ref: '#/components/schemas/name'
-          example: Florida Rate
-        code:
-          $ref: '#/components/schemas/code'
-        description:
-          $ref: '#/components/schemas/description'
-        currency:
-          type: string
-          maxLength: 3
-          example: USD
-          description: Currency code (must be three letters only)
-        rate:
-          type: number
-          example: 10
-          description: Amount per night
+        restricted_spender_user_ids:
+          $ref: '#/components/schemas/restricted_spender_user_ids'
     expense_policy_rule_embed:
       type: object
       additionalProperties: false
@@ -4160,9 +4155,9 @@ tags:
   - name: Categories
     description: |
       These APIs gives you access to manage your organisation's Categories
-  - name: Per Diem Rates
+  - name: Cost Centers
     description: |
-      This API gives you access to manage your organisation's Per Diem Rates
+      These APIs gives you access to manage your organisation's Cost Centers
   - name: Projects
     description: |
       These APIs gives you access to manage your organisation's Projects
@@ -5321,12 +5316,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /approver/per_diem_rates:
+  /approver/cost_centers:
     get:
       tags:
-        - Per Diem Rates
-      summary: List per diem rates
-      operationId: per_diem_rates_list
+        - Cost Centers
+      summary: List cost centers
+      operationId: cost_centers_list
       description: |
         This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
       responses:
@@ -5344,7 +5339,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/per_diem_rate_out'
+                      $ref: '#/components/schemas/approver_cost_center_out'
         '400':
           description: Bad request
           content:
