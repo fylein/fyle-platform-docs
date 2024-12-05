@@ -1678,29 +1678,81 @@ expense_delete_in:
 
 
 expenses_stats_in:
+  type: object
+  required:
+    - data
   properties:
     query_params:
-      nullable: False
+      nullable: false
       type: string
       description: | 
-        This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-      example: id=in.('tx1263', 'tx1569')
+        Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+      example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
 
 expenses_stats_out:
-  type: object 
-  properties:
-    count:
-      type: integer
-      nullable: False
-      description: |
-        This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 1     
-    total_amount:
-      allOf:
-        - $ref: './fields.yaml#/amount'
-      description: |
-        This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 100
+  type: array
+  description: |
+    Array containing stats objects. When group_by_state is true, contains objects for ALL possible states 
+    (with count and total_amount as 0 for states with no matching expenses). When false or not provided, 
+    contains single object with aggregated stats and null state.
+  items:
+    type: object
+    required:
+      - count
+      - total_amount
+      - state
+    properties:
+      count:
+        type: integer
+        nullable: false
+        description: |
+          Number of expenses that match the specified criteria.
+        example: 10
+      total_amount:
+        type: number
+        nullable: false
+        description: |
+          Sum of amounts for matching expenses.
+        example: 44545.4
+      state:
+        type: string
+        nullable: true
+        description: |
+          Expense state for grouping. null when group_by_state is false or not provided.
+          When group_by_state is true, response includes all possible states, with count=0 
+          and total_amount=0 for states with no matching expenses.
+        example: DRAFT
+        enum:
+          - COMPLETE
+          - DRAFT
+          - PAID  
+          - PAYMENT_PROCESSING
+          - APPROVER_PENDING
+          - PAYMENT_PENDING
+          - APPROVED
+          - null
+  example:
+    - state: "COMPLETE"
+      count: 343
+      total_amount: 1337.0
+    - state: "DRAFT"
+      count: 10
+      total_amount: 44545.4
+    - state: "PAID"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PROCESSING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVER_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVED"
+      count: 0
+      total_amount: 0
 
 accounting_export_summary_in:
   type: object
