@@ -2450,6 +2450,54 @@ components:
             - ROUND_TRIP
             - NO_DEDUCTION
             - null
+    spender_expenses_in:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            description: |
+              This id is provided by Fyle to identify an object
+          merchant:
+            $ref: '#/components/schemas/merchant'
+          purpose:
+            type: string
+            example: Team lunch
+          cost_center_id:
+            allOf:
+              - $ref: '#/components/schemas/fk_integer'
+            nullable: true
+            example: 1049
+          category_id:
+            allOf:
+              - $ref: '#/components/schemas/fk_integer'
+            nullable: true
+            example: 49058
+          project_id:
+            allOf:
+              - $ref: '#/components/schemas/fk_integer'
+            nullable: true
+            example: 92895
+          source_account_id:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+            example: acwbl222wlg
+          advance_wallet_id:
+            allOf:
+              - $ref: '#/components/schemas/fk_string'
+            nullable: true
+            example: advwrlAGwjr2
+          is_billable:
+            $ref: '#/components/schemas/is_billable'
+          is_reimbursable:
+            $ref: '#/components/schemas/is_reimbursable'
+          custom_fields:
+            $ref: '#/components/schemas/custom_fields'  
     expense_add_comment_action_in:
       type: object
       required:
@@ -9157,6 +9205,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/expenses/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Update expenses in bulk
+      description: |
+        Update expenses in bulk.
+      operationId: expenses_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_expenses_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+
+
+ 
   /spender/expenses/add_comment:
     post:
       tags:
