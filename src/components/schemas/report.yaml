@@ -954,54 +954,156 @@ process_summary_out:
 
 
 reports_stats_in:
+  type: object
+  required:
+    - data
   properties:
     query_params:
-      nullable: False
       type: string
       description: | 
-        This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
-      example: state=eq.PAYMENT_PROCESSING&report_id=in.('rp123', 'rep1234')
+        Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+      nullable: false
+      example: id=in.('rp123','rep1234')&group_by_state=eq.true
 
 reports_stats_out:
-  type: object 
-  properties:
-    count:
-      type: integer
-      nullable: False
-      description: |
-        This field indicates the count of reports.
-      example: 1     
-    total_amount:
-      allOf:
-        - $ref: './fields.yaml#/amount'
-      description: |
-        This field indicates the sum of amount of reports.
-      example: 100  
-    processing_amount:
-      allOf:
-        - $ref: './fields.yaml#/amount'
-      description: |
-        This field indicates the sum of reimbursable amount of reports in Processing state.
-      example: 101
-    processing_count:
-      type: integer
-      description: |
-         This field indicates the count of reports in Processing state.
-      example: 2  
-    failed_amount:
-      nullable: true
-      anyOf:
-        - $ref: './fields.yaml#/amount'
-        - $ref: './fields.yaml#/null_field'
-      description: |
-        This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
-      example: 101
-    failed_count:
-      type: integer
-      nullable: true
-      description: |
-        This field indicates the count of reports in processing state for which ACH has failed.
-      example: 1 
+  type: array
+  description: |
+    Array containing stats objects. When group_by_state is true, contains objects for ALL possible states
+    (with count and amounts as 0 for states with no matching reports). When false or not provided,
+    contains single object with aggregated stats and null state.
+    Note: failed_amount, failed_count, processing_amount, and processing_count are only applicable
+    for PAYMENT_PROCESSING state and will be null for all other states.
+  items:
+    type: object
+    required:
+      - count
+      - total_amount
+      - state
+      - failed_amount
+      - failed_count
+      - processing_amount
+      - processing_count
+      - reimbursable_amount
+    properties:
+      count:
+        type: integer
+        nullable: false
+        description: |
+          Number of reports that match the specified criteria.
+        example: 5
+      total_amount:
+        type: number
+        nullable: false
+        description: |
+          Sum of amounts for matching reports.
+        example: 2200.0
+      state:
+        type: string
+        nullable: true
+        description: |
+          Report state for grouping. null when group_by_state is false or not provided.
+          When group_by_state is true, response includes all possible states.
+        example: PAYMENT_PROCESSING
+        enum:
+          - DRAFT
+          - APPROVER_PENDING
+          - APPROVER_INQUIRY
+          - PAYMENT_PROCESSING
+          - APPROVED
+          - PAYMENT_PENDING
+          - PAID
+          - null
+      failed_amount:
+        type: number
+        nullable: true
+        description: |
+          Sum of reimbursable amount of reports for which ACH has failed.
+          Only applicable when state is PAYMENT_PROCESSING, null for all other states.
+        example: 200.0
+      failed_count:
+        type: integer
+        nullable: true
+        description: |
+          Count of reports for which ACH has failed.
+          Only applicable when state is PAYMENT_PROCESSING, null for all other states.
+        example: 1
+      processing_amount:
+        type: number
+        nullable: true
+        description: |
+          Sum of reimbursable amount of reports in processing state.
+          Only applicable when state is PAYMENT_PROCESSING, null for all other states.
+        example: 1500.0
+      processing_count:
+        type: integer
+        nullable: true
+        description: |
+          Count of reports in processing state.
+          Only applicable when state is PAYMENT_PROCESSING, null for all other states.
+        example: 3
+      reimbursable_amount:
+        type: number
+        nullable: false
+        description: |
+          Sum of reimbursable amounts for matching reports.
+        example: 500.0
+  example:
+    - state: "DRAFT"
+      count: 3
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 200.0
+      total_amount: 350.0
+    - state: "APPROVER_PENDING"
+      count: 5
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 500.0
+      total_amount: 2200.0
+    - state: "APPROVER_INQUIRY"
+      count: 2
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 0.0
+      total_amount: 500.0
+    - state: "PAYMENT_PROCESSING"
+      count: 5
+      failed_amount: 200.0
+      failed_count: 1
+      processing_amount: 1500.0
+      processing_count: 3
+      reimbursable_amount: 500.0
+      total_amount: 2200.0
+    - state: "APPROVED"
+      count: 0
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 0.0
+      total_amount: 0.0
+    - state: "PAYMENT_PENDING"
+      count: 0
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 0.0
+      total_amount: 0.0
+    - state: "PAID"
+      count: 0
+      failed_amount: null
+      failed_count: null
+      processing_amount: null
+      processing_count: null
+      reimbursable_amount: 0.0
+      total_amount: 0.0
 
 report_create_and_submit_expenses:
   type: object
