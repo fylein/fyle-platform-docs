@@ -1262,6 +1262,12 @@ components:
           description: |
             String denoting the card holder's name
           example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         masked_corporate_card_number:
           $ref: '#/components/schemas/card_number'
         bank_name:
@@ -1875,7 +1881,7 @@ components:
         per_diem_rate:
           $ref: '#/components/schemas/per_diem_rate_out_embed'
         per_diem_num_days:
-          type: integer
+          type: number
           nullable: true
           description: |
             Specific to per diem related expenses, number of days for which per diem claim is made.
@@ -2244,7 +2250,36 @@ components:
       minItems: 0
       maxItems: 10
       items:
-        $ref: '#/components/schemas/location'
+        type: object
+        nullable: true
+        properties:
+          city:
+            type: string
+            nullable: true
+            example: London
+          state:
+            type: string
+            nullable: true
+            example: London
+          display:
+            type: string
+            nullable: true
+          country:
+            type: string
+            nullable: true
+            example: United Kingdom
+          formatted_address:
+            type: string
+            nullable: true
+            example: 221 Baker St, Marylebone, London, United Kingdom
+          latitude:
+            type: number
+            nullable: true
+            example: 12.971599
+          longitude:
+            type: number
+            nullable: true
+            example: 77.594566
     custom_fields:
       type: array
       description: |
@@ -2269,6 +2304,8 @@ components:
             This field is not required for creating Per Diem Expenses
         source:
           $ref: '#/components/schemas/source'
+        code:
+          $ref: '#/components/schemas/code'
         merchant:
           $ref: '#/components/schemas/merchant'
         foreign_currency:
@@ -2347,8 +2384,7 @@ components:
             during creation of per diem rate for which this expense is created. <br>
             This field is required for creating Per Diem Expenses.
         per_diem_num_days:
-          allOf:
-            - $ref: '#/components/schemas/fk_integer'
+          type: number
           nullable: true
           example: 2
           description: |
@@ -2379,6 +2415,41 @@ components:
             List of file ids to attach to the expense. <br>
             To add new files to the expense, send the list of file ids to be attached. <br>
             To remove files from the expense, send the list of all file ids except which you want to remove. <br>
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: |
+            Specific to mileage expense. This represents the Mileage's rate id given by Fyle
+            during creation of mileage rate for which this expense is created.
+          nullable: true
+          example: 9080
+        mileage_is_round_trip:
+          type: boolean
+          nullable: true
+          description: Flag stating whether this was a round trip or not.
+        commute_details_id:
+          type: integer
+          nullable: true
+          description: |
+            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+          example: 1234
+        commute_deduction:
+          type: string
+          nullable: true
+          maxLength: 12
+          description: |
+            Commute deduction type of the expense.
+          example: ONE_WAY
+          enum:
+            - ONE_WAY
+            - ROUND_TRIP
+            - NO_DEDUCTION
+            - null
     expense_add_comment_action_in:
       type: object
       required:
@@ -3270,6 +3341,14 @@ components:
       description: |
         This represents a query string which will be used to filter the data.
       example: code.eq.'E0101'
+    sub_feature:
+      type: string
+      description: |
+        This field can be used to setup a collection of filters. For example, if you have multiple filters
+        for a single page, this can be used as an identifier to fetch all the filters for that page. <br>
+        **Note: Only combination of alphabets, numbers and _(underscore) is allowed**
+      nullable: true
+      example: flagged_expenses
     report_filters_out:
       type: object
       additionalProperties: false
@@ -3288,6 +3367,8 @@ components:
           $ref: '#/components/schemas/user_id'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -3305,6 +3386,8 @@ components:
           $ref: '#/components/schemas/is_shared'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
     report_filters_delete_in:
       type: object
       additionalProperties: false
@@ -4482,6 +4565,12 @@ components:
           description: |
             Determines whether this card transaction can be deleted or not.
           example: false
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5108,6 +5197,12 @@ components:
           description: |
             Determines whether this card transaction can be deleted or not.
           example: false
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5324,6 +5419,12 @@ components:
           description: |
             Determines whether this card transaction can be deleted or not.
           example: false
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5549,6 +5650,12 @@ components:
           description: |
             Determines whether this card transaction can be deleted or not.
           example: false
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -5782,6 +5889,12 @@ components:
           description: |
             Determines whether this card transaction can be deleted or not.
           example: false
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
         foreign_currency:
           $ref: '#/components/schemas/foreign_currency'
         foreign_amount:
@@ -7349,7 +7462,7 @@ components:
           nullable: true
           example: 583
         per_diem_num_days:
-          type: integer
+          type: number
           nullable: true
           description: |
             Specific to per diem related expenses. Number of days for which per diem claim is made.
@@ -7694,14 +7807,6 @@ components:
           description: |
             This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
           example: 100
-    sub_feature:
-      type: string
-      description: |
-        This field can be used to setup a collection of filters. For example, if you have multiple filters
-        for a single page, this can be used as an identifier to fetch all the filters for that page. <br>
-        **Note: Only combination of alphabets, numbers and _(underscore) is allowed**
-      nullable: true
-      example: flagged_expenses
     expense_filters_out:
       type: object
       additionalProperties: false
@@ -8231,6 +8336,11 @@ components:
         card_number:
           type: string
           example: '****3464'
+        account_type:
+          type: string
+          nullable: false
+          example: SAVINGS
+          description: Type of the bank account as provided by Yodlee.
         yodlee_account_id:
           $ref: '#/components/schemas/fk_string'
         yodlee_fastlink_params:
@@ -8290,6 +8400,11 @@ components:
         card_number:
           type: string
           example: '****3464'
+        account_type:
+          type: string
+          nullable: false
+          example: SAVINGS
+          description: Type of the bank account as provided by Yodlee.
         yodlee_account_id:
           $ref: '#/components/schemas/fk_string'
         yodlee_fastlink_params:
@@ -8436,6 +8551,36 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    personal_card_transactions_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            - This field contains the query param string similar to the query params passed in personal card transactions GET call for displaying transactions in the list view.
+            - Supported query params: personal_card_id, state, spent_at, created_at, updated_at, foreign_amount, amount, id
+          example: personal_card_id=eq.bacctW9DfNhwOt&state=eq.HIDDEN
+    personal_card_transactions_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of personal card transactions.
+          example: 1
+        debit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the debit type personal card transactions.
+          example: 1239
+        credit_amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of the credit type personal card transactions.
+          example: 101
   parameters:
     q:
       in: query
@@ -13248,3 +13393,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/personal_card_transactions/stats:
+    post:
+      tags:
+        - Personal Card Transactions
+      summary: Personal Card Transaction Stats
+      description: |
+        Personal Card Transaction Stats
+      operationId: personal_card_transactions_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/personal_card_transactions_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/personal_card_transactions_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
