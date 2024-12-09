@@ -7786,28 +7786,74 @@ components:
           description: |
             List of expense IDs that are part of the duplicate set
     expenses_stats_in:
+      type: object
+      required:
+        - data
       properties:
         query_params:
           nullable: false
           type: string
           description: |
-            This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-          example: id=in.('tx1263', 'tx1569')
+            Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+          example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
     expenses_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: |
-            This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by expense state - includes all possible states with count/amount as 0 for states with no expenses
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching expenses in this state
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching expenses in this state
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - COMPLETE
+                  - DRAFT
+                  - APPROVER_PENDING
+                  - APPROVED
+                  - PAYMENT_PENDING
+                  - PAYMENT_PROCESSING
+                  - PAID
+                description: Expense state
+        - type: array
+          title: Overall Stats
+          description: Overall stats without state grouping
+          maxItems: 1
+          minItems: 1
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Total number of matching expenses
+                example: 353
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for all matching expenses
+                example: 45882.4
+              state:
+                type: 'null'
+                description: Null indicating stats are not grouped by state
     expense_filters_out:
       type: object
       additionalProperties: false
