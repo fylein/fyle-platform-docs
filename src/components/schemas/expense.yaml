@@ -1678,12 +1678,9 @@ expense_delete_in:
 
 
 expenses_stats_in:
-  type: object
-  required:
-    - data
   properties:
     query_params:
-      nullable: false
+      nullable: False
       type: string
       description: | 
         Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
@@ -1692,8 +1689,7 @@ expenses_stats_in:
 expenses_stats_out:
   oneOf:
     - type: array
-      title: "State-wise grouped stats"
-      description: "Stats grouped by expense state - includes all possible states with count/amount as 0 for states with no expenses"
+      description: State-wise grouped stats
       items:
         type: object
         required:
@@ -1704,12 +1700,12 @@ expenses_stats_out:
           count:
             type: integer
             nullable: false
-            description: "Number of matching expenses in this state"
+            description: Number of matching expenses in this state
             example: 10
           total_amount:
             type: number
             nullable: false
-            description: "Sum of amounts for matching expenses in this state"
+            description: Sum of amounts for matching expenses in this state
             example: 44545.4
           state:
             type: string
@@ -1721,33 +1717,26 @@ expenses_stats_out:
               - PAYMENT_PENDING
               - PAYMENT_PROCESSING
               - PAID
-            description: "Expense state"
+            description: Expense state
+    # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
+    # TODO: @Dev to update the response once the hack is removed from platform-api  
+    - type: object
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
 
-    - type: array
-      title: "Overall Stats"
-      description: "Overall stats without state grouping"
-      maxItems: 1
-      minItems: 1
-      items:
-        type: object
-        required:
-          - count
-          - total_amount
-          - state
-        properties:
-          count:
-            type: integer
-            nullable: false
-            description: "Total number of matching expenses"
-            example: 353
-          total_amount:
-            type: number
-            nullable: false
-            description: "Sum of amounts for all matching expenses"
-            example: 45882.4
-          state:
-            type: "null"
-            description: "Null indicating stats are not grouped by state"
 
 accounting_export_summary_in:
   type: object
