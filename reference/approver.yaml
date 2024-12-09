@@ -2714,9 +2714,6 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: rpfilumWHrlPf7K
     reports_stats_in:
-      type: object
-      required:
-        - data
       properties:
         query_params:
           type: string
@@ -2744,12 +2741,12 @@ components:
               count:
                 type: integer
                 nullable: false
-                description: Number of matching reports in this state
+                description: Number of matching reports in this state.
                 example: 5
               total_amount:
                 type: number
                 nullable: false
-                description: Sum of amounts for matching reports in this state
+                description: Sum of amounts for matching reports in this state.
                 example: 2200
               state:
                 type: string
@@ -2761,70 +2758,72 @@ components:
                   - APPROVED
                   - PAYMENT_PENDING
                   - PAID
-                description: Report state
+                description: Report state.
               failed_amount:
                 type: number
                 nullable: true
-                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state
+                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
                 example: 200
               failed_count:
                 type: integer
                 nullable: true
-                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state
+                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
                 example: 1
               processing_amount:
                 type: number
                 nullable: true
-                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state
+                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
                 example: 1500
               processing_count:
                 type: integer
                 nullable: true
-                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state
+                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
                 example: 3
               reimbursable_amount:
                 type: number
                 nullable: false
-                description: Sum of reimbursable amounts for matching reports in this state
+                description: Sum of reimbursable amounts for matching reports in this state.
                 example: 500
         - type: object
+          title: Overall stats
+          description: Overall stats without state grouping (response for older mobile app versions).
+          required:
+            - count
+            - total_amount
+            - processing_amount
+            - processing_count
+            - failed_amount
+            - failed_count
           properties:
             count:
               type: integer
               nullable: false
-              description: |
-                This field indicates the count of reports.
+              description: Total number of matching reports.
               example: 1
             total_amount:
-              allOf:
-                - $ref: '#/components/schemas/amount'
-              description: |
-                This field indicates the sum of amount of reports.
+              type: number
+              nullable: false
+              description: Total sum of amounts for all matching reports.
               example: 100
             processing_amount:
-              allOf:
-                - $ref: '#/components/schemas/amount'
-              description: |
-                This field indicates the sum of reimbursable amount of reports in Processing state.
+              type: number
+              nullable: true
+              description: Sum of reimbursable amounts for reports in processing state.
               example: 101
             processing_count:
               type: integer
-              description: |
-                This field indicates the count of reports in Processing state.
+              nullable: true
+              description: Count of reports in processing state.
               example: 2
             failed_amount:
+              type: number
               nullable: true
-              anyOf:
-                - $ref: '#/components/schemas/amount'
-                - $ref: '#/components/schemas/null_field'
-              description: |
-                This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
+              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
               example: 101
             failed_count:
               type: integer
               nullable: true
-              description: |
-                This field indicates the count of reports in processing state for which ACH has failed.
+              description: Count of reports in processing state with ACH failures.
               example: 1
       example:
         - state: DRAFT
@@ -2843,14 +2842,6 @@ components:
           processing_count: null
           reimbursable_amount: 500
           total_amount: 2200
-        - state: APPROVER_INQUIRY
-          count: 2
-          failed_amount: null
-          failed_count: null
-          processing_amount: null
-          processing_count: null
-          reimbursable_amount: 0
-          total_amount: 500
         - state: PAYMENT_PROCESSING
           count: 5
           failed_amount: 200
@@ -2859,22 +2850,6 @@ components:
           processing_count: 3
           reimbursable_amount: 500
           total_amount: 2200
-        - state: APPROVED
-          count: 0
-          failed_amount: null
-          failed_count: null
-          processing_amount: null
-          processing_count: null
-          reimbursable_amount: 0
-          total_amount: 0
-        - state: PAYMENT_PENDING
-          count: 0
-          failed_amount: null
-          failed_count: null
-          processing_amount: null
-          processing_count: null
-          reimbursable_amount: 0
-          total_amount: 0
         - state: PAID
           count: 0
           failed_amount: null
