@@ -1683,24 +1683,84 @@ expenses_stats_in:
       nullable: False
       type: string
       description: | 
-        This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-      example: id=in.('tx1263', 'tx1569')
+        Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+      example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
 
 expenses_stats_out:
-  type: object 
-  properties:
-    count:
-      type: integer
-      nullable: False
-      description: |
-        This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 1     
-    total_amount:
-      allOf:
-        - $ref: './fields.yaml#/amount'
-      description: |
-        This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 100
+  oneOf:
+    - type: array
+      title: "State-wise grouped stats"
+      description: Stats grouped by expense state
+      items:
+        type: object
+        required:
+          - count
+          - total_amount
+          - state
+        properties:
+          count:
+            type: integer
+            nullable: false
+            description: Number of matching expenses in this state
+            example: 10
+          total_amount:
+            type: number
+            nullable: false
+            description: Sum of amounts for matching expenses in this state
+            example: 44545.4
+          state:
+            type: string
+            enum:
+              - COMPLETE
+              - DRAFT
+              - APPROVER_PENDING
+              - APPROVED
+              - PAYMENT_PENDING
+              - PAYMENT_PROCESSING
+              - PAID
+            description: Expense state
+    # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
+    # TODO: @Dev to update the response once the hack is removed from platform-api  
+    - type: object
+      title: "Overall stats"
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
+  example:
+    - state: "COMPLETE"
+      count: 343
+      total_amount: 1337.0
+    - state: "DRAFT"
+      count: 10
+      total_amount: 44545.4
+    - state: "PAID"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PROCESSING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVER_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVED"
+      count: 0
+      total_amount: 0
+
 
 accounting_export_summary_in:
   type: object
