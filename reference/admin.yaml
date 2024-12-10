@@ -4927,26 +4927,86 @@ components:
     advance_requests_stats_in:
       properties:
         query_params:
-          type: string
           description: |
-            This field contains the query param string similar to the query params passed in advance_requests GET call for displaying advance_requests in the list view.
+            Query param string similar to advance_requests GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
-          example: id=in.('adr1263', 'adr1569')
+          example: id=in.('adr1263','adr1569')&group_by_state=eq.true
     advance_requests_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            This field represents the total number of advance_requests that match the criteria specified in the query_params within the body of the request.
-          nullable: false
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by advance request state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching advance requests in this state.
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching advance requests in this state.
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - DRAFT
+                  - APPROVAL_PENDING
+                  - APPROVED
+                  - CANCELLED
+                  - REJECTED
+                  - PAID
+                  - PULLED_BACK
+                  - SENT_BACK
+                description: Advance request state.
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping.
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching advance requests.
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching advance requests.
+              example: 45882.4
+      example:
+        - state: DRAFT
+          count: 10
+          total_amount: 44545.4
+        - state: APPROVAL_PENDING
+          count: 0
+          total_amount: 0
+        - state: APPROVED
+          count: 343
+          total_amount: 1337
+        - state: CANCELLED
+          count: 0
+          total_amount: 0
+        - state: SENT_BACK
+          count: 0
+          total_amount: 0
+        - state: PULLED_BACK
+          count: 0
+          total_amount: 0
+        - state: REJECTED
+          count: 0
+          total_amount: 0
+        - state: PAID
+          count: 0
+          total_amount: 0
     advance_request_out_embed:
       type: object
       nullable: true
