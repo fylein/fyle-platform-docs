@@ -905,6 +905,118 @@ spender_expense_in:
         - NO_DEDUCTION
         - null
 
+spender_expenses_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be updated in bulk by the spender.
+  items:
+    type: object
+    required:
+      - id
+      - category_id
+    properties:
+      id:
+        allOf:
+          - $ref: './fields.yaml#/id_string'
+        description: |
+          Expense id of the expense to be updated.
+        example: txwownwrng
+      merchant:
+        $ref: './fields.yaml#/merchant'
+        nullable: true
+        description: |
+          String denoting the name of the merchant to which the expense was made.
+        example: Uber
+      purpose:
+        type: string
+        nullable: true
+        description: |
+          Purpose of this expense.
+        example: Team lunch
+      cost_center_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
+        nullable: true
+        description: |
+          This represents the cost_center's id given by Fyle during creation of cost center
+          for which this expense is created.
+        example: 1049
+      category_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
+        nullable: false
+        description: |
+          This represents the category's id given by Fyle during creation of category
+          for which this expense is created.
+        example: 49058
+      project_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
+        nullable: true
+        description: |
+          This represents the project's id given by Fyle during creation of project
+          for which this expense is created.
+        example: 92895
+      is_billable:
+        $ref: './fields.yaml#/is_billable'
+        nullable: true
+        description: This fields marks whether a given expense is billable or not.
+        example: true
+      custom_fields:
+        $ref: './fields.yaml#/custom_fields'
+        nullable: false
+      started_at:
+        $ref: './fields.yaml#/timestamptz_pst'
+        nullable: true
+        description: |
+          Start date for travel or per diem related expenses.
+      ended_at:
+        $ref: './fields.yaml#/timestamptz_pst'
+        nullable: true
+        description: |
+          End date for travel or per diem related expenses.
+      travel_classes:
+        $ref: './fields.yaml#/travel_classes'
+        nullable: false
+        description: |
+          This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+          index 0 holds onward journey class, index 1 holds return journey travel class.
+        example:
+          - ECONOMY
+          - BUSINESS
+      locations:
+        $ref: './fields.yaml#/locations'
+        nullable: false
+        description: |
+          This field will be present for travel related categories.
+          For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+      distance:
+        $ref: './fields.yaml#/distance'
+        nullable: true
+        description: Actual distance travelled by employee in travel related expenses.
+      distance_unit:
+        enum:
+          - KM
+          - MILES
+          - null
+        nullable: true
+        description: Unit of distance travelled.
+        example: MILES
+      hotel_is_breakfast_provided:
+        type: boolean
+        nullable: true
+        description: |
+          This field is applicable for only `Hotel` category.
+
+spender_check_policies_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be validated against expense policy rules in one request.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
 admin_expense_in:
   type: object
   additionalProperties: false
@@ -1693,6 +1805,23 @@ expense_check_policies_out:
         $ref: ./fields.yaml#/expense_check_policies_individual_desired_states
     final_desired_state:
       $ref: ./fields.yaml#/expense_check_policies_final_desired_state
+
+expense_check_policies_bulk_out:
+  type: array
+  additionalProperties: False
+  items:
+    type: object
+    properties:
+      id:
+        allOf:
+          - $ref: ./fields.yaml#/id_string
+        example: 'tx0agOdICdbV'
+      individual_desired_states:
+        type: array
+        items:
+          $ref: ./fields.yaml#/expense_check_policies_individual_desired_states
+      final_desired_state:
+        $ref: ./fields.yaml#/expense_check_policies_final_desired_state
 
 expense_delete_in:
   type: object
