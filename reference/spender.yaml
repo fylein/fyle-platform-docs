@@ -2458,6 +2458,13 @@ components:
             - ROUND_TRIP
             - NO_DEDUCTION
             - null
+    spender_expenses_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be validated against expense policy rules in one request.
+      items:
+        $ref: '#/components/schemas/items'
     expense_add_comment_action_in:
       type: object
       required:
@@ -9569,6 +9576,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/expenses/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Update expenses in bulk
+      description: |
+        Update expenses in bulk.
+      operationId: expenses_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_expenses_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/expenses/add_comment:
     post:
       tags:
