@@ -2045,6 +2045,14 @@ spender_expense_check_mandatory_fields_in:
         Invoice number of the expense.
       example: 123456
 
+spender_expense_check_mandatory_fields_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be checked for missing mandatory fields in one request..
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
 expense_check_mandatory_fields_out:
   type: object
   additionalProperties: False
@@ -2082,6 +2090,46 @@ expense_check_mandatory_fields_out:
       description: |
         List of IDs of expense fields which are mandatory but are missing.
 
+expense_check_mandatory_fields_bulk_out:
+  type: object
+  additionalProperties: False
+  required:
+    - id
+    - missing_amount
+    - missing_currency
+    - missing_receipt
+    - missing_expense_field_ids
+  properties:
+    id:
+      $ref: ./fields.yaml#/id_string
+      example: tx0agOdICdbV
+    missing_amount:
+      type: boolean
+      description: |
+        If this is set to true, then you need to send amount field with expense object.
+      example: false
+    missing_currency:
+      type: boolean
+      description: |
+        If this is set to true, then you need to send currency field with expense object.
+      example: false
+    missing_receipt:
+      type: boolean
+      description: |
+        If this is set to true, then you need to attach receipt to the expense.
+      example: false
+    missing_expense_field_ids:
+      type: array
+      nullable: False
+      items:
+        type: integer
+        nullable: True
+        description: |
+          This id provided by Fyle to identify an expense field.
+        example: 123
+      example: [ 123, 12423 ]
+      description: |
+        List of IDs of expense fields which are mandatory but are missing.
 expense_check_mandatory_fields_in:
   required:
     - id
