@@ -249,7 +249,7 @@ expense_out:
     per_diem_rate:
       $ref: './per_diem_rate.yaml#/per_diem_rate_out_embed'
     per_diem_num_days:
-      type: integer
+      type: number
       nullable: true
       description: |
         Specific to per diem related expenses, number of days for which per diem claim is made.
@@ -689,7 +689,7 @@ expense_in:
       nullable: true
       example: 583
     per_diem_num_days:
-      type: integer
+      type: number
       nullable: true
       description: |
         Specific to per diem related expenses, number of days for which per diem claim is made.
@@ -830,8 +830,7 @@ spender_expense_in:
         during creation of per diem rate for which this expense is created. <br>
         This field is required for creating Per Diem Expenses.
     per_diem_num_days:
-      allOf:
-        - $ref: './fields.yaml#/fk_integer'
+      type: number
       nullable: true
       example: 2
       description: |
@@ -879,6 +878,14 @@ spender_expense_in:
       type: boolean
       nullable: true
       description: Flag stating whether this was a round trip or not.
+    mileage_calculated_distance:
+      type: number
+      nullable: true
+      description: Distance computed by Fyle in mileage expenses.
+    mileage_calculated_amount:
+      type: number
+      nullable: true
+      description: Amount computed by Fyle in mileage expenses.
     commute_details_id:
       type: integer
       nullable: true
@@ -898,25 +905,116 @@ spender_expense_in:
         - NO_DEDUCTION
         - null
 
-expenses_in:
+spender_expenses_bulk_in:
   type: array
   additionalProperties: false
+  description: |
+    Array of expenses to be updated in bulk by the spender.
   items:
     type: object
-    required: 
+    required:
       - id
     properties:
       id:
         allOf:
           - $ref: './fields.yaml#/id_string'
         description: |
-          This id is provided by Fyle to identify an object
-      admin_amount:
-        type: number
+          Expense id of the expense to be updated.
+        example: txwownwrng
+      merchant:
+        $ref: './fields.yaml#/merchant'
+        nullable: true
+        description: |
+          String denoting the name of the merchant to which the expense was made.
+        example: Uber
+      purpose:
+        type: string
+        nullable: true
+        description: |
+          Purpose of this expense.
+        example: Team lunch
+      cost_center_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
+        nullable: true
+        description: |
+          This represents the cost_center's id given by Fyle during creation of cost center
+          for which this expense is created.
+        example: 1049
+      category_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
         nullable: false
         description: |
-          The expense amount which is added or modified by admin or approver.
-        example: 1900
+          This represents the category's id given by Fyle during creation of category
+          for which this expense is created.
+        example: 49058
+      project_id:
+        allOf:
+          - $ref: './fields.yaml#/fk_integer'
+        nullable: true
+        description: |
+          This represents the project's id given by Fyle during creation of project
+          for which this expense is created.
+        example: 92895
+      is_billable:
+        $ref: './fields.yaml#/is_billable'
+        nullable: true
+        description: This fields marks whether a given expense is billable or not.
+        example: true
+      custom_fields:
+        $ref: './fields.yaml#/custom_fields'
+        nullable: false
+      started_at:
+        $ref: './fields.yaml#/timestamptz_pst'
+        nullable: true
+        description: |
+          Start date for travel or per diem related expenses.
+      ended_at:
+        $ref: './fields.yaml#/timestamptz_pst'
+        nullable: true
+        description: |
+          End date for travel or per diem related expenses.
+      travel_classes:
+        $ref: './fields.yaml#/travel_classes'
+        nullable: false
+        description: |
+          This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+          index 0 holds onward journey class, index 1 holds return journey travel class.
+        example:
+          - ECONOMY
+          - BUSINESS
+      locations:
+        $ref: './fields.yaml#/locations'
+        nullable: false
+        description: |
+          This field will be present for travel related categories.
+          For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+      distance:
+        $ref: './fields.yaml#/distance'
+        nullable: true
+        description: Actual distance travelled by employee in travel related expenses.
+      distance_unit:
+        enum:
+          - KM
+          - MILES
+          - null
+        nullable: true
+        description: Unit of distance travelled.
+        example: MILES
+      hotel_is_breakfast_provided:
+        type: boolean
+        nullable: true
+        description: |
+          This field is applicable for only `Hotel` category.
+
+spender_check_policies_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be validated against expense policy rules in one request.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
 
 admin_expense_in:
   type: object
@@ -1059,6 +1157,14 @@ admin_expense_in:
       type: boolean
       nullable: true
       description: Flag stating whether this was a round trip or not.
+    mileage_calculated_distance:
+      type: number
+      nullable: true
+      description: Distance computed by Fyle in mileage expenses.
+    mileage_calculated_amount:
+      type: number
+      nullable: true
+      description: Amount computed by Fyle in mileage expenses.
     commute_details_id:
       type: integer
       nullable: true
@@ -1077,6 +1183,22 @@ admin_expense_in:
         - ROUND_TRIP
         - NO_DEDUCTION
         - null
+    per_diem_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 583
+      description: |
+        Specific to per diem expense. This represents the per diem's rate id given by Fyle
+        during creation of per diem rate for which this expense is created. <br>
+        This field is required for creating Per Diem Expenses.
+    per_diem_num_days:
+      type: number
+      nullable: true
+      example: 2
+      description: |
+        Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+        This field is required for creating Per Diem Expenses.
 
 approver_expense_in:
   type: object
@@ -1173,15 +1295,6 @@ approver_expense_in:
       $ref: './fields.yaml#/locations'
     custom_fields:
       $ref: './fields.yaml#/custom_fields'
-    file_ids:
-      type: array
-      items:
-        allOf:
-          - $ref: './fields.yaml#/fk_string'
-      description: |
-        List of file ids to attach to the expense. <br>
-        To add new files to the expense, send the list of file ids to be attached. <br>
-        To remove files from the expense, send the list of all file ids except which you want to remove. <br>
     hotel_is_breakfast_provided:
       type: boolean
       nullable: true
@@ -1199,6 +1312,14 @@ approver_expense_in:
       type: boolean
       nullable: true
       description: Flag stating whether this was a round trip or not.
+    mileage_calculated_distance:
+      type: number
+      nullable: true
+      description: Distance computed by Fyle in mileage expenses.
+    mileage_calculated_amount:
+      type: number
+      nullable: true
+      description: Amount computed by Fyle in mileage expenses.
     commute_details_id:
       type: integer
       nullable: true
@@ -1217,6 +1338,22 @@ approver_expense_in:
         - ROUND_TRIP
         - NO_DEDUCTION
         - null
+    per_diem_rate_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 583
+      description: |
+        Specific to per diem expense. This represents the per diem's rate id given by Fyle
+        during creation of per diem rate for which this expense is created. <br>
+        This field is required for creating Per Diem Expenses.
+    per_diem_num_days:
+      type: number
+      nullable: true
+      example: 2
+      description: |
+        Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+        This field is required for creating Per Diem Expenses.
 
 expense_out_embed:
   type: object
@@ -1631,7 +1768,7 @@ expense_check_policies_in:
       nullable: true
       example: 583
     per_diem_num_days:
-      type: integer
+      type: number
       nullable: true
       description: |
         Specific to per diem related expenses. Number of days for which per diem claim is made.
@@ -1668,6 +1805,23 @@ expense_check_policies_out:
     final_desired_state:
       $ref: ./fields.yaml#/expense_check_policies_final_desired_state
 
+expense_check_policies_bulk_out:
+  type: array
+  additionalProperties: False
+  items:
+    type: object
+    properties:
+      id:
+        allOf:
+          - $ref: ./fields.yaml#/id_string
+        example: 'tx0agOdICdbV'
+      individual_desired_states:
+        type: array
+        items:
+          $ref: ./fields.yaml#/expense_check_policies_individual_desired_states
+      final_desired_state:
+        $ref: ./fields.yaml#/expense_check_policies_final_desired_state
+
 expense_delete_in:
   type: object
   required:
@@ -1683,24 +1837,84 @@ expenses_stats_in:
       nullable: False
       type: string
       description: | 
-        This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-      example: id=in.('tx1263', 'tx1569')
+        Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+      example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
 
 expenses_stats_out:
-  type: object 
-  properties:
-    count:
-      type: integer
-      nullable: False
-      description: |
-        This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 1     
-    total_amount:
-      allOf:
-        - $ref: './fields.yaml#/amount'
-      description: |
-        This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-      example: 100
+  oneOf:
+    - type: array
+      title: "State-wise grouped stats"
+      description: Stats grouped by expense state
+      items:
+        type: object
+        required:
+          - count
+          - total_amount
+          - state
+        properties:
+          count:
+            type: integer
+            nullable: false
+            description: Number of matching expenses in this state
+            example: 10
+          total_amount:
+            type: number
+            nullable: false
+            description: Sum of amounts for matching expenses in this state
+            example: 44545.4
+          state:
+            type: string
+            enum:
+              - COMPLETE
+              - DRAFT
+              - APPROVER_PENDING
+              - APPROVED
+              - PAYMENT_PENDING
+              - PAYMENT_PROCESSING
+              - PAID
+            description: Expense state
+    # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
+    # TODO: @Dev to update the response once the hack is removed from platform-api  
+    - type: object
+      title: "Overall stats"
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
+  example:
+    - state: "COMPLETE"
+      count: 343
+      total_amount: 1337.0
+    - state: "DRAFT"
+      count: 10
+      total_amount: 44545.4
+    - state: "PAID"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PROCESSING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVER_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "PAYMENT_PENDING"
+      count: 0
+      total_amount: 0
+    - state: "APPROVED"
+      count: 0
+      total_amount: 0
+
 
 accounting_export_summary_in:
   type: object
@@ -1830,6 +2044,14 @@ spender_expense_check_mandatory_fields_in:
         Invoice number of the expense.
       example: 123456
 
+spender_expense_check_mandatory_fields_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be checked for missing mandatory fields in one request..
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
 expense_check_mandatory_fields_out:
   type: object
   additionalProperties: False
@@ -1867,6 +2089,50 @@ expense_check_mandatory_fields_out:
       description: |
         List of IDs of expense fields which are mandatory but are missing.
 
+expense_check_mandatory_fields_bulk_out:
+  type: array
+  additionalProperties: false
+  items:
+    type: object
+    required:
+      - id
+      - missing_amount
+      - missing_currency
+      - missing_receipt
+      - missing_expense_field_ids
+    properties:
+      id:
+        $ref: ./fields.yaml#/id_string
+        example: tx0agOdICdbV
+      missing_amount:
+        type: boolean
+        description: |
+          If this is set to true, then you need to send amount field with expense object.
+        example: false
+      missing_currency:
+        type: boolean
+        description: |
+          If this is set to true, then you need to send currency field with expense object.
+        example: false
+      missing_receipt:
+        type: boolean
+        description: |
+          If this is set to true, then you need to attach receipt to the expense.
+        example: false
+      missing_expense_field_ids:
+        type: array
+        nullable: false
+        items:
+          type: integer
+          nullable: true
+          description: |
+            This id provided by Fyle to identify an expense field.
+          example: 123
+        example:
+          - 123
+          - 12423
+        description: |
+          List of IDs of expense fields which are mandatory but are missing.
 expense_check_mandatory_fields_in:
   required:
     - id

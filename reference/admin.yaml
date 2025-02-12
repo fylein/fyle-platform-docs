@@ -1968,6 +1968,12 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
         locale:
           $ref: '#/components/schemas/locale'
         mileage_settings:
@@ -3800,7 +3806,7 @@ components:
         per_diem_rate:
           $ref: '#/components/schemas/per_diem_rate_out_embed'
         per_diem_num_days:
-          type: integer
+          type: number
           nullable: true
           description: |
             Specific to per diem related expenses, number of days for which per diem claim is made.
@@ -4335,6 +4341,14 @@ components:
           type: boolean
           nullable: true
           description: Flag stating whether this was a round trip or not.
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: Distance computed by Fyle in mileage expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: Amount computed by Fyle in mileage expenses.
         commute_details_id:
           type: integer
           nullable: true
@@ -4353,25 +4367,22 @@ components:
             - ROUND_TRIP
             - NO_DEDUCTION
             - null
-    expenses_in:
-      type: array
-      additionalProperties: false
-      items:
-        type: object
-        required:
-          - id
-        properties:
-          id:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-            description: |
-              This id is provided by Fyle to identify an object
-          admin_amount:
-            type: number
-            nullable: false
-            description: |
-              The expense amount which is added or modified by admin or approver.
-            example: 1900
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+          description: |
+            Specific to per diem expense. This represents the per diem's rate id given by Fyle
+            during creation of per diem rate for which this expense is created. <br>
+            This field is required for creating Per Diem Expenses.
+        per_diem_num_days:
+          type: number
+          nullable: true
+          example: 2
+          description: |
+            Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+            This field is required for creating Per Diem Expenses.
     attach_files_to_expense_in:
       type: object
       required:
@@ -4483,23 +4494,80 @@ components:
           nullable: false
           type: string
           description: |
-            This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-          example: id=in.('tx1263', 'tx1569')
+            Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+          example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
     expenses_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: |
-            This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by expense state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching expenses in this state
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching expenses in this state
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - COMPLETE
+                  - DRAFT
+                  - APPROVER_PENDING
+                  - APPROVED
+                  - PAYMENT_PENDING
+                  - PAYMENT_PROCESSING
+                  - PAID
+                description: Expense state
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching expenses
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching expenses
+              example: 45882.4
+      example:
+        - state: COMPLETE
+          count: 343
+          total_amount: 1337
+        - state: DRAFT
+          count: 10
+          total_amount: 44545.4
+        - state: PAID
+          count: 0
+          total_amount: 0
+        - state: PAYMENT_PROCESSING
+          count: 0
+          total_amount: 0
+        - state: APPROVER_PENDING
+          count: 0
+          total_amount: 0
+        - state: PAYMENT_PENDING
+          count: 0
+          total_amount: 0
+        - state: APPROVED
+          count: 0
+          total_amount: 0
     query_params:
       type: string
       description: |
@@ -4870,26 +4938,86 @@ components:
     advance_requests_stats_in:
       properties:
         query_params:
-          type: string
           description: |
-            This field contains the query param string similar to the query params passed in advance_requests GET call for displaying advance_requests in the list view.
+            Query param string similar to advance_requests GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
-          example: id=in.('adr1263', 'adr1569')
+          example: id=in.('adr1263','adr1569')&group_by_state=eq.true
     advance_requests_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            This field represents the total number of advance_requests that match the criteria specified in the query_params within the body of the request.
-          nullable: false
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by advance request state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching advance requests in this state.
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching advance requests in this state.
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - DRAFT
+                  - APPROVAL_PENDING
+                  - APPROVED
+                  - CANCELLED
+                  - REJECTED
+                  - PAID
+                  - PULLED_BACK
+                  - SENT_BACK
+                description: Advance request state.
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping.
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching advance requests.
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching advance requests.
+              example: 45882.4
+      example:
+        - state: DRAFT
+          count: 10
+          total_amount: 44545.4
+        - state: APPROVAL_PENDING
+          count: 0
+          total_amount: 0
+        - state: APPROVED
+          count: 343
+          total_amount: 1337
+        - state: CANCELLED
+          count: 0
+          total_amount: 0
+        - state: SENT_BACK
+          count: 0
+          total_amount: 0
+        - state: PULLED_BACK
+          count: 0
+          total_amount: 0
+        - state: REJECTED
+          count: 0
+          total_amount: 0
+        - state: PAID
+          count: 0
+          total_amount: 0
     advance_request_out_embed:
       type: object
       nullable: true
@@ -5940,6 +6068,8 @@ components:
           $ref: '#/components/schemas/user_id'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -5957,6 +6087,8 @@ components:
           $ref: '#/components/schemas/is_shared'
         query_string:
           $ref: '#/components/schemas/query_string'
+        sub_feature:
+          $ref: '#/components/schemas/sub_feature'
     report_filters_delete_in:
       type: object
       additionalProperties: false
@@ -6207,51 +6339,148 @@ components:
     reports_stats_in:
       properties:
         query_params:
-          nullable: false
           type: string
           description: |
-            This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
-          example: state=eq.PAYMENT_PROCESSING&report_id=in.('rp123', 'rep1234')
-    reports_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
+            Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
-          description: |
-            This field indicates the count of reports.
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of reports.
-          example: 100
-        processing_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of reimbursable amount of reports in Processing state.
-          example: 101
-        processing_count:
-          type: integer
-          description: |
-            This field indicates the count of reports in Processing state.
-          example: 2
-        failed_amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
-          example: 101
-        failed_count:
-          type: integer
-          nullable: true
-          description: |
-            This field indicates the count of reports in processing state for which ACH has failed.
-          example: 1
+          example: id=in.('rp123','rep1234')&group_by_state=eq.true
+    reports_stats_out:
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by report state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+              - failed_amount
+              - failed_count
+              - processing_amount
+              - processing_count
+              - reimbursable_amount
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching reports in this state.
+                example: 5
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching reports in this state.
+                example: 2200
+              state:
+                type: string
+                enum:
+                  - APPROVER_PENDING
+                  - DRAFT
+                  - PAYMENT_PROCESSING
+                  - APPROVER_INQUIRY
+                  - APPROVED
+                  - PAYMENT_PENDING
+                  - PAID
+                description: Report state.
+              failed_amount:
+                type: number
+                nullable: true
+                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+                example: 200
+              failed_count:
+                type: integer
+                nullable: true
+                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+                example: 1
+              processing_amount:
+                type: number
+                nullable: true
+                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
+                example: 1500
+              processing_count:
+                type: integer
+                nullable: true
+                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
+                example: 3
+              reimbursable_amount:
+                type: number
+                nullable: false
+                description: Sum of reimbursable amounts for matching reports in this state.
+                example: 500
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping (response for older mobile app versions).
+          required:
+            - count
+            - total_amount
+            - processing_amount
+            - processing_count
+            - failed_amount
+            - failed_count
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching reports.
+              example: 1
+            total_amount:
+              type: number
+              nullable: false
+              description: Total sum of amounts for all matching reports.
+              example: 100
+            processing_amount:
+              type: number
+              nullable: true
+              description: Sum of reimbursable amounts for reports in processing state.
+              example: 101
+            processing_count:
+              type: integer
+              nullable: true
+              description: Count of reports in processing state.
+              example: 2
+            failed_amount:
+              type: number
+              nullable: true
+              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
+              example: 101
+            failed_count:
+              type: integer
+              nullable: true
+              description: Count of reports in processing state with ACH failures.
+              example: 1
+      example:
+        - state: DRAFT
+          count: 3
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 200
+          total_amount: 350
+        - state: APPROVER_PENDING
+          count: 5
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 500
+          total_amount: 2200
+        - state: PAYMENT_PROCESSING
+          count: 5
+          failed_amount: 200
+          failed_count: 1
+          processing_amount: 1500
+          processing_count: 3
+          reimbursable_amount: 500
+          total_amount: 2200
+        - state: PAID
+          count: 0
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 0
+          total_amount: 0
     report_create_and_submit_expenses:
       type: object
       additionalProperties: false
@@ -9656,6 +9885,191 @@ components:
         - matched_expenses
         - last_user_matched_at
         - metadata
+    corporate_card_transactions_export_config_column_formula:
+      type: object
+      properties:
+        function:
+          type: string
+          example: parse-format-time
+        parameters:
+          type: array
+          items:
+            anyOf:
+              - type: object
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+          example:
+            - function: field
+              parameters:
+                - spent_at
+            - yyyy-MM-dd'T'HH:mm:ss
+            - dd-MM-yyyy
+            - error in date formatting
+      description: |
+        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+    corporate_card_transactions_export_config:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+          enum:
+            - xlsx
+            - csv
+          description: |
+            Type of the export file.
+          example: csv
+        is_header_visible:
+          type: boolean
+          description: |
+            Whether to show the header in the export file. Only required for CSV and XLSX exports.
+          example: true
+        separate_line_items_entry:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              description: |
+                Whether to show the double rows for each line item in the export file.
+              example: false
+            debit_entries_only:
+              type: array
+              items:
+                type: string
+              description: |
+                Configure which columns to show for debit entries.
+              example:
+                - debit_amount
+            credit_entries_only:
+              type: array
+              items:
+                type: string
+              description: |
+                Configure which columns to show for credit entries.
+              example:
+                - credit_amount
+          description: |
+            Configure how to show the double rows for each line item in the export file, if enabled. Only required for CSV and XLSX exports.
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: |
+                  Name of the column.
+                example: Spent Date
+              formula:
+                allOf:
+                  - $ref: '#/components/schemas/corporate_card_transactions_export_config_column_formula'
+                description: |
+                  Formula to transform the data in the column.
+          description: |
+            Configure the columns to show in the export file. Only required for CSV and XLSX exports.
+    corporate_card_transactions_exports_in:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+        - notify_emails
+        - config
+      properties:
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: |
+            List of emails to notify when the export is ready.
+        config:
+          allOf:
+            - $ref: '#/components/schemas/corporate_card_transactions_export_config'
+          nullable: false
+          description: |
+            Configuration for the export.
+    processed_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        Signifies when this was processed in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-11T13:14:55.201598+00:00'
+    completed_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        Signifies when this was completed in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-11T13:14:55.201598+00:00'
+    failed_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        Signifies when this was failed in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-11T13:14:55.201598+00:00'
+    corporate_card_transactions_exports_out:
+      type: object
+      additionalProperties: false
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: refilumWHrlPf7K
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+        config:
+          allOf:
+            - $ref: '#/components/schemas/corporate_card_transactions_export_config'
+          nullable: false
+        file_id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          example: filumVIrlPf7K
+        state:
+          type: string
+          nullable: false
+          enum:
+            - PENDING
+            - PROCESSING
+            - COMPLETED
+            - FAILED
+          description: |
+            Status of the export.
+          example: PENDING
+        processed_at:
+          $ref: '#/components/schemas/processed_at'
+          nullable: true
+        completed_at:
+          $ref: '#/components/schemas/completed_at'
+          nullable: true
+        failed_at:
+          $ref: '#/components/schemas/failed_at'
+          nullable: true
     virtual_card_out:
       type: object
       properties:
@@ -12656,6 +13070,20 @@ components:
         - no_of_debit
         - no_of_credit
         - no_of_transactions
+    card_mapping_in:
+      type: array
+      items:
+        type: object
+        properties:
+          statement_card_number:
+            type: string
+            description: |
+              Card number from statement
+            example: xxx5-4543
+          corporate_card_id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            example: bawownwrng
     card_transaction_from_statement_in:
       type: object
       properties:
@@ -12769,6 +13197,8 @@ components:
             This specifies list of statement line items which are to be created as RTF missing transactions.
           example:
             - stlisfdfadssd
+        card_mapping:
+          $ref: '#/components/schemas/card_mapping_in'
       required:
         - id
         - statement_mapping
@@ -12973,20 +13403,6 @@ components:
             - PROCESSING
             - SUCCESS
             - ERROR
-    card_mapping_in:
-      type: array
-      items:
-        type: object
-        properties:
-          statement_card_number:
-            type: string
-            description: |
-              Card number from statement
-            example: xxx5-4543
-          corporate_card_id:
-            allOf:
-              - $ref: '#/components/schemas/id_string'
-            example: bawownwrng
     rtf_missing_transaction_from_statement_in:
       type: object
       properties:
@@ -17174,59 +17590,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/expenses/bulk:
-    post:
-      tags:
-        - Expenses
-      summary: Update expenses in bulk
-      description: |
-        Update expenses in bulk.
-      operationId: expenses_post_bulk
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/expenses_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /admin/expenses/attach_files/bulk:
     post:
       tags:
@@ -21204,6 +21567,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_card_transactions/exports:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Create Corproate Card Transactions Export
+      description: |
+        Create Corporate Card Transactions Export Request.
+      operationId: corporate_card_transactions_exports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transactions_exports_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transactions_exports_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/virtual_cards:
     get:
       tags:

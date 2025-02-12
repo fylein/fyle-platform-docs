@@ -2457,3 +2457,74 @@ corporate_card_transaction_reassign_in:
   required:
     - id
     - user_id
+
+corporate_card_transactions_expenses_stats_in:
+  type: object
+  properties:
+    query_params:
+      type: string
+      description: | 
+        Query param string for filtering corporate card transactions.
+      nullable: false
+      example: created_at=gt.2024-01-01
+
+corporate_card_transactions_expenses_stats_out:
+  type: array
+  description: |
+    Array containing stats objects grouped by corporate card numbers and expense state. Returns an empty array if no 
+    transactions are found matching the criteria.
+  items:
+    type: object
+    required:
+      - card_number
+      - bank_name
+      - state
+      - count
+      - total_amount
+    properties:
+      card_number:
+        type: string
+        nullable: false
+        description: |
+          Masked card number (showing first 6 and last 4 digits).
+        example: "411111******1111"
+      bank_name:
+        type: string
+        nullable: false
+        description: |
+          Name of the bank that issued the card.
+        example: "VISA_BANK"
+      state:
+        type: string
+        nullable: false
+        description: |
+          State of the corporate card transactions.
+        example: "COMPLETE"
+      count:
+        type: integer
+        nullable: false
+        description: |
+          Number of transactions for this card number.
+        example: 7
+      total_amount:
+        type: number
+        nullable: false
+        description: |
+          Sum of transaction amounts for this card number.
+        example: 500.86
+  example:
+    - state: "COMPLETE"
+      bank_name: "VISA_BANK"
+      card_number: "411111******1111"
+      count: 7
+      total_amount: 500.86
+    - state: "COMPLETE"
+      bank_name: "MASTERCARD_BANK"
+      card_number: "422222******2222"
+      count: 3
+      total_amount: 3209.98
+    - state: "DRAFT"
+      bank_name: "VISA_BANK"
+      card_number: "444444******4444"
+      count: 3
+      total_amount: 336.81

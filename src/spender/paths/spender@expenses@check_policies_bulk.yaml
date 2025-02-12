@@ -1,0 +1,50 @@
+post:
+  tags:
+    - Expenses
+  summary: Check multiple expenses for policy violations in bulk
+  description: |
+    Bulk version of the `check_policies` API that allows you to check multiple expenses for policy violations in one request.
+
+    **NOTE:** This API can only be used to check policies for existing expenses that you want to update. The API will evaluate all the expenses against the configured policy rules and return an array of policy violation information for each expense in the request payload.
+  operationId: check_policies_bulk_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: "../../components/schemas/expense.yaml#/spender_check_policies_bulk_in"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              data:
+                $ref: ../../components/schemas/expense.yaml#/expense_check_policies_bulk_out
+    "401":
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    "400":
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/400.yaml"
+    "404":
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/404.yaml"
