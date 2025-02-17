@@ -3101,11 +3101,17 @@ components:
         action:
           type: string
           enum:
-            - ACCOUNTING_EXPORT_INITIATED
+            - PARTIALLY_APPROVED
+            - SUBMITTED
+            - APPROVER_ADDED
+            - APPROVER_SENDBACK
             - APPROVED
-            - ADMIN_APPROVED
-            - STATE_CHANGE_PAYMENT_PROCESSING
-            - MARK_PAID
+            - APPROVER_REMOVED
+            - PAYMENT_PENDING
+            - PAYMENT_PROCESSING
+            - PAID
+            - COMMENTED
+            - EXPENSES_ADDED
           example: APPROVED
         data:
           allOf:
@@ -7053,6 +7059,17 @@ components:
           type: boolean
           description: |
             Whether the policy rule is retired and can't be made active again.
+        is_approver_policy:
+          type: boolean
+          description: |
+            Whether the policy rule adds an approver to the expense on violation.
+        approver_order:
+          type: number
+          nullable: true
+          description: |
+            This number indicates the order of the approver expense policy rule in the defined approval sequence. For non-approver policies, this field will be null.
+          minimum: 1
+          example: 3
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -8903,7 +8920,8 @@ components:
           $ref: '#/components/schemas/fk_string'
         yodlee_fastlink_params:
           $ref: '#/components/schemas/fastlink_params'
-          type: string
+          type: object
+          nullable: true
           description: |
             Configuration to open Yodlee Fastlink
         yodlee_is_credential_update_required:
@@ -8967,7 +8985,8 @@ components:
           $ref: '#/components/schemas/fk_string'
         yodlee_fastlink_params:
           $ref: '#/components/schemas/fastlink_params'
-          type: string
+          type: object
+          nullable: true
           description: |
             Configuration to open Yodlee Fastlink
         yodlee_is_credential_update_required:
@@ -12734,6 +12753,16 @@ paths:
             Supported operators are `eq`.<br>
             is_retired=eq.true <br>
             is_retired=eq.false
+          schema:
+            type: string
+            example: eq.true
+        - in: query
+          name: is_approver_policy
+          description: |
+            Whether to fetch expense policy rules that add an approver to an expense on violation.<br>
+            Supported operators are `eq`.<br>
+            is_approver_policy=eq.true <br>
+            is_approver_policy=eq.false
           schema:
             type: string
             example: eq.true
