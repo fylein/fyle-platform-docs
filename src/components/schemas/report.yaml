@@ -766,7 +766,7 @@ report_action_resubmit:
         id of report, which needs to be resubmitted
       example: 'rpa21A2rdj2'
 
-report_out_subscriptions:
+report_out_subscriptions_admin:
   type: object
   additionalProperties: false
   required:
@@ -781,7 +781,35 @@ report_out_subscriptions:
     action:
       type: string
       enum: ['ACCOUNTING_EXPORT_INITIATED', 'APPROVED', 'ADMIN_APPROVED', 'STATE_CHANGE_PAYMENT_PROCESSING', 'MARK_PAID']
-      example: 'APPROVED'
+      example: 'ADMIN_APPROVED'
+    data:
+      allOf:
+        - $ref: '#/report_out'
+        - type: object
+          additionalProperties: False
+          properties:
+            updated_by_user:
+              $ref: './user.yaml#/user_out_embed'
+    reason:
+      type: string
+      example: 'Admin approved the report.'
+
+report_out_subscriptions_spender:
+  type: object
+  additionalProperties: false
+  required:
+    - resource
+    - action
+    - data
+    - reason
+  properties:
+    resource:
+      type: string
+      example: 'REPORT'
+    action:
+      type: string
+      enum: ['PARTIALLY_APPROVED', 'APPROVER_ADDED', 'APPROVER_SENDBACK', 'APPROVED', 'APPROVER_REMOVED', 'PAYMENT_PENDING', 'PAYMENT_PROCESSING', 'PAID', 'COMMENTED']
+      example: 'COMMENTED'
     data:
       allOf:
         - $ref: '#/report_out'
@@ -793,6 +821,34 @@ report_out_subscriptions:
     reason:
       type: string
       example: 'comment given by Approver while approving the report.'
+
+report_out_subscriptions_approver:
+  type: object
+  additionalProperties: false
+  required:
+    - resource
+    - action
+    - data
+    - reason
+  properties:
+    resource:
+      type: string
+      example: 'REPORT'
+    action:
+      type: string
+      enum: ['SUBMITTED', 'COMMENTED']
+      example: 'SUBMITTED'
+    data:
+      allOf:
+        - $ref: '#/report_out'
+        - type: object
+          additionalProperties: False
+          properties:
+            updated_by_user:
+              $ref: './user.yaml#/user_out_embed'
+    reason:
+      type: string
+      example: 'Sender submitted the report.'
 
 report_purpose_out:
   type: object
