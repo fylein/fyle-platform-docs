@@ -2560,20 +2560,6 @@ components:
             nullable: true
             description: |
               This field is applicable for only `Hotel` category.
-    expense_add_comment_action_in:
-      type: object
-      required:
-        - id
-        - comment
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: txsjfwlrglw
-        comment:
-          type: string
-          description: Comment made on the expense.
-          example: This is a food expense.
     expense_attach_receipt_in:
       type: object
       required:
@@ -6446,6 +6432,10 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
         commute_details:
           $ref: '#/components/schemas/commute_details'
         mobile:
@@ -6559,6 +6549,10 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
         commute_details:
           $ref: '#/components/schemas/commute_details'
         mobile:
@@ -6628,6 +6622,10 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
         commute_details:
           $ref: '#/components/schemas/commute_details'
         mobile:
@@ -7457,7 +7455,7 @@ components:
         creator_user_id:
           $ref: '#/components/schemas/user_id'
         creator_user:
-          $ref: '#/components/schemas/user_out_embed'
+          $ref: '#/components/schemas/user_out_embed_nullable'
     expense_policy_rule_embed:
       type: object
       additionalProperties: false
@@ -7542,6 +7540,29 @@ components:
           example:
             - usBdsdfscl
             - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
         run_status:
           nullable: false
           type: string
@@ -7840,6 +7861,29 @@ components:
           example:
             - usBdsdfscl
             - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
         expense_policy_rule_id:
           type: string
           description: |
@@ -9779,55 +9823,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /spender/expenses/add_comment:
-    post:
-      tags:
-        - Expenses
-      summary: Add comment on an expense
-      description: |
-        This API creates comment on a specific expense.
-      operationId: expenses_add_comment_post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/expense_add_comment_action_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
