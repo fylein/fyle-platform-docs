@@ -2618,6 +2618,54 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the expense
+    expense_permissions_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+    expense_permissions_out:
+      type: object
+      required:
+        - can_delete
+        - can_edit
+        - can_verify
+        - can_remove_from_report
+        - can_assign
+        - can_add_to_report
+      properties:
+        can_delete:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to delete this expense.
+          example: false
+        can_edit:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to edit this expense.
+          example: true
+        can_verify:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to verify this expense.
+          example: true
+        can_remove_from_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to remove this expense from a report.
+          example: false
+        can_assign:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to assign this expense to another user.
+          example: false
+        can_add_to_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to add this expense to a report.
+          example: true
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -4976,6 +5024,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/permissions:
+    post:
+      tags:
+        - Expenses
+        - Expense permissions
+        - Permissions
+      summary: Expense Permissions
+      description: |
+        Expense Permissions for the user
+      operationId: expense_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
