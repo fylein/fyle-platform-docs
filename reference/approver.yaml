@@ -148,6 +148,12 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+        approver_order:
+          type: integer
+          description: |
+            This number inidicates the order of the approver in the approval sequence for the report.
+            The approver with the lowest approver_order is the first approver in the sequence.
+          example: 1
     employee_id:
       type: string
       maxLength: 255
@@ -2612,6 +2618,57 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the expense
+    expense_permissions_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Expense ID of the expense to check permissions for.
+          example: tx0agOdICdbV
+    expense_permissions_out:
+      type: object
+      required:
+        - can_delete
+        - can_edit
+        - can_verify
+        - can_remove_from_report
+        - can_assign
+        - can_add_to_report
+      properties:
+        can_delete:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to delete this expense.
+          example: false
+        can_edit:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to edit this expense.
+          example: true
+        can_verify:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to verify this expense.
+          example: true
+        can_remove_from_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to remove this expense from a report.
+          example: false
+        can_assign:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to assign this expense to another user.
+          example: false
+        can_add_to_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to add this expense to a report.
+          example: true
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -3007,7 +3064,7 @@ components:
           $ref: '#/components/schemas/is_enabled'
         webhook_url:
           $ref: '#/components/schemas/webhook_url'
-    report_out_subscriptions:
+    report_out_subscriptions_approver:
       type: object
       additionalProperties: false
       required:
@@ -3022,18 +3079,9 @@ components:
         action:
           type: string
           enum:
-            - PARTIALLY_APPROVED
             - SUBMITTED
-            - APPROVER_ADDED
-            - APPROVER_SENDBACK
-            - APPROVED
-            - APPROVER_REMOVED
-            - PAYMENT_PENDING
-            - PAYMENT_PROCESSING
-            - PAID
             - COMMENTED
-            - EXPENSES_ADDED
-          example: APPROVED
+          example: SUBMITTED
         data:
           allOf:
             - $ref: '#/components/schemas/report_out'
@@ -3044,7 +3092,7 @@ components:
                   $ref: '#/components/schemas/user_out_embed'
         reason:
           type: string
-          example: comment given by Approver while approving the report.
+          example: Spender submitted the report.
     description:
       type: string
       nullable: true
@@ -4409,6 +4457,372 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    role:
+      type: string
+      enum:
+        - FYLER
+        - APPROVER
+        - ACCOUNTANT
+        - TRAVEL_ADMIN
+        - VERIFIER
+        - PAYMENT_PROCESSOR
+        - FINANCE
+        - ADMIN
+        - TRAVEL_AGENT
+        - OWNER
+        - AUDITOR
+        - HOD
+        - HOP
+      description: |
+        Roles are assigned by Admin.
+      example: FYLER
+    mileage_rate_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        vehicle_type:
+          type: string
+          example: Audi
+        code:
+          $ref: '#/components/schemas/code'
+    bank_ifsc:
+      type: string
+      example: SBIN0007587
+      maxLength: 11
+      description: |
+        IFSC code of the bank account of the Employee
+      pattern: ^[A-Z]{4}0[A-Z0-9]{6}$
+    locale:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          nullable: false
+          maxLength: 4
+          example: IST
+          description: |
+            Represents the abbreviation of the employee's locale.
+        offset:
+          type: string
+          nullable: false
+          maxLength: 9
+          example: '05:30:00'
+          description: |
+            Represents the offset of the employee's timezone from UTC.
+        timezone:
+          type: string
+          nullable: false
+          maxLength: 19
+          example: Asia/Kolkata
+          description: |
+            Represents the timezone of the employee.
+      description: |
+        Location and timezone settings of the employee.
+    mileage_settings:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        mileage_rate_labels:
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: four_wheeler
+          example:
+            - four_wheeler
+            - two_wheeler
+        annual_mileage_of_user_before_joining_fyle:
+          type: object
+          nullable: true
+          items:
+            type: object
+          example:
+            two_wheeler: 44
+      description: |
+        Mileage settings of the employee.
+    user_full_name:
+      type: string
+      maxLength: 255
+      description: |
+        String denoting the full name of an employee.
+      example: Jon Snow
+    delegatees:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: |
+            Delegation id.
+          example: 100
+        type:
+          type: string
+          enum:
+            - SHORT_TERM
+            - PERMANENT
+          description: |
+            Type of delegation.
+          example: SHORT_TERM
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            Email of the delegatee.
+        full_name:
+          allOf:
+            - $ref: '#/components/schemas/user_full_name'
+          description: |
+            Full name of the delegatee.
+        start_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time from which the delegation is active.
+          nullable: false
+        end_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
+          nullable: true
+    employee_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        department_id:
+          $ref: '#/components/schemas/fk_string'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
+        level_id:
+          $ref: '#/components/schemas/fk_string'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+        special_email:
+          type: string
+          maxLength: 127
+          example: receipts+admin1_mb4w@fyle.ai
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        flattened_custom_field:
+          $ref: '#/components/schemas/flattened_custom_field'
+        project_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids that this employee is allowed to access.
+        projects:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/project_out_embed'
+          description: |
+            List of projects that this employee is allowed to access.
+        cost_center_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of cost center ids that this employee is allowed to access. [] (empty array) means access to all cost centers.
+        cost_centers:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/cost_center_out_embed'
+          description: |
+            List of cost_ enters that this employee is allowed to access. [] (empty array) means access to all cost centers.
+        per_diem_rate_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of per diem rate ids that this employee is allowed to access.
+        per_diem_rates:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/per_diem_rate_out_embed'
+          description: |
+            List of per diem rates that this employee is allowed to access.
+        mileage_rate_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of mileage rate ids that this employee is allowed to access.
+        mileage_rates:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/mileage_rate_out_embed'
+          description: |
+            List of mileage rates that this employee is allowed to access.
+        approver_user_ids:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - uswoirwlwwg
+            - uswlgwkgw42
+          description: |
+            List of IDs of users who are approvers for this employee. Maximum 3.
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are approvers for this employee.
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        branch_account:
+          type: string
+          nullable: true
+          items:
+            $ref: '#/components/schemas/name'
+          example: null
+          description: |
+            The Account number of the bank account of the Employee.
+        branch_ifsc:
+          type: string
+          nullable: true
+          items:
+            $ref: '#/components/schemas/bank_ifsc'
+          example: null
+          description: |
+            IFSC code of the bank account of the Employee. Must be a 11 digit alphanumeric code.
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
+        locale:
+          $ref: '#/components/schemas/locale'
+        mileage_settings:
+          $ref: '#/components/schemas/mileage_settings'
+        ach_account:
+          type: object
+          nullable: true
+          additionalProperties: false
+          properties:
+            added:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee has added ach account
+            verified:
+              nullable: true
+              type: boolean
+              description: |
+                This field indicates whether employee's ach account is verified.
+          description: |
+            ACH account details of the employee.
+        delegatees:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
+        category_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 3345
+            - 3346
+          description: |
+            List of category ids that this employee is allowed to access.
+        categories:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/category_out_embed'
+          description: |
+            List of categories that this employee is allowed to access.
   parameters:
     limit:
       in: query
@@ -4450,6 +4864,9 @@ tags:
   - name: Subscriptions
     description: |
       This API allows you to subscribe to different events.
+  - name: Employees
+    description: |
+      These APIs gives you access to manage your organisation's Employees
 paths:
   /approver/reports:
     get:
@@ -4976,6 +5393,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/expenses/permissions:
+    post:
+      tags:
+        - Expenses
+        - Expense permissions
+        - Permissions
+      summary: Expense Permissions
+      description: |
+        Expense Permissions for the user
+      operationId: expense_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/reports/eject_expenses:
     post:
       tags:
@@ -5429,7 +5903,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: '#/components/schemas/report_out_subscriptions'
+                      $ref: '#/components/schemas/report_out_subscriptions_approver'
               responses:
                 '200':
                   description: OK
@@ -6502,3 +6976,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/employees:
+    get:
+      tags:
+        - Employees
+      summary: List employees
+      operationId: employees_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
