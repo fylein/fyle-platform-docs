@@ -3093,6 +3093,175 @@ components:
         reason:
           type: string
           example: Spender submitted the report.
+    advance_out_embed:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify an advances.
+            This id is always prefixed with `adv`.
+          readOnly: true
+          example: advkvnwrnpwi
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        advance_request_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advances.
+            This field can be used as reference in UI.
+          example: A/2020/10/T/95
+    advance_request_approval_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        approver_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        approver_user:
+          $ref: '#/components/schemas/user_out_embed'
+        state:
+          type: string
+          enum:
+            - APPROVAL_PENDING
+            - APPROVAL_DISABLED
+            - APPROVAL_DONE
+          description: |
+            State of this advance request approval
+    employee_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
+    advance_request_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        advance_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advjrgwlk2Q
+        advance:
+          $ref: '#/components/schemas/advance_out_embed'
+        seq_num:
+          type: string
+          description: |
+            This is user visible identifier for an advance request.
+            This field can be used as reference in UI.
+          example: AR/2020/10/T/95
+        code:
+          $ref: '#/components/schemas/code'
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVAL_PENDING
+            - APPROVED
+            - SENT_BACK
+            - PULLED_BACK
+            - REJECTED
+            - PAID
+          description: |
+            State of the advance request.
+          example: PAID
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        last_approved_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies if and when this advance request was approved.
+          nullable: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_request_approval_out_embed'
+          description: |
+            List of advance request approval objects
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this advance request has been exported to external accounting system or not.
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
     description:
       type: string
       nullable: true
@@ -4843,6 +5012,9 @@ components:
         type: integer
         example: 10
 tags:
+  - name: Advances
+    description: |
+      This API gives you access to view your Issued Advances data.
   - name: Categories
     description: |
       These APIs gives you access to manage your organisation's Categories
@@ -5938,6 +6110,48 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /approver/advance_requests:
+    get:
+      tags:
+        - Advances
+      summary: List advance requests
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: advance_requests_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
