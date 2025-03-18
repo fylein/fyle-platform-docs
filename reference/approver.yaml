@@ -3262,6 +3262,61 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advance_requests_approver_stats_in:
+      properties:
+        query_params:
+          description: |
+            Query param string similar to advance_requests GET call. Use group_by_currency=eq.true to get currency-wise grouping of stats.
+          nullable: false
+          example: id=in.('adr1263','adr1569')&group_by_currency=eq.true
+    advance_requests_approver_stats_out:
+      oneOf:
+        - type: array
+          title: Currency-wise grouped stats
+          description: Stats grouped by advance request currency
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - currency
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching advance requests with this currency.
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching advance requests with this currency.
+                example: 44545.4
+              currency:
+                type: string
+        - type: object
+          title: Overall stats
+          description: Overall stats without currency grouping.
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching advance requests.
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching advance requests.
+              example: 45882.4
+      example:
+        - currency: USD
+          count: 10
+          total_amount: 44545.4
+        - currency: INR
+          count: 0
+          total_amount: 0
     description:
       type: string
       nullable: true
@@ -6162,6 +6217,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /approver/advance_requests/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Requests Stats
+      description: |
+        Advances Requests Stats
+      operationId: advance_requests_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_requests_approver_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_requests_approver_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/projects:
     get:
       tags:
