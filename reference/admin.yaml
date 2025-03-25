@@ -1968,6 +1968,12 @@ components:
             $ref: '#/components/schemas/phone_number'
           description: |
             Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
         locale:
           $ref: '#/components/schemas/locale'
         mileage_settings:
@@ -2907,6 +2913,12 @@ components:
             - APPROVAL_DONE
           description: |
             State of this report_approval
+        approver_order:
+          type: integer
+          description: |
+            This number inidicates the order of the approver in the approval sequence for the report.
+            The approver with the lowest approver_order is the first approver in the sequence.
+          example: 1
     report_out_embed:
       type: object
       nullable: true
@@ -4335,6 +4347,14 @@ components:
           type: boolean
           nullable: true
           description: Flag stating whether this was a round trip or not.
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: Distance computed by Fyle in mileage expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: Amount computed by Fyle in mileage expenses.
         commute_details_id:
           type: integer
           nullable: true
@@ -4353,6 +4373,22 @@ components:
             - ROUND_TRIP
             - NO_DEDUCTION
             - null
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+          description: |
+            Specific to per diem expense. This represents the per diem's rate id given by Fyle
+            during creation of per diem rate for which this expense is created. <br>
+            This field is required for creating Per Diem Expenses.
+        per_diem_num_days:
+          type: number
+          nullable: true
+          example: 2
+          description: |
+            Specific to per diem related expenses, number of days for which per diem claim is made. <br>
+            This field is required for creating Per Diem Expenses.
     attach_files_to_expense_in:
       type: object
       required:
@@ -4464,23 +4500,80 @@ components:
           nullable: false
           type: string
           description: |
-            This field contains the query param string similar to the query params passed in expenses GET call for displaying expenses in the list view.
-          example: id=in.('tx1263', 'tx1569')
+            Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+          example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
     expenses_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: |
-            This field represents the total number of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of expenses that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by expense state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching expenses in this state
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching expenses in this state
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - COMPLETE
+                  - DRAFT
+                  - APPROVER_PENDING
+                  - APPROVED
+                  - PAYMENT_PENDING
+                  - PAYMENT_PROCESSING
+                  - PAID
+                description: Expense state
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching expenses
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching expenses
+              example: 45882.4
+      example:
+        - state: COMPLETE
+          count: 343
+          total_amount: 1337
+        - state: DRAFT
+          count: 10
+          total_amount: 44545.4
+        - state: PAID
+          count: 0
+          total_amount: 0
+        - state: PAYMENT_PROCESSING
+          count: 0
+          total_amount: 0
+        - state: APPROVER_PENDING
+          count: 0
+          total_amount: 0
+        - state: PAYMENT_PENDING
+          count: 0
+          total_amount: 0
+        - state: APPROVED
+          count: 0
+          total_amount: 0
     query_params:
       type: string
       description: |
@@ -4641,6 +4734,57 @@ components:
           description: |
             Status of the export.
           example: PENDING
+    expense_permissions_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Expense ID of the expense to check permissions for.
+          example: tx0agOdICdbV
+    expense_permissions_out:
+      type: object
+      required:
+        - can_delete
+        - can_edit
+        - can_verify
+        - can_remove_from_report
+        - can_assign
+        - can_add_to_report
+      properties:
+        can_delete:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to delete this expense.
+          example: false
+        can_edit:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to edit this expense.
+          example: true
+        can_verify:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to verify this expense.
+          example: true
+        can_remove_from_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to remove this expense from a report.
+          example: false
+        can_assign:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to assign this expense to another user.
+          example: false
+        can_add_to_report:
+          type: boolean
+          description: |
+            Indicates whether the user has permission to add this expense to a report.
+          example: true
     advance_out_embed:
       type: object
       nullable: true
@@ -4851,26 +4995,86 @@ components:
     advance_requests_stats_in:
       properties:
         query_params:
-          type: string
           description: |
-            This field contains the query param string similar to the query params passed in advance_requests GET call for displaying advance_requests in the list view.
+            Query param string similar to advance_requests GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
-          example: id=in.('adr1263', 'adr1569')
+          example: id=in.('adr1263','adr1569')&group_by_state=eq.true
     advance_requests_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            This field represents the total number of advance_requests that match the criteria specified in the query_params within the body of the request.
-          nullable: false
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of advance_requests that match the criteria specified in the query_params within the body of the request.
-          example: 100
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by advance request state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching advance requests in this state.
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching advance requests in this state.
+                example: 44545.4
+              state:
+                type: string
+                enum:
+                  - DRAFT
+                  - APPROVAL_PENDING
+                  - APPROVED
+                  - CANCELLED
+                  - REJECTED
+                  - PAID
+                  - PULLED_BACK
+                  - SENT_BACK
+                description: Advance request state.
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping.
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching advance requests.
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching advance requests.
+              example: 45882.4
+      example:
+        - state: DRAFT
+          count: 10
+          total_amount: 44545.4
+        - state: APPROVAL_PENDING
+          count: 0
+          total_amount: 0
+        - state: APPROVED
+          count: 343
+          total_amount: 1337
+        - state: CANCELLED
+          count: 0
+          total_amount: 0
+        - state: SENT_BACK
+          count: 0
+          total_amount: 0
+        - state: PULLED_BACK
+          count: 0
+          total_amount: 0
+        - state: REJECTED
+          count: 0
+          total_amount: 0
+        - state: PAID
+          count: 0
+          total_amount: 0
     advance_request_out_embed:
       type: object
       nullable: true
@@ -6192,51 +6396,148 @@ components:
     reports_stats_in:
       properties:
         query_params:
-          nullable: false
           type: string
           description: |
-            This field contains the query param string similar to the query params passed in reports GET call for displaying reports in the list view.
-          example: state=eq.PAYMENT_PROCESSING&report_id=in.('rp123', 'rep1234')
-    reports_stats_out:
-      type: object
-      properties:
-        count:
-          type: integer
+            Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
-          description: |
-            This field indicates the count of reports.
-          example: 1
-        total_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of amount of reports.
-          example: 100
-        processing_amount:
-          allOf:
-            - $ref: '#/components/schemas/amount'
-          description: |
-            This field indicates the sum of reimbursable amount of reports in Processing state.
-          example: 101
-        processing_count:
-          type: integer
-          description: |
-            This field indicates the count of reports in Processing state.
-          example: 2
-        failed_amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            This field indicates the sum of reimbursable amount of reports in Processing state for which ACH has failed
-          example: 101
-        failed_count:
-          type: integer
-          nullable: true
-          description: |
-            This field indicates the count of reports in processing state for which ACH has failed.
-          example: 1
+          example: id=in.('rp123','rep1234')&group_by_state=eq.true
+    reports_stats_out:
+      oneOf:
+        - type: array
+          title: State-wise grouped stats
+          description: Stats grouped by report state
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - state
+              - failed_amount
+              - failed_count
+              - processing_amount
+              - processing_count
+              - reimbursable_amount
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching reports in this state.
+                example: 5
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching reports in this state.
+                example: 2200
+              state:
+                type: string
+                enum:
+                  - APPROVER_PENDING
+                  - DRAFT
+                  - PAYMENT_PROCESSING
+                  - APPROVER_INQUIRY
+                  - APPROVED
+                  - PAYMENT_PENDING
+                  - PAID
+                description: Report state.
+              failed_amount:
+                type: number
+                nullable: true
+                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+                example: 200
+              failed_count:
+                type: integer
+                nullable: true
+                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+                example: 1
+              processing_amount:
+                type: number
+                nullable: true
+                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
+                example: 1500
+              processing_count:
+                type: integer
+                nullable: true
+                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
+                example: 3
+              reimbursable_amount:
+                type: number
+                nullable: false
+                description: Sum of reimbursable amounts for matching reports in this state.
+                example: 500
+        - type: object
+          title: Overall stats
+          description: Overall stats without state grouping (response for older mobile app versions).
+          required:
+            - count
+            - total_amount
+            - processing_amount
+            - processing_count
+            - failed_amount
+            - failed_count
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching reports.
+              example: 1
+            total_amount:
+              type: number
+              nullable: false
+              description: Total sum of amounts for all matching reports.
+              example: 100
+            processing_amount:
+              type: number
+              nullable: true
+              description: Sum of reimbursable amounts for reports in processing state.
+              example: 101
+            processing_count:
+              type: integer
+              nullable: true
+              description: Count of reports in processing state.
+              example: 2
+            failed_amount:
+              type: number
+              nullable: true
+              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
+              example: 101
+            failed_count:
+              type: integer
+              nullable: true
+              description: Count of reports in processing state with ACH failures.
+              example: 1
+      example:
+        - state: DRAFT
+          count: 3
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 200
+          total_amount: 350
+        - state: APPROVER_PENDING
+          count: 5
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 500
+          total_amount: 2200
+        - state: PAYMENT_PROCESSING
+          count: 5
+          failed_amount: 200
+          failed_count: 1
+          processing_amount: 1500
+          processing_count: 3
+          reimbursable_amount: 500
+          total_amount: 2200
+        - state: PAID
+          count: 0
+          failed_amount: null
+          failed_count: null
+          processing_amount: null
+          processing_count: null
+          reimbursable_amount: 0
+          total_amount: 0
     report_create_and_submit_expenses:
       type: object
       additionalProperties: false
@@ -11162,6 +11463,18 @@ components:
           description: |
             This represents the description of the expense policy rule.
           example: Receipt is mandatory for expense above $50
+        source:
+          type: string
+          enum:
+            - WEBAPP_POLICY_FORM
+            - WEBAPP_POLICY_JSON
+            - WEBAPP_EXPENSE_RECEIPT_AMOUNT_LIMIT
+            - WEBAPP_EXPENSE_MILEAGE_SLAB_RATE
+            - WEBAPP_PROJECT_APPROVAL
+            - DEFAULT_PRIMARY_APPROVER_POLICY
+          description: |
+            This represents the source of the expense policy rule, i.e. from where it was created.
+          example: WEBAPP_POLICY_FORM
         is_enabled:
           type: boolean
           description: |
@@ -11170,6 +11483,17 @@ components:
           type: boolean
           description: |
             Whether the policy rule is retired and can't be made active again.
+        is_approver_policy:
+          type: boolean
+          description: |
+            Whether the policy rule adds an approver to the expense on violation.
+        approver_order:
+          type: number
+          nullable: true
+          description: |
+            This number indicates the order of the approver expense policy rule in the defined approval sequence. For non-approver policies, this field will be null.
+          minimum: 1
+          example: 3
         org_id:
           $ref: '#/components/schemas/org_id'
         created_at:
@@ -11559,7 +11883,7 @@ components:
         creator_user_id:
           $ref: '#/components/schemas/user_id'
         creator_user:
-          $ref: '#/components/schemas/user_out_embed'
+          $ref: '#/components/schemas/user_out_embed_nullable'
     expense_policy_in:
       type: object
       required:
@@ -12110,6 +12434,29 @@ components:
           example:
             - usBdsdfscl
             - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
         run_status:
           nullable: false
           type: string
@@ -12245,6 +12592,8 @@ components:
           $ref: '#/components/schemas/org_id'
         creator_user_id:
           $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -13938,6 +14287,29 @@ components:
           example:
             - usBdsdfscl
             - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
         expense_policy_rule_id:
           type: string
           description: |
@@ -17686,6 +18058,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/expenses/permissions:
+    post:
+      tags:
+        - Expenses
+        - Expense permissions
+        - Permissions
+      summary: Expense Permissions
+      description: |
+        Expense Permissions for the user
+      operationId: expense_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/advance_requests:
     get:
       tags:
@@ -22868,6 +23297,16 @@ paths:
           schema:
             type: string
             example: eq.true
+        - in: query
+          name: is_approver_policy
+          description: |
+            Whether to fetch expense policy rules that add an approver to an expense on violation.<br>
+            Supported operators are `eq`.<br>
+            is_approver_policy=eq.true <br>
+            is_approver_policy=eq.false
+          schema:
+            type: string
+            example: eq.true
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       responses:
@@ -23003,6 +23442,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expense_policy_rules/reorder:
+    post:
+      tags:
+        - Expense Policies
+      summary: Reorder approver policies
+      description: |
+        Reorder the enabled approver policies of an org.
+        - An **approver policy** is a policy that adds an approver to an expense on violation.
+        - All **enabled** approver policy IDs must be provided in the request body.
+      operationId: expense_policy_rules_reorder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_policy_state_change_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expense_policy_states:
     get:
       tags:
