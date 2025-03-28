@@ -3501,15 +3501,15 @@ components:
       properties:
         city:
           type: string
-          nullable: false
+          nullable: true
           example: London
         state:
           type: string
-          nullable: false
+          nullable: true
           example: London
         country:
           type: string
-          nullable: false
+          nullable: true
           example: United Kingdom
         formatted_address:
           type: string
@@ -4602,7 +4602,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     expenses_export_config:
       type: object
       additionalProperties: true
@@ -6669,7 +6669,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     reports_export_config:
       type: object
       additionalProperties: true
@@ -9965,7 +9965,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     corporate_card_transactions_export_config:
       type: object
       additionalProperties: true
@@ -23442,6 +23442,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expense_policy_rules/reorder:
+    post:
+      tags:
+        - Expense Policies
+      summary: Reorder approver policies
+      description: |
+        Reorder the enabled approver policies of an org.
+        - An **approver policy** is a policy that adds an approver to an expense on violation.
+        - All **enabled** approver policy IDs must be provided in the request body.
+      operationId: expense_policy_rules_reorder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_policy_state_change_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expense_policy_states:
     get:
       tags:
