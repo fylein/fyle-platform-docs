@@ -2396,6 +2396,40 @@ components:
             - PROCESSING
           description: |
             State of this download.
+    employee_summaries_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            This field contains the query param string similar to the query params passed in employee summaries GET call for displaying summaries in the list view.
+          example: user_id=eq.usabcdefghij&or=(unreported_expenses_total.neq.0,unapproved_reports_total.neq.0)
+    amount:
+      type: number
+      description: |
+        amount of money
+      example: 47.99
+    employee_summaries_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of employees.
+          example: 10
+        unreported_expenses_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of unreported expenses of employees.
+          example: 1239
+        unapproved_reports_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the sum of amount of unapproved reports of employees.
+          example: 101
     file_in:
       type: object
       required:
@@ -2890,11 +2924,6 @@ components:
         Expense custom fields
       items:
         $ref: '#/components/schemas/expense_custom_field'
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -16945,6 +16974,61 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/employees_download_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/employees/summaries/stats:
+    post:
+      tags:
+        - Employees
+      summary: Employee Summaries Stats
+      description: |
+        This api returns count of employees and total amount of unreported expenses and unapproved reports of an org.
+      operationId: employee_summaries_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_summaries_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_summaries_stats_out'
         '400':
           description: Bad request
           content:
