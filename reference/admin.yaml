@@ -6204,73 +6204,6 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/id_string'
-    expense_comments_out:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - comment
-        - action
-        - action_data
-        - expense_id
-        - creator_type
-        - creator_user_id
-        - creator_user
-        - org_id
-        - updated_at
-        - created_at
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-        comment:
-          type: string
-          description: comment on the report
-          example: We don't accept laundry bills
-        action:
-          type: string
-          description: Expense action for which comment is added.
-          enum:
-            - ADMIN_APPROVED
-            - APPROVED
-            - APPROVER_REMOVED
-            - AUTO_MATCHED
-            - AUTO_MERGED
-            - COMMENTED
-            - DATA_EXTRACTED
-            - EJECTED_FROM_REPORT
-            - EXPENSE_RULE_APPLIED
-            - FILE_ATTACHED
-            - FILE_DELETED
-            - INVALID_EXPENSE_FIELD_REMOVED
-            - MATCHED
-            - PAID
-            - PARTIALLY_APPROVED
-            - POLICY_RESULT_APPLIED
-            - UNMATCHED
-          example: APPROVED
-        action_data:
-          type: object
-          description: Data related to expense action.
-        expense_id:
-          $ref: '#/components/schemas/id_string'
-        creator_type:
-          type: string
-          description: Describes whether the comment is system-generated or User made.
-          enum:
-            - SYSTEM
-            - POLICY
-            - USER
-          example: USER
-        creator_user_id:
-          $ref: '#/components/schemas/id_string'
-        creator_user:
-          $ref: '#/components/schemas/user_out_embed_nullable'
-        created_at:
-          $ref: '#/components/schemas/created_at'
-        updated_at:
-          $ref: '#/components/schemas/updated_at'
-        org_id:
-          $ref: '#/components/schemas/id_string'
     add_approver_in:
       type: object
       additionalProperties: false
@@ -14060,6 +13993,73 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    expense_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - action
+        - action_data
+        - expense_id
+        - creator_type
+        - creator_user_id
+        - creator_user
+        - org_id
+        - updated_at
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        action:
+          type: string
+          description: Expense action for which comment is added.
+          enum:
+            - ADMIN_APPROVED
+            - APPROVED
+            - APPROVER_REMOVED
+            - AUTO_MATCHED
+            - AUTO_MERGED
+            - COMMENTED
+            - DATA_EXTRACTED
+            - EJECTED_FROM_REPORT
+            - EXPENSE_RULE_APPLIED
+            - FILE_ATTACHED
+            - FILE_DELETED
+            - INVALID_EXPENSE_FIELD_REMOVED
+            - MATCHED
+            - PAID
+            - PARTIALLY_APPROVED
+            - POLICY_RESULT_APPLIED
+            - UNMATCHED
+          example: APPROVED
+        action_data:
+          type: object
+          description: Data related to expense action.
+        expense_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -14702,15 +14702,6 @@ components:
       schema:
         type: string
         example: in.(bacc1234,bacc4567)
-    expense_id:
-      in: query
-      name: expense_id
-      description: |
-        Expense id for filtering based on expenses.
-        Supported operator is `eq`.
-      schema:
-        type: string
-        example: eq.txS9GZm5hsjh
     id:
       in: query
       name: id
@@ -14720,6 +14711,14 @@ components:
         type: string
         example:
           - eq.ouwruogwnngg
+    expense_id:
+      in: query
+      name: expense_id
+      description: |
+        Expense id for filtering based on expenses. Supported operator is `eq`.
+      schema:
+        type: string
+        example: expense_id=eq.txS9GZm5hsjh
 tags:
   - name: Accounting Exports
     description: |
@@ -19302,49 +19301,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /admin/expenses/comments:
-    get:
-      tags:
-        - Expenses
-      summary: List expense comments
-      description: List all the comments of on expense
-      operationId: expense_comments_get
-      parameters:
-        - $ref: '#/components/parameters/expense_id'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_comments_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
@@ -24419,6 +24375,49 @@ paths:
                     $ref: '#/components/schemas/expense_check_mandatory_fields_out'
         '400':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/comments:
+    get:
+      tags:
+        - Expenses
+      summary: List expense comments
+      description: List all the comments of on expense
+      operationId: expense_comments_get
+      parameters:
+        - $ref: '#/components/parameters/expense_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
