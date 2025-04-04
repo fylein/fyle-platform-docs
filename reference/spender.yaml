@@ -9301,6 +9301,33 @@ components:
           description: |
             This field indicates the sum of amount of the credit type personal card transactions.
           example: 101
+    get_spender_orgs_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
+        domain:
+          type: string
+          maxLength: 255
+          description: This field specifies the domain with which the organisation is registered.
+          example: example.com
+        currency:
+          $ref: '#/components/schemas/currency'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_verified:
+          type: boolean
+          nullable: false
+          description: |
+            Determines whether this organization has been verified by a verifier.
   parameters:
     q:
       in: query
@@ -14424,3 +14451,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/orgs:
+    get:
+      tags:
+        - Organisations
+      summary: List Organisations
+      operationId: orgs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/get_spender_orgs_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
