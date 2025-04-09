@@ -9401,6 +9401,113 @@ components:
           nullable: false
           description: |
             Determines whether this organization has been verified by a verifier.
+    ach_transfer_state:
+      type: string
+      enum:
+        - ACH_FAILED
+        - ACH_INITIATED
+        - ACH_COMPLETE
+        - ACH_RETRY
+      description: |
+        Status of ACH if this reimbursment is processed via ACH.
+      example: ACH_FAILED
+    ach_transfer:
+      type: object
+      properties:
+        state:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/ach_transfer_state'
+            - $ref: '#/components/schemas/null_field'
+        status_info:
+          type: string
+          description: |
+            Description of current status of the payment.
+          example: Kindly ask the employee to add a valid bank account in their Settings. You'll then be able to see the bank icon next to the payment number, after which you can retry the payment.
+          nullable: true
+        initiated_at:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            signifies when the ach payment was initiated.
+        source_account_ach_reference_id:
+          nullable: true
+          type: string
+          description: |
+            Signifies the source of ach transfer reference code.
+          example: IMJYXG4G
+        destination_account_ach_reference_id:
+          nullable: true
+          type: string
+          description: |
+            Signifies the destination of ach transfer reference code.
+          example: II7P2228Z
+    reimbursement_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          maxLength: 255
+          description: |
+            This id provided by Fyle to uniquely identify a reimbursement.
+            This id is always prefixed with `reim`.
+          readOnly: true
+          example: reimntGt9ju6qP
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        reimbursement_number:
+          type: string
+          description: |
+            A unique, organization wide identifier for a particular reimbursement.<br>
+            This id is always prefixed with `P/`.
+          example: P/2020/11/29
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        is_paid:
+          type: boolean
+          example: true
+        paid_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        mode:
+          type: string
+          enum:
+            - ACH
+            - OFFLINE
+          description: |
+            Mode of creation of this reimbursement.
+          example: OFFLINE
+        purpose:
+          type: string
+          description: |
+            Details about purpose of this reimbursement.
+          example: End of month settlement
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this reimbursement has been exported to external
+            accounting system or not.
+        code:
+          $ref: '#/components/schemas/code'
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          $ref: '#/components/schemas/employee_out_embed'
+        ach_transfer:
+          $ref: '#/components/schemas/ach_transfer'
   parameters:
     q:
       in: query
@@ -9543,6 +9650,10 @@ tags:
   - name: Feature Configs
     description: |
       These APIs gives you access to manage feature configs.
+  - name: Reimbursements
+    description: |
+      These APIs gives you access to manage your organisation's Reimbursements
+      data
 paths:
   /spender/projects:
     get:
@@ -14612,3 +14723,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/reimbursements:
+    get:
+      tags:
+        - Reimbursements
+      summary: List reimbursements
+      operationId: reimbursements_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reimbursement_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
