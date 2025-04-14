@@ -11416,6 +11416,30 @@ components:
         is_primary:
           type: boolean
           description: A boolean flag indicating whether the organisation is the primary organisation of the user.
+    org_bank_details_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        bank_account_number:
+          type: string
+          maxLength: 63
+          nullable: true
+          example: 7115634767
+          description: This field specifies the bank account number of the organisation.
+        bank_branch_ifsc:
+          type: string
+          maxLength: 11
+          nullable: true
+          example: ABCD0000145
+          description: This field specifies the branch IFSC code of the bank.
+        dwolla_customers_metadata_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: dcmy7CrOEDh7Z
+          description: This field contains the unique identifier of the dwolla account connected to the organisation.
     expense_policy_limit_type:
       nullable: true
       type: string
@@ -24826,3 +24850,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/orgs/bank_details:
+    get:
+      tags:
+        - Organisations
+      summary: List Bank Account Details of Organisations
+      operationId: orgs_bank_details_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_bank_details_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
