@@ -259,3 +259,62 @@ advance_request_out_embed:
         This is user visible identifier for an advance request.
         This field can be used as reference in UI.
       example: 'AR/2020/10/T/95'
+
+advance_requests_approver_stats_in:
+  properties:
+    query_params:
+      description: | 
+        Query param string similar to advance_requests GET call. Use group_by_currency=eq.true to get currency-wise grouping of stats.
+      nullable: false
+      example: id=in.('adr1263','adr1569')&group_by_currency=eq.true
+
+
+advance_requests_approver_stats_out:
+  oneOf:
+    - type: array
+      title: "Currency-wise grouped stats"
+      description: "Stats grouped by advance request currency"
+      items:
+        type: object
+        required:
+          - count
+          - total_amount
+          - currency
+        properties:
+          count:
+            type: integer
+            nullable: false
+            description: "Number of matching advance requests with this currency."
+            example: 10
+          total_amount:
+            type: number
+            nullable: false
+            description: "Sum of amounts for matching advance requests with this currency."
+            example: 44545.4
+          currency:
+            type: string
+    - type: object
+      title: "Overall stats"
+      description: "Overall stats without currency grouping."
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: "Total number of matching advance requests."
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: "Sum of amounts for all matching advance requests."
+          example: 45882.4
+  example:
+    - currency: "USD"
+      count: 10
+      total_amount: 44545.4
+    - currency: "INR"
+      count: 0
+      total_amount: 0
+

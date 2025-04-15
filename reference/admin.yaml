@@ -3501,15 +3501,15 @@ components:
       properties:
         city:
           type: string
-          nullable: false
+          nullable: true
           example: London
         state:
           type: string
-          nullable: false
+          nullable: true
           example: London
         country:
           type: string
-          nullable: false
+          nullable: true
           example: United Kingdom
         formatted_address:
           type: string
@@ -4602,7 +4602,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     expenses_export_config:
       type: object
       additionalProperties: true
@@ -6669,7 +6669,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     reports_export_config:
       type: object
       additionalProperties: true
@@ -7671,6 +7671,11 @@ components:
           nullable: true
           description: |
             Signifies when this card transaction was last marked personal.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: |
+            The external bank reference number provided for Amex transactions.
         is_dismissed:
           type: boolean
           example: false
@@ -9404,6 +9409,12 @@ components:
           description: |
             Holds the expense ids which are automatically suggested to be matched by the system
           example: []
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: |
+            The external bank reference number provided for Amex transactions.
+          example: null
         last_auto_matched_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -9844,6 +9855,12 @@ components:
           example: false
           description: |
             Determines whether this card transaction is marked as personal transaction made on the corporate card.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: |
+            The external bank reference number provided for Amex transactions.
+          example: null
         last_marked_personal_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -9965,7 +9982,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     corporate_card_transactions_export_config:
       type: object
       additionalProperties: true
@@ -11374,7 +11391,6 @@ components:
         - currency
         - created_at
         - updated_at
-        - is_verified
       properties:
         id:
           $ref: '#/components/schemas/org_id'
@@ -11394,11 +11410,12 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
-        is_verified:
+        is_current:
           type: boolean
-          nullable: false
-          description: |
-            Determines whether this organization has been verified by a verifier.
+          description: A boolean flag indicating whether the organisation is the current organisation the user is logged into.
+        is_primary:
+          type: boolean
+          description: A boolean flag indicating whether the organisation is the primary organisation of the user.
     expense_policy_limit_type:
       nullable: true
       type: string
@@ -13958,6 +13975,79 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    user_id_nullable:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      nullable: true
+      example: uswjwgnwwgo
+    expense_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - action
+        - action_data
+        - expense_id
+        - creator_type
+        - org_id
+        - updated_at
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        action:
+          type: string
+          description: Expense action for which comment is added.
+          enum:
+            - ADMIN_APPROVED
+            - APPROVED
+            - APPROVER_REMOVED
+            - AUTO_MATCHED
+            - AUTO_MERGED
+            - COMMENTED
+            - DATA_EXTRACTED
+            - EJECTED_FROM_REPORT
+            - EXPENSE_RULE_APPLIED
+            - FILE_ATTACHED
+            - FILE_DELETED
+            - INVALID_EXPENSE_FIELD_REMOVED
+            - MATCHED
+            - PAID
+            - PARTIALLY_APPROVED
+            - POLICY_RESULT_APPLIED
+            - UNMATCHED
+          example: APPROVED
+        action_data:
+          type: object
+          description: Data related to expense action.
+          nullable: true
+        expense_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id_nullable'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -14417,6 +14507,30 @@ components:
             $ref: '#/components/schemas/expense_check_policies_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_check_policies_final_desired_state'
+    org_bank_details_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        bank_account_number:
+          type: string
+          maxLength: 63
+          nullable: true
+          example: 7115634767
+          description: This field specifies the bank account number of the organisation.
+        bank_branch_ifsc:
+          type: string
+          maxLength: 11
+          nullable: true
+          example: ABCD0000145
+          description: This field specifies the branch IFSC code of the bank.
+        dwolla_customers_metadata_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: dcmy7CrOEDh7Z
+          description: This field contains the unique identifier of the dwolla account connected to the organisation.
   parameters:
     q:
       in: query
@@ -14609,6 +14723,14 @@ components:
         type: string
         example:
           - eq.ouwruogwnngg
+    expense_id:
+      in: query
+      name: expense_id
+      description: |
+        Expense id for filtering based on expenses. Supported operator is `eq`.
+      schema:
+        type: string
+        example: expense_id=eq.txS9GZm5hsjh
 tags:
   - name: Accounting Exports
     description: |
@@ -24281,6 +24403,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/comments:
+    get:
+      tags:
+        - Expenses
+      summary: List expense comments
+      description: List all the comments of an expense
+      operationId: expense_comments_get
+      parameters:
+        - $ref: '#/components/parameters/expense_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/dismiss_duplicates/bulk:
     post:
       tags:
@@ -24685,3 +24850,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/orgs/bank_details:
+    get:
+      tags:
+        - Organisations
+      summary: List Bank Account Details of Organisations
+      operationId: orgs_bank_details_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_bank_details_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'

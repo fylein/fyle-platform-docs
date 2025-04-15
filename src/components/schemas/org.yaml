@@ -26,7 +26,6 @@ org_out:
     - currency
     - created_at
     - updated_at
-    - is_verified
   properties:
     id:
       $ref: './fields.yaml#/org_id'
@@ -46,11 +45,12 @@ org_out:
       $ref: ./fields.yaml#/created_at
     updated_at:
       $ref: ./fields.yaml#/updated_at
-    is_verified:
+    is_current:
       type: boolean
-      nullable: false
-      description: |
-        Determines whether this organization has been verified by a verifier.
+      description: A boolean flag indicating whether the organisation is the current organisation the user is logged into.
+    is_primary:
+      type: boolean
+      description: A boolean flag indicating whether the organisation is the primary organisation of the user.
 org_rov_out:
   type: object
   additionalProperties: False
@@ -142,3 +142,55 @@ org_reset_delete_in:
       description: |
         The unique id of the Organization to which the object is associated.
       example: orwruogwnngg
+get_spender_orgs_out:
+  type: object
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/org_id'
+    name:
+      type: string
+      maxLength: 255
+      description: Represents the name of the org.
+      example: Demo Account
+    domain:
+      type: string
+      maxLength: 255
+      description: This field specifies the domain with which the organisation is registered.
+      example: example.com
+    currency:
+      $ref: './fields.yaml#/currency'
+    created_at:
+      $ref: ./fields.yaml#/created_at
+    updated_at:
+      $ref: ./fields.yaml#/updated_at
+    is_current:
+      type: boolean
+      description: A boolean flag indicating whether the organisation is the current organisation the user is logged into.
+    is_primary:
+      type: boolean
+      description: A boolean flag indicating whether the organisation is the primary organisation of the user.
+org_bank_details_out:
+  type: object
+  additionalProperties: false
+  properties:
+    org_id:
+      $ref: '#/components/schemas/org_id'
+    bank_account_number:
+      type: string
+      maxLength: 63
+      nullable: true
+      example: 7115634767
+      description: This field specifies the bank account number of the organisation.
+    bank_branch_ifsc:
+      type: string
+      maxLength: 11
+      nullable: true
+      example: ABCD0000145
+      description: This field specifies the branch IFSC code of the bank.
+    dwolla_customers_metadata_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: dcmy7CrOEDh7Z
+      description: This field contains the unique identifier of the dwolla account connected to the organisation.

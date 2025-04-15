@@ -728,7 +728,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     reports_export_config:
       type: object
       additionalProperties: true
@@ -1736,15 +1736,15 @@ components:
       properties:
         city:
           type: string
-          nullable: false
+          nullable: true
           example: London
         state:
           type: string
-          nullable: false
+          nullable: true
           example: London
         country:
           type: string
-          nullable: false
+          nullable: true
           example: United Kingdom
         formatted_address:
           type: string
@@ -3262,6 +3262,61 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+    advance_requests_approver_stats_in:
+      properties:
+        query_params:
+          description: |
+            Query param string similar to advance_requests GET call. Use group_by_currency=eq.true to get currency-wise grouping of stats.
+          nullable: false
+          example: id=in.('adr1263','adr1569')&group_by_currency=eq.true
+    advance_requests_approver_stats_out:
+      oneOf:
+        - type: array
+          title: Currency-wise grouped stats
+          description: Stats grouped by advance request currency
+          items:
+            type: object
+            required:
+              - count
+              - total_amount
+              - currency
+            properties:
+              count:
+                type: integer
+                nullable: false
+                description: Number of matching advance requests with this currency.
+                example: 10
+              total_amount:
+                type: number
+                nullable: false
+                description: Sum of amounts for matching advance requests with this currency.
+                example: 44545.4
+              currency:
+                type: string
+        - type: object
+          title: Overall stats
+          description: Overall stats without currency grouping.
+          required:
+            - count
+            - total_amount
+          properties:
+            count:
+              type: integer
+              nullable: false
+              description: Total number of matching advance requests.
+              example: 353
+            total_amount:
+              type: number
+              nullable: false
+              description: Sum of amounts for all matching advance requests.
+              example: 45882.4
+      example:
+        - currency: USD
+          count: 10
+          total_amount: 44545.4
+        - currency: INR
+          count: 0
+          total_amount: 0
     description:
       type: string
       nullable: true
@@ -3887,6 +3942,79 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    user_id_nullable:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      nullable: true
+      example: uswjwgnwwgo
+    expense_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - action
+        - action_data
+        - expense_id
+        - creator_type
+        - org_id
+        - updated_at
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        action:
+          type: string
+          description: Expense action for which comment is added.
+          enum:
+            - ADMIN_APPROVED
+            - APPROVED
+            - APPROVER_REMOVED
+            - AUTO_MATCHED
+            - AUTO_MERGED
+            - COMMENTED
+            - DATA_EXTRACTED
+            - EJECTED_FROM_REPORT
+            - EXPENSE_RULE_APPLIED
+            - FILE_ATTACHED
+            - FILE_DELETED
+            - INVALID_EXPENSE_FIELD_REMOVED
+            - MATCHED
+            - PAID
+            - PARTIALLY_APPROVED
+            - POLICY_RESULT_APPLIED
+            - UNMATCHED
+          example: APPROVED
+        action_data:
+          type: object
+          description: Data related to expense action.
+          nullable: true
+        expense_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id_nullable'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -4072,7 +4200,7 @@ components:
             - dd-MM-yyyy
             - error in date formatting
       description: |
-        Export column formula is a expression that is used to transform the data. Refer https://help.fylehq.com/en/articles/4422306-advanced-export-formulas for more details.
+        Export column formula is a expression that is used to transform the data. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
     expenses_export_config:
       type: object
       additionalProperties: true
@@ -5011,6 +5139,14 @@ components:
       schema:
         type: integer
         example: 10
+    expense_id:
+      in: query
+      name: expense_id
+      description: |
+        Expense id for filtering based on expenses. Supported operator is `eq`.
+      schema:
+        type: string
+        example: expense_id=eq.txS9GZm5hsjh
 tags:
   - name: Advances
     description: |
@@ -6162,6 +6298,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /approver/advance_requests/stats:
+    post:
+      tags:
+        - Advances
+      summary: Advances Requests Stats
+      description: |
+        Advances Requests Stats
+      operationId: advance_requests_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_requests_approver_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_requests_approver_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/projects:
     get:
       tags:
@@ -6443,6 +6634,49 @@ paths:
                     $ref: '#/components/schemas/expense_check_mandatory_fields_out'
         '400':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/comments:
+    get:
+      tags:
+        - Expenses
+      summary: List expense comments
+      description: List all the comments of an expense
+      operationId: expense_comments_get
+      parameters:
+        - $ref: '#/components/parameters/expense_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
