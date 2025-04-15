@@ -2471,6 +2471,40 @@ components:
           nullable: true
           description: |
             Total liability payable to the employee.
+    employee_summaries_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            - This field contains the query param string similar to the query params passed in employee summaries GET call for displaying summaries in the list view.
+          example: reimbursable_amount=neq.0
+    amount:
+      type: number
+      description: |
+        amount of money
+      example: 47.99
+    employee_summaries_stats_out:
+      type: object
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: |
+            This field indicates the count of employees that match the criteria specified in the query_params within the body of the request.
+          example: 1
+        unreported_expenses_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the total amount of unreported expenses that match the criteria specified in the query_params within the body of the request.
+          example: 1239
+        unapproved_reports_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: |
+            This field indicates the total amount of unapproved reports that match the criteria specified in the query_params within the body of the request.
+          example: 101
     file_in:
       type: object
       required:
@@ -2965,11 +2999,6 @@ components:
         Expense custom fields
       items:
         $ref: '#/components/schemas/expense_custom_field'
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -17171,6 +17200,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/employees/summaries/stats:
+    post:
+      tags:
+        - Employees
+      summary: Employee Summaries Stats
+      description: |
+        Employee Summaries Stats
+      operationId: employee_summaries_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_summaries_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_summaries_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/files:
     post:
       operationId: files_post
