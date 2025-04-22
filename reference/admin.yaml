@@ -14589,6 +14589,21 @@ components:
           nullable: true
           example: dcmy7CrOEDh7Z
           description: This field contains the unique identifier of the dwolla account connected to the organisation.
+    merchant_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        display_name:
+          type: string
+          description: |
+            Merchant name
+          example: Uber
   parameters:
     q:
       in: query
@@ -14789,6 +14804,15 @@ components:
       schema:
         type: string
         example: expense_id=eq.txS9GZm5hsjh
+    display_name:
+      in: query
+      name: display_name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        display_name=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Fast*
 tags:
   - name: Accounting Exports
     description: |
@@ -14878,6 +14902,9 @@ tags:
   - name: Feature Configs
     description: |
       These APIs gives you access to manage feature configs.
+  - name: Merchants
+    description: |
+      This API gives you access to merchants, primarily to help with autocomplete.
 paths:
   /admin/projects:
     get:
@@ -24974,6 +25001,49 @@ paths:
                       $ref: '#/components/schemas/org_bank_details_out'
         '400':
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/merchants:
+    get:
+      tags:
+        - Merchants
+      summary: List merchants
+      operationId: merchants_list
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/display_name'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/merchant_out'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
