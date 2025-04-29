@@ -4015,6 +4015,42 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/org_id'
+    expense_comments_bulk_in:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - id
+              - comment
+              - notify
+            properties:
+              id:
+                $ref: '#/components/schemas/id_string'
+              comment:
+                type: string
+                description: comment on the expense
+                example: This is a comment on an expense.
+              notify:
+                type: boolean
+                description: Whether to notify the user about the comment
+                example: true
+    expense_comments_bulk_out:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_comments_out'
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -6687,6 +6723,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/comments/bulk:
+    post:
+      tags:
+        - Expenses
+        - Expense comments
+        - Comments
+      summary: Bulk comment on expenses
+      description: |
+        Bulk comment on expenses as an approver. The API allows you to add comments to multiple expenses at once.
+      operationId: expense_comments_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: False
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_comments_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: False
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_comments_bulk_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
         '404':
           description: Not Found
           content:
