@@ -5120,6 +5120,64 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    employee_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            List of users who are approvers for this employee.
+        unreported_expenses_total:
+          type: number
+          nullable: true
+          description: |
+            Total amount of all expenses in the COMPLETE state.
+        unapproved_reports_total:
+          type: number
+          nullable: true
+          description: |
+            Total amount of all reports in the APPROVER_PENDING state.
+        reimbursable_amount:
+          type: number
+          nullable: true
+          description: |
+            Total amount of reimbursable expenses.
+        advance_account_ids:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - uswoirwlwwg
+            - uswlgwkgw42
+          description: |
+            List of advance wallet IDs associated with the employee.
+        advance_accounts_balance:
+          type: number
+          nullable: true
+          description: |
+            Total amount of all advance wallets associated with the employee.
+        liability_amount:
+          type: number
+          nullable: true
+          description: |
+            Total liability payable to the employee.
   parameters:
     limit:
       in: query
@@ -5147,6 +5205,13 @@ components:
       schema:
         type: string
         example: expense_id=eq.txS9GZm5hsjh
+    q:
+      in: query
+      name: q
+      description: A search query to filter the results.
+      schema:
+        type: string
+        example: Ritas
 tags:
   - name: Advances
     description: |
@@ -7449,6 +7514,45 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/employees/summaries:
+    get:
+      tags:
+        - Employees
+      summary: List employee summaries
+      operationId: employee_summaries_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      parameters:
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_summary_out'
         '400':
           description: Bad request
           content:
