@@ -481,6 +481,78 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/role'
+    recently_used_fields_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        project_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used project ids
+          example:
+            - '123121'
+        category_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used category ids
+          example:
+            - '123121'
+        cost_center_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used cost center ids
+          example:
+            - '123121'
+        locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used locations
+          example:
+            - '123121'
+        end_locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used end locations
+          example:
+            - Chalakudy, Kerala, India
+        start_locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used start locations
+          example:
+            - Cochin, Kerala, India
+        vehicle_types:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used vehicle types
+          example:
+            - two wheeler
+        currencies:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used currencies
+          example:
+            - INR
     account_out:
       type: object
       additionalProperties: false
@@ -2566,6 +2638,41 @@ components:
             nullable: true
             description: |
               This field is applicable for only `Hotel` category.
+    expense_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                oneOf:
+                  - type: string
+                  - type: integer
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     expense_attach_receipt_in:
       type: object
       required:
@@ -2612,34 +2719,6 @@ components:
           example: fisjfwlrglw
         source:
           $ref: '#/components/schemas/source'
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                oneOf:
-                  - type: string
-                  - type: integer
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
     attach_files_to_expense_in:
       type: object
       required:
@@ -9833,6 +9912,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/recently_used_fields:
+    get:
+      tags:
+        - Recently Used Fields
+      summary: Retrieve recently used fields
+      operationId: recently_used_fields_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/recently_used_fields_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/accounts:
     get:
       tags:
@@ -10057,6 +10164,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/delete/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Delete Expenses in Bulk
+      description: |
+        Delete multiple expenses in bulk.
+      operationId: expenses_delete_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_delete_in'
+      responses:
+        '200':
+          description: The expenses were deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/expenses/attach_receipt:
     post:
       tags:
