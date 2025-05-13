@@ -5120,6 +5120,50 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    account_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          type: string
+          nullable: true
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+        type:
+          type: string
+          enum:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+            - PERSONAL_ADVANCE_ACCOUNT
+            - COMPANY_EXPENSE_ACCOUNT
+            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+            - COMPANY_CATEGORY_ACCOUNT
+          example: PERSONAL_CASH_ACCOUNT
+        currency:
+          $ref: '#/components/schemas/currency'
+        current_balance_amount:
+          type: number
+          example: 90.9
+        tentative_balance_amount:
+          type: number
+          example: 43.8
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        category_id:
+          type: integer
+          description: |
+            This id is provided by Fyle to identify a category.
+          nullable: true
+          example: 49058
   parameters:
     limit:
       in: query
@@ -7457,6 +7501,43 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List accounts
+      operationId: accounts_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
