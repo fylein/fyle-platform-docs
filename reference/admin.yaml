@@ -2110,14 +2110,18 @@ components:
               example: false
               default: false
             first_row_columns_only:
-              type: null
+              type: array
+              items:
+                type: string
               description: |
                 Columns which should be populated for first row only.
               example:
                 - Name
                 - Departement
             second_row_columns_only:
-              type: null
+              type: array
+              items:
+                type: string
               description: |
                 Columns which should be populated for second row only.
               example:
@@ -2169,7 +2173,6 @@ components:
             Configuration for the export.
     employees_exports_out:
       type: object
-      additionalProperties: false
       properties:
         created_at:
           type: string
@@ -16863,9 +16866,10 @@ paths:
     post:
       tags:
         - Employees
-      summary: Export Employees Data
-      description: |
+      summary: |
         Export employees data in the specified format with customizable columns and notification options
+      description: |
+        Create Employees Export Request.
       operationId: employees_exports_create
       requestBody:
         required: true
@@ -16873,12 +16877,11 @@ paths:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required:
-                - data
               properties:
                 data:
                   $ref: '#/components/schemas/employees_exports_in'
+              required:
+                - data
       responses:
         '200':
           description: OK
@@ -16886,7 +16889,6 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: false
                 properties:
                   data:
                     $ref: '#/components/schemas/employees_exports_out'
