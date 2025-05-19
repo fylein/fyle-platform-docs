@@ -73,6 +73,15 @@ components:
           type: string
           description: |
             API server hit an internal error and could not process request. This is likely a bug.
+    ExpenseActionDeleteId:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the expense to be deleted.
+          example: txm3L9soGEt2
+      required:
+        - id
     count:
       type: integer
       description: |
@@ -25438,3 +25447,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/expenses/delete/bulk:
+    post:
+      summary: Bulk delete expenses
+      description: Deletes multiple expenses based on the provided list of IDs, with access limited to the user's own expenses.
+      tags:
+        - Expenses
+      security:
+        - oauth2:
+            - '*'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ExpenseActionDeleteId'
+      responses:
+        '200':
+          description: Expenses successfully processed for deletion.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
