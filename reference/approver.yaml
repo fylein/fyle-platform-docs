@@ -3979,6 +3979,8 @@ components:
             - AUTO_MATCHED
             - AUTO_MERGED
             - COMMENTED
+            - COMMENTED_WITH_NOTIFICATION
+            - COMMENTED_WITHOUT_NOTIFICATION
             - DATA_EXTRACTED
             - EJECTED_FROM_REPORT
             - EXPENSE_RULE_APPLIED
@@ -3990,7 +3992,7 @@ components:
             - PARTIALLY_APPROVED
             - POLICY_RESULT_APPLIED
             - UNMATCHED
-          example: APPROVED
+          example: COMMENTED_WITH_NOTIFICATION
         action_data:
           type: object
           description: Data related to expense action.
@@ -4015,6 +4017,28 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/org_id'
+    expense_comments_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expense comments to be added in bulk.
+      items:
+        type: object
+        required:
+          - expense_id
+          - comment
+          - notify
+        properties:
+          expense_id:
+            $ref: '#/components/schemas/id_string'
+          comment:
+            type: string
+            description: comment on the expense
+            example: We don't accept laundry bills
+          notify:
+            type: boolean
+            description: Whether to notify the user about the comment
+            example: true
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -5120,6 +5144,50 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    account_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user_id:
+          type: string
+          nullable: true
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+        type:
+          type: string
+          enum:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+            - PERSONAL_ADVANCE_ACCOUNT
+            - COMPANY_EXPENSE_ACCOUNT
+            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+            - COMPANY_CATEGORY_ACCOUNT
+          example: PERSONAL_CASH_ACCOUNT
+        currency:
+          $ref: '#/components/schemas/currency'
+        current_balance_amount:
+          type: number
+          example: 90.9
+        tentative_balance_amount:
+          type: number
+          example: 43.8
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        category_id:
+          type: integer
+          description: |
+            This id is provided by Fyle to identify a category.
+          nullable: true
+          example: 49058
   parameters:
     limit:
       in: query
@@ -6693,6 +6761,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/expenses/comments/bulk:
+    post:
+      tags:
+        - Expenses
+        - Expense comments
+        - Comments
+      summary: Bulk comment on expenses
+      description: |
+        Bulk comment on expenses as an approver. The API allows you to add comments to multiple expenses at once.
+      operationId: expense_comments_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_comments_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/expenses/dismiss_duplicates/bulk:
     post:
       tags:
@@ -7457,6 +7580,43 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List accounts
+      operationId: accounts_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/account_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:

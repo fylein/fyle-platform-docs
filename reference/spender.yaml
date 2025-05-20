@@ -481,6 +481,78 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/role'
+    recently_used_fields_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        project_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used project ids
+          example:
+            - '123121'
+        category_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used category ids
+          example:
+            - '123121'
+        cost_center_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used cost center ids
+          example:
+            - '123121'
+        locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used locations
+          example:
+            - '123121'
+        end_locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used end locations
+          example:
+            - Chalakudy, Kerala, India
+        start_locations:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used start locations
+          example:
+            - Cochin, Kerala, India
+        vehicle_types:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used vehicle types
+          example:
+            - two wheeler
+        currencies:
+          type: array
+          items:
+            type: string
+          description: |
+            list of last five recently used currencies
+          example:
+            - INR
     account_out:
       type: object
       additionalProperties: false
@@ -2297,13 +2369,13 @@ components:
       additionalProperties: false
       required:
         - claim_amount
-        - spent_at
       properties:
         id:
           $ref: '#/components/schemas/id_string'
         spent_at:
           allOf:
             - $ref: '#/components/schemas/spent_at'
+          nullable: true
           description: |
             Date on which the expense was made.
             This date cannot be in future.
@@ -2566,6 +2638,41 @@ components:
             nullable: true
             description: |
               This field is applicable for only `Hotel` category.
+    expense_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    bulk_error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: BulkError
+        message:
+          type: string
+          nullable: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                description: |
+                  This holds the info of which row contains bad data.
+              key:
+                oneOf:
+                  - type: string
+                  - type: integer
+                description: |
+                  This helps in identifying the error by unique key.
+              message:
+                type: string
+                description: |
+                  This explains what the error is in `human readable` text
     expense_attach_receipt_in:
       type: object
       required:
@@ -2612,34 +2719,6 @@ components:
           example: fisjfwlrglw
         source:
           $ref: '#/components/schemas/source'
-    bulk_error:
-      type: object
-      properties:
-        error:
-          type: string
-          example: BulkError
-        message:
-          type: string
-          nullable: true
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              row:
-                type: integer
-                description: |
-                  This holds the info of which row contains bad data.
-              key:
-                oneOf:
-                  - type: string
-                  - type: integer
-                description: |
-                  This helps in identifying the error by unique key.
-              message:
-                type: string
-                description: |
-                  This explains what the error is in `human readable` text
     attach_files_to_expense_in:
       type: object
       required:
@@ -4570,6 +4649,84 @@ components:
         - nickname
         - total_transactions_count
         - unassigned_transactions_count
+    yodlee_accounts_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        bank_name:
+          $ref: '#/components/schemas/bank_name'
+        card_number:
+          $ref: '#/components/schemas/card_number'
+        last_synced_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last synced.
+        yodlee_is_credential_update_required:
+          type: boolean
+          nullable: true
+          description: |
+            If credential update is required for the card
+          example: true
+        yodlee_is_mfa_required:
+          type: boolean
+          nullable: true
+          description: |
+            If MFA is required for the card
+          example: false
+        yodlee_fastlink_params:
+          type: object
+          nullable: true
+          properties:
+            flow:
+              type: string
+              nullable: false
+              description: |
+                Flow through which fastlink should be accessed
+              example: edit
+            configName:
+              type: string
+              nullable: false
+              description: |
+                Configuration to be used in fastlink
+              example: Aggregation
+            providerAccountId:
+              type: string
+              nullable: false
+              description: |
+                Provider account id of the user
+              example: '12345'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+      required:
+        - id
+        - bank_name
+        - card_number
+        - last_synced_at
+        - yodlee_is_credential_update_required
+        - yodlee_is_mfa_required
+        - yodlee_fastlink_params
+        - created_at
+        - updated_at
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -8449,6 +8606,8 @@ components:
             - AUTO_MATCHED
             - AUTO_MERGED
             - COMMENTED
+            - COMMENTED_WITH_NOTIFICATION
+            - COMMENTED_WITHOUT_NOTIFICATION
             - DATA_EXTRACTED
             - EJECTED_FROM_REPORT
             - EXPENSE_RULE_APPLIED
@@ -8460,7 +8619,7 @@ components:
             - PARTIALLY_APPROVED
             - POLICY_RESULT_APPLIED
             - UNMATCHED
-          example: APPROVED
+          example: COMMENTED_WITH_NOTIFICATION
         action_data:
           type: object
           description: Data related to expense action.
@@ -8485,6 +8644,28 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/org_id'
+    expense_comments_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expense comments to be added in bulk.
+      items:
+        type: object
+        required:
+          - expense_id
+          - comment
+          - notify
+        properties:
+          expense_id:
+            $ref: '#/components/schemas/id_string'
+          comment:
+            type: string
+            description: comment on the expense
+            example: We don't accept laundry bills
+          notify:
+            type: boolean
+            description: Whether to notify the user about the comment
+            example: true
     expense_dismiss_duplicates_in:
       type: object
       required:
@@ -9402,6 +9583,16 @@ components:
         is_primary:
           type: boolean
           description: A boolean flag indicating whether the organisation is the primary organisation of the user.
+    spender_org_bank_details_out:
+      type: object
+      additionalProperties: false
+      properties:
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        is_bank_account_added:
+          type: boolean
+          example: true
+          description: This field contains a boolean value indicating if a bank account has been added to the organisation.
   parameters:
     q:
       in: query
@@ -9833,6 +10024,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/recently_used_fields:
+    get:
+      tags:
+        - Recently Used Fields
+      summary: Retrieve recently used fields
+      operationId: recently_used_fields_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/recently_used_fields_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/accounts:
     get:
       tags:
@@ -10057,6 +10276,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/delete/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Delete Expenses in Bulk
+      description: |
+        Delete multiple expenses in bulk.
+      operationId: expenses_delete_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expense_delete_in'
+      responses:
+        '200':
+          description: The expenses were deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/expenses/attach_receipt:
     post:
       tags:
@@ -11676,6 +11949,42 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/corporate_cards/yodlee_accounts:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List of yodlee corporate cards assigned to user
+      operationId: corporate_card_yodlee_accounts_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/yodlee_accounts_out'
         '400':
           description: Bad request
           content:
@@ -13444,6 +13753,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/comments/bulk:
+    post:
+      tags:
+        - Expenses
+        - Expense comments
+        - Comments
+      summary: Bulk comment on expenses
+      description: |
+        Bulk comment on expenses as a spender. The API allows you to add comments to multiple expenses at once.
+      operationId: expense_comments_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_comments_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/expenses/dismiss_duplicates/bulk:
     post:
       tags:
@@ -14601,6 +14965,43 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/get_spender_orgs_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/orgs/bank_details:
+    get:
+      tags:
+        - Organisations
+      summary: List Bank Account Status of Organisations
+      operationId: orgs_bank_details_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spender_org_bank_details_out'
         '400':
           description: Bad Request
           content:
