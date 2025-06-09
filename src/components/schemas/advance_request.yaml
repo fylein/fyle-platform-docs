@@ -95,7 +95,23 @@ advance_request_out:
     employee_id:
       $ref: './fields.yaml#/employee_id'
     employee:
-      $ref: './employee.yaml#/employee_out_embed'    
+      $ref: './employee.yaml#/employee_out_embed'
+    comments:
+      type: array
+      items:
+        $ref: '#/advance_request_comments_out'
+      description: |
+        List of comments in the advance request
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+    files:
+      type: array
+      items:
+        $ref: './file.yaml#/file_out_embed'
 
 advance_request_in:
   type: object
@@ -317,4 +333,39 @@ advance_requests_approver_stats_out:
     - currency: "INR"
       count: 0
       total_amount: 0
+
+advance_request_comments_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    comment:
+      type: string
+      description: A comment on the advance request
+      example: Advance request was created
+    action:
+      type: string
+      description: Advance request action for which comment is added.
+      example: SUBMITTED
+    advance_request_id:
+      $ref: './fields.yaml#/id_string'
+    creator_type:
+      type: string
+      description: Describes whether the comment is system-generated or User made.
+      enum:
+        - SYSTEM
+        - POLICY
+        - USER
+      example: USER
+    creator_user_id:
+      $ref: './fields.yaml#/user_id_nullable'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed_nullable'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    org_id:
+      $ref: './fields.yaml#/org_id'
 
