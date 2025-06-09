@@ -9650,6 +9650,23 @@ components:
           type: boolean
           example: true
           description: This field contains a boolean value indicating if a bank account has been added to the organisation.
+    attach_files_to_advance_request_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the advance request
   parameters:
     q:
       in: query
@@ -15091,6 +15108,61 @@ paths:
               properties:
                 data:
                   $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/attach_files/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk attach files to advance requests
+      description: |
+        Bulk attach files to advance requests
+      operationId: advance_requests_bulk_attach_files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/attach_files_to_advance_request_in'
       responses:
         '200':
           description: OK
