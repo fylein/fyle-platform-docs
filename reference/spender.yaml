@@ -4075,6 +4075,47 @@ components:
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+    user_id_nullable:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      nullable: true
+      example: uswjwgnwwgo
+    advance_request_comments_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: A comment on the advance request
+          example: Advance request was created
+        action:
+          type: string
+          description: Advance request action for which comment is added.
+          example: SUBMITTED
+        advance_request_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id_nullable'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     advance_request_out:
       type: object
       additionalProperties: false
@@ -4173,6 +4214,22 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_request_comments_out'
+          description: |
+            List of comments in the advance request
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/file_out_embed'
     advance_request_in:
       type: object
       properties:
@@ -8576,13 +8633,6 @@ components:
               - 12423
             description: |
               List of IDs of expense fields which are mandatory but are missing.
-    user_id_nullable:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      nullable: true
-      example: uswjwgnwwgo
     expense_comments_out:
       type: object
       additionalProperties: false
@@ -9162,6 +9212,121 @@ components:
             Sending this field will add the expense to the report. If the expense is already attached to a report,
             the expense will be removed from the old report and added to the new report if it is not yet approved.
           example: rpvgnwlgw34
+    target_expense_fields:
+      type: object
+      additionalProperties: false
+      properties:
+        amount:
+          type: number
+          description: The amount for which the expense was/will-be filed.
+          example: 1500
+          nullable: false
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        tax_amount:
+          type: number
+          nullable: true
+          description: Tax amount as setup by your organization.
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_pst'
+          nullable: true
+          description: Date on which the expense was made. This date cannot be in future.
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: acwbl222wlg
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        is_reimbursable:
+          allOf:
+            - $ref: '#/components/schemas/is_reimbursable'
+          nullable: false
+        merchant:
+          $ref: '#/components/schemas/merchant'
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          description: |
+            This represents the category's id given by Fyle during creation of category
+            for which this expense is created.
+            Null is not allowed for category_id field instead pass Unspecified category Id
+          example: 49058
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        distance:
+          $ref: '#/components/schemas/distance'
+        distance_unit:
+          $ref: '#/components/schemas/distance_unit'
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+        locations:
+          $ref: '#/components/schemas/locations'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - figwiwpjww
+    expenses_merge_in:
+      type: object
+      additionalProperties: false
+      required:
+        - target_expense_id
+        - source_expense_ids
+        - target_expense_fields
+      properties:
+        target_expense_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: tx0agOdICdbV
+          nullable: false
+        source_expense_ids:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - tx0agOdICdbV
+            - tx0agOdBCdbV
+          description: |
+            List of source expense IDs to merge into the target expense.
+        target_expense_fields:
+          allOf:
+            - $ref: '#/components/schemas/target_expense_fields'
+          nullable: false
+          description: |
+            Fields to be updated in the target expense.
     any_type:
       anyOf:
         - type: string
@@ -14311,6 +14476,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/merge:
+    post:
+      tags:
+        - Expenses
+      summary: Merge expenses
+      description: |
+        Merge expenses.
+      operationId: merge_expenses_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_merge_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/feature_configs:
     get:
       tags:
@@ -15021,3 +15237,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/advance_requests/submit:
+    post:
+      tags:
+        - Advances
+      summary: Submit an advance request
+      description: |
+        Submit an advance request.
+      operationId: advance_requests_submit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
