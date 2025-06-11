@@ -2565,3 +2565,121 @@ expenses_verify_bulk_in:
       description: |
         Expense ID of the expense to be verified.
       example: 'tx0agOdICdbV'
+
+
+target_expense_fields:
+  type: object
+  additionalProperties: false
+  properties:
+    amount:
+      type: number
+      description: The amount for which the expense was/will-be filed.
+      example: 1500
+      nullable: false
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    tax_amount:
+      type: number
+      nullable: true
+      description: Tax amount as setup by your organization.
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      nullable: true
+      description: Date on which the expense was made. This date cannot be in future.
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      example: acwbl222wlg
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      allOf:
+        - $ref: './fields.yaml#/is_reimbursable'
+      nullable: false
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        This represents the category's id given by Fyle during creation of category
+        for which this expense is created.
+        Null is not allowed for category_id field instead pass Unspecified category Id
+      example: 49058
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    hotel_is_breakfast_provided:
+      type: boolean
+      nullable: true
+      description: |
+        This field is applicable for only `Hotel` category.
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/fk_string'
+      example:
+        - figwiwpjww
+
+expenses_merge_in:
+  type: object
+  additionalProperties: false
+  required:
+    - target_expense_id
+    - source_expense_ids
+    - target_expense_fields
+  properties:
+    target_expense_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: 'tx0agOdICdbV'
+      nullable: false
+    source_expense_ids:
+      type: array
+      nullable: false
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - 'tx0agOdICdbV'
+        - 'tx0agOdBCdbV'
+      description: |
+        List of source expense IDs to merge into the target expense.
+    target_expense_fields:
+      allOf:
+        - $ref: '#/target_expense_fields'
+      nullable: false
+      description: |
+        Fields to be updated in the target expense.
