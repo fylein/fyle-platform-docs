@@ -10370,6 +10370,9 @@ tags:
   - name: Feature Configs
     description: |
       These APIs gives you access to manage feature configs.
+  - name: Expense Policy Comments
+    description: |
+      These APIs gives you access to manage expense policy comments.
 paths:
   /spender/projects:
     get:
@@ -15791,6 +15794,104 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/expense_policy_comments:
+    post:
+      tags:
+        - Expense Policy Comments
+      summary: Add expense policy comment
+      description: |
+        This API adds or updates expense policy comments. 
+
+        **Note:** 
+        - If the specified `comment_type` already exists for the expense, the API will update the existing comment's `comment_text` with the new value provided, rather than creating a new comment entry.
+        - If the `comment_type` is specified and the `comment_text` is null or an empty string, the comment will be deleted for that expense.
+      operationId: add_expense_policy_comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expense_id:
+                  type: string
+                  description: The expense ID
+                expense_policy_comments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      comment_type:
+                        type: string
+                        description: The comment type
+                      comment_text:
+                        type: string
+                        description: The comment text
+                        nullable: true
+              required:
+                - expense_id
+                - expense_policy_comments
+              additionalProperties: false
+            example:
+              expense_id: txGCcvnhUbrP
+              expense_policy_comments:
+                - comment_type: MISSING_FIELDS
+                  comment_text: Reason for missing fields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        expense_id:
+                          type: string
+                          description: The expense ID
+                        expense_policy_comments:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              comment_type:
+                                type: string
+                                description: The comment type
+                              comment_text:
+                                type: string
+                                description: The comment text
+                      required:
+                        - expense_id
+                        - expense_policy_comments
+                      additionalProperties: false
+              example:
+                expense_id: txGCcvnhUbrP
+                expense_policy_comments:
+                  - comment_type: MISSING_FIELDS
+                    comment_text: Reason for missing fields
+        '400':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advance_requests/submit:
     post:
       tags:
