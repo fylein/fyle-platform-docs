@@ -3301,6 +3301,24 @@ components:
         content_type:
           type: string
           example: application/pdf
+    expense_policy_comment_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment_type
+        - comment_text
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: epc1a2f3farmk
+        comment_type:
+          type: string
+          description: Type of the policy comment
+        comment_text:
+          type: string
+          description: Text content of the policy comment
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -3900,6 +3918,7 @@ components:
         - physical_bill_submitted_at
         - invoice_number
         - is_duplicate_present
+        - expense_policy_comments
       properties:
         id:
           allOf:
@@ -4192,6 +4211,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/file_out_embed'
+        expense_policy_comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_comment_out_embed'
+          description: |
+            List of expense policy comment objects
         approvals:
           type: array
           items:
@@ -15005,6 +15030,23 @@ components:
           description: |
             Merchant name
           example: Uber
+    attach_files_to_advance_request_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the advance request
   parameters:
     q:
       in: query
@@ -25732,3 +25774,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/500'
+  /admin/advance_requests/attach_files/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk attach files to advance requests
+      description: |
+        Bulk attach files to advance requests
+      operationId: advance_requests_bulk_attach_files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
