@@ -10225,6 +10225,23 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the advance request
+    advance_request_action_pull_back_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          type: string
+          description: |
+            id of advance request that is to be pulled back
+          example: 'areqGsQdgSoteL'
+        comment:
+          type: string
+          description: |
+            Comment explaining the reason for pulling back the advance request
+          example: 'sending back'
   parameters:
     q:
       in: query
@@ -16006,6 +16023,64 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/pull_back:
+    post:
+      operationId: advance_requests_pull_back_post
+      summary: Pull back advance request
+      description: |
+        Allows a spender to pull back their advance request, changing its state to DRAFT.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_action_pull_back_in'
+            example:
+              data:
+                id: 'areqGsQdgSoteL'
+                comment: 'sending back'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
         '400':
           description: Bad request
           content:
