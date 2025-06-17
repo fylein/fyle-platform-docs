@@ -10218,6 +10218,64 @@ components:
           type: boolean
           example: true
           description: This field contains a boolean value indicating if a bank account has been added to the organisation.
+    advance_request_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: id of the advance request
+          example: areqiwr3Wwirr
+    advance_request_permissions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        can_save:
+          type: boolean
+          description: Whether the user can save changes to this advance request
+          example: true
+        can_submit:
+          type: boolean
+          description: Whether the user can submit this advance request for approval
+          example: false
+        can_edit:
+          type: boolean
+          description: Whether the user can edit this advance request
+          example: true
+        can_add_approver:
+          type: boolean
+          description: Whether the user can add an approver to this advance request
+          example: false
+        can_disable_approver:
+          type: boolean
+          description: Whether the user can disable an approver for this advance request
+          example: false
+        can_reject:
+          type: boolean
+          description: Whether the user can reject this advance request
+          example: false
+        can_approve:
+          type: boolean
+          description: Whether the user can approve this advance request
+          example: true
+        can_inquire:
+          type: boolean
+          description: Whether the user can inquire about this advance request
+          example: false
+        can_pull_back:
+          type: boolean
+          description: Whether the user can pull back this advance request
+          example: false
+        can_pay:
+          type: boolean
+          description: Whether the user can mark this advance request as paid
+          example: false
+        can_delete:
+          type: boolean
+          description: Whether the user can delete this advance request
+          example: true
     attach_files_to_advance_request_in:
       type: object
       required:
@@ -15962,6 +16020,61 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/permissions:
+    post:
+      tags:
+        - Advances
+      summary: Advance Request Permissions
+      description: |
+        Returns a list of all possible actions that can be performed on an advance request by the current user.
+      operationId: advance_requests_permissions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_permissions_out'
         '400':
           description: Bad request
           content:
