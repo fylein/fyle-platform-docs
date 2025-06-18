@@ -3196,6 +3196,21 @@ components:
       readOnly: true
       nullable: true
       example: uswjwgnwwgo
+    advance_request_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - advance_request_id
+        - comment
+      properties:
+        advance_request_id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add comment to
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Comment text to be added to the advance request
+          example: test
     advance_request_comments_out:
       type: object
       additionalProperties: false
@@ -6878,6 +6893,57 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/advance_request_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/advance_requests/comments:
+    post:
+      summary: Add comment to advance request
+      operationId: advance_requests_comments_post
+      description: |
+        This API allows approvers to add comments to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_comments_in'
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_comments_out'
         '400':
           description: Bad request
           content:
