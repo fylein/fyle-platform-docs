@@ -10387,43 +10387,6 @@ components:
       schema:
         type: string
         example: expense_id=eq.txS9GZm5hsjh
-  responses:
-    '400':
-      type: object
-      properties:
-        message:
-          type: string
-          nullable: true
-          description: |
-            Message describing why the request is invalid
-    '401':
-      type: object
-      properties:
-        message:
-          enum:
-            - invalid token
-          type: string
-          description: |
-            This error means that the input access token is either not issued by Fyle or has expired.
-            You need to generate a new access token.
-    '403':
-      type: object
-      properties:
-        message:
-          enum:
-            - Forbidden
-          type: string
-          description: |
-            This error means current user does not have enough permissions to perform this operation.
-    '404':
-      type: object
-      properties:
-        message:
-          enum:
-            - Resource not found
-          type: string
-          description: |
-            This error means the requested resource was not found or the requester doesn't have sufficient access.
 tags:
   - name: Accounts
     description: |
@@ -16188,13 +16151,34 @@ paths:
                   data:
                     $ref: '#/components/schemas/advance_request_out'
         '400':
-          $ref: '#/components/responses/400'
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
         '401':
-          $ref: '#/components/responses/401'
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '403':
-          $ref: '#/components/responses/403'
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
         '404':
-          $ref: '#/components/responses/404'
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advance_requests/attach_files/bulk:
     post:
       tags:
