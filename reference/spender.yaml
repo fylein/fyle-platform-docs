@@ -7336,6 +7336,16 @@ components:
           items:
             $ref: '#/components/schemas/id_string'
           description: List of per diem rates that the employee has access to
+        mileage_rate_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: List of mileage rates that the employee has access to
+        category_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: List of categories that the employee has access to
         insta_fyle_settings:
           type: object
           additionalProperties: false
@@ -10226,6 +10236,81 @@ components:
           type: boolean
           example: true
           description: This field contains a boolean value indicating if a bank account has been added to the organisation.
+    advance_request_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: id of the advance request
+          example: areqiwr3Wwirr
+    advance_request_permissions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        can_save:
+          type: boolean
+          description: Whether the user can save changes to this advance request
+          example: true
+        can_submit:
+          type: boolean
+          description: Whether the user can submit this advance request for approval
+          example: false
+        can_edit:
+          type: boolean
+          description: Whether the user can edit this advance request
+          example: true
+        can_add_approver:
+          type: boolean
+          description: Whether the user can add an approver to this advance request
+          example: false
+        can_disable_approver:
+          type: boolean
+          description: Whether the user can disable an approver for this advance request
+          example: false
+        can_reject:
+          type: boolean
+          description: Whether the user can reject this advance request
+          example: false
+        can_approve:
+          type: boolean
+          description: Whether the user can approve this advance request
+          example: true
+        can_inquire:
+          type: boolean
+          description: Whether the user can inquire about this advance request
+          example: false
+        can_pull_back:
+          type: boolean
+          description: Whether the user can pull back this advance request
+          example: false
+        can_pay:
+          type: boolean
+          description: Whether the user can mark this advance request as paid
+          example: false
+        can_delete:
+          type: boolean
+          description: Whether the user can delete this advance request
+          example: true
+    advance_request_action_pull_back_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          type: string
+          description: |
+            id of advance request that is to be pulled back
+          example: areqGsQdgSoteL
+        comment:
+          type: string
+          description: |
+            Comment explaining the reason for pulling back the advance request
+          example: sending back
     attach_files_to_advance_request_in:
       type: object
       required:
@@ -10243,6 +10328,21 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the advance request
+    advance_request_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - advance_request_id
+        - comment
+      properties:
+        advance_request_id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add comment to
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Comment text to be added to the advance request
+          example: test
   parameters:
     q:
       in: query
@@ -13427,7 +13527,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/spender_employee_settings_in'
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_employee_settings_in'
       responses:
         '200':
           description: OK
@@ -15989,6 +16094,124 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/advance_requests/permissions:
+    post:
+      tags:
+        - Advances
+      summary: Advance Request Permissions
+      description: |
+        Returns a list of all possible actions that can be performed on an advance request by the current user.
+      operationId: advance_requests_permissions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/pull_back:
+    post:
+      operationId: advance_requests_pull_back_post
+      summary: Pull back advance request
+      description: |
+        Allows a spender to pull back their advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_action_pull_back_in'
+            example:
+              data:
+                id: areqGsQdgSoteL
+                comment: sending back
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/advance_requests/attach_files/bulk:
     post:
       tags:
@@ -16024,6 +16247,57 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/comments:
+    post:
+      summary: Add comment to advance request
+      operationId: advance_requests_comments_post
+      description: |
+        This API allows spenders to add comments to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_comments_in'
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_comments_out'
         '400':
           description: Bad request
           content:
