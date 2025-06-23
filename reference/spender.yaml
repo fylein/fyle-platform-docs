@@ -10349,6 +10349,15 @@ components:
           type: string
           description: Comment text to be added to the advance request
           example: test
+    advance_request_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: id of the advance request to be deleted
+          example: adrkvnwrnpwi
   parameters:
     q:
       in: query
@@ -16322,6 +16331,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/advance_requests/delete:
+    post:
+      tags:
+        - Advances
+      summary: Delete an advance request
+      description: |
+        Delete an advance request.
+      operationId: advance_requests_delete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_delete_in'
+      responses:
+        '200':
+          description: The advance request was deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
         '404':
           description: Not Found
           content:
