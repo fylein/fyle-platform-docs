@@ -15438,6 +15438,21 @@ components:
           type: string
           description: A comment explaining the reason for adding the approver
           example: Need your review on this advance
+    advance_request_reject_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be rejected
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for rejecting the advance request
+          example: Budget exceeded
   parameters:
     q:
       in: query
@@ -26661,3 +26676,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_requests/reject:
+    post:
+      tags:
+        - Advances
+      summary: Reject advance request
+      description: |
+        This API allows admins to reject an advance request.
+      operationId: advance_requests_reject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_reject_in'
+              example:
+                data:
+                  id: areq5F9xIaMURI
+                  comment: Budget exceeded
+      responses:
+        '200':
+          description: Advance request has been rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
