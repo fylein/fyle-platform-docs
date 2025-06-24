@@ -5237,6 +5237,7 @@ components:
             - APPROVAL_PENDING
             - APPROVAL_DISABLED
             - APPROVAL_DONE
+            - APPROVAL_REJECTED
           description: |
             State of this advance request approval
     employee_out_embed:
@@ -5614,6 +5615,21 @@ components:
           type: string
           description: Comment text to be added to the advance request
           example: test
+    advance_request_remove_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to remove approver from
+          example: areq5F9xIaMURI
+        approver_email:
+          $ref: '#/components/schemas/email'
+          description: Email address of the approver to be removed
+          example: approver@example.com
     advance_request_out_embed:
       type: object
       nullable: true
@@ -15393,6 +15409,66 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the advance request
+    advance_request_bulk_approve_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be approved
+          example: areq5F9xIaMURI
+    advance_request_add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add approver to
+          example: areq5F9xIaMURI
+        approver_email:
+          $ref: '#/components/schemas/email'
+          description: Email address of the approver to be added
+          example: approver@example.com
+        comment:
+          type: string
+          description: A comment explaining the reason for adding the approver
+          example: Need your review on this advance
+    advance_request_reject_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be rejected
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for rejecting the advance request
+          example: Budget exceeded
+    advance_request_inquire_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to inquire about
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for sending the advance request back to the spender
+          example: Please provide additional documentation
   parameters:
     q:
       in: query
@@ -19572,6 +19648,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_requests/remove_approver:
+    post:
+      summary: Remove approver from advance request
+      operationId: advance_requests_remove_approver_post
+      description: |
+        This API allows admins to disable/remove an approver from an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_remove_approver_in'
+            example:
+              data:
+                id: areq5F9xIaMURI
+                approver_email: approver@example.com
+      responses:
+        '200':
+          description: Approver removed successfully and returns the updated advance request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
         '404':
           description: Not Found
           content:
@@ -26342,6 +26478,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_requests/approve/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk approve advance requests
+      description: |
+        This API allows admins to approve multiple advance requests in a single operation.
+      operationId: advance_requests_bulk_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_request_bulk_approve_in'
+      responses:
+        '200':
+          description: OK - All advance requests have been processed successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expense_policy_comments:
     post:
       tags:
@@ -26446,3 +26631,261 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_requests/add_approver:
+    post:
+      summary: Add approver to advance request
+      operationId: advance_requests_add_approver_post
+      description: |
+        This API allows admins to add an approver to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_add_approver_in'
+            example:
+              data:
+                id: areq5F9xIaMURI
+                approver_email: approver@example.com
+                comment: Need your review on this advance
+      responses:
+        '200':
+          description: Approver added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/advance_requests/reject:
+    post:
+      tags:
+        - Advances
+      summary: Reject advance request
+      description: |
+        This API allows admins to reject an advance request.
+      operationId: advance_requests_reject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_reject_in'
+              example:
+                data:
+                  id: areq5F9xIaMURI
+                  comment: Budget exceeded
+      responses:
+        '200':
+          description: Advance request has been rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/advance_requests/inquire:
+    post:
+      tags:
+        - Advances
+      summary: Inquire about advance request
+      description: |
+        This API allows admins to inquire about an advance request, sending it back to the spender for clarification or modifications.
+      operationId: advance_requests_inquire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_inquire_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: Advance request has been sent back successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access. 
+  /admin/advance_requests/submit:
+    post:
+      tags:
+        - Advances
+      summary: Submit an advance request
+      description: |
+        Submit an advance request.
+      operationId: advance_requests_submit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
