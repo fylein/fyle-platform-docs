@@ -15454,6 +15454,21 @@ components:
           type: string
           description: Reason for rejecting the advance request
           example: Budget exceeded
+    advance_request_inquire_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to inquire about
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for sending the advance request back to the spender
+          example: Please provide additional documentation
   parameters:
     q:
       in: query
@@ -26746,3 +26761,66 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/advance_requests/inquire:
+    post:
+      tags:
+        - Advances
+      summary: Inquire about advance request
+      description: |
+        This API allows admins to inquire about an advance request, sending it back to the spender for clarification or modifications.
+      operationId: advance_requests_inquire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_inquire_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: Advance request has been sent back successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access. 
