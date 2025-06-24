@@ -1,0 +1,69 @@
+post:
+  tags:
+    - Expenses
+    - Verify
+    - Verify expenses
+    - Bulk
+  summary: Verify expenses in bulk
+  description: |
+    Verify expenses in bulk.
+  operationId: expenses_verify_bulk
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "../../components/schemas/expense.yaml#/expenses_verify_bulk_in"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+
+    "400":
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "../../components/schemas/bulk_error.yaml"
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  message:
+                    type: string
+                    nullable: true
+                  data:
+                    type: object
+                    nullable: true
+              - $ref: "../../components/schemas/400.yaml"
+    "401":
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    "403":
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
+    "404":
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/404.yaml"

@@ -44,6 +44,12 @@ corporate_card_out:
         Id given by external systems like Gmail. To identify whether that entity
         has been already added to Fyle or not.
       example: 'wgjwgo3ihwljnlsww'
+    yodlee_account_id:
+      type: string
+      nullable: true
+      description: |
+        Identifier for the linked Yodlee account.
+      example: "yac2cqC4eSaS6"
     last_synced_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -162,6 +168,7 @@ corporate_card_out:
     - cardholder_name
     - data_feed_source
     - code
+    - yodlee_account_id
     - last_synced_at
     - last_assigned_at
     - assignor_user_id
@@ -313,6 +320,12 @@ corporate_card_unassign_out:
         Id given by external systems like Gmail. To identify whether that entity
         has been already added to Fyle or not.
       example: 'wgjwgo3ihwljnlsww'
+    yodlee_account_id:
+      type: string
+      nullable: true
+      description: |
+        Identifier for the linked Yodlee account.
+      example: "yac2cqC4eSaS6"
     last_synced_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -427,6 +440,7 @@ corporate_card_unassign_out:
     - cardholder_name
     - data_feed_source
     - code
+    - yodlee_account_id
     - last_synced_at
     - last_assigned_at
     - assignor_user_id
@@ -538,3 +552,83 @@ corporate_card_reassign_in:
   required:
     - id
     - user_id
+
+yodlee_accounts_out:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: "./fields.yaml#/id_string"
+      example: bawownwrng
+    org_id:
+      $ref: "./fields.yaml#/org_id"
+    user_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        The unique id of an user to whom the card is assigned
+      example: uswjwgnwwgo
+    corporate_card_id:
+      allOf:
+        - $ref: '#/components/schemas/id_string'
+      example: bawownwrng
+    bank_name:
+      $ref: "./fields.yaml#/bank_name"
+    card_number:
+      $ref: "./fields.yaml#/card_number"
+    last_synced_at:
+      allOf:
+        - $ref: "./fields.yaml#/timestamptz_utc"
+      nullable: true
+      description: |
+        Signifies when this card was last synced.
+    yodlee_is_credential_update_required:
+      type: boolean
+      nullable: true
+      description: |
+        If credential update is required for the card
+      example: true
+    yodlee_is_mfa_required:
+      type: boolean
+      nullable: true
+      description: |
+        If MFA is required for the card
+      example: false
+    yodlee_fastlink_params:
+      type: object
+      nullable: true
+      properties:
+        flow:
+          type: string
+          nullable: false
+          description: |
+            Flow through which fastlink should be accessed
+          example: "edit"
+        configName:
+          type: string
+          nullable: false
+          description: |
+            Configuration to be used in fastlink
+          example: "Aggregation"
+        providerAccountId:
+          type: string
+          nullable: false
+          description: |
+            Provider account id of the user
+          example: "12345"
+    created_at:
+      $ref: "./fields.yaml#/created_at"
+    updated_at:
+      $ref: "./fields.yaml#/updated_at"
+
+  required:
+    - id
+    - bank_name
+    - card_number
+    - last_synced_at
+    - yodlee_is_credential_update_required
+    - yodlee_is_mfa_required
+    - yodlee_fastlink_params
+    - created_at
+    - updated_at

@@ -78,6 +78,7 @@ expense_out:
     - physical_bill_submitted_at
     - invoice_number
     - is_duplicate_present
+    - expense_policy_comments
   properties:
     id:
       allOf:
@@ -371,6 +372,12 @@ expense_out:
       type: array
       items:
         $ref: './file.yaml#/file_out_embed'
+    expense_policy_comments:
+      type: array
+      items:
+        $ref: '#/expense_policy_comment_out_embed'
+      description: |
+        List of expense policy comment objects
 #    approver_user_ids:
 #      type: array
 #      items:
@@ -737,13 +744,13 @@ spender_expense_in:
   additionalProperties: false
   required:
     - claim_amount
-    - spent_at
   properties:
     id:
       $ref: './fields.yaml#/id_string'
     spent_at:
       allOf:
       - $ref: './fields.yaml#/spent_at'
+      nullable: true
       description: |
         Date on which the expense was made.
         This date cannot be in future.
@@ -1022,7 +1029,6 @@ admin_expense_in:
   anyOf:
     - required:
       - admin_amount
-      - spent_at
       - assignee_user_email
     - required: 
       - id
@@ -1045,7 +1051,7 @@ admin_expense_in:
     spent_at:
       type: string
       format: date-time
-      nullable: False
+      nullable: true
       description: |
         It signifies when this expense was made.
         This date cannot be in future.
@@ -2130,7 +2136,99 @@ expense_check_mandatory_fields_in:
       $ref: './fields.yaml#/claim_amount'
   allOf:
     - $ref: ./expense.yaml#/spender_expense_check_mandatory_fields_in
-    
+
+expense_comments_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment
+    - action
+    - action_data
+    - expense_id
+    - creator_type
+    - org_id
+    - updated_at
+    - created_at
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    comment:
+      type: string
+      description: comment on the report
+      example: We don't accept laundry bills
+    action:
+      type: string
+      description: Expense action for which comment is added.
+      enum:
+        - ADMIN_APPROVED
+        - APPROVED
+        - APPROVER_REMOVED
+        - AUTO_MATCHED
+        - AUTO_MERGED
+        - COMMENTED
+        - COMMENTED_WITH_NOTIFICATION
+        - COMMENTED_WITHOUT_NOTIFICATION
+        - DATA_EXTRACTED
+        - EJECTED_FROM_REPORT
+        - EXPENSE_RULE_APPLIED
+        - FILE_ATTACHED
+        - FILE_DELETED
+        - INVALID_EXPENSE_FIELD_REMOVED
+        - MATCHED
+        - PAID
+        - PARTIALLY_APPROVED
+        - POLICY_RESULT_APPLIED
+        - UNMATCHED
+      example: COMMENTED_WITH_NOTIFICATION
+    action_data:
+      type: object
+      description: Data related to expense action.
+      nullable: true
+    expense_id:
+      $ref: './fields.yaml#/id_string'
+    creator_type:
+      type: string
+      description: Describes whether the comment is system-generated or User made.
+      enum:
+        - SYSTEM
+        - POLICY
+        - USER
+      example: USER
+    creator_user_id:
+      $ref: './fields.yaml#/user_id_nullable'
+    creator_user:
+      $ref:  './user.yaml#/user_out_embed_nullable'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+
+expense_comments_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expense comments to be added in bulk.
+  items:
+    type: object
+    required:
+      - expense_id
+      - comment
+      - notify
+    properties:
+      expense_id:
+        $ref: './fields.yaml#/id_string'
+      comment:
+        type: string
+        description: comment on the expense
+        example: We don't accept laundry bills
+      notify:
+        type: boolean
+        description: Whether to notify the user about the comment
+        example: true
+
 expense_dismiss_duplicates_in:
   type: object
   required:
@@ -2462,3 +2560,152 @@ expense_permissions_out:
       description: |
         Indicates whether the user has permission to add this expense to a report.
       example: true
+
+expenses_verify_bulk_in:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        Expense ID of the expense to be verified.
+      example: 'tx0agOdICdbV'
+
+
+target_expense_fields:
+  type: object
+  additionalProperties: false
+  properties:
+    amount:
+      type: number
+      description: The amount for which the expense was/will-be filed.
+      example: 1500
+      nullable: false
+    foreign_amount:
+      $ref: './fields.yaml#/foreign_amount'
+    foreign_currency:
+      $ref: './fields.yaml#/foreign_currency'
+    tax_group_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+    tax_amount:
+      type: number
+      nullable: true
+      description: Tax amount as setup by your organization.
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_pst'
+      nullable: true
+      description: Date on which the expense was made. This date cannot be in future.
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
+    source_account_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      example: acwbl222wlg
+    is_billable:
+      $ref: './fields.yaml#/is_billable'
+    is_reimbursable:
+      allOf:
+        - $ref: './fields.yaml#/is_reimbursable'
+      nullable: false
+    merchant:
+      $ref: './fields.yaml#/merchant'
+    project_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 92895
+    category_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      description: |
+        This represents the category's id given by Fyle during creation of category
+        for which this expense is created.
+        Null is not allowed for category_id field instead pass Unspecified category Id
+      example: 49058
+    cost_center_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_integer'
+      nullable: true
+      example: 1049
+    distance:
+      $ref: './fields.yaml#/distance'
+    distance_unit:
+      $ref: './fields.yaml#/distance_unit'
+    started_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    ended_at:
+      $ref: './fields.yaml#/timestamptz_pst'
+    hotel_is_breakfast_provided:
+      type: boolean
+      nullable: true
+      description: |
+        This field is applicable for only `Hotel` category.
+    travel_classes:
+      $ref: './fields.yaml#/travel_classes'
+    locations:
+      $ref: './fields.yaml#/locations'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/fk_string'
+      example:
+        - figwiwpjww
+
+expenses_merge_in:
+  type: object
+  additionalProperties: false
+  required:
+    - target_expense_id
+    - source_expense_ids
+    - target_expense_fields
+  properties:
+    target_expense_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: 'tx0agOdICdbV'
+      nullable: false
+    source_expense_ids:
+      type: array
+      nullable: false
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - 'tx0agOdICdbV'
+        - 'tx0agOdBCdbV'
+      description: |
+        List of source expense IDs to merge into the target expense.
+    target_expense_fields:
+      allOf:
+        - $ref: '#/target_expense_fields'
+      nullable: false
+      description: |
+        Fields to be updated in the target expense.
+
+expense_policy_comment_out_embed:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment_type
+    - comment_text
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: epc1a2f3farmk
+    comment_type:
+      type: string
+      description: Type of the policy comment
+    comment_text:
+      type: string
+      description: Text content of the policy comment

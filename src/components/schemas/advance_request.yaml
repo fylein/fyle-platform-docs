@@ -95,7 +95,23 @@ advance_request_out:
     employee_id:
       $ref: './fields.yaml#/employee_id'
     employee:
-      $ref: './employee.yaml#/employee_out_embed'    
+      $ref: './employee.yaml#/employee_out_embed'
+    comments:
+      type: array
+      items:
+        $ref: '#/advance_request_comments_out'
+      description: |
+        List of comments in the advance request
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+    files:
+      type: array
+      items:
+        $ref: './file.yaml#/file_out_embed'
 
 advance_request_in:
   type: object
@@ -259,3 +275,219 @@ advance_request_out_embed:
         This is user visible identifier for an advance request.
         This field can be used as reference in UI.
       example: 'AR/2020/10/T/95'
+
+advance_requests_approver_stats_in:
+  properties:
+    query_params:
+      description: | 
+        Query param string similar to advance_requests GET call. Use group_by_currency=eq.true to get currency-wise grouping of stats.
+      nullable: false
+      example: id=in.('adr1263','adr1569')&group_by_currency=eq.true
+
+
+advance_requests_approver_stats_out:
+  oneOf:
+    - type: array
+      title: "Currency-wise grouped stats"
+      description: "Stats grouped by advance request currency"
+      items:
+        type: object
+        required:
+          - count
+          - total_amount
+          - currency
+        properties:
+          count:
+            type: integer
+            nullable: false
+            description: "Number of matching advance requests with this currency."
+            example: 10
+          total_amount:
+            type: number
+            nullable: false
+            description: "Sum of amounts for matching advance requests with this currency."
+            example: 44545.4
+          currency:
+            type: string
+    - type: object
+      title: "Overall stats"
+      description: "Overall stats without currency grouping."
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: "Total number of matching advance requests."
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: "Sum of amounts for all matching advance requests."
+          example: 45882.4
+  example:
+    - currency: "USD"
+      count: 10
+      total_amount: 44545.4
+    - currency: "INR"
+      count: 0
+      total_amount: 0
+
+advance_request_comments_in:
+  type: object
+  additionalProperties: false
+  required:
+    - advance_request_id
+    - comment
+  properties:
+    advance_request_id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to add comment to
+      example: areq5F9xIaMURI
+    comment:
+      type: string
+      description: Comment text to be added to the advance request
+      example: test
+
+advance_request_comments_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    comment:
+      type: string
+      description: A comment on the advance request
+      example: Advance request was created
+    action:
+      type: string
+      description: Advance request action for which comment is added.
+      example: SUBMITTED
+    advance_request_id:
+      $ref: './fields.yaml#/id_string'
+    creator_type:
+      type: string
+      description: Describes whether the comment is system-generated or User made.
+      enum:
+        - SYSTEM
+        - POLICY
+        - USER
+      example: USER
+    creator_user_id:
+      $ref: './fields.yaml#/user_id_nullable'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed_nullable'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+
+attach_files_to_advance_request_in:
+  type: object
+  required:
+    - id
+    - file_ids
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: areqsjfwlrglw
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+      description: List of files to be attached to the advance request
+
+advance_request_permissions_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: id of the advance request
+      example: 'areqiwr3Wwirr'
+
+advance_request_permissions_out:
+  type: object
+  additionalProperties: false
+  properties:
+    can_save:
+      type: boolean
+      description: Whether the user can save changes to this advance request
+      example: true
+    can_submit:
+      type: boolean
+      description: Whether the user can submit this advance request for approval
+      example: false
+    can_edit:
+      type: boolean
+      description: Whether the user can edit this advance request
+      example: true
+    can_add_approver:
+      type: boolean
+      description: Whether the user can add an approver to this advance request
+      example: false
+    can_disable_approver:
+      type: boolean
+      description: Whether the user can disable an approver for this advance request
+      example: false
+    can_reject:
+      type: boolean
+      description: Whether the user can reject this advance request
+      example: false
+    can_approve:
+      type: boolean
+      description: Whether the user can approve this advance request
+      example: true
+    can_inquire:
+      type: boolean
+      description: Whether the user can inquire about this advance request
+      example: false
+    can_pull_back:
+      type: boolean
+      description: Whether the user can pull back this advance request
+      example: false
+    can_pay:
+      type: boolean
+      description: Whether the user can mark this advance request as paid
+      example: false
+    can_delete:
+      type: boolean
+      description: Whether the user can delete this advance request
+      example: true
+
+advance_request_action_pull_back_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment
+  properties:
+    id:
+      type: string
+      description: |
+        id of advance request that is to be pulled back
+      example: 'areqGsQdgSoteL'
+    comment:
+      type: string
+      description: |
+        Comment explaining the reason for pulling back the advance request
+      example: 'sending back'
+
+advance_request_delete_in:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: id of the advance request to be deleted
+      example: 'adrkvnwrnpwi'
+
