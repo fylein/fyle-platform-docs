@@ -5626,6 +5626,26 @@ components:
           example:
             - figwiwpjww
           description: List of files to be attached to the advance request
+    advance_request_add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add approver to
+          example: areq5F9xIaMURI
+        approver_email:
+          $ref: '#/components/schemas/email'
+          description: Email address of the approver to be added
+          example: approver@example.com
+        comment:
+          type: string
+          description: A comment explaining the reason for adding the approver
+          example: Need your review on this advance
   parameters:
     limit:
       in: query
@@ -8281,3 +8301,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/advance_requests/add_approver:
+    post:
+      summary: Add approver to advance request
+      operationId: advance_requests_add_approver_post
+      description: |
+        This API allows approvers to add an approver to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_add_approver_in'
+            example:
+              data:
+                id: areq5F9xIaMURI
+                approver_email: approver@example.com
+                comment: Need your review on this advance
+      responses:
+        '200':
+          description: Approver added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
