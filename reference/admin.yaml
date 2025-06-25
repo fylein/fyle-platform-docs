@@ -5619,6 +5619,21 @@ components:
           type: string
           description: Comment text to be added to the advance request
           example: test
+    advance_request_remove_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to remove approver from
+          example: areq5F9xIaMURI
+        approver_email:
+          $ref: '#/components/schemas/email'
+          description: Email address of the approver to be removed
+          example: approver@example.com
     advance_request_out_embed:
       type: object
       nullable: true
@@ -19622,6 +19637,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/advance_requests/remove_approver:
+    post:
+      summary: Remove approver from advance request
+      operationId: advance_requests_remove_approver_post
+      description: |
+        This API allows admins to disable/remove an approver from an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_remove_approver_in'
+            example:
+              data:
+                id: areq5F9xIaMURI
+                approver_email: approver@example.com
+      responses:
+        '200':
+          description: Approver removed successfully and returns the updated advance request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
   /admin/advances:
     get:
       tags:
