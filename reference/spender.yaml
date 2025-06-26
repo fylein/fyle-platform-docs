@@ -8917,42 +8917,6 @@ components:
           nullable: true
           description: Signifies the time when the next automate report submission will run for the organization. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
           example: '2021-06-01T13:14:54.804+00:00'
-    recurring_expense_in:
-      type: object
-      additionalProperties: false
-      required:
-        - type
-        - expense_details
-        - schedule_config
-      properties:
-        type:
-          type: string
-          enum:
-            - EXPENSE
-            - MILEAGE
-          description: |
-            Type of recurring expense automation.
-            - EXPENSE: Regular expense type
-            - MILEAGE: Mileage-based expense type
-          example: EXPENSE
-        expense_details:
-          $ref: '#/components/schemas/spender_expense_in'
-          description: |
-            Expense template details that will be used to create the recurring expenses.
-        schedule_config:
-          $ref: '#/components/schemas/schedule_config'
-    recurring_expense_disable_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          description: |
-            ID of the recurring expense automation to disable.
-          example: rec1a2b3c4d5e6
     recurring_expense_out:
       type: object
       additionalProperties: false
@@ -8992,7 +8956,7 @@ components:
             Expense template details used for creating recurring expenses.
             Contains all the expense fields that will be applied to each generated expense.
           example:
-            claim_amount: 100.00
+            claim_amount: 100
             category_id: 115254
             merchant: Monthly Coffee Subscription
             purpose: Recurring coffee subscription for office
@@ -9011,6 +8975,44 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    recurring_expense_in:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - expense_details
+        - schedule_config
+      properties:
+        type:
+          type: string
+          enum:
+            - EXPENSE
+            - MILEAGE
+          description: |
+            Type of recurring expense automation.
+            - EXPENSE: Regular expense type
+            - MILEAGE: Mileage-based expense type
+          example: EXPENSE
+        expense_details:
+          allOf:
+            - $ref: '#/components/schemas/spender_expense_in'
+          description: |
+            Expense template details that will be used to create the recurring expenses.
+            This should match the structure of spender expense input.
+        schedule_config:
+          $ref: '#/components/schemas/schedule_config'
+    recurring_expense_disable_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            ID of the recurring expense automation to disable.
+          example: rec1a2b3c4d5e6
     spender_expense_check_mandatory_fields_in:
       type: object
       additionalProperties: false
@@ -14712,7 +14714,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/404' 
+                $ref: '#/components/schemas/404'
   /spender/expenses/check_mandatory_fields:
     post:
       tags:
