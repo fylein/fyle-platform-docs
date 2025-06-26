@@ -2123,6 +2123,7 @@ components:
             - APPROVER_PENDING
             - PAYMENT_PENDING
             - APPROVED
+            - UNREPORTABLE
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -3731,6 +3732,12 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        action_make_unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
+          example: true
     expense_policy_expenses_query_object_params:
       type: object
       properties:
@@ -3889,6 +3896,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -4260,6 +4273,7 @@ components:
                   - PAYMENT_PENDING
                   - PAYMENT_PROCESSING
                   - PAID
+                  - UNREPORTABLE
                 description: Expense state
         - type: object
           title: Overall stats
@@ -4298,6 +4312,9 @@ components:
           count: 0
           total_amount: 0
         - state: APPROVED
+          count: 0
+          total_amount: 0
+        - state: UNREPORTABLE
           count: 0
           total_amount: 0
     expense_filters_out:
@@ -4762,6 +4779,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
