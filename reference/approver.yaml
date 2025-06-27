@@ -5669,6 +5669,16 @@ components:
           type: string
           description: A comment explaining the reason for adding the approver
           example: Need your review on this advance
+    advance_request_bulk_approve_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be approved
+          example: areq5F9xIaMURI
   parameters:
     limit:
       in: query
@@ -8390,3 +8400,52 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/advance_requests/approve/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk approve advance requests
+      description: |
+        This API allows approvers to approve multiple advance requests in a single operation.
+      operationId: advance_requests_bulk_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_request_bulk_approve_in'
+      responses:
+        '200':
+          description: OK - All advance requests have been processed successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
