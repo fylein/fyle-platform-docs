@@ -1,0 +1,98 @@
+recurring_expense_in:
+  type: object
+  additionalProperties: false
+  required:
+    - type
+    - expense_details
+    - schedule_config
+  properties:
+    type:
+      type: string
+      enum:
+        - EXPENSE
+        - MILEAGE
+      description: |
+        Type of recurring expense automation.
+        - EXPENSE: Regular expense type
+        - MILEAGE: Mileage-based expense type
+      example: EXPENSE
+    expense_details:
+      allOf:
+        - $ref: './expense.yaml#/spender_expense_in'
+      description: |
+        Expense template details that will be used to create the recurring expenses.
+        This should match the structure of spender expense input.
+    schedule_config:
+      $ref: './fields.yaml#/schedule_config'
+
+recurring_expense_disable_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        ID of the recurring expense automation to disable.
+      example: rec1a2b3c4d5e6
+
+recurring_expense_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - org_id
+    - user_id
+    - type
+    - expense_details
+    - schedule_config
+    - is_enabled
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        Unique ID of the recurring expense automation.
+      example: rec1a2b3c4d5e6
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    type:
+      type: string
+      enum:
+        - EXPENSE
+        - MILEAGE
+      description: |
+        Type of recurring expense automation.
+        - EXPENSE: Regular expense type
+        - MILEAGE: Mileage-based expense type
+      example: EXPENSE
+    expense_details:
+      type: object
+      nullable: false
+      description: |
+        Expense template details used for creating recurring expenses.
+        Contains all the expense fields that will be applied to each generated expense.
+      example:
+        claim_amount: 100.00
+        category_id: 115254
+        merchant: Monthly Coffee Subscription
+        purpose: Recurring coffee subscription for office
+        source: WEBAPP
+        is_reimbursable: true
+        currency: USD
+    schedule_config:
+      $ref: './fields.yaml#/schedule_config'
+    is_enabled:
+      type: boolean
+      description: |
+        Whether the recurring expense automation is currently active.
+        When false, no new expenses will be created automatically.
+      example: true
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at' 
