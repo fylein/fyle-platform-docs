@@ -2123,6 +2123,7 @@ components:
             - APPROVER_PENDING
             - PAYMENT_PENDING
             - APPROVED
+            - UNREPORTABLE
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -3732,6 +3733,12 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        action_make_unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
+          example: true
     expense_policy_expenses_query_object_params:
       type: object
       properties:
@@ -3890,6 +3897,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -4261,6 +4274,7 @@ components:
                   - PAYMENT_PENDING
                   - PAYMENT_PROCESSING
                   - PAID
+                  - UNREPORTABLE
                 description: Expense state
         - type: object
           title: Overall stats
@@ -4299,6 +4313,9 @@ components:
           count: 0
           total_amount: 0
         - state: APPROVED
+          count: 0
+          total_amount: 0
+        - state: UNREPORTABLE
           count: 0
           total_amount: 0
     expense_filters_out:
@@ -4763,6 +4780,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -5662,6 +5685,16 @@ components:
           type: string
           description: Reason for rejecting the advance request
           example: Budget exceeded
+    advance_request_bulk_approve_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be approved
+          example: areq5F9xIaMURI
     advance_request_inquire_in:
       type: object
       additionalProperties: false
@@ -5677,54 +5710,6 @@ components:
           type: string
           description: Reason for sending the advance request back to the spender
           example: Please provide additional documentation
-    advance_request_bulk_approve_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-          description: ID of the advance request to be approved
-          example: areq5F9xIaMURI
-    advance_request_in:
-      type: object
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: areqiwr3Wwirr
-        currency:
-          $ref: '#/components/schemas/currency'
-        amount:
-          $ref: '#/components/schemas/amount'
-        code:
-          $ref: '#/components/schemas/code'
-        notes:
-          type: string
-          nullable: true
-          description: |
-            Optional descriptive notes which can be added to an advance request.
-          example: onsite client meeting
-        purpose:
-          type: string
-          nullable: true
-          description: |
-            Descriptive purpose which is added to an advance request.
-          example: onsite client meeting
-        source:
-          type: string
-          nullable: true
-          description: |
-            The name of the client app from which this advance was created.
-            if its a thrid party app, it prefixed with TPA_.
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
-            passed, source is saved as TPA.
-          example: WEBAPP
-        project_id:
-          $ref: '#/components/schemas/fk_integer'
-        custom_fields:
-          $ref: '#/components/schemas/custom_fields'
   parameters:
     limit:
       in: query
@@ -8440,7 +8425,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/404'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/advance_requests/reject:
     post:
       tags:
@@ -8510,6 +8500,55 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/advance_requests/approve/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk approve advance requests
+      description: |
+        This API allows approvers to approve multiple advance requests in a single operation.
+      operationId: advance_requests_bulk_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_request_bulk_approve_in'
+      responses:
+        '200':
+          description: OK - All advance requests have been processed successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/advance_requests/inquire:
     post:
       tags:
@@ -8573,117 +8612,3 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access. 
-  /approver/advance_requests/approve/bulk:
-    post:
-      tags:
-        - Advances
-      summary: Bulk approve advance requests
-      description: |
-        This API allows approvers to approve multiple advance requests in a single operation.
-      operationId: advance_requests_bulk_approve
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/advance_request_bulk_approve_in'
-      responses:
-        '200':
-          description: OK - All advance requests have been processed successfully
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /approver/advance_requests/submit:
-    post:
-      tags:
-        - Advances
-      summary: Submit an advance request
-      description: |
-        Submit an advance request.
-      operationId: advance_requests_submit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/advance_request_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  data:
-                    $ref: '#/components/schemas/advance_request_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: |
-                      This error means current user does not have enough permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: |
-                      This error means the requested resource was not found or the requester doesn't have sufficient access.
