@@ -4147,6 +4147,7 @@ components:
             - APPROVER_PENDING
             - PAYMENT_PENDING
             - APPROVED
+            - UNREPORTABLE
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -4828,6 +4829,7 @@ components:
                   - PAYMENT_PENDING
                   - PAYMENT_PROCESSING
                   - PAID
+                  - UNREPORTABLE
                 description: Expense state
         - type: object
           title: Overall stats
@@ -4866,6 +4868,9 @@ components:
           count: 0
           total_amount: 0
         - state: APPROVED
+          count: 0
+          total_amount: 0
+        - state: UNREPORTABLE
           count: 0
           total_amount: 0
     query_params:
@@ -7971,6 +7976,7 @@ components:
             - APPROVER_PENDING
             - PAYMENT_PENDING
             - APPROVED
+            - UNREPORTABLE
           description: The state of the Expense.
         seq_num:
           type: string
@@ -12938,6 +12944,12 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        action_make_unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
+          example: true
     expense_policy_expenses_query_object_params:
       type: object
       properties:
@@ -13096,6 +13108,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -15028,6 +15046,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -15454,21 +15478,6 @@ components:
           type: string
           description: Reason for rejecting the advance request
           example: Budget exceeded
-    advance_request_inquire_in:
-      type: object
-      additionalProperties: false
-      required:
-        - id
-        - comment
-      properties:
-        id:
-          $ref: '#/components/schemas/id_string'
-          description: ID of the advance request to inquire about
-          example: areq5F9xIaMURI
-        comment:
-          type: string
-          description: Reason for sending the advance request back to the spender
-          example: Please provide additional documentation
   parameters:
     q:
       in: query
@@ -19713,7 +19722,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/404'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
   /admin/advances:
     get:
       tags:
@@ -26691,7 +26705,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/404'
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
   /admin/advance_requests/reject:
     post:
       tags:
@@ -26761,66 +26780,3 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
-  /admin/advance_requests/inquire:
-    post:
-      tags:
-        - Advances
-      summary: Inquire about advance request
-      description: |
-        This API allows admins to inquire about an advance request, sending it back to the spender for clarification or modifications.
-      operationId: advance_requests_inquire
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/advance_request_inquire_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: Advance request has been sent back successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/advance_request_out'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: |
-                      This error means current user does not have enough permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: |
-                      This error means the requested resource was not found or the requester doesn't have sufficient access. 
