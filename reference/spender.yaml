@@ -10373,6 +10373,63 @@ components:
           $ref: '#/components/schemas/id_string'
           description: id of the advance request to be deleted
           example: adrkvnwrnpwi
+    secondary_email_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier for the secondary email.
+          example: seh8wr55ruh2
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            The secondary email address.
+          example: secondary@test.tech
+        is_verified:
+          type: boolean
+          description: |
+            Indicates whether the secondary email address has been verified.
+          example: true
+        org_id:
+          allOf:
+            - $ref: '#/components/schemas/org_id'
+          description: |
+            The unique id of the Organization to which the secondary email belongs.
+          example: oriSOntNdZGd
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/user_id'
+          description: |
+            The unique id of the user to which the secondary email belongs.
+          example: usplIdJBA5OP
+        created_at:
+          allOf:
+            - $ref: '#/components/schemas/created_at'
+          description: |
+            Timestamp when the secondary email was created.
+          example: '2025-06-30T10:06:18.534148+00:00'
+        updated_at:
+          allOf:
+            - $ref: '#/components/schemas/updated_at'
+          description: |
+            Timestamp when the secondary email was last updated.
+          example: '2025-06-30T10:06:18.534148+00:00'
+    secondary_email_in:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            The secondary email address to be added.
+          example: secondary-test@test.in
   parameters:
     q:
       in: query
@@ -10521,6 +10578,9 @@ tags:
   - name: Expense Policy Comments
     description: |
       These APIs gives you access to manage expense policy comments.
+  - name: Secondary Emails
+    description: |
+      These APIs gives you access to manage your secondary email addresses.
 paths:
   /spender/projects:
     get:
@@ -16398,6 +16458,205 @@ paths:
                     type: string
                     description: |
                       This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/secondary_emails:
+    get:
+      tags:
+        - Secondary Emails
+      summary: List Secondary Emails
+      operationId: secondary_emails_list
+      description: |
+        List secondary emails of the spender.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/secondary_email_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Secondary Emails
+      summary: Add Secondary Email
+      operationId: secondary_emails_add
+      description: |
+        Add a new secondary email address for the spender.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/secondary_email_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/secondary_email_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/secondary_emails/check:
+    post:
+      tags:
+        - Secondary Emails
+      summary: Check Secondary Email
+      operationId: secondary_emails_check
+      description: |
+        Check whether the email is available for usage as a secondary email or is already added to another account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - email
+                  properties:
+                    email:
+                      allOf:
+                        - $ref: '#/components/schemas/email'
+                      description: |
+                        The email address to check for availability.
+                      example: test-xyz@test.in
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    description: |
+                      Empty data object indicating the check was successful.
+                    example: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /spender/secondary_emails/delete:
+    post:
+      tags:
+        - Secondary Emails
+      summary: Delete Secondary Email
+      operationId: secondary_emails_delete
+      description: |
+        Delete a secondary email address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - id
+                  properties:
+                    id:
+                      allOf:
+                        - $ref: '#/components/schemas/id_string'
+                      description: |
+                        The unique identifier of the secondary email to delete.
+                      example: seu2gy8ulk32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    description: |
+                      Empty data object indicating the deletion was successful.
+                    example: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
         '404':
           description: Not Found
           content:
