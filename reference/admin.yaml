@@ -15493,6 +15493,108 @@ components:
           type: string
           description: Reason for sending the advance request back to the spender
           example: Please provide additional documentation
+    advance_request_custom_field_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - type
+        - is_mandatory
+        - is_enabled
+      properties:
+        id:
+          type: integer
+          description: ID of the custom field (optional, required for update operations)
+          example: 123
+        name:
+          type: string
+          description: Name of the custom field
+          example: Department
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - MULTI_SELECT
+            - BOOLEAN
+            - LOCATION
+            - USER_LIST
+            - DATE
+          description: Type of the custom field
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: Options for SELECT and MULTI_SELECT field types
+          example:
+            - HR
+            - Finance
+        is_mandatory:
+          type: boolean
+          description: Whether the field is mandatory
+          example: true
+        placeholder:
+          type: string
+          maxLength: 50
+          description: Placeholder text for the field (max 50 characters)
+          example: Select dept
+        is_enabled:
+          type: boolean
+          description: Whether the field is enabled or disabled
+          example: true
+    advance_request_custom_field_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID of the custom field
+          example: 123
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          description: Name of the custom field
+          example: Department
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - MULTI_SELECT
+            - BOOLEAN
+            - LOCATION
+            - USER_LIST
+            - DATE
+          description: Type of the custom field
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: Options for SELECT and MULTI_SELECT field types
+          example:
+            - HR
+            - Finance
+        is_mandatory:
+          type: boolean
+          description: Whether the field is mandatory
+          example: true
+        is_enabled:
+          type: boolean
+          description: Whether the field is enabled
+          example: true
+        placeholder:
+          type: string
+          description: Placeholder text for the field
+          example: Select dept
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
   parameters:
     q:
       in: query
@@ -26923,3 +27025,66 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/advance_requests/custom_fields:
+    post:
+      tags:
+        - Advances
+      summary: Create or update advance request custom fields
+      description: |
+        This API allows admins to create and update custom fields for advance requests.
+      operationId: advance_requests_custom_fields_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_custom_field_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: Custom field created or updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_custom_field_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access. 
