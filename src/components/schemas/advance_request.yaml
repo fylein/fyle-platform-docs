@@ -74,7 +74,7 @@ advance_request_out:
     project:
       $ref: './project.yaml#/project_out_embed'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: '#/advance_request_custom_fields'
     custom_fields_flattened:
       $ref: './fields.yaml#/flattened_custom_field'
     last_approved_at:
@@ -152,7 +152,7 @@ advance_request_in:
     project_id:
       $ref: './fields.yaml#/fk_integer'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: '#/advance_request_custom_fields'
 
 advance_request_action_in:
   type: object
@@ -685,3 +685,52 @@ advance_request_custom_fields_out:
   items:
     $ref: '#/advance_request_custom_field_out'
   description: List of advance request custom fields
+
+advance_request_custom_field:
+  type: object
+  description: |
+    Advance request custom field
+  properties:
+    name:
+      type: string
+      example: cf1
+    value:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: './fields.yaml#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'v1', 'v2' ]
+    type:
+      type: string
+      nullable: true
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - BOOLEAN
+        - MULTI_SELECT
+        - LOCATION
+        - USER_LIST
+        - DATE
+      description: |
+        This field specifies the type of the custom field.
+      example: SELECT
+    id:
+      type: integer
+      description: ID of the custom field
+      example: 123
+
+advance_request_custom_fields:
+  type: array
+  description: |
+    Advance request custom fields
+  items:
+    $ref: '#/expense_custom_field'
