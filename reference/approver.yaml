@@ -3146,6 +3146,55 @@ components:
             This is user visible identifier for an advances.
             This field can be used as reference in UI.
           example: A/2020/10/T/95
+    advance_request_custom_field:
+      type: object
+      description: |
+        Advance request custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+          description: |
+            This field specifies the type of the custom field.
+          example: SELECT
+        id:
+          type: integer
+          description: ID of the custom field
+          example: 123
+    advance_request_custom_fields:
+      type: array
+      description: |
+        Advance request custom fields
+      items:
+        $ref: '#/components/schemas/advance_request_custom_field'
     advance_request_approval_out_embed:
       type: object
       additionalProperties: false
@@ -3308,7 +3357,7 @@ components:
         project:
           $ref: '#/components/schemas/project_out_embed'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/advance_request_custom_fields'
         custom_fields_flattened:
           $ref: '#/components/schemas/flattened_custom_field'
         last_approved_at:
@@ -5749,7 +5798,7 @@ components:
         project_id:
           $ref: '#/components/schemas/fk_integer'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/advance_request_custom_fields'
     advance_request_custom_field_out:
       type: object
       additionalProperties: false
