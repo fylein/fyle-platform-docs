@@ -74,7 +74,7 @@ advance_request_out:
     project:
       $ref: './project.yaml#/project_out_embed'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: '#/advance_request_custom_fields'
     last_approved_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -95,7 +95,23 @@ advance_request_out:
     employee_id:
       $ref: './fields.yaml#/employee_id'
     employee:
-      $ref: './employee.yaml#/employee_out_embed'    
+      $ref: './employee.yaml#/employee_out_embed'
+    comments:
+      type: array
+      items:
+        $ref: '#/advance_request_comments_out'
+      description: |
+        List of comments in the advance request
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+    files:
+      type: array
+      items:
+        $ref: './file.yaml#/file_out_embed'
 
 advance_request_in:
   type: object
@@ -134,7 +150,7 @@ advance_request_in:
     project_id:
       $ref: './fields.yaml#/fk_integer'
     custom_fields:
-      $ref: './fields.yaml#/custom_fields'
+      $ref: '#/advance_request_custom_fields'
 
 advance_request_action_in:
   type: object
@@ -318,3 +334,400 @@ advance_requests_approver_stats_out:
       count: 0
       total_amount: 0
 
+advance_request_comments_in:
+  type: object
+  additionalProperties: false
+  required:
+    - advance_request_id
+    - comment
+  properties:
+    advance_request_id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to add comment to
+      example: areq5F9xIaMURI
+    comment:
+      type: string
+      description: Comment text to be added to the advance request
+      example: test
+
+advance_request_comments_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    comment:
+      type: string
+      description: A comment on the advance request
+      example: Advance request was created
+    action:
+      type: string
+      description: Advance request action for which comment is added.
+      example: SUBMITTED
+    advance_request_id:
+      $ref: './fields.yaml#/id_string'
+    creator_type:
+      type: string
+      description: Describes whether the comment is system-generated or User made.
+      enum:
+        - SYSTEM
+        - POLICY
+        - USER
+      example: USER
+    creator_user_id:
+      $ref: './fields.yaml#/user_id_nullable'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed_nullable'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+
+attach_files_to_advance_request_in:
+  type: object
+  required:
+    - id
+    - file_ids
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: areqsjfwlrglw
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example:
+        - figwiwpjww
+      description: List of files to be attached to the advance request
+
+advance_request_permissions_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: id of the advance request
+      example: 'areqiwr3Wwirr'
+
+advance_request_permissions_out:
+  type: object
+  additionalProperties: false
+  properties:
+    can_save:
+      type: boolean
+      description: Whether the user can save changes to this advance request
+      example: true
+    can_submit:
+      type: boolean
+      description: Whether the user can submit this advance request for approval
+      example: false
+    can_edit:
+      type: boolean
+      description: Whether the user can edit this advance request
+      example: true
+    can_add_approver:
+      type: boolean
+      description: Whether the user can add an approver to this advance request
+      example: false
+    can_disable_approver:
+      type: boolean
+      description: Whether the user can disable an approver for this advance request
+      example: false
+    can_reject:
+      type: boolean
+      description: Whether the user can reject this advance request
+      example: false
+    can_approve:
+      type: boolean
+      description: Whether the user can approve this advance request
+      example: true
+    can_inquire:
+      type: boolean
+      description: Whether the user can inquire about this advance request
+      example: false
+    can_pull_back:
+      type: boolean
+      description: Whether the user can pull back this advance request
+      example: false
+    can_pay:
+      type: boolean
+      description: Whether the user can mark this advance request as paid
+      example: false
+    can_delete:
+      type: boolean
+      description: Whether the user can delete this advance request
+      example: true
+
+advance_request_action_pull_back_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment
+  properties:
+    id:
+      type: string
+      description: |
+        id of advance request that is to be pulled back
+      example: 'areqGsQdgSoteL'
+    comment:
+      type: string
+      description: |
+        Comment explaining the reason for pulling back the advance request
+      example: 'sending back'
+
+advance_request_delete_in:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: id of the advance request to be deleted
+      example: 'adrkvnwrnpwi'
+
+advance_request_add_approver_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - approver_email
+    - comment
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to add approver to
+      example: areq5F9xIaMURI
+    approver_email:
+      $ref: './fields.yaml#/email'
+      description: Email address of the approver to be added
+      example: approver@example.com
+    comment:
+      type: string
+      description: A comment explaining the reason for adding the approver
+      example: Need your review on this advance
+
+advance_request_bulk_approve_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to be approved
+      example: areq5F9xIaMURI
+
+advance_request_remove_approver_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - approver_email
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to remove approver from
+      example: areq5F9xIaMURI
+    approver_email:
+      $ref: './fields.yaml#/email'
+      description: Email address of the approver to be removed
+      example: approver@example.com
+
+advance_request_reject_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to be rejected
+      example: areq5F9xIaMURI
+    comment:
+      type: string
+      description: Reason for rejecting the advance request
+      example: Budget exceeded
+
+advance_request_inquire_in:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - comment
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      description: ID of the advance request to inquire about
+      example: areq5F9xIaMURI
+    comment:
+      type: string
+      description: Reason for sending the advance request back to the spender
+      example: Please provide additional documentation
+
+advance_request_custom_field_in:
+  type: object
+  additionalProperties: false
+  required:
+    - name
+    - type
+    - is_mandatory
+    - is_enabled
+    - placeholder
+  properties:
+    id:
+      type: integer
+      description: ID of the custom field (optional, required for update operations)
+      example: 123
+    name:
+      type: string
+      description: Name of the custom field
+      example: Department
+    type:
+      type: string
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - MULTI_SELECT
+        - BOOLEAN
+        - LOCATION
+        - USER_LIST
+        - DATE
+      description: Type of the custom field
+      example: SELECT
+    options:
+      type: array
+      items:
+        type: string
+      description: Options for SELECT and MULTI_SELECT field types
+      example:
+        - HR
+        - Finance
+    is_mandatory:
+      type: boolean
+      description: Whether the field is mandatory
+      example: true
+    placeholder:
+      type: string
+      maxLength: 50
+      description: Placeholder text for the field (max 50 characters)
+      example: Select dept
+    is_enabled:
+      type: boolean
+      description: Whether the field is enabled or disabled
+      example: true
+
+advance_request_custom_field_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      type: integer
+      description: ID of the custom field
+      example: 123
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    name:
+      type: string
+      description: Name of the custom field
+      example: Department
+    type:
+      type: string
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - MULTI_SELECT
+        - BOOLEAN
+        - LOCATION
+        - USER_LIST
+        - DATE
+      description: Type of the custom field
+      example: SELECT
+    options:
+      type: array
+      items:
+        type: string
+      description: Options for SELECT and MULTI_SELECT field types
+      example:
+        - HR
+        - Finance
+      nullable: true
+    is_mandatory:
+      type: boolean
+      description: Whether the field is mandatory
+      example: true
+    is_enabled:
+      type: boolean
+      description: Whether the field is enabled
+      example: true
+    placeholder:
+      type: string
+      description: Placeholder text for the field
+      example: Select dept
+      nullable: true
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+
+advance_request_custom_fields_out:
+  type: array
+  items:
+    $ref: '#/advance_request_custom_field_out'
+  description: List of advance request custom fields
+
+advance_request_custom_field:
+  type: object
+  description: |
+    Advance request custom field
+  properties:
+    name:
+      type: string
+      example: cf1
+    value:
+      nullable: true
+      oneOf:
+        - type: string
+          example: string1
+        - type: boolean
+          example: True
+        - type: integer
+          example: 123
+        - $ref: './fields.yaml#/location'
+        - type: array
+          items:
+            type: string
+          example: [ 'v1', 'v2' ]
+    type:
+      type: string
+      enum:
+        - TEXT
+        - NUMBER
+        - SELECT
+        - BOOLEAN
+        - MULTI_SELECT
+        - LOCATION
+        - USER_LIST
+        - DATE
+      description: |
+        This field specifies the type of the custom field.
+      example: SELECT
+    id:
+      type: integer
+      description: ID of the custom field
+      example: 123
+
+advance_request_custom_fields:
+  type: array
+  description: |
+    Advance request custom fields
+  items:
+    $ref: '#/advance_request_custom_field'

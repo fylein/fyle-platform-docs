@@ -1251,6 +1251,24 @@ components:
         content_type:
           type: string
           example: application/pdf
+    expense_policy_comment_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment_type
+        - comment_text
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: epc1a2f3farmk
+        comment_type:
+          type: string
+          description: Type of the policy comment
+        comment_text:
+          type: string
+          description: Text content of the policy comment
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -1876,6 +1894,7 @@ components:
         - physical_bill_submitted_at
         - invoice_number
         - is_duplicate_present
+        - expense_policy_comments
       properties:
         id:
           allOf:
@@ -2104,6 +2123,7 @@ components:
             - APPROVER_PENDING
             - PAYMENT_PENDING
             - APPROVED
+            - UNREPORTABLE
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -2168,6 +2188,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/file_out_embed'
+        expense_policy_comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_comment_out_embed'
+          description: |
+            List of expense policy comment objects
         approvals:
           type: array
           items:
@@ -3120,6 +3146,54 @@ components:
             This is user visible identifier for an advances.
             This field can be used as reference in UI.
           example: A/2020/10/T/95
+    advance_request_custom_field:
+      type: object
+      description: |
+        Advance request custom field
+      properties:
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+          description: |
+            This field specifies the type of the custom field.
+          example: SELECT
+        id:
+          type: integer
+          description: ID of the custom field
+          example: 123
+    advance_request_custom_fields:
+      type: array
+      description: |
+        Advance request custom fields
+      items:
+        $ref: '#/components/schemas/advance_request_custom_field'
     advance_request_approval_out_embed:
       type: object
       additionalProperties: false
@@ -3136,6 +3210,7 @@ components:
             - APPROVAL_PENDING
             - APPROVAL_DISABLED
             - APPROVAL_DONE
+            - APPROVAL_REJECTED
           description: |
             State of this advance request approval
     employee_out_embed:
@@ -3164,6 +3239,47 @@ components:
         department:
           nullable: true
           $ref: '#/components/schemas/department_out_embed'
+    user_id_nullable:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      nullable: true
+      example: uswjwgnwwgo
+    advance_request_comments_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: A comment on the advance request
+          example: Advance request was created
+        action:
+          type: string
+          description: Advance request action for which comment is added.
+          example: SUBMITTED
+        advance_request_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id_nullable'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
     advance_request_out:
       type: object
       additionalProperties: false
@@ -3240,7 +3356,7 @@ components:
         project:
           $ref: '#/components/schemas/project_out_embed'
         custom_fields:
-          $ref: '#/components/schemas/custom_fields'
+          $ref: '#/components/schemas/advance_request_custom_fields'
         last_approved_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3262,6 +3378,22 @@ components:
           $ref: '#/components/schemas/employee_id'
         employee:
           $ref: '#/components/schemas/employee_out_embed'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/advance_request_comments_out'
+          description: |
+            List of comments in the advance request
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/file_out_embed'
     advance_requests_approver_stats_in:
       properties:
         query_params:
@@ -3317,6 +3449,79 @@ components:
         - currency: INR
           count: 0
           total_amount: 0
+    advance_request_permissions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: id of the advance request
+          example: areqiwr3Wwirr
+    advance_request_permissions_out:
+      type: object
+      additionalProperties: false
+      properties:
+        can_save:
+          type: boolean
+          description: Whether the user can save changes to this advance request
+          example: true
+        can_submit:
+          type: boolean
+          description: Whether the user can submit this advance request for approval
+          example: false
+        can_edit:
+          type: boolean
+          description: Whether the user can edit this advance request
+          example: true
+        can_add_approver:
+          type: boolean
+          description: Whether the user can add an approver to this advance request
+          example: false
+        can_disable_approver:
+          type: boolean
+          description: Whether the user can disable an approver for this advance request
+          example: false
+        can_reject:
+          type: boolean
+          description: Whether the user can reject this advance request
+          example: false
+        can_approve:
+          type: boolean
+          description: Whether the user can approve this advance request
+          example: true
+        can_inquire:
+          type: boolean
+          description: Whether the user can inquire about this advance request
+          example: false
+        can_pull_back:
+          type: boolean
+          description: Whether the user can pull back this advance request
+          example: false
+        can_pay:
+          type: boolean
+          description: Whether the user can mark this advance request as paid
+          example: false
+        can_delete:
+          type: boolean
+          description: Whether the user can delete this advance request
+          example: true
+    advance_request_comments_in:
+      type: object
+      additionalProperties: false
+      required:
+        - advance_request_id
+        - comment
+      properties:
+        advance_request_id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add comment to
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Comment text to be added to the advance request
+          example: test
     description:
       type: string
       nullable: true
@@ -3576,6 +3781,12 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        action_make_unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
+          example: true
     expense_policy_expenses_query_object_params:
       type: object
       properties:
@@ -3734,6 +3945,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -3942,13 +4159,6 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
-    user_id_nullable:
-      type: string
-      description: |
-        The unique id of an user to which the object is associated.
-      readOnly: true
-      nullable: true
-      example: uswjwgnwwgo
     expense_comments_out:
       type: object
       additionalProperties: false
@@ -4112,6 +4322,7 @@ components:
                   - PAYMENT_PENDING
                   - PAYMENT_PROCESSING
                   - PAID
+                  - UNREPORTABLE
                 description: Expense state
         - type: object
           title: Overall stats
@@ -4150,6 +4361,9 @@ components:
           count: 0
           total_amount: 0
         - state: APPROVED
+          count: 0
+          total_amount: 0
+        - state: UNREPORTABLE
           count: 0
           total_amount: 0
     expense_filters_out:
@@ -4614,6 +4828,12 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
         is_receipt_mandatory:
           type: boolean
           description: |
@@ -5188,6 +5408,452 @@ components:
             This id is provided by Fyle to identify a category.
           nullable: true
           example: 49058
+    spender_employee_settings_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          example: ous7FnPJtFRmN
+          description: Unique identifier for the employee settings
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+          example: ouLdnA486RYD
+          description: Unique identifier of the employee
+        org_id:
+          $ref: '#/components/schemas/org_id'
+          example: org123
+          description: Unique identifier of the organization
+        created_at:
+          $ref: '#/components/schemas/created_at'
+          example: '2019-10-18T07:01:55.756Z'
+          description: Timestamp when the settings were created
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+          example: '2025-04-20T04:14:26.820Z'
+          description: Timestamp when the settings were last updated
+        category_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example: []
+          description: List of category ids that the employee has access to
+        cost_center_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example: []
+          description: List of cost centers that the employee has access to
+        project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example: []
+          description: List of projects that the employee has access to
+        per_diem_rate_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example: []
+          description: List of per diem rates that the employee has access to
+        mileage_rate_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example: []
+          description: List of mileage rate ids that the employee has access to
+        insta_fyle_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for InstaFyle receipt scanning and data extraction
+          properties:
+            allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether InstaFyle is allowed for the employee
+            enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether InstaFyle is enabled for the employee
+            static_camera_overlay_enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether static camera overlay is enabled for receipt scanning
+            extract_fields:
+              type: array
+              nullable: true
+              items:
+                type: string
+              example:
+                - AMOUNT
+                - CURRENCY
+                - CATEGORY
+                - TXN_DT
+              description: List of fields to extract from receipts
+        notification_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for email and push notifications
+          properties:
+            email_allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether email notifications are allowed
+            email_enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether email notifications are enabled
+            email_unsubscribed_events:
+              type: array
+              nullable: true
+              items:
+                type: string
+              example: []
+              description: List of events for which email notifications are unsubscribed
+            push_allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether push notifications are allowed
+            push_enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether push notifications are enabled
+            push_unsubscribed_events:
+              type: array
+              nullable: true
+              items:
+                type: string
+              example:
+                - EADVANCE_REQUESTS_CREATED
+                - EADVANCE_REQUESTS_UPDATED
+                - EADVANCE_REQUESTS_INQUIRY
+              description: List of events for which push notifications are unsubscribed
+            notify_user:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether to notify the user about events
+            notify_delegatee:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether to notify the delegatee about events
+        mileage_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for mileage tracking and rates
+          properties:
+            mileage_rate_labels:
+              type: object
+              nullable: true
+              example: null
+              description: Labels for different mileage rates
+            annual_mileage_of_user_before_joining_fyle:
+              type: object
+              nullable: true
+              example: {}
+              description: Annual mileage limit for user before joining Fyle
+        expense_form_autofills:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for automatic form filling in expenses
+          properties:
+            allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether expense form autofill is allowed
+            enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether expense form autofill is enabled
+        data_extractor_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for data extraction from receipts
+          properties:
+            allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether data extraction is allowed
+            enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether data extraction is enabled
+        in_app_chat_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for in-app chat functionality
+          properties:
+            allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether in-app chat is allowed
+            enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether in-app chat is enabled
+            restore_id:
+              type: string
+              nullable: true
+              example: null
+              description: ID for restoring chat session
+        payment_mode_settings:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for payment modes
+          properties:
+            allowed:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether payment mode selection is allowed
+            enabled:
+              type: boolean
+              nullable: true
+              example: true
+              description: Whether payment mode selection is enabled
+            allowed_payment_modes:
+              type: array
+              nullable: true
+              items:
+                type: string
+              example:
+                - PERSONAL_ACCOUNT
+                - COMPANY_ACCOUNT
+              description: List of payment modes allowed for the employee
+        locale:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Settings for user's locale and timezone
+          properties:
+            timezone:
+              type: string
+              nullable: true
+              example: Asia/Kolkata
+              description: User's timezone
+            abbreviation:
+              type: string
+              nullable: true
+              example: IST
+              description: Timezone abbreviation
+            offset:
+              type: string
+              nullable: true
+              example: '05:30:00'
+              description: Timezone offset from UTC
+        is_personal_cards_enabled:
+          type: boolean
+          example: true
+          description: Whether personal card usage is enabled
+        default_project_id:
+          type: string
+          nullable: true
+          example: null
+          description: Default project ID for expenses
+        default_payment_mode:
+          type: string
+          nullable: true
+          example: null
+          description: Default payment mode for expenses
+        default_vehicle_type:
+          type: string
+          nullable: true
+          example: null
+          description: Default vehicle type for mileage expenses
+    attach_files_to_advance_request_in:
+      type: object
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqsjfwlrglw
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+          description: List of files to be attached to the advance request
+    advance_request_add_approver_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - approver_email
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to add approver to
+          example: areq5F9xIaMURI
+        approver_email:
+          $ref: '#/components/schemas/email'
+          description: Email address of the approver to be added
+          example: approver@example.com
+        comment:
+          type: string
+          description: A comment explaining the reason for adding the approver
+          example: Need your review on this advance
+    advance_request_reject_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be rejected
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for rejecting the advance request
+          example: Budget exceeded
+    advance_request_bulk_approve_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to be approved
+          example: areq5F9xIaMURI
+    advance_request_inquire_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request to inquire about
+          example: areq5F9xIaMURI
+        comment:
+          type: string
+          description: Reason for sending the advance request back to the spender
+          example: Please provide additional documentation
+    advance_request_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: areqiwr3Wwirr
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          $ref: '#/components/schemas/amount'
+        code:
+          $ref: '#/components/schemas/code'
+        notes:
+          type: string
+          nullable: true
+          description: |
+            Optional descriptive notes which can be added to an advance request.
+          example: onsite client meeting
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Descriptive purpose which is added to an advance request.
+          example: onsite client meeting
+        source:
+          type: string
+          nullable: true
+          description: |
+            The name of the client app from which this advance was created.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: WEBAPP
+        project_id:
+          $ref: '#/components/schemas/fk_integer'
+        custom_fields:
+          $ref: '#/components/schemas/advance_request_custom_fields'
+    advance_request_custom_field_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID of the custom field
+          example: 123
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          description: Name of the custom field
+          example: Department
+        type:
+          type: string
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - MULTI_SELECT
+            - BOOLEAN
+            - LOCATION
+            - USER_LIST
+            - DATE
+          description: Type of the custom field
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: Options for SELECT and MULTI_SELECT field types
+          example:
+            - HR
+            - Finance
+          nullable: true
+        is_mandatory:
+          type: boolean
+          description: Whether the field is mandatory
+          example: true
+        is_enabled:
+          type: boolean
+          description: Whether the field is enabled
+          example: true
+        placeholder:
+          type: string
+          description: Placeholder text for the field
+          example: Select dept
+          nullable: true
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    advance_request_custom_fields_out:
+      type: array
+      items:
+        $ref: '#/components/schemas/advance_request_custom_field_out'
+      description: List of advance request custom fields
   parameters:
     limit:
       in: query
@@ -6424,6 +7090,112 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/advance_requests/permissions:
+    post:
+      tags:
+        - Advances
+      summary: Advance Request Permissions
+      description: |
+        Returns a list of all possible actions that can be performed on an advance request by the current user.
+      operationId: advance_requests_permissions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_permissions_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_permissions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/advance_requests/comments:
+    post:
+      summary: Add comment to advance request
+      operationId: advance_requests_comments_post
+      description: |
+        This API allows approvers to add comments to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_comments_in'
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/projects:
     get:
       tags:
@@ -7624,3 +8396,469 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/employee_settings:
+    get:
+      tags:
+        - Employee Settings
+      summary: Get Employee Settings
+      operationId: approver_employee_settings_get
+      description: |
+        Get employee settings for a given employee.
+      parameters:
+        - in: query
+          name: employee_id
+          schema:
+            type: string
+          required: true
+          description: The employee ID for user whom we need to fetch settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/spender_employee_settings_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /approver/advance_requests/attach_files/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk attach files to advance requests
+      description: |
+        Bulk attach files to advance requests
+      operationId: advance_requests_bulk_attach_files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/attach_files_to_advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/advance_requests/add_approver:
+    post:
+      summary: Add approver to advance request
+      operationId: advance_requests_add_approver_post
+      description: |
+        This API allows approvers to add an approver to an advance request.
+      tags:
+        - Advances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_add_approver_in'
+            example:
+              data:
+                id: areq5F9xIaMURI
+                approver_email: approver@example.com
+                comment: Need your review on this advance
+      responses:
+        '200':
+          description: Approver added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/advance_requests/reject:
+    post:
+      tags:
+        - Advances
+      summary: Reject advance request
+      description: |
+        This API allows approvers to reject an advance request.
+      operationId: advance_requests_reject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_reject_in'
+              example:
+                data:
+                  id: areq5F9xIaMURI
+                  comment: Budget exceeded
+      responses:
+        '200':
+          description: Advance request has been rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/advance_requests/approve/bulk:
+    post:
+      tags:
+        - Advances
+      summary: Bulk approve advance requests
+      description: |
+        This API allows approvers to approve multiple advance requests in a single operation.
+      operationId: advance_requests_bulk_approve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_request_bulk_approve_in'
+      responses:
+        '200':
+          description: OK - All advance requests have been processed successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/advance_requests/inquire:
+    post:
+      tags:
+        - Advances
+      summary: Inquire about advance request
+      description: |
+        This API allows approvers to inquire about an advance request, sending it back to the spender for clarification or modifications.
+      operationId: advance_requests_inquire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_inquire_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: Advance request has been sent back successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access. 
+  /approver/advance_requests/submit:
+    post:
+      tags:
+        - Advances
+      summary: Submit an advance request
+      description: |
+        Submit an advance request.
+      operationId: advance_requests_submit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/advance_request_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/advance_requests/custom_fields:
+    get:
+      tags:
+        - Advances
+      summary: Get advance request custom fields
+      description: |
+        This API allows approvers to retrieve all active custom fields for advance requests in their organization.
+      operationId: advance_requests_custom_fields_get
+      responses:
+        '200':
+          description: Successfully retrieved custom fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/advance_request_custom_fields_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation. 
