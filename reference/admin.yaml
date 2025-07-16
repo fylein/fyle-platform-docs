@@ -6126,16 +6126,28 @@ components:
           enum:
             - cron
         when:
-          oneOf:
-            - type: object
-              additionalProperties: false
-              properties:
-                day:
-                  type: number
+          type: object
+          additionalProperties: false
+          properties:
+            month:
+              oneOf:
+                - type: number
+                  example: 1
+                  description: Month of the year (number, e.g. 1)
+                - type: string
+                  example: '*/2'
+                  description: cron expression (e.g. '*/2' for every alternate month)
+            day:
+              oneOf:
+                - type: number
                   example: 15
                   description: Day of month (number, e.g. 15)
-                day_of_week:
-                  type: string
+                - type: string
+                  example: last
+                  description: cron expression (string, e.g. "last")
+            day_of_week:
+              oneOf:
+                - type: string
                   enum:
                     - mon
                     - tue
@@ -6146,31 +6158,24 @@ components:
                     - sun
                   example: mon
                   description: Single weekday name (e.g. "mon")
-                hour:
-                  type: number
-                  example: 22
-                  description: hour of the day in 24-hr format (0-23)
-                minute:
-                  type: number
-                  example: 42
-                  description: minute of the hour (0-59)
-            - type: object
-              additionalProperties: false
-              properties:
-                day:
-                  type: string
-                  example: last
-                  description: cron expression (string, e.g. "last")
-                day_of_week:
-                  type: string
+                - type: string
+                  pattern: '^[1-7](?:,[1-7])*$'
                   example: 1,3,5
                   description: comma-separated day numbers (e.g. "1,3,5" for mon,wed,fri)
-                hour:
-                  type: string
+            hour:
+              oneOf:
+                - type: number
+                  example: 22
+                  description: hour of the day in 24-hr format (0-23)
+                - type: string
                   example: '*/2'
                   description: cron expression (e.g. "*/2" for every 2 hours)
-                minute:
-                  type: string
+            minute:
+              oneOf:
+                - type: number
+                  example: 42
+                  description: minute of the hour (0-59)
+                - type: string
                   example: '*/15'
                   description: cron expression (e.g. "*/15" for every 15 minutes)
     reminder_receiver_user_ids:
