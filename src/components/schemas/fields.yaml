@@ -1289,26 +1289,46 @@ reminder_schedule_config:
       enum:
         - cron
     when:
-      nullable: false
       type: object
       additionalProperties: false
       properties:
-        day:
-          type: number
-          description: day of month (1-31)
-          example: 16
-        day_of_week:
+        year:
           type: string
-          enum:
-            - mon
-            - tue
-            - wed
-            - thu
-            - fri
-            - sat
-            - sun
-          description: name of weekday
-          example: mon
+          example: '*'
+          description: cron expression (string, e.g. "*" for every year)
+        month:
+          oneOf:
+            - type: number
+              example: 1
+              description: Month of the year (number, e.g. 1)
+            - type: string
+              example: '*/2'
+              description: cron expression (e.g. '*/2' for every alternate month)
+        day:
+          oneOf:
+            - type: number
+              example: 15
+              description: Day of month (number, e.g. 15)
+            - type: string
+              example: last
+              description: cron expression (string, e.g. "last")
+        day_of_week:
+          oneOf:
+            - type: string
+              enum:
+                - mon
+                - tue
+                - wed
+                - thu
+                - fri
+                - sat
+                - sun
+              example: mon
+              description: Single weekday name (e.g. "mon")
+            - type: string
+              pattern: '^[1-7](?:,[1-7])*$'
+              example: 1,3,5
+              description: comma-separated day numbers (e.g. "1,3,5" for mon,wed,fri)
         hour:
           type: number
           example: 22
@@ -1316,8 +1336,7 @@ reminder_schedule_config:
         minute:
           type: number
           example: 42
-          description: minute of the hour
-
+          description: minute of the hour (0-59)
 project_display_name:
   type: string
   nullable: false
