@@ -63,6 +63,7 @@ Here's the full list of operators supported:
 | agte | Greater than or equal to absolute value | integer| amount=agte.0 |
 | in | Is one of | integer, string | id=in.(id1,id2,id3) |
 | not_in | Is not one of | integer, string | id=not_in.(id1,id2,id3) |
+| ilike_in | Is one of, case insensitive | string | merchant=ilike_in.(MERCHANT1, merchant2) |
 | is | Is equals to | null, boolean | is_reimbursable=is.true |
 | is_not | Is not equals to | null, boolean | is_reimbursable=is_not.true |
 | like | Matches case-sensitively with pattern  | integer, string | cost_center->name=like.%porate%, cost_center->name=like.Corporate |
