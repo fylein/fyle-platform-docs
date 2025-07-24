@@ -5854,6 +5854,24 @@ components:
       items:
         $ref: '#/components/schemas/advance_request_custom_field_out'
       description: List of advance request custom fields
+    advance_request_generate_file_urls_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - file_ids
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          description: ID of the advance request
+          example: areqWQsueRHdy
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: List of file IDs to generate URLs for
+          example:
+            - fiH717IpzaTG
   parameters:
     limit:
       in: query
@@ -8862,3 +8880,66 @@ paths:
                     type: string
                     description: |
                       This error means current user does not have enough permissions to perform this operation. 
+  /approver/advance_requests/generate_file_urls/bulk:
+    post:
+      operationId: advance_requests_generate_file_urls_bulk_post
+      tags:
+        - Advances
+      summary: Bulk generate download and upload URLs for advance request files
+      description: |
+        Generate temporary signed URLs for downloading and uploading files associated with advance requests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/advance_request_generate_file_urls_in'
+                  example:
+                    - id: areqWQsueRHdy
+                      file_ids:
+                        - fiH717IpzaTG
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_generate_urls_action_out'
+                    example:
+                      - id: fiH717IpzaTG
+                        name: foodreceipt.png
+                        content_type: image/png
+                        download_url: https://s3.ap-south-1.amazonaws.com/fyle-storage-mumbai-3/2025-07-21/orLr77tpLxsk/receipts/fiH717IpzaTG.foodreceipt.png
+                        upload_url: https://s3.ap-south-1.amazonaws.com/fyle-storage-mumbai-3/2025-07-21/orLr77tpLxsk/receipts/fiH717IpzaTG.foodreceipt.png
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
