@@ -35,4 +35,4 @@ focus: false
 
 That's a very high-level summary of how to use Fyle's APIs. The devil, as always, is in the details. 
 
-Next, you'd want to understand the [Types of Applications](./concepts/types-of-application.md) in Fyle and how to get them to work for you.
+Next, you'd want to understand the [Types of Applications](./concepts/types-of-application.md) in Fyle and how to get them to work for you. 
