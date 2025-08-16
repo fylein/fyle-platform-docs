@@ -58,24 +58,8 @@ jobs:
     - name: Update owner docs
       run: openapi bundle -o reference/owner.yaml src/owner/openapi.yaml
 
-    - name: Get Git user info
-      id: git-user
-      run: |
-        # Try to get the actual committer from the triggering commit
-        if [ "${{ github.event_name }}" = "push" || "${{ github.event_name }}" = "pull_request" ]; then
-          COMMITTER_NAME=$(git log -1 --pretty=format:'%an' ${{ github.sha }})
-          COMMITTER_EMAIL=$(git log -1 --pretty=format:'%ae' ${{ github.sha }})
-        else
-          COMMITTER_NAME="${{ github.actor }}"
-          COMMITTER_EMAIL="${{ github.actor }}@users.noreply.github.com"
-        fi
-        echo "name=$COMMITTER_NAME" >> $GITHUB_OUTPUT
-        echo "email=$COMMITTER_EMAIL" >> $GITHUB_OUTPUT
-
     - name: Commit changes
       uses: EndBug/add-and-commit@v6
       with:
-        author_name: ${{ steps.git-user.outputs.name }}
-        author_email: ${{ steps.git-user.outputs.email }}
         message: "Auto generate API docs"
         add: "./reference"
