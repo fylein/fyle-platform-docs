@@ -17,6 +17,9 @@ tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Employees
+    description: |
+      These APIs gives you access to manage employees.
 paths:
   /owner/orgs/reset:
     post:
@@ -124,6 +127,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /owner/employees/change_owner:
+    post:
+      tags:
+        - Employees
+      summary: Change Owner of an Org
+      description: |
+        This API allows transferring ownership of an organisation to an admin.
+      operationId: employees_change_owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_change_owner_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
 components:
   securitySchemes:
     oauth2:
@@ -181,3 +231,18 @@ components:
           description: |
             The unique id of the Organization to which the object is associated.
           example: orwruogwnngg
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
+    employee_change_owner_in:
+      type: object
+      properties:
+        target_employee_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ouabcdefghij
+      required:
+        - target_employee_id
