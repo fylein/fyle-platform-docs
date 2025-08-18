@@ -13,67 +13,13 @@ servers:
     description: US Region Server
   - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
-components:
-  securitySchemes:
-    oauth2:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: https://app.fylehq.com/app/developers/#/oauth/authorize
-          tokenUrl: https://accounts.fylehq.com/oauth/token
-          scopes:
-            '*': Grant all actions
-  schemas:
-    '400':
-      type: object
-      properties:
-        message:
-          type: string
-          nullable: true
-          description: |
-            Message describing why the request is invalid
-    '401':
-      type: object
-      properties:
-        message:
-          enum:
-            - invalid token
-          type: string
-          description: |
-            This error means that the input access token is either not issued by Fyle or has expired.
-            You need to generate a new access token.
-    '403':
-      type: object
-      properties:
-        message:
-          enum:
-            - Forbidden
-          type: string
-          description: |
-            This error means current user does not have enough permissions to perform this operation.
-    '404':
-      type: object
-      properties:
-        message:
-          enum:
-            - Resource not found
-          type: string
-          description: |
-            This error means the requested resource was not found or the requester doesn't have sufficient access.
-    org_reset_delete_in:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          description: |
-            The unique id of the Organization to which the object is associated.
-          example: orwruogwnngg
 tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Employees
+    description: |
+      These APIs gives you access to manage employees.
 paths:
   /owner/orgs/reset:
     post:
@@ -181,3 +127,122 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /owner/employees/change_owner:
+    post:
+      tags:
+        - Employees
+      summary: Change Owner of an Org
+      description: |
+        This API allows transferring ownership of an organisation to an admin.
+      operationId: employees_change_owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employee_change_owner_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://app.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
+          scopes:
+            '*': Grant all actions
+  schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is invalid
+    '401':
+      type: object
+      properties:
+        message:
+          enum:
+            - invalid token
+          type: string
+          description: |
+            This error means that the input access token is either not issued by Fyle or has expired.
+            You need to generate a new access token.
+    '403':
+      type: object
+      properties:
+        message:
+          enum:
+            - Forbidden
+          type: string
+          description: |
+            This error means current user does not have enough permissions to perform this operation.
+    '404':
+      type: object
+      properties:
+        message:
+          enum:
+            - Resource not found
+          type: string
+          description: |
+            This error means the requested resource was not found or the requester doesn't have sufficient access.
+    org_reset_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: |
+            The unique id of the Organization to which the object is associated.
+          example: orwruogwnngg
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
+    employee_change_owner_in:
+      type: object
+      properties:
+        target_employee_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ouabcdefghij
+      required:
+        - target_employee_id
