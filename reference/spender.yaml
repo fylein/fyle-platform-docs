@@ -3146,6 +3146,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/employees/send_mobile_verification_code:
+    post:
+      tags:
+        - Employees
+      summary: Send mobile verification code
+      operationId: employees_send_mobile_verification_code_post
+      description: |
+        Send mobile verification code to employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_send_mobile_verification_code_post_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
   /spender/employee_settings:
     get:
       tags:
@@ -6523,6 +6580,13 @@ components:
           nullable: true
           description: |
             Message describing why the request resulted in a conflict
+    '500':
+      type: object
+      properties:
+        message:
+          type: string
+          description: |
+            API server hit an internal error and could not process request. This is likely a bug.
     count:
       type: integer
       description: |
@@ -13562,6 +13626,41 @@ components:
           $ref: '#/components/schemas/timestamptz_utc'
         end_date:
           $ref: '#/components/schemas/timestamptz_utc'
+    employees_send_mobile_verification_code_post_out:
+      type: object
+      additionalProperties: false
+      properties:
+        to:
+          type: string
+          description: |
+            Phone number to which the verification code was sent
+          example: '+15017122661'
+        channel:
+          type: string
+          description: |
+            Channel used for sending the verification code
+          example: sms
+        status:
+          type: string
+          description: |
+            Current status of the verification attempt
+          example: pending
+        valid:
+          type: boolean
+          description: |
+            Whether the verification is valid
+          example: false
+        date_created:
+          type: string
+          format: date-time
+          description: |
+            Date and time when the verification was created
+          example: '2015-07-30T20:00:00Z'
+        attempts_left:
+          type: number
+          description: |
+            Number of attempts left in a 24 hour window
+          example: 4
     employee_check_mobile_verification_code_in:
       type: object
       properties:
