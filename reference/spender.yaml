@@ -2795,6 +2795,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Add mobile number
+      description: |
+        Add mobile number to an employee's profile
+      operationId: spender_employee_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_employee_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/employees/commute_details:
     post:
       tags:
@@ -13353,6 +13407,21 @@ components:
             $ref: '#/components/schemas/delegatees'
           description: |
             List of users who are delegatees for this employee.
+    spender_employee_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ouabcdefghij
+        mobile:
+          type: string
+          description: |
+            The mobile number to be added to the employee's profile. It should start with a '+' sign, include the country code, and have a total of 4 to 15 digits.
+          example: '+15017122661'
+      required:
+        - id
+        - mobile
     commute_location_not_nullable:
       type: object
       nullable: false
