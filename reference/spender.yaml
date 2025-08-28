@@ -2849,6 +2849,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/employees/current:
+    get:
+      tags:
+        - Employees
+      summary: Get current employee
+      operationId: employees_current
+      description: |
+        Get the current employee details
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_employee_current_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /spender/employees/commute_details:
     post:
       tags:
@@ -13464,6 +13495,198 @@ components:
       required:
         - id
         - mobile
+    locale:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        abbreviation:
+          type: string
+          nullable: false
+          maxLength: 4
+          example: IST
+          description: |
+            Represents the abbreviation of the employee's locale.
+        offset:
+          type: string
+          nullable: false
+          maxLength: 9
+          example: '05:30:00'
+          description: |
+            Represents the offset of the employee's timezone from UTC.
+        timezone:
+          type: string
+          nullable: false
+          maxLength: 19
+          example: Asia/Kolkata
+          description: |
+            Represents the timezone of the employee.
+      description: |
+        Location and timezone settings of the employee.
+    mileage_settings:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        mileage_rate_labels:
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: four_wheeler
+          example:
+            - four_wheeler
+            - two_wheeler
+        annual_mileage_of_user_before_joining_fyle:
+          type: object
+          nullable: true
+          items:
+            type: object
+          example:
+            two_wheeler: 44
+      description: |
+        Mileage settings of the employee.
+    spender_employee_current_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/fk_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        special_email:
+          type: string
+          maxLength: 127
+          nullable: true
+          example: receipts+admin1_mb4w@fyle.ai
+          description: |
+            Special email address for the employee used for receipt processing
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        branch_account:
+          type: string
+          nullable: true
+          example: '1234567890'
+          description: |
+            The Account number of the bank account of the Employee.
+        branch_ifsc:
+          type: string
+          nullable: true
+          maxLength: 11
+          example: SBIN0007587
+          description: |
+            IFSC code of the bank account of the Employee. Must be a 11 digit alphanumeric code.
+        department_id:
+          $ref: '#/components/schemas/fk_string'
+        department:
+          $ref: '#/components/schemas/department_out_embed'
+        level_id:
+          $ref: '#/components/schemas/fk_string'
+        level:
+          nullable: true
+          $ref: '#/components/schemas/level_out_embed'
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          description: |
+            Mobile number of the employee
+        is_mobile_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Flag which indicates if mobile is verified or not.
+          example: false
+        mobile_verification_attempts_left:
+          type: integer
+          description: |
+            Number of mobile verification attempts left for the employee
+          example: 3
+        approver_user_ids:
+          type: array
+          maxLength: 3
+          nullable: true
+          items:
+            $ref: '#/components/schemas/fk_string'
+          example:
+            - uswoirwlwwg
+            - uswlgwkgw42
+          description: |
+            List of IDs of users who are approvers for this employee. Maximum 3.
+        approver_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            List of users who are approvers for this employee.
+        locale:
+          $ref: '#/components/schemas/locale'
+        delegatees:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/delegatees'
+          description: |
+            List of users who are delegatees for this employee.
+        mileage_settings:
+          $ref: '#/components/schemas/mileage_settings'
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+        flattened_custom_field:
+          $ref: '#/components/schemas/flattened_custom_field'
+        commute_details_id:
+          $ref: '#/components/schemas/fk_integer'
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+        is_primary:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates if this is the primary org employee record for the user
+          example: true
     commute_location_not_nullable:
       type: object
       nullable: false
