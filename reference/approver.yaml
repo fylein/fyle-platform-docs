@@ -31,6 +31,9 @@ tags:
   - name: Projects
     description: |
       These APIs gives you access to manage your organisation's Projects
+  - name: Merchants
+    description: |
+      This API gives you access to your organisation's Merchants
   - name: Mileage Rates
     description: |
       This API gives you access to your organisation's Mileage Rates
@@ -1459,6 +1462,49 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/per_diem_rate_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /approver/merchants:
+    get:
+      tags:
+        - Merchants
+      summary: List merchants
+      operationId: merchants_list
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/display_name'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/approver_merchant_out'
         '400':
           description: Bad request
           content:
@@ -3056,6 +3102,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /approver/employee_overview/hierarchy:
+    get:
+      tags:
+        - Employees
+      summary: List employees hierarchy view
+      description: |
+        This API returns a hierarchical list of employees reporting to the user calling this API. Each employee includes their position in the hierarchy (depth) and their primary approver.
+      operationId: employee_overview_hierarchy_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_hierarchy_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
 components:
   securitySchemes:
     oauth2:
@@ -6778,6 +6878,23 @@ components:
           type: number
           example: 10
           description: Amount per night
+    approver_merchant_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        display_name:
+          type: string
+          description: |
+            Merchant name
+          example: Starbucks Coffee
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -8928,7 +9045,82 @@ components:
           description: List of file IDs to generate URLs for
           example:
             - fiH717IpzaTG
+    employee_hierarchy_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Full name of the employee
+          example: David Davis
+        email:
+          $ref: '#/components/schemas/email'
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        depth:
+          type: integer
+          description: Hierarchy depth level of the employee (0 is top level)
+          example: 0
+          minimum: 0
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        primary_approver_user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+          nullable: true
   parameters:
+    id:
+      in: query
+      name: id
+      description: |
+        A resource ID
+      schema:
+        type: string
+        example:
+          - eq.ouwruogwnngg
+    created_at:
+      in: query
+      name: created_at
+      description: |
+        Date string in yyyy-MM-ddTHH:mm:ss.SSSZ  format along with operator in RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
+      schema:
+        type: string
+        example: gte.2020-06-01T00:00:00.000-08:00
+    updated_at:
+      in: query
+      name: updated_at
+      description: |
+        Date string in yyyy-MM-ddTHH:mm:ss.SSSZ  format along with operator in RHS dot pattern.<br> Supported operators are `gte`,`lte`,`gt`,`lt`.
+      schema:
+        type: string
+        example: gte.2020-06-01T00:00:00.000-08:00
+    display_name:
+      in: query
+      name: display_name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        display_name=in.(value1,value2)
+      schema:
+        type: string
+        example: like.Fast*
+    offset:
+      in: query
+      name: offset
+      description: |
+        offset is used to skip that many number of objects before counting. <br>
+      schema:
+        type: integer
+        example: 10
     limit:
       in: query
       name: limit
@@ -8939,14 +9131,22 @@ components:
         example: 20
         default: 50
         maximum: 200
-    offset:
+    order:
       in: query
-      name: offset
+      name: order
       description: |
-        offset is used to skip that many number of objects before counting. <br>
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
       schema:
-        type: integer
-        example: 10
+        type: string
+        example: updated_at.desc,id
+    q:
+      in: query
+      name: q
+      description: A search query to filter the results.
+      schema:
+        type: string
+        example: Ritas
     expense_id:
       in: query
       name: expense_id
