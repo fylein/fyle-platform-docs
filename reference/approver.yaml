@@ -3102,6 +3102,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /approver/employee_overview/hierarchy:
+    get:
+      tags:
+        - Employees
+      summary: List employees hierarchy view
+      description: |
+        This API returns a hierarchical list of employees reporting to the user calling this API. Each employee includes their position in the hierarchy (depth) and their primary approver.
+      operationId: employee_overview_hierarchy_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_hierarchy_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
 components:
   securitySchemes:
     oauth2:
@@ -8991,6 +9045,39 @@ components:
           description: List of file IDs to generate URLs for
           example:
             - fiH717IpzaTG
+    employee_hierarchy_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Full name of the employee
+          example: David Davis
+        email:
+          $ref: '#/components/schemas/email'
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        depth:
+          type: integer
+          description: Hierarchy depth level of the employee (0 is top level)
+          example: 0
+          minimum: 0
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        primary_approver_user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+          nullable: true
   parameters:
     id:
       in: query
