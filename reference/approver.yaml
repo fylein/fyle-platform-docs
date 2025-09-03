@@ -3156,6 +3156,64 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/employee_overview:
+    get:
+      tags:
+        - Employees
+      summary: List expense overview of employees under the current user hierarchy
+      description: |
+        This API returns a list of employees in the organization hierarchy under the current approver with their expense statistics and overview information.
+      operationId: employee_overview_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_overview_out'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  count:
+                    $ref: '#/components/schemas/count'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
 components:
   securitySchemes:
     oauth2:
@@ -9078,6 +9136,105 @@ components:
             The unique id of an user to which the object is associated.
           example: uswjwgnwwgo
           nullable: true
+    employee_overview_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user:
+          type: object
+          additionalProperties: false
+          properties:
+            email:
+              $ref: '#/components/schemas/email'
+            full_name:
+              type: string
+              maxLength: 255
+              description: Full name of the user
+              example: John
+            id:
+              $ref: '#/components/schemas/user_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        employee:
+          type: object
+          additionalProperties: false
+          properties:
+            has_accepted_invite:
+              $ref: '#/components/schemas/has_accepted_invite'
+            id:
+              $ref: '#/components/schemas/id_string'
+            is_enabled:
+              allOf:
+                - $ref: '#/components/schemas/is_enabled'
+              description: |
+                This field indicates whether the employee is enabled in the org.
+            org_id:
+              $ref: '#/components/schemas/org_id'
+            org_name:
+              $ref: '#/components/schemas/org_name'
+            title:
+              type: string
+              maxLength: 255
+              nullable: true
+              example: Branch Manager
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+        primary_approver:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            id:
+              $ref: '#/components/schemas/user_id'
+            name:
+              type: string
+              maxLength: 255
+              description: Full name of the primary approver
+              example: David Davis
+            email:
+              $ref: '#/components/schemas/email'
+        primary_approver_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+          nullable: true
+        department:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            id:
+              $ref: '#/components/schemas/id_string'
+            name:
+              type: string
+              maxLength: 255
+              description: Name of the department
+              example: Engineering
+            code:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: Department code
+              example: ENG
+            sub_department:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: Sub-department name
+              example: null
+        department_id:
+          $ref: '#/components/schemas/id_string'
+        expense_total_amount:
+          type: number
+          description: Total amount of expenses for the employee
+          example: 200.01
+        expense_count:
+          type: integer
+          description: Total count of expenses for the employee
+          example: 5
   parameters:
     id:
       in: query
