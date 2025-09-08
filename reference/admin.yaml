@@ -7800,7 +7800,7 @@ paths:
               additionalProperties: false
               properties:
                 data:
-                  $ref: '#/components/schemas/subscriptions_in'
+                  $ref: '#/components/schemas/admin_subscriptions_in'
       responses:
         '200':
           description: OK
@@ -22246,6 +22246,36 @@ components:
       description: |
         URL Endpoint for webhook
       example: https://api.custom.com/webhook1
+    subscribed_resources:
+      type: array
+      description: |
+        List of resource types that the subscription is configured for.
+      items:
+        type: string
+        enum:
+          - EXPENSE
+          - REPORT
+          - CATEGORY
+          - PROJECT
+          - COST_CENTER
+          - EXPENSE_FIELD
+          - DEPENDENT_EXPENSE_FIELD
+          - CORPORATE_CARD
+          - EMPLOYEE
+          - TAX_GROUP
+          - ORG_SETTING
+      example:
+        - EXPENSE
+        - REPORT
+        - CATEGORY
+        - PROJECT
+        - COST_CENTER
+        - EXPENSE_FIELD
+        - DEPENDENT_EXPENSE_FIELD
+        - CORPORATE_CARD
+        - EMPLOYEE
+        - TAX_GROUP
+        - ORG_SETTING
     admin_subscriptions_out:
       type: object
       additionalProperties: false
@@ -22262,17 +22292,22 @@ components:
           $ref: '#/components/schemas/created_at'
         org_id:
           $ref: '#/components/schemas/fk_string'
-    subscriptions_in:
+        subscribed_resources:
+          $ref: '#/components/schemas/subscribed_resources'
+    admin_subscriptions_in:
       type: object
       additionalProperties: false
       required:
         - is_enabled
         - webhook_url
+        - subscribed_resources
       properties:
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
         webhook_url:
           $ref: '#/components/schemas/webhook_url'
+        subscribed_resources:
+          $ref: '#/components/schemas/subscribed_resources'
     report_out:
       type: object
       additionalProperties: false
