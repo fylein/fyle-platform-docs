@@ -1,0 +1,84 @@
+post:
+  tags:
+    - Places
+  summary: Location Autocomplete
+  description: |
+    Returns place suggestions based on the search query.
+  operationId: location_autocomplete
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - search_query
+            - user_id
+          properties:
+            search_query:
+              type: string
+              description: The query string on which to search for place suggestions
+              example: www
+            user_id:
+              type: string
+              description: User ID for cache personalization
+              example: usx4eGq0uIPu
+            location:
+              type: string
+              description: Optional location bias in format "latitude,longitude"
+              example: "26.595889,85.4891037"
+            types:
+              type: string
+              description: Optional place types filter
+              example: "(cities)"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                          example: "wwwtc mall, Gloucester Road, Causeway Bay, Hong Kong"
+                        place_id:
+                          type: string
+                          example: "ChIJVX_KZ1YABDQR8TZ6STtir8M"
+                        structured_formatting:
+                          type: object
+                          properties:
+                            main_text:
+                              type: string
+                              example: "wwwtc mall"
+                            secondary_text:
+                              type: string
+                              example: "Gloucester Road, Causeway Bay, Hong Kong"
+                        types:
+                          type: array
+                          items:
+                            type: string
+                          example: ["establishment", "point_of_interest"]
+                  status:
+                    type: string
+                    example: "OK"
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
