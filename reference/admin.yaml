@@ -16392,6 +16392,74 @@ components:
             Last updated timestamp in UTC.
           readOnly: true
           example: '2023-12-01T10:15:30.123+00:00'
+    reconciliation_transaction_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - reconciliation_entry_id
+        - corporate_card_id
+        - statement_amount
+        - statement_merchant
+        - matched_expenses_count
+        - is_reconciled
+        - is_ignored
+        - expenses
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          example: rectx8abc123
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        reconciliation_entry_id:
+          $ref: '#/components/schemas/id_string'
+          example: receabc12345
+        corporate_card_id:
+          $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        statement_line_item_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: stliabc123
+        expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwownwrng
+            - txuXDH16HzK
+        statement_amount:
+          $ref: '#/components/schemas/amount'
+          example: 33.45
+        statement_merchant:
+          type: string
+          example: AMexon
+        statement_transaction_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+        statement_post_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+        matched_expenses_count:
+          type: integer
+          example: 3
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_out'
+          description: >
+            List of matched expenses. Can be an empty array when there are no
+            expenses.
+        is_reconciled:
+          type: boolean
+          example: false
+        is_ignored:
+          type: boolean
+          example: false
     spender_employee_settings_out:
       type: object
       additionalProperties: false
@@ -28059,6 +28127,46 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reconciliation_entry'
+  /admin/reconciliation_entries/transactions:
+    get:
+      tags:
+        - Reconciliation
+      summary: List reconciliation transactions
+      description: >
+        Retrieve reconciliation transactions for corporate card statement
+        reconciliations.
+
+
+        Use this endpoint to fetch transactions with statement details and
+        matched expenses. Filter across fields using the `q` parameter and
+        structured filters. Pagination is supported via `offset` and `limit`,
+        and sorting via `order`.
+
+
+        To understand filtering, ordering and pagination, see the [Guide to Data
+        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reconciliation_transactions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reconciliation_transaction_out'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses

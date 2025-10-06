@@ -1,0 +1,66 @@
+reconciliation_transaction_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - org_id
+    - reconciliation_entry_id
+    - corporate_card_id
+    - statement_amount
+    - statement_merchant
+    - matched_expenses_count
+    - is_reconciled
+    - is_ignored
+    - expenses
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+      example: rectx8abc123
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    reconciliation_entry_id:
+      $ref: './fields.yaml#/id_string'
+      example: receabc12345
+    corporate_card_id:
+      $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    statement_line_item_id:
+      allOf:
+        - $ref: './fields.yaml#/fk_string'
+      nullable: true
+      example: stliabc123
+    expense_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      example: [ 'txwownwrng', 'txuXDH16HzK' ]
+    statement_amount:
+      $ref: './fields.yaml#/amount'
+      example: 33.45
+    statement_merchant:
+      type: string
+      example: AMexon
+    statement_transaction_date:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+    statement_post_date:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+    matched_expenses_count:
+      type: integer
+      example: 3
+    expenses:
+      type: array
+      items:
+        $ref: './expense.yaml#/expense_out'
+      description: | 
+        List of matched expenses. Can be an empty array when there are no expenses.
+    is_reconciled:
+      type: boolean
+      example: false
+    is_ignored:
+      type: boolean
+      example: false
+
