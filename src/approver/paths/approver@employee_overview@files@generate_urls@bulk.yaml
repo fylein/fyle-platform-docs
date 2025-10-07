@@ -1,0 +1,68 @@
+post:
+  operationId: files_generate_urls_bulk_post
+  tags:
+    - Files
+  summary: Bulk generate download and upload URLs
+  description: |
+    Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
+    need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: ../../components/schemas/file.yaml#/file_generate_urls_action_in
+              example:
+                - id: fi123819sa
+                - id: fi876833tu
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/file.yaml#/file_generate_urls_action_out
+                example:
+                  - id: sdfd2391
+                    name: uber_expenses_vmrpw.pdf
+                    content_type: application/pdf
+                    download_url: https://aaa.bbb.cc/x232sds
+                    upload_url: https://aaa.bbb.cc/x232sds
+                  - id: sdfd2392
+                    name: lyft_expenses_vmrpw.pdf
+                    content_type: application/pdf
+                    download_url: https://aaa.bbb.cc/x22ddsds
+                    upload_url: https://aaa.bbb.cc/x2sdssds
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
+
