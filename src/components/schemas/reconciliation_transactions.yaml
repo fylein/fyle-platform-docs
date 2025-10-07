@@ -54,7 +54,7 @@ reconciliation_transaction_out:
     expenses:
       type: array
       items:
-        $ref: './expense.yaml#/expense_out'
+        $ref: '#/reconciliation_matched_expense_out_embed'
       description: | 
         List of matched expenses. Can be an empty array when there are no expenses.
     is_reconciled:
@@ -63,4 +63,140 @@ reconciliation_transaction_out:
     is_ignored:
       type: boolean
       example: false
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
 
+reconciliation_expense_split_out_embed:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - amount
+    - state
+    - purpose
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: txwownwrng
+    amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      nullable: true
+    merchant:
+      allOf:
+        - $ref: './fields.yaml#/merchant'
+      nullable: true
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      description: The state of the Expense.
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: List of file IDs attached to the expense split
+      example: ['figwiwpjww', 'figwiwpjwx']
+    category:
+      allOf:
+        - $ref: './fields.yaml#/category_display_name'
+      description: Category display name of the split expense
+      nullable: true
+      example: Travel
+    project:
+      allOf:
+        - $ref: './fields.yaml#/project_display_name'
+      description: Project display name of the split expense
+      nullable: true
+      example: ACME / Expansion
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
+
+reconciliation_matched_expense_out_embed:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - amount
+    - merchant
+    - spent_at
+    - state
+    - file_ids
+    - category
+    - project
+    - purpose
+    - splits
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: txuXDH16HzK
+    amount:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      nullable: true
+      example: 33.45
+    merchant:
+      allOf:
+        - $ref: './fields.yaml#/merchant'
+      nullable: true
+      example: AMexon
+    spent_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+    state:
+      type: string
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      description: The state of the Expense.
+    file_ids:
+      type: array
+      items:
+        $ref: './fields.yaml#/id_string'
+      description: List of file IDs attached to the expense
+      example: ['figwiwpjww', 'figwiwpjwx']
+    category:
+      allOf:
+        - $ref: './fields.yaml#/category_display_name'
+      description: Category display name of the expense
+      nullable: true
+      example: Travel
+    project:
+      allOf:
+        - $ref: './fields.yaml#/project_display_name'
+      description: Project display name of the expense
+      nullable: true
+      example: ACME / Expansion
+    purpose:
+      type: string
+      nullable: true
+      example: Team lunch
+    splits:
+      type: array
+      description: List of split expenses. Empty when the expense is not split.
+      items:
+        $ref: '#/reconciliation_expense_split_out_embed'
