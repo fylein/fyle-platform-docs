@@ -1,0 +1,250 @@
+openapi: 3.0.3
+info:
+  version: '1.0'
+  title: Manager APIs
+  description: |
+    These APIs are generally used to integrate Fyle with accounting or HRMS systems. 
+  contact:
+    name: Platform Beta
+    email: support@fylehq.com
+servers:
+  - url: https://us1.fylehq.com/platform/v1
+    description: US Region Server
+  - url: https://in1.fylehq.com/platform/v1
+    description: India Region Server
+tags: []
+paths:
+  /manager/employee_overview/expense_comments:
+    get:
+      operationId: employee_overview_expense_comments_get
+      tags:
+        - Employees
+      summary: Get employee overview expense comments
+      description: |
+        This API returns expense comments of an expense.
+      parameters:
+        - $ref: '#/components/parameters/expense_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://app.fylehq.com/app/developers/#/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
+          scopes:
+            '*': Grant all actions
+  parameters:
+    expense_id:
+      in: query
+      name: expense_id
+      description: |
+        Expense id for filtering based on expenses. Supported operator is `eq`.
+      schema:
+        type: string
+        example: expense_id=eq.txS9GZm5hsjh
+  schemas:
+    '400':
+      type: object
+      properties:
+        message:
+          type: string
+          nullable: true
+          description: |
+            Message describing why the request is invalid
+    '401':
+      type: object
+      properties:
+        message:
+          enum:
+            - invalid token
+          type: string
+          description: |
+            This error means that the input access token is either not issued by Fyle or has expired.
+            You need to generate a new access token.
+    count:
+      type: integer
+      description: |
+        The total number of objects that can be requested.
+      example: 10000
+    offset:
+      description: |
+        offset is used to skip that many number of objects before counting. <br>
+        For example, if there are 2000 objects, <br>
+        The first request will have offset as 0 and limit as 200 to return first 200 objects. <br>
+        The second request will have offset as 200 and limit as 200 to return next 200 objects. <br>
+      type: integer
+      example: 10
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
+    user_id_nullable:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      nullable: true
+      example: uswjwgnwwgo
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: |
+        An immutable field that represents the email address of the employee.
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
+    user_out_embed_nullable:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+    created_at:
+      type: string
+      format: date-time
+      description: |
+        Signifies when this object was created in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T13:14:54.804+00:00'
+    updated_at:
+      type: string
+      format: date-time
+      description: |
+        Signifies when this object was updated in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-11T13:14:55.201598+00:00'
+    org_id:
+      type: string
+      description: |
+        The unique id of the Organization to which the object is associated.
+      readOnly: true
+      example: orwruogwnngg
+    expense_comments_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment
+        - action
+        - action_data
+        - expense_id
+        - creator_type
+        - org_id
+        - updated_at
+        - created_at
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        comment:
+          type: string
+          description: comment on the report
+          example: We don't accept laundry bills
+        action:
+          type: string
+          description: Expense action for which comment is added.
+          enum:
+            - ADMIN_APPROVED
+            - APPROVED
+            - APPROVER_REMOVED
+            - AUTO_MATCHED
+            - AUTO_MERGED
+            - COMMENTED
+            - COMMENTED_WITH_NOTIFICATION
+            - COMMENTED_WITHOUT_NOTIFICATION
+            - DATA_EXTRACTED
+            - EJECTED_FROM_REPORT
+            - EXPENSE_RULE_APPLIED
+            - FILE_ATTACHED
+            - FILE_DELETED
+            - INVALID_EXPENSE_FIELD_REMOVED
+            - MATCHED
+            - PAID
+            - PARTIALLY_APPROVED
+            - POLICY_RESULT_APPLIED
+            - UNMATCHED
+          example: COMMENTED_WITH_NOTIFICATION
+        action_data:
+          type: object
+          description: Data related to expense action.
+          nullable: true
+        expense_id:
+          $ref: '#/components/schemas/id_string'
+        creator_type:
+          type: string
+          description: Describes whether the comment is system-generated or User made.
+          enum:
+            - SYSTEM
+            - POLICY
+            - USER
+          example: USER
+        creator_user_id:
+          $ref: '#/components/schemas/user_id_nullable'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
