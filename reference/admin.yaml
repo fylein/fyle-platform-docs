@@ -104,6 +104,9 @@ tags:
   - name: Merchants
     description: |
       This API gives you access to merchants, primarily to help with autocomplete.
+  - name: Reconciliation
+    description: |
+      These APIs give you access to view reconciliation entries for corporate card statement reconciliations.
   - name: Expense Policy Comments
     description: |
       This API gives you access to manage expense policy comments.
@@ -10706,6 +10709,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/reconciliation_entries:
+    get:
+      tags:
+        - Reconciliation
+      summary: List reconciliation entries
+      description: |
+        Retrieve reconciliation entries for corporate card statement reconciliations.
+
+        Use this endpoint to fetch entries with period, status and totals, and filter across all fields using the `q` parameter. Pagination is supported via `offset` and `limit`, and sorting via `order`.
+
+        To understand filtering, ordering and pagination, see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reconciliation_entries_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reconciliation_entry'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete project(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses
@@ -26702,6 +26768,106 @@ components:
           description: |
             Merchant name
           example: Uber
+    reconciliation_entry:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: |
+            Unique identifier for this reconciliation entry.
+          readOnly: true
+          example: recnlQw9xY12
+        org_id:
+          type: string
+          description: |
+            Organization id to which this reconciliation entry belongs.
+          example: orwruogwnngg
+        period_start:
+          type: string
+          format: date-time
+          description: |
+            Start of the reconciliation period in UTC.
+          example: '2023-11-01T00:00:00.000+00:00'
+        period_end:
+          type: string
+          format: date-time
+          description: |
+            End of the reconciliation period in UTC.
+          example: '2023-11-30T23:59:59.999+00:00'
+        status:
+          type: string
+          description: |
+            Current status of the reconciliation entry. Values are subject to change.
+          example: RECONCILED
+        reconciled_on:
+          type: string
+          format: date-time
+          description: |
+            Timestamp when the reconciliation was completed.
+          example: '2023-12-01T10:15:30.123+00:00'
+        reconciled_by:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+              description: |
+                Unique identifier of the user who performed the reconciliation.
+              example: uswjwgnwwgo
+            full_name:
+              type: string
+              description: |
+                Full name of the user who performed the reconciliation.
+              example: Jane Doe
+            email:
+              type: string
+              description: |
+                Email of the user who performed the reconciliation.
+              example: john.doe@example.com
+          description: |
+            Details of the user who performed the reconciliation.
+        bridging_entry_change_type:
+          type: string
+          description: |
+            Indicates how the reconciliation window changed due to a bridging entry. Values are subject to change.
+          example: STATEMENT_CYCLE_TO_CALENDAR_MONTH
+        statement_transaction_count:
+          type: integer
+          description: |
+            Number of statement transactions considered in this reconciliation period.
+          example: 128
+        expense_count:
+          type: integer
+          description: |
+            Number of expenses considered in this reconciliation period.
+          example: 125
+        statement_total:
+          type: number
+          format: double
+          description: |
+            Sum of statement transaction amounts considered in this reconciliation period.
+          example: 15432.67
+        expense_total:
+          type: number
+          format: double
+          description: |
+            Sum of expense amounts considered in this reconciliation period.
+          example: 15410.22
+        created_at:
+          type: string
+          format: date-time
+          description: |
+            Resource creation timestamp in UTC.
+          readOnly: true
+          example: '2023-11-30T08:45:12.000+00:00'
+        updated_at:
+          type: string
+          format: date-time
+          description: |
+            Last updated timestamp in UTC.
+          readOnly: true
+          example: '2023-12-01T10:15:30.123+00:00'
     spender_employee_settings_out:
       type: object
       additionalProperties: false
