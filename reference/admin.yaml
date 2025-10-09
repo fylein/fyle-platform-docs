@@ -16286,26 +16286,9 @@ components:
           example: '2023-11-30T23:59:59.999+00:00'
         status:
           type: string
-          enum:
-            - YET_TO_START
-            - PROCESSING
-            - RECONCILED
-            - PROCESSING_STATEMENT
-            - FAILED_STATEMENT
           description: >
-            Current status of the reconciliation entry.
-
-
-            - YET_TO_START: The reconciliation has not started yet
-
-            - PROCESSING: Reconciliation is in progress
-
-            - RECONCILED: Reconciliation is complete
-
-            - PROCESSING_STATEMENT: Statement processing is in progress prior to
-            reconciliation
-
-            - FAILED_STATEMENT: Statement processing failed
+            Current status of the reconciliation entry. Values are subject to
+            change.
           example: RECONCILED
         reconciled_on:
           type: string
@@ -16336,23 +16319,9 @@ components:
             Details of the user who performed the reconciliation.
         bridging_entry_change_type:
           type: string
-          enum:
-            - CALENDAR_MONTH_TO_STATEMENT_CYCLE
-            - STATEMENT_CYCLE_TO_CALENDAR_MONTH
-            - STATEMENT_CYCLE_TO_STATEMENT_CYCLE
           description: >
             Indicates how the reconciliation window changed due to a bridging
-            entry.
-
-
-            - CALENDAR_MONTH_TO_STATEMENT_CYCLE: Calendar month reconciled to
-            statement cycle
-
-            - STATEMENT_CYCLE_TO_CALENDAR_MONTH: Statement cycle reconciled to
-            calendar month
-
-            - STATEMENT_CYCLE_TO_STATEMENT_CYCLE: Statement cycle reconciled to
-            a different statement cycle
+            entry. Values are subject to change.
           example: STATEMENT_CYCLE_TO_CALENDAR_MONTH
         statement_transaction_count:
           type: integer
@@ -28059,6 +28028,38 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reconciliation_entry'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: >
+                      Can not delete project(s) used in other resources like
+                      expense, expense policy, expense rules, budgets, dependent
+                      fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses
