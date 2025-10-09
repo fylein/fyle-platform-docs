@@ -3290,6 +3290,119 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/employee_overview/expenses:
+    get:
+      tags:
+        - Employees
+      summary: List expenses in hierarchy
+      description: |
+        This API gets expenses of employees that are under the current user's hierarchy.
+      operationId: employee_overview_expenses_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /approver/employee_overview/expenses/stats:
+    post:
+      tags:
+        - Employees
+      summary: Expenses Stats of users in hierarchy
+      description: |
+        This API gets expenses stats of employees that are under the current user's hierarchy.
+      operationId: employee_overview_expenses_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_overview_expense_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
 components:
   securitySchemes:
     oauth2:
@@ -9430,6 +9543,18 @@ components:
         total_amount:
           type: number
           description: Total amount across all employees in the overview
+          example: 30003
+    employee_overview_expense_stats_out:
+      type: object
+      additionalProperties: false
+      properties:
+        count:
+          type: integer
+          description: Total count of expenses in the hierarchy
+          example: 1130
+        total_amount:
+          type: number
+          description: Total amount across all employees in the hierarchy
           example: 30003
   parameters:
     id:
