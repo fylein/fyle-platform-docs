@@ -15341,9 +15341,11 @@ components:
         project_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
+          nullable: true
           example: 92895
         project:
           $ref: '#/components/schemas/project_out_embed'
+          nullable: true
         cost_center_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -15364,6 +15366,16 @@ components:
             Dependent expense fields
           items:
             $ref: '#/components/schemas/dependent_expense_fields'
+    is_suggested:
+      type: boolean
+      nullable: true
+      description: Whether this expense rule is a suggested rule
+      example: true
+    is_suggestion_dismissed:
+      type: boolean
+      nullable: true
+      description: Whether the suggestion for this rule has been dismissed
+      example: false
     expense_rule_out:
       type: object
       additionalProperties: false
@@ -15395,6 +15407,10 @@ components:
           $ref: '#/components/schemas/expense_rule_if_out'
         set:
           $ref: '#/components/schemas/expense_rule_data_out'
+        is_suggested:
+          $ref: '#/components/schemas/is_suggested'
+        is_suggestion_dismissed:
+          $ref: '#/components/schemas/is_suggestion_dismissed'
     expense_rule_if_in:
       type: object
       nullable: false
@@ -15437,6 +15453,13 @@ components:
             - $ref: '#/components/schemas/expense_rule_data_in'
             - type: object
               nullable: false
+    expense_rule_dismiss_suggestion_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     expense_rule_delete_in:
       type: object
       required:
@@ -27275,6 +27298,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/expense_rules/dismiss_suggestion:
+    post:
+      tags:
+        - Expense Rules
+      summary: Dismiss an expense rule suggestion
+      description: |
+        Dismiss an expense rule suggestion.
+      operationId: expense_rules_dismiss_suggestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_rule_dismiss_suggestion_in'
+      responses:
+        '200':
+          description: The expense rule suggestion was dismissed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_rule_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expense_rules/delete:
     post:
       tags:
