@@ -10772,6 +10772,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reconciliation_entries/transactions:
+    get:
+      tags:
+        - Reconciliation
+      summary: List reconciliation transactions
+      description: |
+        Retrieve reconciliation transactions for corporate card statement reconciliations.
+
+        Use this endpoint to fetch transactions with statement details and matched expenses. Filter across fields using the `q` parameter and structured filters. Pagination is supported via `offset` and `limit`, and sorting via `order`.
+
+        To understand filtering, ordering and pagination, see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reconciliation_transactions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+        - in: query
+          name: statement_amount
+          schema:
+            type: string
+          description: Filter by statement amount using operators like eq., gt., lt., etc.
+        - in: query
+          name: statement_merchant
+          schema:
+            type: string
+          description: Filter by statement merchant using operators like eq., ilike., etc.
+        - in: query
+          name: statement_transaction_date
+          schema:
+            type: string
+          description: Filter by transaction date using timestamp operators like gte., lte., etc.
+        - in: query
+          name: statement_post_date
+          schema:
+            type: string
+          description: Filter by post date using timestamp operators like gte., lte., etc.
+        - in: query
+          name: is_ignored
+          schema:
+            type: string
+          description: Filter by ignored flag using eq.true/eq.false
+        - in: query
+          name: is_reconciled
+          schema:
+            type: string
+          description: Filter by reconciled flag using eq.true/eq.false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reconciliation_transaction_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses
@@ -26868,6 +26949,249 @@ components:
             Last updated timestamp in UTC.
           readOnly: true
           example: '2023-12-01T10:15:30.123+00:00'
+    reconciliation_expense_split_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - amount
+        - state
+        - purpose
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+          description: Expense id of the split line.
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          nullable: true
+          description: Amount of this split line in organization currency.
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/currency'
+          nullable: true
+          description: Currency of this split line amount (organization currency).
+          example: USD
+        merchant:
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          nullable: true
+          description: Merchant associated with this split, if any.
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Spent date of this split line (nullable).
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - DRAFT
+            - PAID
+            - PAYMENT_PROCESSING
+            - APPROVER_PENDING
+            - PAYMENT_PENDING
+            - APPROVED
+            - UNREPORTABLE
+          description: The state of the Expense.
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: List of file IDs attached to the expense split
+          example:
+            - figwiwpjww
+            - figwiwpjwx
+        category:
+          allOf:
+            - $ref: '#/components/schemas/category_display_name'
+          description: Category display name of the split expense
+          nullable: true
+          example: Travel
+        project:
+          allOf:
+            - $ref: '#/components/schemas/project_display_name'
+          description: Project display name of the split expense
+          nullable: true
+          example: ACME / Expansion
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+          description: Purpose or description of this split line.
+    reconciliation_matched_expense_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - amount
+        - merchant
+        - spent_at
+        - state
+        - file_ids
+        - category
+        - project
+        - purpose
+        - splits
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txuXDH16HzK
+          description: Expense id.
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          nullable: true
+          example: 33.45
+          description: Expense amount in organization currency (nullable).
+        currency:
+          allOf:
+            - $ref: '#/components/schemas/currency'
+          nullable: true
+          example: USD
+          description: Currency of the expense amount (organization currency).
+        merchant:
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          nullable: true
+          example: AMexon
+          description: Merchant associated with the expense, if any.
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Date when the expense was made (nullable).
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - DRAFT
+            - PAID
+            - PAYMENT_PROCESSING
+            - APPROVER_PENDING
+            - PAYMENT_PENDING
+            - APPROVED
+            - UNREPORTABLE
+          description: The state of the Expense.
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: List of file IDs attached to the expense
+          example:
+            - figwiwpjww
+            - figwiwpjwx
+        category:
+          allOf:
+            - $ref: '#/components/schemas/category_display_name'
+          description: Category display name of the expense
+          nullable: true
+          example: Travel
+        project:
+          allOf:
+            - $ref: '#/components/schemas/project_display_name'
+          description: Project display name of the expense
+          nullable: true
+          example: ACME / Expansion
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+          description: Purpose or description of the expense.
+        splits:
+          type: array
+          description: List of split expenses. Empty when the expense is not split.
+          items:
+            $ref: '#/components/schemas/reconciliation_expense_split_out_embed'
+    reconciliation_transaction_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - reconciliation_entry_id
+        - corporate_card_id
+        - statement_amount
+        - statement_merchant
+        - matched_expenses_count
+        - is_reconciled
+        - is_ignored
+        - expenses
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+          example: rectx8abc123
+          description: Unique id of the reconciliation transaction.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+          description: Organization id to which this reconciliation transaction belongs.
+        reconciliation_entry_id:
+          $ref: '#/components/schemas/id_string'
+          example: receabc12345
+          description: Reconciliation entry id that this transaction is associated with.
+        corporate_card_id:
+          $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+          description: Corporate card id for which this statement transaction was received.
+        statement_line_item_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: stliabc123
+          description: Statement line item id corresponding to this transaction (nullable).
+        expense_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - txwownwrng
+            - txuXDH16HzK
+          description: List of matched expense ids. Can be an empty array when not matched.
+        statement_amount:
+          $ref: '#/components/schemas/amount'
+          example: 33.45
+          description: Amount present on the card statement for this transaction.
+        statement_merchant:
+          type: string
+          example: AMexon
+          description: Merchant name as present on the card statement.
+        statement_transaction_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Transaction date as present on the statement (nullable).
+        statement_post_date:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Post date as present on the statement (nullable).
+        matched_expenses_count:
+          type: integer
+          example: 3
+          description: Number of expenses matched to this statement transaction.
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/reconciliation_matched_expense_out_embed'
+          description: |
+            List of matched expenses. Can be an empty array when there are no expenses.
+        is_reconciled:
+          type: boolean
+          example: false
+          description: Indicates whether the statement transaction is reconciled.
+        is_ignored:
+          type: boolean
+          example: false
+          description: Indicates whether the statement transaction is ignored from reconciliation.
+        created_at:
+          $ref: '#/components/schemas/created_at'
+          description: Timestamp when this reconciliation transaction record was created.
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+          description: Timestamp when this reconciliation transaction record was last updated.
     spender_employee_settings_out:
       type: object
       additionalProperties: false
