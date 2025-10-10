@@ -74,6 +74,77 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/expense_policy_states:
+    get:
+      tags:
+        - Employees
+      summary: Get policy states of Expenses
+      description: |
+        Get policy states of Expenses
+      operationId: expense_policy_states_get
+      parameters:
+        - in: query
+          name: expense_id
+          description: |
+            The id of the expense for which you are querying the policy states.<br>
+            Supported operators are `eq`.<br>
+            expense_id=eq."id" <br>
+          schema:
+            type: string
+            example: eq."txSdfsytrqw"
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_policy_states_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
 components:
   securitySchemes:
     oauth2:
@@ -93,6 +164,24 @@ components:
       schema:
         type: string
         example: expense_id=eq.txS9GZm5hsjh
+    limit:
+      in: query
+      name: limit
+      description: |
+        A limit on the number of objects to be returned. Allowed values are from 1 to 200.
+      schema:
+        type: integer
+        example: 20
+        default: 50
+        maximum: 200
+    offset:
+      in: query
+      name: offset
+      description: |
+        offset is used to skip that many number of objects before counting. <br>
+      schema:
+        type: integer
+        example: 10
   schemas:
     '400':
       type: object
@@ -248,3 +337,260 @@ components:
           $ref: '#/components/schemas/updated_at'
         org_id:
           $ref: '#/components/schemas/org_id'
+    description:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        This represents the description of the resource.
+      example: Win the trophy
+    expense_policy_rule_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: tpr1234abcd
+          description: This represents the id of the expense policy rule that is violated for this expense.
+        description:
+          anyOf:
+            - $ref: '#/components/schemas/description'
+          description: |
+            This represents the description of the expense policy rule that is violated for this expense.
+          example: Receipt is mandatory for expense above $50
+        action_show_warning:
+          type: boolean
+          description: |
+            A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
+          example: true
+        action_make_unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
+          example: true
+    amount:
+      type: number
+      description: |
+        amount of money
+      example: 47.99
+    null_field:
+      type: string
+      nullable: true
+    expense_policy_expenses_query_object_params:
+      type: object
+      properties:
+        category_id:
+          type: string
+          description: |
+            Category ids query param to find the list of expenses.
+          example: in.(60506)
+        project_id:
+          type: string
+          description: |
+            Project ids query param to find the list of expenses.
+          example: in.(261155)
+        cost_center_id:
+          type: string
+          description: |
+            Cost center ids query param to find the list of expenses.
+          example: in.(7475)
+        currency:
+          type: string
+          description: |
+            Currency query param to find the list of expenses.
+          example: eq.USD
+        mileage_rate_id:
+          type: string
+          description: |
+            Mileage rate query param to find the list of expenses.
+          example: eq.2
+        employee_id:
+          type: string
+          description: |
+            Employee id query param to find the list of expenses.
+          example: eq.ouNSnadfaLA
+    expense_policy_expenses_query_object:
+      type: object
+      description: |
+        An expense may be violating an expense policy rule due to a group of other expenses.
+        These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
+        Below params should be ANDed to get the correct list of violating expenses.
+      properties:
+        limit_start_date:
+          type: string
+          description: |
+            Spend start date query param to find the list of violating expenses.
+          example: '2021-12-01'
+        limit_end_date:
+          type: string
+          description: |
+            Spend end date query param to find the list of violating expenses.
+          example: '2022-03-31'
+        params:
+          $ref: '#/components/schemas/expense_policy_expenses_query_object_params'
+    expense_policy_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: |
+            This represent the status of policy computation for an expense against the policy. If the state is
+            `UNVIOLATED`, it means that the expense is not violating the policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+            it means that expense is violating the policy and action stated in the object will be applied to
+            expense. However, if the state is `VIOLATION_ACTION_FAILURE`, it means that the policy is violated for the
+            expense but since some approver was missing or not setup properly, it will fail to take action
+            on the expense
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+            case some approver was not setup properly for the given violation, this array will contain description of
+            missing approvers. For example, Department approver, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_policy_final_desired_state:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        flag:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
+        is_receipt_mandatory:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_policy_states_out:
+      type: object
+      additionalProperties: false
+      properties:
+        expense_id:
+          type: string
+          description: |
+            This represents the id of the expense.
+          example: txabsdfSYqd
+        individual_desired_states:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_individual_desired_states'
+        final_desired_state:
+          $ref: '#/components/schemas/expense_policy_final_desired_state'
