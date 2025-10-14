@@ -16712,6 +16712,79 @@ components:
           type: string
           description: Current reconciliation eligibility status for this card.
           example: RECONCILED
+    reconciliation_eligible_cards_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: >
+            Query param string similar to the GET eligible cards call. Must
+            include `reconciliation_entry_id` to scope stats to a specific
+            entry.
+
+            Refer the [Guide to Data
+            APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+            for filtering syntax.
+          example: reconciliation_entry_id=eq.receabc12345
+    reconciliation_eligible_cards_stats_out:
+      type: object
+      additionalProperties: false
+      properties:
+        period_start:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Start of the reconciliation period in UTC.
+        period_end:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: End of the reconciliation period in UTC.
+        statement_transaction_count:
+          type: integer
+          description: Total number of statement transactions in the period.
+          example: 3
+        expense_count:
+          type: integer
+          description: Total number of expenses in the period.
+          example: 2
+        statement_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Sum of statement transaction amounts in the period.
+          example: 45
+        expense_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Sum of expense amounts in the period.
+          example: 30
+        difference:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Difference between `statement_total` and `expense_total`.
+          example: 15
+        matching_issue_count:
+          type: integer
+          description: >-
+            Number of transactions with matching issues across all eligible
+            cards.
+          example: 3
+        total_cards:
+          type: integer
+          description: Total number of eligible cards.
+          example: 3
+        card_without_statement_count:
+          type: integer
+          description: Number of cards that have no statement transactions in the period.
+          example: 2
+        card_with_matching_issue_count:
+          type: integer
+          description: Number of cards that have only matching issues.
+          example: 0
+        reconciled_card_count:
+          type: integer
+          description: Number of cards that are reconciled.
+          example: 0
     spender_employee_settings_out:
       type: object
       additionalProperties: false
@@ -28607,6 +28680,68 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/reconciliation_eligible_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/eligible_cards/stats:
+    post:
+      tags:
+        - Reconciliation
+      summary: Stats for eligible cards of a reconciliation entry
+      description: >
+        Returns aggregate stats for corporate cards eligible under a
+        reconciliation entry.
+
+
+        Use this endpoint to get period window, transaction and expense totals,
+        differences, and card-level aggregate counts such as matching issues and
+        reconciliation status.
+      operationId: reconciliation_entries_eligible_cards_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconciliation_eligible_cards_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: >-
+                      #/components/schemas/reconciliation_eligible_cards_stats_out
         '400':
           description: Bad request
           content:
