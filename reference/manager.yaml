@@ -220,6 +220,312 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/hierarchy:
+    get:
+      tags:
+        - Employees
+      summary: List employees hierarchy view
+      description: |
+        This API returns a hierarchical list of employees reporting to the user calling this API. Each employee includes their position in the hierarchy (depth) and their primary approver.
+      operationId: manager_hierarchy_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_hierarchy_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview:
+    get:
+      tags:
+        - Employees
+      summary: List expense overview of employees under the current user hierarchy
+      description: |
+        This API returns a list of employees in the organization hierarchy under the current approver with their expense statistics and overview information.
+      operationId: employee_hierarchy_overview_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_overview_out'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  count:
+                    $ref: '#/components/schemas/count'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/stats:
+    post:
+      operationId: employee_hierarchy_overview_stats_post
+      tags:
+        - Employees
+      summary: Get employee overview statistics
+      description: |
+        This API returns statistical information about employees in the hierarchy, including total count and total amount.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    query_params:
+                      type: string
+                      nullable: false
+                      description: Required query parameters for filtering
+                      example: department_id=123
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_overview_stats_out'
+                example:
+                  data:
+                    count: 1130
+                    total_amount: 30003
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/expenses:
+    get:
+      tags:
+        - Employees
+      summary: List expenses in hierarchy
+      description: |
+        This API gets expenses of employees that are under the current user's hierarchy.
+      operationId: employee_hierarchy_overview_expenses_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/expenses/stats:
+    post:
+      tags:
+        - Employees
+      summary: Expenses Stats of users in hierarchy
+      description: |
+        This API gets expenses stats of employees that are under the current user's hierarchy.
+      operationId: employee_hierarchy_overview_expenses_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_overview_expense_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
 components:
   securitySchemes:
     oauth2:
@@ -276,6 +582,15 @@ components:
           description: |
             This error means that the input access token is either not issued by Fyle or has expired.
             You need to generate a new access token.
+    '404':
+      type: object
+      properties:
+        message:
+          enum:
+            - Resource not found
+          type: string
+          description: |
+            This error means the requested resource was not found or the requester doesn't have sufficient access.
     count:
       type: integer
       description: |
@@ -697,3 +1012,1863 @@ components:
             $ref: '#/components/schemas/expense_policy_individual_desired_states'
         final_desired_state:
           $ref: '#/components/schemas/expense_policy_final_desired_state'
+    user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      readOnly: true
+      example: uswjwgnwwgo
+    has_accepted_invite:
+      type: boolean
+      description: |
+        This boolean field represents whether the employee has accepted the current org's invite by verifying his/her email or not.
+      example: true
+    employee_hierarchy_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Full name of the employee
+          example: David Davis
+        email:
+          $ref: '#/components/schemas/email'
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        depth:
+          type: integer
+          description: Hierarchy depth level of the employee (0 is top level)
+          example: 0
+          minimum: 0
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        primary_approver_user_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+          nullable: true
+    is_enabled:
+      type: boolean
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
+      example: true
+    org_name:
+      type: string
+      maxLength: 255
+      description: |
+        This represents the name of the organization. This should be unique for all organizations
+      example: foo123
+    employee_overview_out:
+      type: object
+      additionalProperties: false
+      properties:
+        user:
+          type: object
+          additionalProperties: false
+          properties:
+            email:
+              $ref: '#/components/schemas/email'
+            full_name:
+              type: string
+              maxLength: 255
+              description: Full name of the user
+              example: John
+            id:
+              $ref: '#/components/schemas/user_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        employee:
+          type: object
+          additionalProperties: false
+          properties:
+            has_accepted_invite:
+              $ref: '#/components/schemas/has_accepted_invite'
+            id:
+              $ref: '#/components/schemas/id_string'
+            is_enabled:
+              allOf:
+                - $ref: '#/components/schemas/is_enabled'
+              description: |
+                This field indicates whether the employee is enabled in the org.
+            org_id:
+              $ref: '#/components/schemas/org_id'
+            org_name:
+              $ref: '#/components/schemas/org_name'
+            title:
+              type: string
+              maxLength: 255
+              nullable: true
+              example: Branch Manager
+        employee_id:
+          $ref: '#/components/schemas/id_string'
+        primary_approver:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            id:
+              $ref: '#/components/schemas/user_id'
+            name:
+              type: string
+              maxLength: 255
+              description: Full name of the primary approver
+              example: David Davis
+            email:
+              $ref: '#/components/schemas/email'
+        primary_approver_id:
+          type: string
+          description: |
+            The unique id of an user to which the object is associated.
+          example: uswjwgnwwgo
+          nullable: true
+        department:
+          type: object
+          additionalProperties: false
+          nullable: true
+          properties:
+            id:
+              $ref: '#/components/schemas/id_string'
+            name:
+              type: string
+              maxLength: 255
+              description: Name of the department
+              example: Engineering
+            code:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: Department code
+              example: ENG
+            sub_department:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: Sub-department name
+              example: null
+        department_id:
+          $ref: '#/components/schemas/id_string'
+        expense_total_amount:
+          type: number
+          description: Total amount of expenses for the employee
+          example: 200.01
+        expense_count:
+          type: integer
+          description: Total count of expenses for the employee
+          example: 5
+    employee_overview_stats_out:
+      type: object
+      additionalProperties: false
+      properties:
+        count:
+          type: integer
+          description: Total count of employees in the overview
+          example: 1130
+        total_amount:
+          type: number
+          description: Total amount across all employees in the overview
+          example: 30003
+    user_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: uswjwgnwwgo
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+    timestamptz_utc:
+      type: string
+      format: date-time
+      nullable: true
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T13:14:54.804+00:00'
+    currency:
+      type: string
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: ([A-Z]{3})
+    foreign_currency:
+      type: string
+      nullable: true
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: GBP
+    foreign_amount:
+      type: number
+      nullable: true
+      description: |
+        Amount value of the object, in original currency i.e the currency in which the object was initially created.
+      example: 3768
+    fk_integer:
+      type: integer
+      nullable: true
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: 1234
+    id_integer:
+      type: integer
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: 1234
+    code:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: |
+        This represents a code that is typically used for syncing with other systems.
+      example: C1234
+    cost_center_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: |
+            This represents the name of the cost center.
+          example: sales & marketing
+        code:
+          $ref: '#/components/schemas/code'
+    category_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        system_category:
+          nullable: true
+          type: string
+          maxLength: 255
+          example: Others
+          description: Represents the name of the system_category.
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the category.
+        sub_category:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: Turbo charged
+          description: Represents the name of the sub_category.
+        code:
+          $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Engine / Turbo charged
+          description: |
+            This is a combination of name and sub_category separated by a / and spaces. In case if no sub_category is present it is same as name of the category.
+    project_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the project.
+          example: Fast and Furious
+        sub_project:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: Represents the name of the sub_project.
+          example: Formula One
+        code:
+          $ref: '#/components/schemas/code'
+        display_name:
+          type: string
+          example: Fast and Furious / Formula One
+          description: |
+            This is a combination of name and sub_project separated by a / and spaces.
+            In case if no sub_project is present it is same as name of the project.
+    fk_string:
+      type: string
+      nullable: true
+      maxLength: 15
+      description: |
+        This id is provided by Fyle to identify an object.
+      example: sdfd2391
+    account_out_embed:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: acwbl222wlg
+        type:
+          type: string
+          enum:
+            - PERSONAL_CASH_ACCOUNT
+            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+            - PERSONAL_ADVANCE_ACCOUNT
+            - COMPANY_EXPENSE_ACCOUNT
+            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+            - COMPANY_CATEGORY_ACCOUNT
+          example: PERSONAL_CASH_ACCOUNT
+    mileage_rate_out_embed_for_expense:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        vehicle_type:
+          type: string
+          example: Audi
+        code:
+          $ref: '#/components/schemas/code'
+        rate:
+          type: number
+          example: 10
+          nullable: true
+          description: Amount (in Home currency) per unit.
+    name:
+      type: string
+      maxLength: 255
+      description: |
+        This represents the name of the resource. This should be unique in an organization
+      example: foo123
+    per_diem_rate_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Florida Rate
+        code:
+          $ref: '#/components/schemas/code'
+    location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        display_name:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: true
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: true
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: true
+          example: 77.594566
+    expense_custom_field:
+      type: object
+      description: |
+        Expense custom field
+      properties:
+        id:
+          type: integer
+          description: |
+            Expense field ID of the custom field.
+
+            NOTE: This field may not be present for older expense custom fields created without the "id" field.
+          example: 1337
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+        type:
+          type: string
+          nullable: true
+          enum:
+            - TEXT
+            - NUMBER
+            - SELECT
+            - BOOLEAN
+            - MULTI_SELECT
+            - LOCATION
+            - USER_LIST
+            - DATE
+            - DEPENDENT_SELECT
+            - null
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        is_enabled:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/is_enabled'
+          nullable: true
+    expense_custom_fields:
+      type: array
+      description: |
+        Expense custom fields
+      items:
+        $ref: '#/components/schemas/expense_custom_field'
+    flattened_custom_field:
+      type: object
+      description: |
+        Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
+
+        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened to `{"custom_field_1": "Value 1"}`
+
+        NOTE: Key name is converted to snake case and spaces are replaced with underscores.
+      nullable: false
+      additionalProperties: true
+      properties:
+        cf1:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - string1
+                - string2
+      example:
+        cf1: string1
+        custom_field_2: Value 2
+    report_approval_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        approver_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        approver_user:
+          $ref: '#/components/schemas/user_out_embed'
+        state:
+          type: string
+          enum:
+            - APPROVAL_PENDING
+            - APPROVAL_DISABLED
+            - APPROVAL_DONE
+          description: |
+            State of this report_approval
+        approver_order:
+          type: integer
+          description: |
+            This number inidicates the order of the approver in the approval sequence for the report.
+            The approver with the lowest approver_order is the first approver in the sequence.
+          example: 1
+    report_out_embed:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required:
+        - id
+        - last_approved_at
+        - last_submitted_at
+        - seq_num
+        - title
+        - state
+        - last_paid_at
+        - reimbursement_id
+        - reimbursement_seq_num
+      properties:
+        id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          example: rpvgnwlgw34
+        last_approved_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this report was approved.
+        last_submitted_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this report was submitted.
+        seq_num:
+          type: string
+          nullable: true
+          description: |
+            A unique human readable identifier for the report
+          example: C/2021/02/R/907
+        title:
+          type: string
+          nullable: true
+          description: purpose for creating the report
+          example: Business trip to London
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVER_PENDING
+            - APPROVER_INQUIRY
+            - PAYMENT_PROCESSING
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+            - null
+          nullable: true
+        amount:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/amount'
+          nullable: true
+        last_paid_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this report was reimbursed.
+        last_verified_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when this report was verified.
+        reimbursement_id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          maxLength: 255
+          description: |
+            An unique ID, generated by Fyle, for identifying the Reimbursement.
+          example: reimntGt9ju6qP
+        reimbursement_seq_num:
+          type: string
+          nullable: true
+          description: |
+            A unique, organization wide identifier for a particular reimbursement.<br>
+            This id is always prefixed with `P/`.
+          example: P/2020/11/29
+        approvals:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+    file_out_embed:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: figwiwpjww
+        name:
+          type: string
+          description: |
+            Name of the uploaded file.
+          example: uber_expenses_vmrpw.pdf
+        type:
+          type: string
+          enum:
+            - INTEGRATION
+            - RECEIPT
+          description: |
+            Indicates whether this file original size or encrypted or its thumbnail image.
+          example: RECEIPT
+        content_type:
+          type: string
+          example: application/pdf
+    expense_policy_comment_out_embed:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - comment_type
+        - comment_text
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: epc1a2f3farmk
+        comment_type:
+          type: string
+          description: Type of the policy comment
+        comment_text:
+          type: string
+          description: Text content of the policy comment
+    expense_verification_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        verifier_user_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: usge49ielgel
+        verifier_user:
+          $ref: '#/components/schemas/user_out_embed'
+    employee_id:
+      type: string
+      maxLength: 255
+      description: |
+        This id provided by Fyle to uniquely identify an employee within an organization.
+        This id is always prefixed with `ou`.
+      example: outGt9ju6qP
+    department_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: dept9in4oIHpdR
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+    level_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        name:
+          type: string
+          description: |
+            Level name of the employees
+          example: Associate I
+        band:
+          type: string
+          nullable: true
+          description: |
+            Band in which this level belongs to, you can group multiple levels into a single band.
+          example: Associate
+      required:
+        - id
+        - name
+        - band
+    custom_field:
+      type: object
+      description: |
+        Custom field
+      properties:
+        id:
+          type: integer
+          description: |
+            Expense field ID of the custom field.
+          example: 1337
+        name:
+          type: string
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    phone_number:
+      type: string
+      example: '+12131234567'
+      maxLength: 16
+      description: |
+        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
+    joined_at:
+      anyOf:
+        - $ref: '#/components/schemas/null_field'
+        - $ref: '#/components/schemas/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+    employee_out_embed_for_expense:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        custom_fields:
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
+        flattened_custom_field:
+          $ref: '#/components/schemas/flattened_custom_field'
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
+      description: |
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
+    card_number:
+      type: string
+      description: |
+        Specifies the masked number of the card.
+        Add only masked card-numbers, last four digits of the card.
+      example: xxxx-4543
+    bank_name:
+      type: string
+      description: |
+        Specifies the name of bank who issued the card.
+      example: Bank of America
+    name_nullable:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        This represents the name of the resource. This should be unique in an organization
+      example: foo123
+    timestamptz_pst:
+      type: string
+      format: date-time
+      nullable: true
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      example: '2020-06-01T01:18:19.292-08:00'
+    spent_at:
+      allOf:
+        - $ref: '#/components/schemas/timestamptz_pst'
+      description: |
+        It signifies when this expense was made.
+        This date cannot be in future.
+    merchant:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        String denoting the name of the vendor to which the expense was made.
+      example: Uber
+    matched_corporate_card_transaction_out_embed:
+      type: object
+      nullable: true
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Fyle but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Fyle but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@fyle.in
+    missing_mandatory_fields:
+      type: object
+      nullable: false
+      properties:
+        expense_field_ids:
+          type: array
+          nullable: false
+          items:
+            type: integer
+            nullable: true
+            description: |
+              This id provided by Fyle to identify an expense field.
+            example: 123
+          example:
+            - 123
+            - 12423
+          description: |
+            List of IDs of expense fields which are mandatory but are missing.
+        amount:
+          type: boolean
+          nullable: false
+          description: |
+            This field shows whether the amount field is present in the expense or not
+        currency:
+          type: boolean
+          nullable: false
+          description: |
+            This field shows whether the currency field is present in the expense or not
+      description: |
+        This object contains all the fields which are mandatory bu tare missing in the expense.
+    activity_details:
+      type: object
+      nullable: true
+      properties:
+        unique_meetings:
+          type: number
+          nullable: false
+          example: 21
+        total_meetings:
+          type: number
+          nullable: false
+          example: 70
+    extracted_data:
+      type: object
+      nullable: true
+      properties:
+        amount:
+          type: number
+          nullable: true
+          example: 21
+        vendor_name:
+          type: string
+          nullable: true
+          example: Uber
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        category:
+          type: string
+          nullable: true
+          example: Taxi
+        date:
+          type: string
+          nullable: true
+          example: '2020-07-20'
+    split_group_amount:
+      type: number
+      nullable: true
+      description: |
+        The amount of expense before splitting.
+      example: 3768
+    is_billable:
+      type: boolean
+      nullable: true
+      example: true
+      description: This field marks whether a given expense is billable or not.
+    dependent_expense_fields:
+      type: object
+      description: |
+        Dependent expense fields details
+      properties:
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This id provided by Fyle to identify the parent expense field.
+          example: 123
+        dependent_expense_field_id:
+          type: integer
+          description: |
+            This id provided by Fyle to identify the dependent expense field.
+          example: 123
+        dependent_expense_field_value_id:
+          type: integer
+          description: |
+            This id provided by Fyle to identify dependent field value.
+          example: 123
+        name:
+          type: string
+          description: |
+            This represents the name of the dependent expense field.
+          example: cf1
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+              example: string1
+            - type: boolean
+              example: true
+            - type: integer
+              example: 123
+            - $ref: '#/components/schemas/location'
+            - type: array
+              items:
+                type: string
+              example:
+                - v1
+                - v2
+    expense_rule_data_in:
+      type: object
+      nullable: true
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        merchant:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the name of the merchant to which the Expense was made.
+          example: Amazon
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 92895
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          example: 1049
+        custom_fields:
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
+        dependent_fields:
+          type: array
+          nullable: true
+          description: |
+            Dependent expense fields
+          items:
+            $ref: '#/components/schemas/dependent_expense_fields'
+    tax_group:
+      type: object
+      nullable: true
+      description: |
+        Tax group details.
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: |
+            Name of the tax group.
+          example: GST
+        percentage:
+          type: number
+          nullable: true
+          description: |
+            Tax percentage.
+          example: 5
+    policy_checks:
+      type: object
+      description: |
+        Policy checks details.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
+      properties:
+        is_amount_limit_applied:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense amount is capped based on the policy calculation.
+          example: true
+        are_approvers_added:
+          type: boolean
+          description: |
+            A true value here means, approvers are added to the expense based on the policy calculation.
+          example: true
+        is_flagged_ever:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense is flagged.
+          example: true
+        violations:
+          type: array
+          nullable: true
+          description: |
+            List of policy violations on this expense.
+          items:
+            type: object
+            properties:
+              policy_rule_description:
+                type: string
+                description: |
+                  Description of the policy rule.
+                example: Expense amount is greater than the policy limit
+              policy_rule_id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                description: |
+                  ID of the policy rule.
+                example: tprCCiQiiuJZs
+    commute_location:
+      type: object
+      nullable: true
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: London
+        state:
+          type: string
+          nullable: true
+          example: London
+        country:
+          type: string
+          nullable: true
+          example: United Kingdom
+        formatted_address:
+          type: string
+          nullable: false
+          example: 221 Baker St, Marylebone, London, United Kingdom
+        latitude:
+          type: number
+          nullable: false
+          example: 12.971599
+        longitude:
+          type: number
+          nullable: false
+          example: 77.594566
+    commute_details:
+      type: object
+      nullable: true
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+        home_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Home location of the employee.
+          nullable: true
+        work_location:
+          allOf:
+            - $ref: '#/components/schemas/commute_location'
+          description: |
+            Work location of the employee.
+          nullable: true
+        distance:
+          type: number
+          nullable: true
+          description: |
+            Distance between home and work location of the employee.
+          example: 10.55
+        distance_unit:
+          type: string
+          nullable: true
+          description: |
+            Unit of distance.
+          enum:
+            - KM
+            - MILES
+            - null
+          example: MILES
+    expense_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - user_id
+        - user
+        - org_id
+        - created_at
+        - updated_at
+        - spent_at
+        - source
+        - merchant
+        - currency
+        - amount
+        - claim_amount
+        - policy_amount
+        - admin_amount
+        - foreign_currency
+        - foreign_amount
+        - purpose
+        - cost_center_id
+        - cost_center
+        - category_id
+        - category
+        - project_id
+        - project
+        - source_account_id
+        - advance_wallet_id
+        - source_account
+        - tax_amount
+        - tax_group_id
+        - is_billable
+        - is_reimbursable
+        - distance
+        - distance_unit
+        - mileage_calculated_distance
+        - mileage_calculated_amount
+        - mileage_rate_id
+        - mileage_rate
+        - mileage_is_round_trip
+        - per_diem_rate_id
+        - per_diem_rate
+        - per_diem_num_days
+        - started_at
+        - ended_at
+        - travel_classes
+        - hotel_is_breakfast_provided
+        - locations
+        - custom_fields
+        - code
+        - state
+        - state_display_name
+        - seq_num
+        - report_id
+        - added_to_report_at
+        - report
+        - is_verified
+        - last_verified_at
+        - is_receipt_mandatory
+        - is_exported
+        - last_exported_at
+        - file_ids
+        - files
+        - employee
+        - is_corporate_card_transaction_auto_matched
+        - matched_corporate_card_transaction_ids
+        - matched_corporate_card_transactions
+        - last_settled_at
+        - missing_mandatory_fields
+        - activity_details
+        - creator_user_id
+        - extracted_data
+        - is_manually_flagged
+        - is_policy_flagged
+        - split_group_id
+        - is_physical_bill_submitted
+        - physical_bill_submitted_at
+        - invoice_number
+        - is_duplicate_present
+        - expense_policy_comments
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: txwownwrng
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was made.
+            This date cannot be in future.
+        source:
+          type: string
+          description: |
+            The name of the client app which is creating the expense.
+            if its a thrid party app, it prefixed with TPA_.
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
+            passed, source is saved as TPA.
+          example: SLACK_APP
+        merchant:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the name of the merchant to which the Expense was made.
+          example: Uber
+        currency:
+          $ref: '#/components/schemas/currency'
+        amount:
+          type: number
+          nullable: true
+          description: |
+            The amount for which the expense was/will-be fyled.
+            The amount will be in the currency that the organization's home currency.<br>
+
+            Note that, this field is calculated from admin_amount, policy_amount, claim_amount.
+
+            if admin_amount is present then this value will be same admin_amount.
+            if policy_amount is present then this value will be same policy_amount.
+            else this should be same as claim_amount.
+          example: 1500
+        claim_amount:
+          type: number
+          nullable: true
+          description: |
+            The expense amount as claimed by user.
+          example: 1984.18
+        policy_amount:
+          type: number
+          nullable: true
+          description: |
+            The expense amount set by policy.
+          example: 1500
+        admin_amount:
+          type: number
+          nullable: true
+          description: |
+            The expense amount which is modified by admin or approver.
+            This could be null if admin or approver has not edited your expense.
+          example: null
+        foreign_currency:
+          $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          $ref: '#/components/schemas/foreign_amount'
+        purpose:
+          type: string
+          nullable: true
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 1049
+        cost_center:
+          $ref: '#/components/schemas/cost_center_out_embed'
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 49058
+        category:
+          $ref: '#/components/schemas/category_out_embed'
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 92895
+        project:
+          $ref: '#/components/schemas/project_out_embed'
+        source_account_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          example: acwbl222wlg
+        advance_wallet_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          example: advwrlAGwjr2
+        source_account:
+          $ref: '#/components/schemas/account_out_embed'
+        tax_amount:
+          type: number
+          nullable: true
+          description: |
+            Tax amount as setup by your organization.
+            - _Note:_
+              - Tax amount cannot be greater than the expense amount.
+        tax_group_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+        is_billable:
+          type: boolean
+          nullable: true
+          example: true
+          description: This fields marks whether a given expense is billable a not.
+        is_reimbursable:
+          type: boolean
+          description: This fields marks whether a given expense is reimbursable a not.
+          example: true
+        distance:
+          type: number
+          nullable: true
+          description: Actual distance travelled by employee in travel related expenses.
+        distance_unit:
+          type: string
+          nullable: true
+          description: Unit of distance travelled.
+          enum:
+            - KM
+            - MILES
+            - null
+          example: MILES
+        mileage_calculated_distance:
+          type: number
+          nullable: true
+          description: Distance computed by Fyle in mileage expenses.
+        mileage_calculated_amount:
+          type: number
+          nullable: true
+          description: Amount computed by Fyle in mileage expenses.
+        mileage_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 9080
+        mileage_rate:
+          $ref: '#/components/schemas/mileage_rate_out_embed_for_expense'
+        mileage_is_round_trip:
+          type: boolean
+          nullable: true
+          description: Flag stating whether this was a round trip or not.
+        per_diem_rate_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          example: 583
+        per_diem_rate:
+          $ref: '#/components/schemas/per_diem_rate_out_embed'
+        per_diem_num_days:
+          type: number
+          nullable: true
+          description: |
+            Specific to per diem related expenses, number of days for which per diem claim is made.
+          example: 2
+        started_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        travel_classes:
+          description: |
+            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+            index 0 holds onward journey class, index 1 holds return journey travel class.
+          type: array
+          minItems: 0
+          maxItems: 2
+          items:
+            type: string
+          example:
+            - ECONOMY
+            - BUSINESS
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+        locations:
+          description: |
+            This field will be present for travel related categories.
+            For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+            For travel between Place A to Place c and stopping at Place B, this
+          type: array
+          minItems: 0
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/location'
+        custom_fields:
+          $ref: '#/components/schemas/expense_custom_fields'
+        custom_fields_flattened:
+          $ref: '#/components/schemas/flattened_custom_field'
+        code:
+          type: string
+          nullable: true
+          description: |
+            Id given by external systems like Gmail. To identify whether that entity
+            has been already added to Fyle or not.
+          example: wgjwgo3ihwljnlsww
+        state:
+          type: string
+          enum:
+            - COMPLETE
+            - DRAFT
+            - PAID
+            - PAYMENT_PROCESSING
+            - APPROVER_PENDING
+            - PAYMENT_PENDING
+            - APPROVED
+            - UNREPORTABLE
+          description: The state of the Expense.
+        state_display_name:
+          type: string
+          example: Sent Back
+          description: readable state name
+        seq_num:
+          type: string
+          readOnly: true
+          description: |
+            This is user visible identifier for an expense.
+            This field can be used as reference in UI.
+          example: E/2020/10/T/95
+        report_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_string'
+          nullable: true
+          description: |
+            Unique id given by Fyle to identify an Expense Report.
+          example: rpvgnwlgw34
+        added_to_report_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was added to a report.
+            If this expense is not added to a report, then this could be null.
+        report:
+          $ref: '#/components/schemas/report_out_embed'
+        is_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this expense has been verified by a verifier.
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was verified.
+        is_receipt_mandatory:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether a receipt is missing for this expense when it is required.
+        is_exported:
+          type: boolean
+          nullable: true
+          description: |
+            Determines whether this expense has been exported to external accounting system or not.
+        last_exported_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: signifies when this expense was exported to an external accounting system.
+        file_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - figwiwpjww
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/file_out_embed'
+        expense_policy_comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_comment_out_embed'
+          description: |
+            List of expense policy comment objects
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/report_approval_out_embed'
+          description: |
+            List of report_approval objects
+        verifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_verification_out_embed'
+          description: |
+            List of verification objects
+        employee_id:
+          $ref: '#/components/schemas/employee_id'
+        employee:
+          nullable: true
+          $ref: '#/components/schemas/employee_out_embed_for_expense'
+        is_corporate_card_transaction_auto_matched:
+          type: boolean
+          example: false
+          description: |
+            Signifies when this corporate card transaction is auto_matched.
+        matched_corporate_card_transaction_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          description: |
+            Holds the corporate card transaction ids which are matched to this expense
+          example:
+            - btxnwownwrng
+        matched_corporate_card_transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed'
+          description: |
+            Holds the corporate card transactions which are matched to this expense.
+            NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        last_settled_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            signifies when this expense was last settled.
+        missing_mandatory_fields:
+          $ref: '#/components/schemas/missing_mandatory_fields'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        activity_details:
+          $ref: '#/components/schemas/activity_details'
+        extracted_data:
+          $ref: '#/components/schemas/extracted_data'
+        is_manually_flagged:
+          type: boolean
+          nullable: true
+          description: This fields marks whether a given expense is manually flagged or not.
+          example: true
+        is_policy_flagged:
+          type: boolean
+          nullable: true
+          description: This fields marks whether a given expense is flagged by policy or not.
+          example: true
+        split_group_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id provided by Fyle to identify an object.
+          example: txwownwrngx
+        split_group_amount:
+          $ref: '#/components/schemas/split_group_amount'
+        is_physical_bill_submitted:
+          type: boolean
+          nullable: true
+          description: |
+            This fields marks if physical has been collected for the given expense.
+          example: true
+        physical_bill_submitted_at:
+          type: string
+          format: date-time
+          example: '2020-06-11T13:14:55.201598+00:00'
+          description: |
+            Signifies if and when the physical bill for this report was submitted.
+          nullable: true
+        expense_rule_id:
+          type: string
+          nullable: true
+          maxLength: 15
+          description: |
+            This id is provided by Fyle to identify an Expense Rule.
+          example: ervgnwlgw34
+        expense_rule_data:
+          $ref: '#/components/schemas/expense_rule_data_in'
+        is_split:
+          type: boolean
+          nullable: true
+          description: |
+            Whether the expense is split.
+          example: true
+        tax_group:
+          $ref: '#/components/schemas/tax_group'
+        approver_comments:
+          type: array
+          description: |
+            Comments added by approvers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
+          items:
+            type: string
+          example:
+            - This is a comment by approver
+        verifier_comments:
+          type: array
+          description: |
+            Comments added by verifiers.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
+          items:
+            type: string
+          example:
+            - This is a comment by verifier
+        policy_checks:
+          $ref: '#/components/schemas/policy_checks'
+        accounting_export_summary:
+          type: object
+          description: |
+            Summary of accounting export for this expense.
+          properties:
+            state:
+              type: string
+              enum:
+                - COMPLETE
+                - ERROR
+                - IN_PROGRESS
+                - SKIPPED
+                - INITIATED
+              example: COMPLETE
+            error_type:
+              type: string
+              nullable: true
+              enum:
+                - ACCOUNTING_INTEGRATION_ERROR
+                - MAPPING
+                - null
+              example: ACCOUNTING_INTEGRATION_ERROR
+            url:
+              type: string
+              description: URL Endpoint for exported / failed expense
+              example: https://app.example.com/expense/txwownwrng
+            tpa_id:
+              type: string
+              nullable: false
+              description: |
+                Third party app id.
+              example: tpa_1234567890
+        report_last_paid_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was reimbursed.
+        report_last_approved_at:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies if and when report of this expense was approved.
+        invoice_number:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: |
+            Invoice number of the expense.
+          example: 123456
+        commute_deduction:
+          type: string
+          nullable: true
+          maxLength: 12
+          description: |
+            Commute deduction type of the expense.
+          example: ONE_WAY
+          enum:
+            - ONE_WAY
+            - ROUND_TRIP
+            - NO_DEDUCTION
+            - null
+        commute_details_id:
+          type: integer
+          nullable: true
+          description: |
+            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+          example: 1234
+        commute_details:
+          $ref: '#/components/schemas/commute_details'
+        is_duplicate_present:
+          type: boolean
+          nullable: false
+          description: |
+            Whether duplicate expenses is detected for this expense or not.
+          example: true
+    expenses_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+          example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
+    employee_overview_expense_stats_out:
+      type: object
+      additionalProperties: false
+      properties:
+        count:
+          type: integer
+          description: Total count of expenses in the hierarchy
+          example: 1130
+        total_amount:
+          type: number
+          description: Total amount across all employees in the hierarchy
+          example: 30003
