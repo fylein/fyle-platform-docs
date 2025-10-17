@@ -1,0 +1,90 @@
+post:
+  tags:
+    - Reconciliation
+  summary: Bulk match and reconcile reconciliation transactions
+  description: |
+    Match reconciliation transactions with target transactions/expenses and reconcile in bulk.
+  operationId: reconciliation_transactions_match_and_reconcile_bulk
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              description: List of source and target reconciliation transaction identifiers to match and reconcile.
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                  - source_id
+                  - target_id
+                properties:
+                  source_id:
+                    type: string
+                    description: Source reconciliation transaction id.
+                    example: rectx8abc123
+                  target_id:
+                    type: string
+                    description: Target reconciliation transaction or expense id to match with.
+                    example: rectx8xyz789
+              example:
+                - source_id: rectx8abc123
+                  target_id: rectx8xyz789
+                - source_id: rectx8def456
+                  target_id: rectx8uvw000
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              data:
+                type: object
+                description: Result of bulk match and reconcile. Empty object on success.
+                example: {}
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '../../components/schemas/bulk_error.yaml'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  message:
+                    type: string
+                    nullable: true
+                  data:
+                    type: object
+                    nullable: true
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
+
