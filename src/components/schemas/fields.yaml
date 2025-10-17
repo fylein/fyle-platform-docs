@@ -761,6 +761,18 @@ is_reimbursable:
   description: This field marks whether a given expense is reimbursable or not.
   example: true
 
+is_suggested:
+  type: boolean
+  nullable: true
+  description: Whether this expense rule is a suggested rule
+  example: true
+
+is_suggestion_dismissed:
+  type: boolean
+  nullable: true
+  description: Whether the suggestion for this rule has been dismissed
+  example: false
+
 claim_amount:
   type: number
   description: |
@@ -803,6 +815,11 @@ custom_field:
   description: |
     Custom field
   properties:
+    id:
+      type: integer
+      description: |
+        Expense field ID of the custom field.
+      example: 1337
     name:
       type: string
       example: cf1
@@ -873,6 +890,13 @@ expense_custom_field:
   description: |
     Expense custom field
   properties:
+    id:
+      type: integer
+      description: |
+        Expense field ID of the custom field.
+
+        NOTE: This field may not be present for older expense custom fields created without the "id" field.
+      example: 1337
     name:
       type: string
       example: cf1
@@ -1490,7 +1514,7 @@ ach_transfer:
         Description of current status of the payment.
       example: Kindly ask the employee to add a valid bank account in their Settings. You'll then be able to see the bank icon next to the payment number, after which you can retry the payment.
       nullable: true
-    initiated_at: 
+    initiated_at:
       nullable: true
       anyOf:
         - $ref: '#/timestamptz_utc'
@@ -1500,16 +1524,35 @@ ach_transfer:
     source_account_ach_reference_id:
       nullable: true
       type: string
-      description: | 
+      description: |
        Signifies the source of ach transfer reference code.
       example: IMJYXG4G
     destination_account_ach_reference_id:
       nullable: true
       type: string
-      description: | 
+      description: |
        Signifies the destination of ach transfer reference code.
       example: II7P2228Z
-    
+    clearing_type:
+      nullable: true
+      anyOf:
+        - $ref: '#/ach_transfer_clearing_type'
+        - $ref: '#/null_field'
+    initiator_user_id:
+      nullable: true
+      type: string
+      description: >
+        User id of the admin who initiated the ACH reimbursement.
+      example: uswjwgnwwgo
+
+ach_transfer_clearing_type:
+  type: string
+  enum:
+    - STANDARD
+    - NEXT_DAY
+  description: >
+    The ACH transfer type used for the reimbursement.
+  example: STANDARD
 
 ach_transfer_state:
   type: string
@@ -1557,7 +1600,7 @@ delegatees:
         - $ref: './fields.yaml#/timestamptz_utc'
       description: |
         Date and time from which the delegation is active.
-      nullable: False   
+      nullable: False
     end_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -1709,7 +1752,7 @@ split_group_amount:
 
 query_params:
   type: string
-  description: | 
+  description: |
     This field contains the query param string similar to the query params passed in GET call for displaying data in the list view.
   example: state=eq.PAID
 
@@ -1891,3 +1934,12 @@ delegatee:
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
+
+subscribed_resources:
+  type: array
+  description: |
+    List of resource types that the subscription is configured for.
+  items:
+    type: string
+    enum: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, DEPENDENT_EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]
+  example: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, DEPENDENT_EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]

@@ -1,0 +1,80 @@
+get:
+  tags:
+    - Reconciliation
+  summary: List reconciliation transactions
+  description: |
+    Retrieve reconciliation transactions for corporate card statement reconciliations.
+
+    Use this endpoint to fetch transactions with statement details and matched expenses. Filter across fields using the `q` parameter and structured filters. Pagination is supported via `offset` and `limit`, and sorting via `order`.
+
+    To understand filtering, ordering and pagination, see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: reconciliation_transactions_list
+  parameters:
+    - $ref: '../../components/parameters/q.yaml'
+    - $ref: '../../components/parameters/order.yaml'
+    - $ref: '../../components/parameters/offset.yaml'
+    - $ref: '../../components/parameters/limit.yaml'
+    - in: query
+      name: statement_amount
+      schema:
+        type: string
+      description: Filter by statement amount using operators like eq., gt., lt., etc.
+    - in: query
+      name: statement_merchant
+      schema:
+        type: string
+      description: Filter by statement merchant using operators like eq., ilike., etc.
+    - in: query
+      name: statement_transaction_date
+      schema:
+        type: string
+      description: Filter by transaction date using timestamp operators like gte., lte., etc.
+    - in: query
+      name: statement_post_date
+      schema:
+        type: string
+      description: Filter by post date using timestamp operators like gte., lte., etc.
+    - in: query
+      name: is_ignored
+      schema:
+        type: string
+      description: Filter by ignored flag using eq.true/eq.false
+    - in: query
+      name: is_reconciled
+      schema:
+        type: string
+      description: Filter by reconciled flag using eq.true/eq.false
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/reconciliation_transactions.yaml#/reconciliation_transaction_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml

@@ -12,6 +12,105 @@ servers:
     description: US Region Server
   - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
+tags: []
+paths:
+  /accountant/orgs:
+    get:
+      tags:
+        - Organisations
+      summary: List Organisations
+      operationId: orgs_list
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_rov_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Organisations
+      summary: Create Organisation
+      operationId: org_create
+      description: |
+        This API is used to create a new org with an owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - owner_email
+                - currency
+                - name
+              properties:
+                owner_email:
+                  $ref: '#/components/schemas/email'
+                owner_full_name:
+                  $ref: '#/components/schemas/user_full_name'
+                currency:
+                  $ref: '#/components/schemas/currency'
+                code:
+                  $ref: '#/components/schemas/code'
+                name:
+                  $ref: '#/components/schemas/org_name'
+                domain:
+                  $ref: '#/components/schemas/domain'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  refresh_token:
+                    $ref: '#/components/schemas/refresh_token'
+                  org_id:
+                    $ref: '#/components/schemas/org_id'
+                  user_id:
+                    $ref: '#/components/schemas/user_id'
+                  redirect_uri:
+                    $ref: '#/components/schemas/redirect_uri'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
 components:
   securitySchemes:
     oauth2:
@@ -237,102 +336,3 @@ components:
       description: |
         URL where user needs to be redirected
       example: https://app.fylehq.com/app/...
-tags: []
-paths:
-  /accountant/orgs:
-    get:
-      tags:
-        - Organisations
-      summary: List Organisations
-      operationId: orgs_list
-      description: |
-        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/org_rov_out'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-    post:
-      tags:
-        - Organisations
-      summary: Create Organisation
-      operationId: org_create
-      description: |
-        This API is used to create a new org with an owner
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - owner_email
-                - currency
-                - name
-              properties:
-                owner_email:
-                  $ref: '#/components/schemas/email'
-                owner_full_name:
-                  $ref: '#/components/schemas/user_full_name'
-                currency:
-                  $ref: '#/components/schemas/currency'
-                code:
-                  $ref: '#/components/schemas/code'
-                name:
-                  $ref: '#/components/schemas/org_name'
-                domain:
-                  $ref: '#/components/schemas/domain'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  refresh_token:
-                    $ref: '#/components/schemas/refresh_token'
-                  org_id:
-                    $ref: '#/components/schemas/org_id'
-                  user_id:
-                    $ref: '#/components/schemas/user_id'
-                  redirect_uri:
-                    $ref: '#/components/schemas/redirect_uri'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'

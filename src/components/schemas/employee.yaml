@@ -193,12 +193,17 @@ employee_out:
           nullable: True
           type: boolean
           description: >
-            This field indicates whether employee has added ach account
+            This field indicates whether employee has added a bank account to receive ACH reimbursements.
         verified:
           nullable: True
           type: boolean
           description: >
-            This field indicates whether employee's ach account is verified.
+            This field indicates whether employee's bank account, added to receive ACH reimbursements, is verified.
+        suspended:
+          nullable: True
+          type: boolean
+          description: >
+            This field indicates whether employee's ACH account is suspended.
       description: |
         ACH account details of the employee.
     delegatees:
@@ -410,12 +415,17 @@ employee_out_embed_for_report:
           nullable: True
           type: boolean
           description: >
-            This field indicates whether employee has added ach account
+            This field indicates whether employee has added a bank account to receive ACH reimbursements.
         verified:
           nullable: True
           type: boolean
           description: >
-            This field indicates whether employee's ach account is verified.
+            This field indicates whether employee's bank account, added to receive ACH reimbursements, is verified.
+        suspended:
+          nullable: True
+          type: boolean
+          description: >
+            This field indicates whether employee's ACH account is suspended.
     business_unit:
       type: string
       maxLength: 255
@@ -906,3 +916,402 @@ employee_summary_out:
       nullable: True
       description: |
         Total liability payable to the employee.
+
+employee_change_owner_in:
+  type: object
+  properties:
+    target_employee_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ouabcdefghij
+  required:
+    - target_employee_id
+
+employees_send_mobile_verification_code_post_out:
+  type: object
+  additionalProperties: False
+  properties:
+    to:
+      type: string
+      description: |
+        Phone number to which the verification code was sent
+      example: "+15017122661"
+    channel:
+      type: string
+      description: |
+        Channel used for sending the verification code
+      example: "sms"
+    status:
+      type: string
+      description: |
+        Current status of the verification attempt
+      example: "pending"
+    valid:
+      type: boolean
+      description: |
+        Whether the verification is valid
+      example: false
+    date_created:
+      type: string
+      format: date-time
+      description: |
+        Date and time when the verification was created
+      example: "2015-07-30T20:00:00Z"
+    attempts_left:
+      type: number
+      description: |
+        Number of attempts left in a 24 hour window
+      example: 4
+
+
+employee_check_mobile_verification_code_in:
+  type: object
+  properties:
+    otp:
+      type: string
+      description: |
+        OTP received on the mobile number.
+  required:
+    - otp
+
+spender_employee_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ouabcdefghij
+    mobile:
+      type: string
+      nullable: True
+      description: |
+        The mobile number to be added to the employee's profile. It should start with a '+' sign, include the country code, and have a total of 4 to 15 digits.
+      example: '+15017122661'
+  required:
+    - id
+    - mobile
+
+employee_hierarchy_out:
+  type: object
+  additionalProperties: False
+  properties:
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    name:
+      type: string
+      maxLength: 255
+      description: Full name of the employee
+      example: "David Davis"
+    email:
+      $ref: './fields.yaml#/email'
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+    depth:
+      type: integer
+      description: Hierarchy depth level of the employee (0 is top level)
+      example: 0
+      minimum: 0
+    has_accepted_invite:
+      $ref: './fields.yaml#/has_accepted_invite'
+    primary_approver_user_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      example: uswjwgnwwgo
+      nullable: True
+
+spender_employee_current_out:
+  type: object
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    org_id:
+      $ref: ./fields.yaml#/org_id
+    user_id:
+      $ref: ./fields.yaml#/fk_string
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    user:
+      $ref: ./user.yaml#/user_out_embed
+    code:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: E84122
+      description: >
+        This field refers to any string that the client programs can use to refer
+        to an employee's unique id.
+
+        This could be any field such as an UUID from an Active Directory server or
+        employee id in a HRMS system.
+    joined_at:
+      $ref: './fields.yaml#/joined_at'
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+    business_unit:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: Finance ops
+    special_email:
+      type: string
+      maxLength: 127
+      nullable: true
+      example: receipts+admin1_mb4w@fyle.ai
+      description: |
+        Special email address for the employee used for receipt processing
+    roles:
+      type: array
+      items:
+        $ref: ./fields.yaml#/role
+    location:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Bangalore Ofc
+    is_enabled:
+      allOf:
+        - $ref: ./fields.yaml#/is_enabled
+      description: |
+        This field indicates whether the employee is enabled in the org.
+    has_accepted_invite:
+      $ref: ./fields.yaml#/has_accepted_invite
+    branch_account:
+      type: string
+      nullable: True
+      example: "1234567890"
+      description: |
+        The Account number of the bank account of the Employee.
+    branch_ifsc:
+      type: string
+      nullable: True
+      maxLength: 11
+      example: "SBIN0007587"
+      description: |
+        IFSC code of the bank account of the Employee. Must be a 11 digit alphanumeric code.
+    department_id:
+      $ref: './fields.yaml#/fk_string'
+    department:
+      $ref: './department.yaml#/department_out_embed'
+    level_id:
+      $ref: './fields.yaml#/fk_string'
+    level:
+      nullable: True
+      $ref: './level.yaml#/level_out_embed'
+    mobile:
+      type: string
+      nullable: True
+      example: '+12131234567'
+      description: |
+        Mobile number of the employee
+    is_mobile_verified:
+      type: boolean
+      nullable: true
+      description: |
+        Flag which indicates if mobile is verified or not.
+      example: false
+    mobile_verification_attempts_left:
+      type: integer
+      description: |
+        Number of mobile verification attempts left for the employee
+      example: 3
+    mobile_verification_attempted_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: |
+        Date and time when the mobile verification was last attempted.
+    org_name:
+      type: string
+      description: |
+        Employee's org name
+    currency:
+      $ref: './fields.yaml#/currency'
+    approver_user_ids:
+      type: array
+      maxLength: 3
+      nullable: True
+      items:
+        $ref: './fields.yaml#/fk_string'
+      example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
+      description: |
+        List of IDs of users who are approvers for this employee. Maximum 3.
+    approver_users:
+      type: array
+      nullable: True
+      items:
+        $ref: ./user.yaml#/user_out_embed_nullable
+      description: |
+        List of users who are approvers for this employee.
+    locale:
+      $ref: './fields.yaml#/locale'
+    delegatees:
+      type: array
+      nullable: True
+      items:
+        $ref: ./fields.yaml#/delegatees
+      description: |
+        List of users who are delegatees for this employee.
+    mileage_settings:
+      $ref: './fields.yaml#/mileage_settings'
+    custom_fields:
+      $ref: './fields.yaml#/custom_fields'
+    flattened_custom_field:
+      $ref: './fields.yaml#/flattened_custom_field'
+    commute_details_id:
+      $ref: './fields.yaml#/fk_integer'
+    commute_details:
+      $ref: './fields.yaml#/commute_details'
+    is_primary:
+      type: boolean
+      nullable: true
+      description: |
+        Indicates if this is the primary org employee record for the user
+      example: true
+
+employee_overview_out:
+  type: object
+  additionalProperties: False
+  properties:
+    user:
+      type: object
+      additionalProperties: False
+      properties:
+        email:
+          $ref: './fields.yaml#/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: Full name of the user
+          example: "John"
+        id:
+          $ref: './fields.yaml#/user_id'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    employee:
+      type: object
+      additionalProperties: False
+      properties:
+        has_accepted_invite:
+          $ref: './fields.yaml#/has_accepted_invite'
+        id:
+          $ref: './fields.yaml#/id_string'
+        is_enabled:
+          allOf:
+            - $ref: ./fields.yaml#/is_enabled
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        org_id:
+          $ref: './fields.yaml#/org_id'
+        org_name:
+          $ref: './fields.yaml#/org_name'
+        title:
+          type: string
+          maxLength: 255
+          nullable: True
+          example: Branch Manager
+    employee_id:
+      $ref: './fields.yaml#/id_string'
+    primary_approver:
+      type: object
+      additionalProperties: False
+      nullable: True
+      properties:
+        id:
+          $ref: './fields.yaml#/user_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Full name of the primary approver
+          example: "David Davis"
+        email:
+          $ref: './fields.yaml#/email'
+    primary_approver_id:
+      type: string
+      description: |
+        The unique id of an user to which the object is associated.
+      example: uswjwgnwwgo
+      nullable: True
+    department:
+      type: object
+      additionalProperties: False
+      nullable: True
+      properties:
+        id:
+          $ref: './fields.yaml#/id_string'
+        name:
+          type: string
+          maxLength: 255
+          description: Name of the department
+          example: "Engineering"
+        code:
+          type: string
+          maxLength: 255
+          nullable: True
+          description: Department code
+          example: "ENG"
+        sub_department:
+          type: string
+          maxLength: 255
+          nullable: True
+          description: Sub-department name
+          example: null
+    department_id:
+      $ref: './fields.yaml#/id_string'
+    expense_total_amount:
+      type: number
+      description: Total amount of expenses for the employee
+      example: 200.01
+    expense_count:
+      type: integer
+      description: Total count of expenses for the employee
+      example: 5
+
+employee_overview_stats_out:
+  type: object
+  additionalProperties: false
+  properties:
+    count:
+      type: integer
+      description: Total count of employees in the overview
+      example: 1130
+    total_amount:
+      type: number
+      description: Total amount across all employees in the overview
+      example: 30003
+
+employee_overview_expense_stats_out:
+  type: object
+  additionalProperties: false
+  properties:
+    count:
+      type: integer
+      description: Total count of expenses in the hierarchy
+      example: 1130
+    total_amount:
+      type: number
+      description: Total amount across all employees in the hierarchy
+      example: 30003
+
+employee_change_primary_org_in:
+  type: object
+  properties:
+    target_org_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ouabcdefghij
+  required:
+    - target_org_id
