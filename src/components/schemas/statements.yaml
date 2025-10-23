@@ -775,6 +775,145 @@ reconciliation_summary_from_statement_in:
     - ignored_line_item_ids
     - reconciliation_entry_ids
 
+reconcile_from_statement_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: stmtadfdsdf
+    statement_mapping:
+      type: object
+      properties:
+        description_column:
+          type: string
+          description: |
+            Specifies the mapping of description column on the statement
+          nullable: true
+          example: description
+        transaction_date_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction date on the statement.
+          example: txn date
+        transaction_id_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction id / unique id on the statement.
+          example: reference number
+          nullable: true
+        amount_column:
+          type: string
+          description: |
+            Specifies the mapping of amount on the statement.
+          example: amount
+        card_number_column:
+          type: string
+          description: |
+            Specifies the mapping of card number on the statement.
+          example: account number
+        merchant_column:
+          type: string
+          description: |
+            Specifies the mapping of merchant on the statement.
+          example: Amazon
+        foreign_amount_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign amount on the statement.
+          example: foreign amount
+          nullable: true
+        foreign_currency_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign currency on the statement.
+          example: foreign currency
+          nullable: true
+        post_date_column:
+          type: string
+          description: |
+            Specifies the header name of the post date column in the statement.
+          example: post date
+          nullable: true
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: |
+            Specifies the representation of the the amount in the statement, if true then the amount represented by |
+            positive sign are debits, and if false then the amount represented by negative sign are debits.
+          example: true
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: USD
+          nullable: true
+        card_network:
+          type: string
+          description: |
+            Specifies the credit card network used by the card
+          example: VISA
+          nullable: true
+      required:
+        - description_column
+        - transaction_date_column
+        - transaction_id_column
+        - amount_column
+        - card_number_column
+        - merchant_column
+        - foreign_amount_column
+        - foreign_currency_column
+        - post_date_column
+        - bank_name
+        - is_debit_positive
+        - name
+        - card_network
+    ignored_line_item_ids:
+      type: array
+      items:
+        type: string
+      description: >
+        This specifies list of statement line items to be ignored in the statement.
+      example:
+        - stlisfdfadssd
+    start_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Start date of the statement period
+      nullable: true
+    end_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        End date of the statement period
+      nullable: true
+    card_mapping:
+      $ref: '#/card_mapping_in'
+    reconciliation_method:
+      type: string
+      description: |
+        Specifies the reconciliation method to be used for the statement.
+      example: TRANSACTION_DATE
+      enum:
+        - POST_DATE
+        - TRANSACTION_DATE
+    reconciliation_entry_ids:
+      type: array
+      description: IDs of reconciliation entry selecting periods for which reconciliation is to be done
+      items:
+        type: string
+      example:
+        - recexxxxxx
+  required:
+    - id
+    - statement_mapping
+    - ignored_line_item_ids
+    - reconciliation_method
+    - reconciliation_entry_ids
+
 rtf_missing_transaction_from_statement_out:
   type: object
   properties:
