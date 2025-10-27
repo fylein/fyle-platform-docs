@@ -3667,6 +3667,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Expenses
+      summary: Create or update an expense export configuration
+      description: |
+        Create or update an expense export configuration.
+
+        If `id` is provided in the request, the existing configuration will be updated. 
+        If `id` is not provided, a new configuration will be created.
+      operationId: expenses_export_configurations_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_export_configuration_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expenses_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/permissions:
     post:
       tags:
@@ -17102,6 +17157,46 @@ components:
             - $ref: '#/components/schemas/expenses_export_configuration_config'
           description: |
             Configuration details for the export including columns, sorting, and formatting options.
+    expenses_export_configuration_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ecH2sfdf
+          nullable: true
+          description: |
+            Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Expenses - Apr'25
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=spent_at.desc&report-%3Eseq_num=in.(%22C/2025/07/R/175%22)
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+            - PDF
+          description: |
+            Type of the export file format.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/expenses_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+      required:
+        - name
+        - query_string
+        - type
+        - config
     expense_permissions_in:
       type: object
       required:
