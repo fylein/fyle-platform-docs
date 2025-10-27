@@ -1,8 +1,8 @@
-<img src="https://raw.github.com/fylein/fyle-platform-docs/main/assets/images/fyle_logo.png" alt="Fyle logo" width="100">
+<img src="https://raw.github.com/fylein/fyle-platform-docs/main/assets/images/sage-expense-management-horizontal.png" alt="Sage Expense Management logo" width="100">
 
 # fyle-platform-docs #
 
-OpenAPI documentation of Fyle Platform APIs
+OpenAPI documentation of Sage Expense Management Platform APIs
 
 ## Installing Nvm and Node ##
 

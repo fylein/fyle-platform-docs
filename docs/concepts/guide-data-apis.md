@@ -1,7 +1,7 @@
 # Guide to Data APIs
 
 At this point, you should already be familiar with:
-* [Different types of applications](./types-of-application.md) in Fyle
+* [Different types of applications](./types-of-application.md) in Sage Expense Management
 * [Figuring out which cluster](./cluster.md) you should be hitting to access your data
 
 ## Security
@@ -18,9 +18,9 @@ If your access token is invalid or expired, your call with error out. Every acce
 
 Resources are business objects that are relevant to expense management. Typical resources that you'll see are: `expenses`, `reports`, `employees`, `projects` etc. Not all roles have access to all resources. Access to these resources are restricted via role-specific APIs.
 
-Every user in Fyle has one or more roles. Every application that you write assumes that the user who will authorize the application has certain roles. Each role has access to specific set of APIs.
+Every user in Sage Exp Mgmt has one or more roles. Every application that you write assumes that the user who will authorize the application has certain roles. Each role has access to specific set of APIs.
 
-E.g. if John has the role `["FYLER"]` only, then John will only have access to spender APIs. If John has roles `["FYLER","ADMIN"]`, then John has access to both spender and admin APIs. Therefore, the application that John authorizes also has access to both spender and admin APIs.
+E.g. if John has the role `["SPENDER"]` only, then John will only have access to spender APIs. If John has roles `["SPENDER","ADMIN"]`, then John has access to both spender and admin APIs. Therefore, the application that John authorizes also has access to both spender and admin APIs.
 
 > #### Finer access control is coming soon!
 >
