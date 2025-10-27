@@ -1,0 +1,137 @@
+expenses_export_configuration_column:
+  type: object
+  properties:
+    name:
+      type: string
+      description: |
+        Name of the column.
+      example: Merchant
+    formula:
+      type: object
+      additionalProperties: true
+      description: |
+        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+      example:
+        function: Field
+        parameters:
+          - merchant
+
+
+expenses_export_configuration_sort_column:
+  type: object
+  properties:
+    display_name:
+      type: string
+      description: |
+        Display name of the sort column.
+      example: Spent At
+    field_name:
+      type: string
+      description: |
+        Field name to sort by.
+      example: spent_at
+    direction:
+      type: string
+      enum:
+        - asc
+        - desc
+      description: |
+        Sort direction - ascending or descending.
+      example: desc
+
+
+expenses_export_configuration_separate_line_items_entry:
+  type: object
+  properties:
+    is_enabled:
+      type: boolean
+      description: |
+        Whether to show separate double rows for each line item in the export file.
+      example: false
+    debit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for debit entries only.
+      example: []
+    credit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for credit entries only.
+      example: []
+
+
+expenses_export_configuration_config:
+  type: object
+  additionalProperties: true
+  properties:
+    date_format:
+      type: string
+      description: |
+        Date format to be used in the export file.
+      example: dd-MM-yyyy
+    is_column_header_included:
+      type: boolean
+      description: |
+        Whether to include column headers in the export file.
+      example: true
+    separate_line_items_entry:
+      allOf:
+        - $ref: '#/expenses_export_configuration_separate_line_items_entry'
+      description: |
+        Configure how to show separate line items for debit and credit entries in the export file.
+    columns:
+      type: array
+      items:
+        $ref: '#/expenses_export_configuration_column'
+      description: |
+        List of columns to include in the export file with their formulas.
+    sort_columns:
+      type: array
+      items:
+        $ref: '#/expenses_export_configuration_sort_column'
+      description: |
+        List of columns to sort the export data by.
+
+
+expenses_export_configuration_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ecH2sfdf
+      description: |
+        Unique identifier for the export configuration.
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    name:
+      type: string
+      description: |
+        Name of the export configuration.
+      example: "Monthly Expenses - Apr'25"
+    query_string:
+      type: string
+      description: |
+        Query string containing filters and parameters for the export.
+      example: "order=spent_at.desc&report-%3Eseq_num=in.(%22C/2025/07/R/175%22)"
+    type:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+        - PDF
+      description: |
+        Type of the export file format.
+      example: CSV
+    config:
+      allOf:
+        - $ref: '#/expenses_export_configuration_config'
+      description: |
+        Configuration details for the export including columns, sorting, and formatting options.
