@@ -1,0 +1,52 @@
+post:
+  tags:
+    - Reconciliation
+  summary: Create backdated reconciliation entries
+  description: |
+    This API creates backdated reconciliation entries based on your organization's reconciliation 
+    configuration. Up to 3 reconciliation entries can be created in total for an organization.
+  operationId: post_create_reconciliation_entries
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: '../../components/schemas/reconciliation_entry.yaml#/create_from_reconciliation_entry_in'
+          required:
+            - data
+  responses:
+    '200':
+      description: OK - Reconciliation entries created successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Empty object on success
+            additionalProperties: false
+            example: {}
+    '400':
+      description: |
+        Bad request. Possible reasons:
+        - Reconciliation config is not set
+        - Maximum 3 backdated reconciliation entries are already created for org
+        - Reconciliation config changed, backdated entries can not be generated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
