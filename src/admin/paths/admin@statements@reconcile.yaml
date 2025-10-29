@@ -1,10 +1,10 @@
 post:
   tags:
     - Statements
-  summary: Matching cards present in Sage Exp Mgmt
+  summary: Reconcile uploaded statement
   description: |
-    Returns matching cards present in Sage Exp Mgmt for cards in Statement
-  operationId: matching_cards
+    This API starts the reconciliation process for an uploaded bank statement. Provide the reconciliation method (TRANSACTION_DATE or POST_DATE), statement mapping configuration, and the periods you want to reconcile. The reconciliation will be processed in the background, and you can check the status through the reconciliation entries.
+  operationId: post_reconcile_statement
   requestBody:
     required: true
     content:
@@ -13,7 +13,7 @@ post:
           type: object
           properties:
             data:
-              $ref: '../../components/schemas/statements.yaml#/card_transaction_from_statement_in'
+              $ref: '../../components/schemas/statements.yaml#/reconcile_from_statement_in'
           required:
             - data
   responses:
@@ -25,9 +25,8 @@ post:
             type: object
             properties:
               data:
-                type: array
-                items:
-                  $ref: '../../components/schemas/statements.yaml#/matching_cards_out'
+                type: object
+                description: Empty object on successful reconciliation
     '400':
       description: Bad request
       content:
@@ -52,3 +51,4 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/404.yaml'
+

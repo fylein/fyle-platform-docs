@@ -3,7 +3,7 @@ info:
   version: '1.0'
   title: Admin APIs
   description: |
-    These APIs are generally used to integrate Fyle with accounting or HRMS systems. 
+    These APIs are generally used to integrate Sage Expense Management with accounting or HRMS systems. 
   contact:
     name: Platform Beta
     email: support@fylehq.com
@@ -15,7 +15,7 @@ servers:
 tags:
   - name: Accounting Exports
     description: |
-      This API allows you to record export of Fyle resources to an external accounting exports
+      This API allows you to record export of Sage Expense Management resources to an external accounting exports
   - name: Accounts
     description: |
       This APIs gives access to your Employees's accounts data.
@@ -57,7 +57,7 @@ tags:
       This API gives you access to your organisation's Expense Rules
   - name: Files
     description: |
-      This API gives you access to creates a file in Fyle
+      This API gives you access to creates a file in Sage Expense Management
   - name: Levels
     description: |
       These APIs gives you access to manage your organisation's Employee levels.
@@ -2276,7 +2276,7 @@ paths:
         - Employees
       summary: Upload Employees data via excel file.
       description: |
-        Upload Employees data via excel file to Fyle system.
+        Upload Employees data via excel file to Sage Exp Mgmt system.
       operationId: employees_upload_post
       requestBody:
         required: true
@@ -9393,7 +9393,7 @@ paths:
         - Statements
       summary: Upload a statement
       description: |
-        Upload a corporate card statement(csv or excel) to Fyle for reconciliation.
+        Upload a corporate card statement(csv or excel) to Sage Exp Mgmt for reconciliation.
       operationId: statements_post
       requestBody:
         required: true
@@ -9706,13 +9706,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/reconcile:
+    post:
+      tags:
+        - Statements
+      summary: Reconcile uploaded statement
+      description: |
+        This API starts the reconciliation process for an uploaded bank statement. Provide the reconciliation method (TRANSACTION_DATE or POST_DATE), statement mapping configuration, and the periods you want to reconcile. The reconciliation will be processed in the background, and you can check the status through the reconciliation entries.
+      operationId: post_reconcile_statement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconcile_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Empty object on successful reconciliation
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/statements/card_stats:
     post:
       tags:
         - Statements
       summary: RTF Card Stats of a Statement
       description: |
-        This API helps in getting all the card stats of a statement during RTF missing transactions upload. Stats include information such as if Card exists in Fyle, RTF enrollment of card etc.
+        This API helps in getting all the card stats of a statement during RTF missing transactions upload. Stats include information such as if Card exists in Sage Exp Mgmt, RTF enrollment of card etc.
       operationId: card_stats
       requestBody:
         required: true
@@ -9763,9 +9817,9 @@ paths:
     post:
       tags:
         - Statements
-      summary: Matching cards present in Fyle
+      summary: Matching cards present in Sage Exp Mgmt
       description: |
-        Returns matching cards present in Fyle for cards in Statement
+        Returns matching cards present in Sage Exp Mgmt for cards in Statement
       operationId: matching_cards
       requestBody:
         required: true
@@ -10192,7 +10246,7 @@ paths:
       summary: Check expense for missing mandatory fields
       description: |
         Before updating employee's expense object
-        into Fyle, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
+        into Sage Exp Mgmt, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
         You can easily do that by passing the same expense object with some extra optional fields documented below.
       operationId: check_mandatory_fields_post
       requestBody:
@@ -10636,7 +10690,7 @@ paths:
       summary: Check mandatory fields before splitting an expense
       description: |
         Before splitting an employee's expense object
-        into Fyle, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
+        into Sage Exp Mgmt, based on the business requirements, you might want to check if you have added all the mandatory fields set up by your organization.
         You can easily do that by passing the same expense split object documented below.
       operationId: expenses_split_check_mandatory_post
       requestBody:
@@ -10691,7 +10745,7 @@ paths:
       summary: Check for policy violations before splitting an expense
       description: |
         Before splitting an [expense object](https://docs.fylehq.com/docs/fyle-platform-docs/7a3407a5ef184-split-an-expense)
-        into Fyle, based on the business requirements, you might want to check the resulting 
+        into Sage Exp Mgmt, based on the business requirements, you might want to check the resulting 
         expenses against the policy rules set up by your organization. You can easily do that by passing the same split expense object 
         to this API.
       operationId: expenses_split_check_policies_post
@@ -10963,6 +11017,190 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reconciliation_entries/eligible_cards:
+    get:
+      tags:
+        - Reconciliation
+      summary: List eligible cards for a reconciliation entry
+      description: |
+        Returns the list of corporate cards that are eligible for a given reconciliation entry.
+        To understand filtering, ordering and pagination, see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reconciliation_entries_eligible_cards_list
+      parameters:
+        - in: query
+          name: reconciliation_entry_id
+          required: true
+          schema:
+            type: string
+            example: receabc12345
+          description: |
+            Reconciliation entry id for which eligible cards should be listed.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            example: RECONCILED
+          description: |
+            Optional status filter for eligible cards.
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reconciliation_eligible_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/eligible_cards/stats:
+    post:
+      tags:
+        - Reconciliation
+      summary: Stats for eligible cards of a reconciliation entry
+      description: |
+        Returns aggregate stats for corporate cards eligible under a reconciliation entry.
+
+        Use this endpoint to get period window, transaction and expense totals, differences, and card-level aggregate counts such as matching issues and reconciliation status.
+      operationId: reconciliation_entries_eligible_cards_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconciliation_eligible_cards_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reconciliation_eligible_cards_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/stats:
+    post:
+      tags:
+        - Reconciliation
+      summary: Reconciliation Transactions Stats
+      description: |
+        Retrieve stats for reconciliation transactions within a reconciliation period and optional filters.
+
+        Use this endpoint to compute counts and totals of statement transactions and matched expenses, and identify differences for reconciliation analysis. Pass filters using `query_params` similar to the reconciliation transactions GET list API.
+      operationId: reconciliation_transactions_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconciliation_transactions_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reconciliation_transactions_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses
@@ -11684,7 +11922,7 @@ components:
             - invalid token
           type: string
           description: |
-            This error means that the input access token is either not issued by Fyle or has expired.
+            This error means that the input access token is either not issued by Sage Exp Mgmt or has expired.
             You need to generate a new access token.
     '403':
       type: object
@@ -11736,7 +11974,7 @@ components:
     id_integer:
       type: integer
       description: |
-        This id is provided by Fyle to identify an object.
+        This id is provided by Sage Exp Mgmt to identify an object.
       example: 1234
     org_id:
       type: string
@@ -11783,7 +12021,7 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
+          This id is provided by Sage Exp Mgmt to identify an object.
         example: uswoirwlwwg
       example:
         - uswoirwlwwg
@@ -11799,7 +12037,7 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
+          This id is provided by Sage Exp Mgmt to identify an object.
         example: uswoirwlwwg
       example:
         - uswoirwlwwg
@@ -11810,7 +12048,7 @@ components:
       type: string
       maxLength: 15
       description: |
-        This id is provided by Fyle to identify an object.
+        This id is provided by Sage Exp Mgmt to identify an object.
       example: sdfd2391
     email:
       type: string
@@ -11922,7 +12160,7 @@ components:
             nullable: false
             maxLength: 15
             description: |
-              This id is provided by Fyle to identify an object.
+              This id is provided by Sage Exp Mgmt to identify an object.
             example: uswoirwlwwg
           example:
             - uswoirwlwwg
@@ -12084,7 +12322,7 @@ components:
             nullable: false
             maxLength: 15
             description: |
-              This id is provided by Fyle to identify an object.
+              This id is provided by Sage Exp Mgmt to identify an object.
             example: uswoirwlwwg
           example:
             - uswoirwlwwg
@@ -12211,7 +12449,7 @@ components:
             nullable: false
             maxLength: 15
             description: |
-              This id is provided by Fyle to identify an object.
+              This id is provided by Sage Exp Mgmt to identify an object.
             example: uswoirwlwwg
           example:
             - uswoirwlwwg
@@ -12804,7 +13042,7 @@ components:
         nullable: true
         maxLength: 15
         description: |
-          This id is provided by Fyle to identify an object.
+          This id is provided by Sage Exp Mgmt to identify an object.
         example: uswoirwlwwg
       example:
         - uswoirwlwwg
@@ -12855,7 +13093,7 @@ components:
           nullable: true
           description: |
             Link to an external document that would be shared with employees
-          example: https://fyle.stoplight.io/
+          example: https://stoplight.io/
     department_in:
       type: object
       required:
@@ -12885,7 +13123,7 @@ components:
           nullable: true
           description: |
             Link to an external document that would be shared with employees
-          example: https://fyle.stoplight.io/
+          example: https://stoplight.io/
     mileage_rate_out:
       type: object
       additionalProperties: false
@@ -13044,7 +13282,7 @@ components:
       nullable: true
       maxLength: 15
       description: |
-        This id is provided by Fyle to identify an object.
+        This id is provided by Sage Exp Mgmt to identify an object.
       example: sdfd2391
     department_out_embed:
       type: object
@@ -14078,7 +14316,7 @@ components:
       type: string
       maxLength: 255
       description: |
-        This id provided by Fyle to uniquely identify an employee within an organization.
+        This id provided by Sage Exp Mgmt to uniquely identify an employee within an organization.
         This id is always prefixed with `ou`.
       example: outGt9ju6qP
     reinvitation_in:
@@ -14709,7 +14947,7 @@ components:
       type: integer
       nullable: true
       description: |
-        This id is provided by Fyle to identify an object.
+        This id is provided by Sage Exp Mgmt to identify an object.
       example: 1234
     account_out_embed:
       type: object
@@ -14917,7 +15155,7 @@ components:
           nullable: true
           maxLength: 255
           description: |
-            An unique ID, generated by Fyle, for identifying the Reimbursement.
+            An unique ID, generated by Sage Exp Mgmt, for identifying the Reimbursement.
           example: reimntGt9ju6qP
         reimbursement_seq_num:
           type: string
@@ -15191,21 +15429,21 @@ components:
             - $ref: '#/components/schemas/merchant'
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
         category:
           type: string
           maxLength: 255
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         matched_by:
           type: string
           nullable: true
           description: |
             String denoting the email of the user who matched the card transaction to an expense.
-          example: john.ooe@fyle.in
+          example: john.ooe@sage.com
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -15217,7 +15455,7 @@ components:
             type: integer
             nullable: true
             description: |
-              This id provided by Fyle to identify an expense field.
+              This id provided by Sage Exp Mgmt to identify an expense field.
             example: 123
           example:
             - 123
@@ -15291,17 +15529,17 @@ components:
         parent_expense_field_id:
           type: integer
           description: |
-            This id provided by Fyle to identify the parent expense field.
+            This id provided by Sage Exp Mgmt to identify the parent expense field.
           example: 123
         dependent_expense_field_id:
           type: integer
           description: |
-            This id provided by Fyle to identify the dependent expense field.
+            This id provided by Sage Exp Mgmt to identify the dependent expense field.
           example: 123
         dependent_expense_field_value_id:
           type: integer
           description: |
-            This id provided by Fyle to identify dependent field value.
+            This id provided by Sage Exp Mgmt to identify dependent field value.
           example: 123
         name:
           type: string
@@ -15721,11 +15959,11 @@ components:
         mileage_calculated_distance:
           type: number
           nullable: true
-          description: Distance computed by Fyle in mileage expenses.
+          description: Distance computed by Sage Exp Mgmt in mileage expenses.
         mileage_calculated_amount:
           type: number
           nullable: true
-          description: Amount computed by Fyle in mileage expenses.
+          description: Amount computed by Sage Exp Mgmt in mileage expenses.
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -15790,7 +16028,7 @@ components:
           nullable: true
           description: |
             Id given by external systems like Gmail. To identify whether that entity
-            has been already added to Fyle or not.
+            has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
           type: string
@@ -15820,7 +16058,7 @@ components:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
           description: |
-            Unique id given by Fyle to identify an Expense Report.
+            Unique id given by Sage Exp Mgmt to identify an Expense Report.
           example: rpvgnwlgw34
         added_to_report_at:
           allOf:
@@ -15939,7 +16177,7 @@ components:
           nullable: true
           maxLength: 15
           description: |
-            This id provided by Fyle to identify an object.
+            This id provided by Sage Exp Mgmt to identify an object.
           example: txwownwrngx
         split_group_amount:
           $ref: '#/components/schemas/split_group_amount'
@@ -15961,7 +16199,7 @@ components:
           nullable: true
           maxLength: 15
           description: |
-            This id is provided by Fyle to identify an Expense Rule.
+            This id is provided by Sage Exp Mgmt to identify an Expense Rule.
           example: ervgnwlgw34
         expense_rule_data:
           $ref: '#/components/schemas/expense_rule_data_in'
@@ -16062,7 +16300,7 @@ components:
           type: integer
           nullable: true
           description: |
-            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+            Commute details id of the expense. This id is provided by Sage Exp Mgmt to identify a commute details.
           example: 1234
         commute_details:
           $ref: '#/components/schemas/commute_details'
@@ -16071,6 +16309,12 @@ components:
           nullable: false
           description: |
             Whether duplicate expenses is detected for this expense or not.
+          example: true
+        is_reconciled:
+          type: boolean
+          nullable: false
+          description: |
+            Whether expenses is reconciled or not.
           example: true
     source:
       type: string
@@ -16160,7 +16404,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           description: |
-            This id is provided by Fyle to identify an object
+            This id is provided by Sage Exp Mgmt to identify an object
             - When `id` is sent, default action is to update the expense
         admin_amount:
           type: number
@@ -16278,7 +16522,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
           description: |
-            Specific to mileage expense. This represents the Mileage's rate id given by Fyle
+            Specific to mileage expense. This represents the Mileage's rate id given by Sage Exp Mgmt
             during creation of mileage rate for which this expense is created.
           nullable: true
           example: 9080
@@ -16289,16 +16533,16 @@ components:
         mileage_calculated_distance:
           type: number
           nullable: true
-          description: Distance computed by Fyle in mileage expenses.
+          description: Distance computed by Sage Exp Mgmt in mileage expenses.
         mileage_calculated_amount:
           type: number
           nullable: true
-          description: Amount computed by Fyle in mileage expenses.
+          description: Amount computed by Sage Exp Mgmt in mileage expenses.
         commute_details_id:
           type: integer
           nullable: true
           description: |
-            Commute details id of the expense. This id is provided by Fyle to identify a commute details.
+            Commute details id of the expense. This id is provided by Sage Exp Mgmt to identify a commute details.
           example: 1234
         commute_deduction:
           type: string
@@ -16318,7 +16562,7 @@ components:
           nullable: true
           example: 583
           description: |
-            Specific to per diem expense. This represents the per diem's rate id given by Fyle
+            Specific to per diem expense. This represents the per diem's rate id given by Sage Exp Mgmt
             during creation of per diem rate for which this expense is created. <br>
             This field is required for creating Per Diem Expenses.
         per_diem_num_days:
@@ -16791,7 +17035,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
           description: |
-            This represents the category's id given by Fyle during creation of category
+            This represents the category's id given by Sage Exp Mgmt during creation of category
             for which this expense is created.
             Null is not allowed for category_id field instead pass Unspecified category Id
           example: 49058
@@ -16862,7 +17106,7 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify an advances.
+            This id provided by Sage Exp Mgmt to uniquely identify an advances.
             This id is always prefixed with `adv`.
           readOnly: true
           example: advkvnwrnpwi
@@ -17346,7 +17590,7 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify an advance requests.
+            This id provided by Sage Exp Mgmt to uniquely identify an advance requests.
             This id is always prefixed with `adr`.
           readOnly: true
           example: adrkvnwrnpwi
@@ -17836,7 +18080,7 @@ components:
         type: string
         nullable: false
         description: |
-          This id is provided by Fyle to identify an object.
+          This id is provided by Sage Exp Mgmt to identify an object.
         example: uswoirwlwwg
       example:
         - uswoirwlwwg
@@ -17851,7 +18095,7 @@ components:
           type: string
           maxLength: 20
           description: |
-            This id provided by Fyle to identify an object.
+            This id provided by Sage Exp Mgmt to identify an object.
           example: remindRsjf2WmGd2
         org_id:
           $ref: '#/components/schemas/org_id'
@@ -17865,7 +18109,7 @@ components:
           type: string
           description: |
             The custom message which the admin wants to send alongside the reminder
-          example: Please fyle your expenses before 25th of this month
+          example: Please submit your expenses before 25th of this month
         schedule_config:
           $ref: '#/components/schemas/reminder_schedule_config'
         last_reminded_at:
@@ -17897,7 +18141,7 @@ components:
           type: string
           maxLength: 20
           description: |
-            This id provided by Fyle to identify an object.
+            This id provided by Sage Exp Mgmt to identify an object.
           example: remindRsjf2WmGd2
         type:
           $ref: '#/components/schemas/reminder_type'
@@ -17905,7 +18149,7 @@ components:
           type: string
           description: |
             The custom message which the admin wants send alongside the reminder
-          example: Please fyle your expenses before going on leave
+          example: Please submit your expenses before going on leave
         schedule_config:
           $ref: '#/components/schemas/reminder_schedule_config'
         add_to_calendar:
@@ -18079,7 +18323,7 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
+            This id provided by Sage Exp Mgmt to uniquely identify a reimbursement.
             This id is always prefixed with `reim`.
           example: reimntGt9ju6qP
         currency:
@@ -18293,7 +18537,7 @@ components:
           nullable: true
           maxLength: 255
           description: |
-            An unique ID, generated by Fyle, for identifying the Reimbursement.
+            An unique ID, generated by Sage Exp Mgmt, for identifying the Reimbursement.
           example: reimntGt9ju6qP
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_minimal'
@@ -19141,7 +19385,7 @@ components:
           nullable: true
           description: |
             Id given by external systems like Gmail. To identify whether that entity
-            has been already added to Fyle or not.
+            has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         yodlee_account_id:
           type: string
@@ -19247,13 +19491,13 @@ components:
           type: integer
           nullable: false
           description: |
-            The total number of transactions for the card, in Fyle
+            The total number of transactions for the card, in Sage Exp Mgmt
           example: 100
         unassigned_transactions_count:
           type: integer
           nullable: false
           description: |
-            The total number of unassigned transactions for the card, in Fyle
+            The total number of unassigned transactions for the card, in Sage Exp Mgmt
           example: 50
       required:
         - id
@@ -19320,7 +19564,7 @@ components:
           nullable: true
           description: |
             Id given by external systems like Gmail. To identify whether that entity
-            has been already added to Fyle or not.
+            has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         last_synced_at:
           allOf:
@@ -19455,7 +19699,7 @@ components:
           nullable: true
           description: |
             Id given by external systems like Gmail. To identify whether that entity
-            has been already added to Fyle or not.
+            has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         yodlee_account_id:
           type: string
@@ -19557,13 +19801,13 @@ components:
           type: integer
           nullable: false
           description: |
-            The total number of transactions for the card, in Fyle
+            The total number of transactions for the card, in Sage Exp Mgmt
           example: 100
         unassigned_transactions_count:
           type: integer
           nullable: false
           description: |
-            The total number of unassigned transactions for the card, in Fyle
+            The total number of unassigned transactions for the card, in Sage Exp Mgmt
           example: 50
       required:
         - id
@@ -19683,6 +19927,7 @@ components:
         - seq_num
         - no_of_files
         - category_display_name
+        - is_reconciled
       properties:
         id:
           allOf:
@@ -19742,6 +19987,10 @@ components:
           description: |
             Category of the expense.
           example: Travel
+        is_reconciled:
+          type: boolean
+          description: |
+            Whether expense is reconciled or not.
     double_precision_detail:
       type: number
       description: Additional floating point numeric details of the card transaction. Same as double precision.
@@ -19931,7 +20180,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         category:
           type: string
@@ -19939,7 +20188,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -20116,7 +20365,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         category:
           type: string
@@ -20124,7 +20373,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         mcc:
           type: string
@@ -20213,7 +20462,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -20227,7 +20476,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -20547,7 +20796,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -20561,7 +20810,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -20786,7 +21035,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -20800,7 +21049,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -20996,7 +21245,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -21010,7 +21259,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -21203,7 +21452,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -21217,7 +21466,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -21417,7 +21666,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -21431,7 +21680,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -21639,7 +21888,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -21653,7 +21902,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -21876,7 +22125,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -21890,7 +22139,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -22115,7 +22364,7 @@ components:
           nullable: true
           description: |
             String denoting the name of the vendor to which the card transaction was made.
-            Note: This is not same as the merchant added in Fyle but just a string
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
           example: Uber
         mcc:
           type: string
@@ -22129,7 +22378,7 @@ components:
           nullable: true
           description: |
             String denoting the category of the card transaction
-            Note: This is not same as the category added in Fyle but just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         corporate_card_id:
           allOf:
@@ -22814,7 +23063,7 @@ components:
           nullable: true
           maxLength: 255
           description: |
-            An unique ID, generated by Fyle, for identifying the Reimbursement.
+            An unique ID, generated by Sage Exp Mgmt, for identifying the Reimbursement.
           example: reimntGt9ju6qP
         reimbursement:
           $ref: '#/components/schemas/reimbursement_out_minimal'
@@ -22920,7 +23169,7 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
+            This id provided by Sage Exp Mgmt to uniquely identify a reimbursement.
             This id is always prefixed with `reim`.
           readOnly: true
           example: reimntGt9ju6qP
@@ -22981,7 +23230,7 @@ components:
           type: string
           maxLength: 255
           description: |
-            This id provided by Fyle to uniquely identify a reimbursement.
+            This id provided by Sage Exp Mgmt to uniquely identify a reimbursement.
             This id is always prefixed with `reim`.
           example: reimntGt9ju6qP
         code:
@@ -23309,7 +23558,7 @@ components:
           nullable: true
           maxLength: 15
           description: |
-            This id provided by Fyle to identify a user. This can be null if the corporate card is not assigned to any user.
+            This id provided by Sage Exp Mgmt to identify a user. This can be null if the corporate card is not assigned to any user.
           example: sdfd2391
         amount:
           $ref: '#/components/schemas/amount'
@@ -23358,7 +23607,7 @@ components:
         category_id:
           type: integer
           description: |
-            This id is provided by Fyle to identify a category.
+            This id is provided by Sage Exp Mgmt to identify a category.
           nullable: true
           example: 49058
     account_in:
@@ -23381,7 +23630,7 @@ components:
         category_id:
           type: integer
           description: |
-            This id is provided by Fyle to identify a category.
+            This id is provided by Sage Exp Mgmt to identify a category.
           nullable: true
           example: 49058
     tax_group_out:
@@ -25860,6 +26109,144 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/_reconciliation_summary_object'
+    reconcile_from_statement_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          properties:
+            description_column:
+              type: string
+              description: |
+                Specifies the mapping of description column on the statement
+              nullable: true
+              example: description
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            transaction_id_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction id / unique id on the statement.
+              example: reference number
+              nullable: true
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            merchant_column:
+              type: string
+              description: |
+                Specifies the mapping of merchant on the statement.
+              example: Amazon
+            foreign_amount_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+              nullable: true
+            foreign_currency_column:
+              type: string
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+              nullable: true
+            post_date_column:
+              type: string
+              description: |
+                Specifies the header name of the post date column in the statement.
+              example: post date
+              nullable: true
+            bank_name:
+              type: string
+              description: |
+                Specifies the bank name of the statement
+              example: American Express
+            is_debit_positive:
+              type: boolean
+              description: |
+                Specifies the representation of the the amount in the statement, if true then the amount represented by |
+                positive sign are debits, and if false then the amount represented by negative sign are debits.
+              example: true
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+              nullable: true
+            card_network:
+              type: string
+              description: |
+                Specifies the credit card network used by the card
+              example: VISA
+              nullable: true
+          required:
+            - description_column
+            - transaction_date_column
+            - transaction_id_column
+            - amount_column
+            - card_number_column
+            - merchant_column
+            - foreign_amount_column
+            - foreign_currency_column
+            - post_date_column
+            - bank_name
+            - is_debit_positive
+            - name
+            - card_network
+        ignored_line_item_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies list of statement line items to be ignored in the statement.
+          example:
+            - stlisfdfadssd
+        start_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Start date of the statement period
+          nullable: true
+        end_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            End date of the statement period
+          nullable: true
+        card_mapping:
+          $ref: '#/components/schemas/card_mapping_in'
+        reconciliation_method:
+          type: string
+          description: |
+            Specifies the reconciliation method to be used for the statement.
+          example: TRANSACTION_DATE
+          enum:
+            - POST_DATE
+            - TRANSACTION_DATE
+        reconciliation_entry_ids:
+          type: array
+          description: IDs of reconciliation entry selecting periods for which reconciliation is to be done
+          items:
+            type: string
+          example:
+            - recexxxxxx
+      required:
+        - id
+        - statement_mapping
+        - ignored_line_item_ids
+        - reconciliation_method
+        - reconciliation_entry_ids
     card_transaction_from_statement_in:
       type: object
       properties:
@@ -25984,7 +26371,7 @@ components:
         missing_transactions_count:
           type: integer
           description: |
-            Number of transactions in the statement that are from cards that dont exist on Fyle/are not RTF enrolled.
+            Number of transactions in the statement that are from cards that dont exist on Sage Exp Mgmt/are not RTF enrolled.
           example: 76
         is_rtf_statement:
           type: boolean
@@ -26010,7 +26397,7 @@ components:
               is_present:
                 type: boolean
                 description: |
-                  Specifies if the card exists on Fyle.
+                  Specifies if the card exists on Sage Exp Mgmt.
                 example: true
               is_visa_enrolled:
                 type: boolean
@@ -26157,12 +26544,12 @@ components:
         rtf_confidence:
           type: string
           description: |
-            RTF Confidence percentage - `rtf_count` to the `total_count`, indicates what % of statement transactions are already existing in Fyle via RTF.
+            RTF Confidence percentage - `rtf_count` to the `total_count`, indicates what % of statement transactions are already existing in Sage Exp Mgmt via RTF.
           example: 99.22
         rtf_count:
           type: integer
           description: |
-            Number of transactions in the statement that are already existing in Fyle via RTF.
+            Number of transactions in the statement that are already existing in Sage Exp Mgmt via RTF.
           example: 76
         total_count:
           type: integer
@@ -26319,7 +26706,7 @@ components:
         rtf_confidence:
           type: string
           description: |
-            RTF Confidence percentage indicates what % of the transactions in last uploaded statement are already existing in Fyle via RTF.
+            RTF Confidence percentage indicates what % of the transactions in last uploaded statement are already existing in Sage Exp Mgmt via RTF.
           example: 99.22
     expense_rule_if_out:
       type: object
@@ -26651,7 +27038,7 @@ components:
             type: integer
             nullable: true
             description: |
-              This id provided by Fyle to identify an expense field.
+              This id provided by Sage Exp Mgmt to identify an expense field.
             example: 123
           example:
             - 123
@@ -27047,7 +27434,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           description: |
-            This id is provided by Fyle to identify an object
+            This id is provided by Sage Exp Mgmt to identify an object
             - When `id` is sent, default action is to update the expense
         admin_amount:
           type: number
@@ -27407,6 +27794,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
+          nullable: true
           description: List of file IDs attached to the expense split
           example:
             - figwiwpjww
@@ -27487,6 +27875,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
+          nullable: true
           description: List of file IDs attached to the expense
           example:
             - figwiwpjww
@@ -27510,6 +27899,7 @@ components:
           description: Purpose or description of the expense.
         splits:
           type: array
+          nullable: true
           description: List of split expenses. Empty when the expense is not split.
           items:
             $ref: '#/components/schemas/reconciliation_expense_split_out_embed'
@@ -27599,6 +27989,206 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
           description: Timestamp when this reconciliation transaction record was last updated.
+    reconciliation_eligible_card_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - reconciliation_entry_id
+        - card_number
+        - card_nickname
+        - user
+        - reconciled_on
+        - statement_transaction_count
+        - expense_count
+        - statement_total
+        - expense_total
+        - matching_issue_count
+        - status
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        reconciliation_entry_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: receabc12345
+          description: Reconciliation entry id for which the card is eligible.
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ecc123abc
+          description: Unique id of the eligible card record.
+        card_number:
+          $ref: '#/components/schemas/card_number'
+        card_nickname:
+          type: string
+          nullable: true
+          maxLength: 25
+          description: Unique nickname assigned to the card.
+          example: Business Card
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        reconciled_on:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Date when reconciliation was completed for this card in the entry.
+        statement_transaction_count:
+          type: integer
+          example: 3
+          description: Number of statement transactions for the card within the entry period.
+        expense_count:
+          type: integer
+          example: 2
+          description: Number of matched expenses for the card within the entry period.
+        statement_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          nullable: true
+          description: Sum of statement transaction amounts for the card (nullable).
+          example: 45
+        expense_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          nullable: true
+          description: Sum of matched expense amounts for the card (nullable).
+          example: 24
+        matching_issue_count:
+          type: integer
+          example: 3
+          description: Number of matching issues identified for this card within the entry period.
+        status:
+          type: string
+          description: Current reconciliation eligibility status for this card.
+          example: RECONCILED
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    reconciliation_eligible_cards_stats_in:
+      properties:
+        query_params:
+          nullable: false
+          type: string
+          description: |
+            Query param string similar to the GET eligible cards call. Must include `reconciliation_entry_id` to scope stats to a specific entry.
+            Refer the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering) for filtering syntax.
+          example: reconciliation_entry_id=eq.receabc12345
+    reconciliation_eligible_cards_stats_out:
+      type: object
+      additionalProperties: false
+      properties:
+        period_start:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Start of the reconciliation period in UTC.
+        period_end:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: End of the reconciliation period in UTC.
+        statement_transaction_count:
+          type: integer
+          description: Total number of statement transactions in the period.
+          example: 3
+        expense_count:
+          type: integer
+          description: Total number of expenses in the period.
+          example: 2
+        statement_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Sum of statement transaction amounts in the period.
+          example: 45
+        expense_total:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Sum of expense amounts in the period.
+          example: 30
+        difference:
+          allOf:
+            - $ref: '#/components/schemas/amount'
+          description: Difference between `statement_total` and `expense_total`.
+          example: 15
+        matching_issue_count:
+          type: integer
+          description: Number of transactions with matching issues across all eligible cards.
+          example: 3
+        total_cards:
+          type: integer
+          description: Total number of eligible cards.
+          example: 3
+        card_without_statement_count:
+          type: integer
+          description: Number of cards that have no statement transactions in the period.
+          example: 2
+        card_with_matching_issue_count:
+          type: integer
+          description: Number of cards that have only matching issues.
+          example: 0
+        reconciled_card_count:
+          type: integer
+          description: Number of cards that are reconciled.
+          example: 0
+    reconciliation_transactions_stats_in:
+      type: object
+      additionalProperties: false
+      description: |
+        Input to fetch reconciliation transactions stats for a specific card or filter.
+        Pass filters using the `query_params` string similar to the GET list API.
+        For example, filter by a single card using `corporate_card_id=eq.<card_id>`.
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to reconciliation transactions GET call. Use this to filter the population
+            before computing stats. For individual card stats, pass `corporate_card_id=eq.<card_id>`.
+          example: corporate_card_id=eq.bawownwrng
+    reconciliation_transactions_stats_out:
+      type: object
+      additionalProperties: false
+      description: |
+        Reconciliation transactions statistics for the selected filter period.
+      properties:
+        period_start:
+          type: string
+          format: date-time
+          description: Start of the reconciliation period in UTC.
+          example: '2025-10-01T00:00:00.000+00:00'
+        period_end:
+          type: string
+          format: date-time
+          description: End of the reconciliation period in UTC.
+          example: '2025-10-31T23:59:59.999+00:00'
+        statement_transaction_count:
+          type: integer
+          description: Number of statement transactions considered in the period.
+          example: 3
+        expense_count:
+          type: integer
+          description: Number of expenses considered in the period.
+          example: 2
+        statement_total:
+          type: number
+          format: double
+          description: Sum of statement transaction amounts considered in the period.
+          example: 45
+        expense_total:
+          type: number
+          format: double
+          description: Sum of expense amounts considered in the period.
+          example: 30
+        difference:
+          type: number
+          format: double
+          description: Difference between statement total and expense total (statement_total - expense_total).
+          example: 15
+        matching_issue_count:
+          type: integer
+          description: Count of matching issues for transactions in the period.
+          example: 3
     spender_employee_settings_out:
       type: object
       additionalProperties: false
@@ -27753,7 +28343,7 @@ components:
               type: object
               nullable: true
               example: {}
-              description: Annual mileage limit for user before joining Fyle
+              description: Annual mileage limit for user before joining Sage Exp Mgmt
         expense_form_autofills:
           type: object
           nullable: true
