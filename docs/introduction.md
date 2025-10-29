@@ -1,6 +1,6 @@
 # Introduction
 
-[Sage Expense Management](https://www.fylehq.com) is an spend management SaaS product. If you don't have an existing account, please visit our [website](https://www.fylehq.com).
+[Sage Expense Management](https://www.fylehq.com) is a spend management SaaS product. If you don't have an existing account, please visit our [website](https://www.fylehq.com).
 
 If you're looking to build applications that interface with Sage Exp Mgmt, then you're in the right place.
 

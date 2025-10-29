@@ -20,7 +20,7 @@ Resources are business objects that are relevant to expense management. Typical 
 
 Every user in Sage Exp Mgmt has one or more roles. Every application that you write assumes that the user who will authorize the application has certain roles. Each role has access to specific set of APIs.
 
-E.g. if John has the role `["SPENDER"]` only, then John will only have access to spender APIs. If John has roles `["SPENDER","ADMIN"]`, then John has access to both spender and admin APIs. Therefore, the application that John authorizes also has access to both spender and admin APIs.
+E.g. if John has the role `["FYLER"]` only, then John will only have access to spender APIs. If John has roles `["FYLER","ADMIN"]`, then John has access to both spender and admin APIs. Therefore, the application that John authorizes also has access to both spender and admin APIs.
 
 > #### Finer access control is coming soon!
 >
