@@ -1,8 +1,8 @@
-# 👋 Welcome to Fyle Platform APIs (beta)
+# 👋 Welcome to Sage Expense Management Platform APIs (beta)
 
-[Fyle](https://www.fylehq.com) is an expense management SaaS product for companies that want to save their employees the headache of managing their business expenses. If you don't have a Fyle account, please visit our [website](https://www.fylehq.com).
+[Sage Expense Management](https://www.fylehq.com) is an expense management SaaS product for companies that want to save their employees the headache of managing their business expenses. If you don't have a Sage Exp Mgmt account, please visit our [website](https://www.fylehq.com).
 
-You're probably here because you want to build some interesting applications or integrations that read / write to Fyle. Whatever it is you want to do, you should be able to find APIs for them here.
+You're probably here because you want to build some interesting applications or integrations that read / write to Sage Exp Mgmt. Whatever it is you want to do, you should be able to find APIs for them here.
 
 Here are some quick links to important parts of the documentation:
 
@@ -19,5 +19,3 @@ Here are some quick links to important parts of the documentation:
 >
 > While you have access to a very rich set of APIs, these are currently in beta and there may be some niggles. We might even make some minor changes to the API endpoints in this phase (we'll avoid this as much as possible). If you do decide to try out these APIs, please send us a note at support@fylehq.com so that we can assist you in case of any issues.
 
-
-Built with ❤️ by [Fyle](https://www.fylehq.com)

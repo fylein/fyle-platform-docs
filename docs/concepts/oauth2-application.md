@@ -9,7 +9,7 @@ This type of application is generally built by partners and are used by multiple
 
 
 
-Login to Fyle by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+Login to Sage Exp Mgmt by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
 
 On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 
