@@ -1,10 +1,12 @@
 post:
   tags:
-    - Employees
-  summary: Delete Commute Details
+    - Reconciliation
+  summary: Reconciliation Transactions Stats
   description: |
-    Delete spender's commute details. Spender will not be able to use commute deduction feature in mileage expenses.
-  operationId: employee_commute_details_delete_post
+    Retrieve stats for reconciliation transactions within a reconciliation period and optional filters.
+
+    Use this endpoint to compute counts and totals of statement transactions and matched expenses, and identify differences for reconciliation analysis. Pass filters using `query_params` similar to the reconciliation transactions GET list API.
+  operationId: reconciliation_transactions_stats
   requestBody:
     required: true
     content:
@@ -16,14 +18,7 @@ post:
             - data
           properties:
             data:
-              required:
-                - id
-              properties:
-                id:
-                  allOf:
-                    - $ref: '../../components/schemas/fields.yaml#/id_integer'
-                  description:
-                    Current commute details id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+              $ref: '../../components/schemas/reconciliation_transactions.yaml#/reconciliation_transactions_stats_in'
   responses:
     '200':
       description: OK
@@ -32,32 +27,31 @@ post:
           schema:
             type: object
             additionalProperties: False
-            required:
-              - data
             properties:
               data:
-                $ref: '../../components/schemas/fields.yaml#/commute_details'
+                $ref: '../../components/schemas/reconciliation_transactions.yaml#/reconciliation_transactions_stats_out'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/400.yaml'
+            $ref: ../../components/schemas/400.yaml
     '401':
       description: Unauthorized request
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/401.yaml'
+            $ref: ../../components/schemas/401.yaml
     '403':
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/403.yaml'
+            $ref: ../../components/schemas/403.yaml
     '404':
       description: Not Found
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/404.yaml'
+

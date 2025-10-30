@@ -1,0 +1,145 @@
+reconciliation_eligible_card_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - org_id
+    - reconciliation_entry_id
+    - card_number
+    - card_nickname
+    - user
+    - reconciled_on
+    - statement_transaction_count
+    - expense_count
+    - statement_total
+    - expense_total
+    - matching_issue_count
+    - status
+  properties:
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    reconciliation_entry_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: receabc12345
+      description: Reconciliation entry id for which the card is eligible.
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ecc123abc
+      description: Unique id of the eligible card record.
+    card_number:
+      $ref: './fields.yaml#/card_number'
+    card_nickname:
+      type: string
+      nullable: true
+      maxLength: 25
+      description: Unique nickname assigned to the card.
+      example: Business Card
+    user:
+      $ref: './user.yaml#/user_out_embed_nullable'
+    reconciled_on:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: Date when reconciliation was completed for this card in the entry.
+    statement_transaction_count:
+      type: integer
+      example: 3
+      description: Number of statement transactions for the card within the entry period.
+    expense_count:
+      type: integer
+      example: 2
+      description: Number of matched expenses for the card within the entry period.
+    statement_total:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      nullable: true
+      description: Sum of statement transaction amounts for the card (nullable).
+      example: 45
+    expense_total:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      nullable: true
+      description: Sum of matched expense amounts for the card (nullable).
+      example: 24
+    matching_issue_count:
+      type: integer
+      example: 3
+      description: Number of matching issues identified for this card within the entry period.
+    status:
+      type: string
+      description: Current reconciliation eligibility status for this card.
+      example: RECONCILED
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+
+reconciliation_eligible_cards_stats_in:
+  properties:
+    query_params:
+      nullable: False
+      type: string
+      description: |
+        Query param string similar to the GET eligible cards call. Must include `reconciliation_entry_id` to scope stats to a specific entry.
+        Refer the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering) for filtering syntax.
+      example: reconciliation_entry_id=eq.receabc12345
+
+reconciliation_eligible_cards_stats_out:
+  type: object
+  additionalProperties: False
+  properties:
+    period_start:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: Start of the reconciliation period in UTC.
+    period_end:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      nullable: true
+      description: End of the reconciliation period in UTC.
+    statement_transaction_count:
+      type: integer
+      description: Total number of statement transactions in the period.
+      example: 3
+    expense_count:
+      type: integer
+      description: Total number of expenses in the period.
+      example: 2
+    statement_total:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: Sum of statement transaction amounts in the period.
+      example: 45
+    expense_total:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: Sum of expense amounts in the period.
+      example: 30
+    difference:
+      allOf:
+        - $ref: './fields.yaml#/amount'
+      description: Difference between `statement_total` and `expense_total`.
+      example: 15
+    matching_issue_count:
+      type: integer
+      description: Number of transactions with matching issues across all eligible cards.
+      example: 3
+    total_cards:
+      type: integer
+      description: Total number of eligible cards.
+      example: 3
+    card_without_statement_count:
+      type: integer
+      description: Number of cards that have no statement transactions in the period.
+      example: 2
+    card_with_matching_issue_count:
+      type: integer
+      description: Number of cards that have only matching issues.
+      example: 0
+    reconciled_card_count:
+      type: integer
+      description: Number of cards that are reconciled.
+      example: 0
