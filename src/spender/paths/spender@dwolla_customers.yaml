@@ -1,0 +1,88 @@
+get:
+  tags:
+    - Dwolla Customers
+  summary: List dwolla customers
+  operationId: dwolla_customers_list
+  description: |
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+
+post:
+  tags:
+    - Dwolla Customers
+  summary: Create or update dwolla customer
+  description: |
+    Create or update a Dwolla customer record. The customer_id and customer_added_by fields are required for CREATE operations. The org_id is automatically set from the authenticated principal.
+  operationId: dwolla_customers_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
