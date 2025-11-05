@@ -3733,6 +3733,67 @@ paths:
                     type: string
                     description: |
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/expenses/export_configurations/delete/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Deletes expenses export configurations
+      description: |
+        Deletes unused expenses export configurations. This endpoint allows bulk deletion of export configurations
+        that are no longer needed. If any of the export configurations in the input do not exist or the user 
+        does not have permission to delete them, a validation error is raised.
+      operationId: expenses_export_configurations_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expenses_export_configuration_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/permissions:
     post:
       tags:
@@ -17219,6 +17280,14 @@ components:
         - query_string
         - type
         - config
+    expenses_export_configuration_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     expense_permissions_in:
       type: object
       required:
