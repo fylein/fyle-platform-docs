@@ -1,0 +1,84 @@
+get:
+  tags:
+    - Dwolla Customers
+  summary: Get dwolla customer
+  operationId: dwolla_customers_get
+  description: |
+    Retrieve the Dwolla customer record for the authenticated user's organization. Returns null if no Dwolla customer exists.
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              data:
+                allOf:
+                  - $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_out'
+                nullable: true
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+
+post:
+  tags:
+    - Dwolla Customers
+  summary: Create or update dwolla customer
+  description: |
+    Create or update a Dwolla customer record. The customer_id and customer_added_by fields are required for CREATE operations. The org_id is automatically set from the authenticated principal.
+  operationId: dwolla_customers_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/dwolla_customer.yaml#/dwolla_customer_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
