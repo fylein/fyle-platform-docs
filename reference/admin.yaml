@@ -11672,6 +11672,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/move_to_next_period/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Move reconciliation transactions to next period
+      description: |
+        This API moves one or more reconciliation transactions from their current reconciliation period 
+        to the next reconciliation period. This is useful when transactions need to be deferred to a 
+        future reconciliation cycle.
+      operationId: post_move_to_next_period_reconciliation_transactions_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/move_to_next_period_from_reconciliation_transaction_in'
+                  description: List of reconciliation transaction objects to move to the next period.
+                  example:
+                    - id: rectx8abc123
+                    - id: rectx9def456
+              required:
+                - data
+      responses:
+        '200':
+          description: OK - Transactions successfully moved to next period
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Empty object on success
+        '400':
+          description: Bad request - Invalid transaction IDs, transactions already reconciled, transactions from different periods, or inconsistent reconciliation entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User doesn't have required permissions (ADMIN, FINANCE, VERIFIER, PAYMENT_PROCESSOR, or AUDITOR role required)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Reconciliation transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/delete/bulk:
     post:
       summary: Bulk delete expenses
@@ -29154,6 +29216,19 @@ components:
           type: integer
           description: Count of matching issues for transactions in the period.
           example: 3
+    move_to_next_period_from_reconciliation_transaction_in:
+      type: object
+      additionalProperties: false
+      description: |
+        Input to move a reconciliation transaction to the next reconciliation period.
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: rectx8abc123
+          description: Unique identifier of the reconciliation transaction to move to the next period.
     spender_employee_settings_out:
       type: object
       additionalProperties: false
