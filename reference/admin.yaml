@@ -10179,6 +10179,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/unassigned_cards:
+    post:
+      tags:
+        - Statements
+      summary: Get unassigned cards from a reconciled statement
+      description: |
+        This API retrieves all corporate cards from a reconciled statement that have not been assigned to any user.
+        Use this after starting the reconciliation process to identify which cards need to be assigned to employees.
+      operationId: post_unassigned_cards_statement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/unassigned_cards_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/statements/card_stats:
     post:
       tags:
@@ -11668,6 +11724,68 @@ paths:
                 $ref: '#/components/schemas/403'
         '404':
           description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/move_to_next_period/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Move reconciliation transactions to next period
+      description: |
+        This API moves one or more reconciliation transactions from their current reconciliation period 
+        to the next reconciliation period. This is useful when transactions need to be deferred to a 
+        future reconciliation cycle.
+      operationId: post_move_to_next_period_reconciliation_transactions_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/move_to_next_period_from_reconciliation_transaction_in'
+                  description: List of reconciliation transaction objects to move to the next period.
+                  example:
+                    - id: rectx8abc123
+                    - id: rectx9def456
+              required:
+                - data
+      responses:
+        '200':
+          description: OK - Transactions successfully moved to next period
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Empty object on success
+        '400':
+          description: Bad request - Invalid transaction IDs, transactions already reconciled, transactions from different periods, or inconsistent reconciliation entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User doesn't have required permissions (ADMIN, FINANCE, VERIFIER, PAYMENT_PROCESSOR, or AUDITOR role required)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Reconciliation transaction not found
           content:
             application/json:
               schema:
@@ -27254,6 +27372,17 @@ components:
         - ignored_line_item_ids
         - reconciliation_method
         - reconciliation_entry_ids
+    unassigned_cards_from_statement_in:
+      type: object
+      properties:
+        statement_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique identifier of the statement for which to retrieve unassigned cards.
+          example: stmtwownwrng
+      required:
+        - statement_id
     card_transaction_from_statement_in:
       type: object
       properties:
@@ -29202,6 +29331,19 @@ components:
           type: integer
           description: Count of matching issues for transactions in the period.
           example: 3
+    move_to_next_period_from_reconciliation_transaction_in:
+      type: object
+      additionalProperties: false
+      description: |
+        Input to move a reconciliation transaction to the next reconciliation period.
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: rectx8abc123
+          description: Unique identifier of the reconciliation transaction to move to the next period.
     spender_employee_settings_out:
       type: object
       additionalProperties: false
