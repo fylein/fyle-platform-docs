@@ -10179,6 +10179,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/unassigned_cards:
+    post:
+      tags:
+        - Statements
+      summary: Get unassigned cards from a reconciled statement
+      description: |
+        This API retrieves all corporate cards from a reconciled statement that have not been assigned to any user.
+        Use this after starting the reconciliation process to identify which cards need to be assigned to employees.
+      operationId: post_unassigned_cards_statement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/unassigned_cards_from_statement_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/statements/card_stats:
     post:
       tags:
@@ -27268,6 +27324,17 @@ components:
         - ignored_line_item_ids
         - reconciliation_method
         - reconciliation_entry_ids
+    unassigned_cards_from_statement_in:
+      type: object
+      properties:
+        statement_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique identifier of the statement for which to retrieve unassigned cards.
+          example: stmtwownwrng
+      required:
+        - statement_id
     card_transaction_from_statement_in:
       type: object
       properties:
