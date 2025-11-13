@@ -87,6 +87,9 @@ tags:
   - name: Secondary Emails
     description: |
       These APIs gives you access to manage your secondary email addresses.
+  - name: Dwolla Customers
+    description: |
+      These APIs gives you access to manage Dwolla customer data.
 paths:
   /spender/projects:
     get:
@@ -3746,6 +3749,7 @@ paths:
       description: |
         Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
         need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+        The upload URL will be null if the file is linked to an expense or advance request in approved or higher state.
       operationId: files_generate_urls_post
       requestBody:
         required: true
@@ -3797,6 +3801,7 @@ paths:
       description: |
         Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
         need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+        The upload URL will be null if the file is linked to an expense or advance request in approved or higher state.
       requestBody:
         required: true
         content:
@@ -6651,6 +6656,89 @@ paths:
                     type: string
                     description: |
                       This error means current user does not have enough permissions to perform this operation. 
+  /spender/dwolla_customers:
+    get:
+      tags:
+        - Dwolla Customers
+      summary: Get dwolla customer
+      operationId: dwolla_customers_get
+      description: |
+        Retrieve the Dwolla customer record for the authenticated user's organization. Returns null if no Dwolla customer exists.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/dwolla_customer_out'
+                    nullable: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Dwolla Customers
+      summary: Create or update dwolla customer
+      description: |
+        Create or update a Dwolla customer record. The customer_id and customer_added_by fields are required for CREATE operations. The org_id is automatically set from the authenticated principal.
+      operationId: dwolla_customers_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/dwolla_customer_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/dwolla_customer_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
 components:
   securitySchemes:
     oauth2:
@@ -14809,7 +14897,8 @@ components:
           nullable: true
           type: string
           description: |
-            Link to upload contents of this file
+            Link to upload contents of this file.
+            Returns null if linked to an expense or advance request in approved or higher state.
     file_generate_urls_action_in:
       type: object
       properties:
@@ -14837,7 +14926,8 @@ components:
           nullable: true
           type: string
           description: |
-            Link to upload contents of this file
+            Link to upload contents of this file.
+            Returns null if linked to an expense or advance request in approved or higher state.
     file_delete_action_in:
       type: object
       required:
@@ -17684,6 +17774,220 @@ components:
       items:
         $ref: '#/components/schemas/advance_request_custom_field_out'
       description: List of advance request custom fields
+    dwolla_customer_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: dcm_abc123xyz
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        customer_id:
+          type: string
+          description: |
+            The unique Dwolla customer ID
+          example: dwolla_customer_12345
+        customer_email:
+          type: string
+          nullable: true
+          description: |
+            Email address associated with the Dwolla customer
+          example: employee@company.com
+        customer_added_by:
+          type: string
+          description: |
+            User ID of the person who added the Dwolla customer
+          example: user_xyz789
+        is_customer_verified:
+          type: boolean
+          description: |
+            Indicates whether the customer has been verified in Dwolla
+          default: false
+          example: true
+        is_beneficial_owner_added:
+          type: boolean
+          description: |
+            Indicates whether a beneficial owner has been added
+          default: false
+          example: false
+        is_beneficial_owner_verified:
+          type: boolean
+          description: |
+            Indicates whether the beneficial owner has been verified
+          default: false
+          example: false
+        is_bank_account_added:
+          type: boolean
+          description: |
+            Indicates whether a bank account has been added
+          default: false
+          example: true
+        is_bank_account_verified:
+          type: boolean
+          description: |
+            Indicates whether the bank account has been verified
+          default: false
+          example: false
+        bank_account_added_by:
+          type: string
+          nullable: true
+          description: |
+            User ID of the person who added the bank account
+          example: user_xyz789
+        is_customer_document_needed:
+          type: boolean
+          description: |
+            Indicates whether customer documentation is needed
+          default: false
+          example: false
+        is_beneficial_owner_document_needed:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner documentation is needed
+          default: false
+          example: false
+        is_customer_retry:
+          type: boolean
+          description: |
+            Indicates whether customer verification needs to be retried
+          default: false
+          example: false
+        is_customer_suspended:
+          type: boolean
+          description: |
+            Indicates whether the customer account is suspended
+          default: false
+          example: false
+        micro_deposit_verification_status:
+          type: string
+          nullable: true
+          description: |
+            Status of micro-deposit verification
+          enum:
+            - pending
+            - verified
+            - failed
+          example: verified
+        micro_deposit_verification_attempts:
+          type: integer
+          nullable: true
+          description: |
+            Number of micro-deposit verification attempts
+          example: 2
+        is_beneficial_owner_retry:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner verification needs to be retried
+          default: false
+          example: false
+    dwolla_customer_in:
+      type: object
+      additionalProperties: false
+      properties:
+        customer_id:
+          type: string
+          description: |
+            The unique Dwolla customer ID (required for CREATE operations)
+          example: dwolla_customer_12345
+        customer_email:
+          type: string
+          nullable: true
+          description: |
+            Email address associated with the Dwolla customer
+          example: employee@company.com
+        customer_added_by:
+          type: string
+          description: |
+            User ID of the person who added the Dwolla customer (required for CREATE operations)
+          example: user_xyz789
+        is_customer_verified:
+          type: boolean
+          description: |
+            Indicates whether the customer has been verified in Dwolla
+          default: false
+          example: true
+        is_beneficial_owner_added:
+          type: boolean
+          description: |
+            Indicates whether a beneficial owner has been added
+          default: false
+          example: false
+        is_beneficial_owner_verified:
+          type: boolean
+          description: |
+            Indicates whether the beneficial owner has been verified
+          default: false
+          example: false
+        is_bank_account_added:
+          type: boolean
+          description: |
+            Indicates whether a bank account has been added
+          default: false
+          example: true
+        is_bank_account_verified:
+          type: boolean
+          description: |
+            Indicates whether the bank account has been verified
+          default: false
+          example: false
+        bank_account_added_by:
+          type: string
+          nullable: true
+          description: |
+            User ID of the person who added the bank account
+          example: user_xyz789
+        is_customer_document_needed:
+          type: boolean
+          description: |
+            Indicates whether customer documentation is needed
+          default: false
+          example: false
+        is_beneficial_owner_document_needed:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner documentation is needed
+          default: false
+          example: false
+        is_customer_retry:
+          type: boolean
+          description: |
+            Indicates whether customer verification needs to be retried
+          default: false
+          example: false
+        is_customer_suspended:
+          type: boolean
+          description: |
+            Indicates whether the customer account is suspended
+          default: false
+          example: false
+        micro_deposit_verification_status:
+          type: string
+          nullable: true
+          description: |
+            Status of micro-deposit verification
+          enum:
+            - pending
+            - verified
+            - failed
+          example: verified
+        micro_deposit_verification_attempts:
+          type: integer
+          nullable: true
+          description: |
+            Number of micro-deposit verification attempts
+          example: 2
+        is_beneficial_owner_retry:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner verification needs to be retried
+          default: false
+          example: false
   parameters:
     q:
       in: query

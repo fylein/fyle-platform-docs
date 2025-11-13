@@ -1,0 +1,222 @@
+reports_export_configuration_column:
+  type: object
+  properties:
+    name:
+      type: string
+      description: |
+        Name of the column.
+      example: Employee Name
+    formula:
+      type: object
+      additionalProperties: true
+      description: |
+        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+      example:
+        function: Field
+        parameters:
+          - employee->full_name
+    is_custom:
+      type: boolean
+      nullable: true
+      description: |
+        Indicates whether this is a custom column. This field is optional and can be null.
+      example: false
+    field_name:
+      type: string
+      nullable: true
+      description: |
+        The field name that this column maps to. This field is optional and can be null.
+      example: employee_name
+    formula_text:
+      type: string
+      nullable: true
+      description: |
+        A text representation of the formula used for the column. This field is optional and can be null.
+      example: "GET(employee, user, full_name)"
+
+
+reports_export_configuration_sort_column:
+  type: object
+  properties:
+    display_name:
+      type: string
+      description: |
+        Display name of the sort column.
+      example: Created At
+    field_name:
+      type: string
+      description: |
+        Field name to sort by.
+      example: created_at
+    direction:
+      type: string
+      enum:
+        - asc
+        - desc
+      description: |
+        Sort direction - ascending or descending.
+      example: desc
+
+
+reports_export_configuration_separate_line_items_entry:
+  type: object
+  properties:
+    is_enabled:
+      type: boolean
+      description: |
+        Whether to show separate double rows for each line item in the export file.
+      example: false
+    debit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for debit entries only.
+      example: []
+    credit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for credit entries only.
+      example: []
+
+
+reports_export_configuration_config:
+  type: object
+  additionalProperties: true
+  properties:
+    is_column_header_included:
+      type: boolean
+      description: |
+        Whether to include column headers in the export file.
+      example: true
+    separate_line_items_entry:
+      allOf:
+        - $ref: '#/reports_export_configuration_separate_line_items_entry'
+      description: |
+        Configure how to show separate line items for debit and credit entries in the export file.
+    columns:
+      type: array
+      items:
+        $ref: '#/reports_export_configuration_column'
+      description: |
+        List of columns to include in the export file with their formulas.
+    sort_columns:
+      type: array
+      items:
+        $ref: '#/reports_export_configuration_sort_column'
+      description: |
+        List of columns to sort the export data by.
+    date_format:
+      type: string
+      nullable: true
+      description: |
+        Date format to use for date fields in the export. This field is optional and can be null.
+      example: "MM/DD/YYYY"
+
+
+reports_export_configuration_in:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: rcH2sfdf
+      nullable: true
+      description: |
+        Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+    name:
+      type: string
+      description: |
+        Name of the export configuration.
+      example: "Monthly Reports - Apr'25"
+    query_string:
+      type: string
+      description: |
+        Query string containing filters and parameters for the export.
+      example: "order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)"
+    type:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+        - PDF
+      description: |
+        Type of the export file format.
+      example: CSV
+    config:
+      allOf:
+        - $ref: '#/reports_export_configuration_config'
+      description: |
+        Configuration details for the export including columns, sorting, and formatting options.
+  required:
+    - name
+    - query_string
+    - type
+    - config
+
+
+reports_export_configuration_in_only_id:
+  type: object
+  required:
+    - id
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+
+
+reports_export_configuration_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: rcH2sfdf
+      description: |
+        Unique identifier for the export configuration.
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    created_by:
+      allOf:
+        - $ref: './user.yaml#/user_out_embed_nullable'
+      description: |
+        User who created this export configuration.
+    updated_by:
+      allOf:
+        - $ref: './user.yaml#/user_out_embed_nullable'
+      description: |
+        User who last updated this export configuration.
+    name:
+      type: string
+      description: |
+        Name of the export configuration.
+      example: "Monthly Reports - Apr'25"
+    query_string:
+      type: string
+      description: |
+        Query string containing filters and parameters for the export.
+      example: "order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)"
+    type:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+        - PDF
+      description: |
+        Type of the export file format.
+      example: CSV
+    config:
+      allOf:
+        - $ref: '#/reports_export_configuration_config'
+      description: |
+        Configuration details for the export including columns, sorting, and formatting options.
