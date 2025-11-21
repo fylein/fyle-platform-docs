@@ -3680,6 +3680,19 @@ paths:
 
         If `id` is provided in the request, the existing configuration will be updated. 
         If `id` is not provided, a new configuration will be created.
+
+        ### Configuration Types:
+
+        **CSV/EXCEL Exports:**
+        - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+        - Columns must include `formula` field with function and parameters
+        - Support multiple sort columns
+
+        **PDF Exports:**
+        - Require `include_receipts` field (boolean, cannot be null)
+        - Columns do NOT use `formula` field
+        - Columns require `is_custom`, `field_name`, and `formula_text` fields
+        - Maximum of 1 sort column allowed
       operationId: expenses_export_configurations_post
       requestBody:
         required: true
@@ -3692,6 +3705,70 @@ paths:
                   $ref: '#/components/schemas/expenses_export_configuration_in'
               required:
                 - data
+            examples:
+              csv_export:
+                summary: CSV Export Configuration
+                value:
+                  data:
+                    name: Monthly Expenses CSV Export
+                    query_string: state=eq.APPROVED
+                    type: CSV
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Email
+                          formula:
+                            function: GET
+                            parameters:
+                              - employee
+                              - user
+                              - email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          formula:
+                            function: GET
+                            parameters:
+                              - claim_amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
+                      date_format: YYYY-MM-DD
+              pdf_export:
+                summary: PDF Export Configuration
+                value:
+                  data:
+                    name: Expense Report PDF with Receipts
+                    query_string: state=eq.APPROVED
+                    type: PDF
+                    config:
+                      columns:
+                        - name: Employee Email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                        - name: Merchant
+                          is_custom: true
+                          field_name: merchant
+                          formula_text: GET(merchant)
+                      include_receipts: true
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
       responses:
         '200':
           description: OK
@@ -17633,7 +17710,7 @@ components:
           type: object
           additionalProperties: true
           description: |
-            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
           example:
             function: Field
             parameters:
@@ -17684,31 +17761,36 @@ components:
         is_column_header_included:
           type: boolean
           description: |
-            Whether to include column headers in the export file.
+            Whether to include column headers in the export file. Required for CSV and EXCEL export types.
           example: true
         separate_line_items_entry:
           allOf:
             - $ref: '#/components/schemas/expenses_export_configuration_separate_line_items_entry'
           description: |
-            Configure how to show separate line items for debit and credit entries in the export file.
+            Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
         columns:
           type: array
           items:
             $ref: '#/components/schemas/expenses_export_configuration_column'
           description: |
-            List of columns to include in the export file with their formulas.
+            List of columns to include in the export file with their formulas. For CSV and EXCEL exports, use expenses_export_configuration_column. For PDF exports, use expenses_export_pdf_configuration_column.
         sort_columns:
           type: array
           items:
             $ref: '#/components/schemas/expenses_export_configuration_sort_column'
           description: |
-            List of columns to sort the export data by.
+            List of columns to sort the export data by. For PDF exports, maximum of 1 sort column is allowed.
         date_format:
           type: string
           nullable: true
           description: |
-            Date format to use for date fields in the export. This field is optional and can be null.
+            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
           example: YYYY-MM-DD
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the PDF export. Required for PDF export type only.
+          example: true
     expenses_export_configuration_out:
       type: object
       additionalProperties: false
