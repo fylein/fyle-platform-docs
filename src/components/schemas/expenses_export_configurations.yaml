@@ -10,7 +10,7 @@ expenses_export_configuration_column:
       type: object
       additionalProperties: true
       description: |
-        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
       example:
         function: Field
         parameters:
@@ -32,6 +32,38 @@ expenses_export_configuration_column:
       nullable: true
       description: |
         A text representation of the formula used for the column. This field is optional and can be null.
+      example: "GET(merchant)"
+
+
+expenses_export_pdf_configuration_column:
+  type: object
+  required:
+    - name
+    - is_custom
+    - field_name
+    - formula_text
+  properties:
+    name:
+      type: string
+      description: |
+        Name of the column.
+      example: Merchant
+    is_custom:
+      type: boolean
+      description: |
+        Indicates whether this is a custom column. Cannot be null for PDF exports.
+      example: true
+    field_name:
+      type: string
+      nullable: true
+      description: |
+        The field name that this column maps to. Required field but can be null.
+      example: merchant_name
+    formula_text:
+      type: string
+      nullable: true
+      description: |
+        A text representation of the formula used for the column. Required field but can be null.
       example: "GET(merchant)"
 
 
@@ -89,31 +121,63 @@ expenses_export_configuration_config:
     is_column_header_included:
       type: boolean
       description: |
-        Whether to include column headers in the export file.
+        Whether to include column headers in the export file. Required for CSV and EXCEL export types.
       example: true
     separate_line_items_entry:
       allOf:
         - $ref: '#/expenses_export_configuration_separate_line_items_entry'
       description: |
-        Configure how to show separate line items for debit and credit entries in the export file.
+        Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
     columns:
       type: array
       items:
         $ref: '#/expenses_export_configuration_column'
       description: |
-        List of columns to include in the export file with their formulas.
+        List of columns to include in the export file with their formulas. For CSV and EXCEL exports, use expenses_export_configuration_column. For PDF exports, use expenses_export_pdf_configuration_column.
     sort_columns:
       type: array
       items:
         $ref: '#/expenses_export_configuration_sort_column'
       description: |
-        List of columns to sort the export data by.
+        List of columns to sort the export data by. For PDF exports, maximum of 1 sort column is allowed.
     date_format:
       type: string
       nullable: true
       description: |
-        Date format to use for date fields in the export. This field is optional and can be null.
+        Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
       example: "YYYY-MM-DD"
+    include_receipts:
+      type: boolean
+      description: |
+        Whether to include receipts in the PDF export. Required for PDF export type only.
+      example: true
+
+
+expenses_export_pdf_configuration_config:
+  type: object
+  required:
+    - columns
+    - include_receipts
+  additionalProperties: true
+  properties:
+    columns:
+      type: array
+      items:
+        $ref: '#/expenses_export_pdf_configuration_column'
+      description: |
+        List of columns to include in the PDF export file. Formula field is not used for PDF exports.
+    include_receipts:
+      type: boolean
+      description: |
+        Whether to include receipts in the PDF export. This field is required and cannot be null.
+      example: true
+    sort_columns:
+      type: array
+      maxItems: 1
+      items:
+        $ref: '#/expenses_export_configuration_sort_column'
+      description: |
+        List of columns to sort the export data by. Maximum of 1 sort column is allowed for PDF exports.
 
 
 expenses_export_configuration_in:
