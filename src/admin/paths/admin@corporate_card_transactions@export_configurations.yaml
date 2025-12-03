@@ -1,0 +1,199 @@
+get:
+  tags:
+    - Corporate Card Transactions
+  summary: List corporate card transactions export configurations
+  description: |
+    This API gets you the saved export configurations for corporate card transactions in the current organization.
+    
+    Export configurations allow users to save and reuse export settings including column selections, 
+    formulas, sort orders, and formatting preferences.
+
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: corporate_card_transactions_export_configurations_list
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/corporate_card_transactions_export_configurations.yaml#/corporate_card_transactions_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+post:
+  tags:
+    - Corporate Card Transactions
+  summary: Create or update a corporate card transactions export configuration
+  description: |
+    Create or update a corporate card transactions export configuration.
+    
+    If `id` is provided in the request, the existing configuration will be updated. 
+    If `id` is not provided, a new configuration will be created.
+    
+    ### Configuration Types:
+    
+    **CSV/EXCEL Exports:**
+    - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+    - Columns must include `formula` field with function and parameters
+    - Support maximum of 1 sort column
+    
+    **Note:** PDF exports are NOT supported for corporate card transactions.
+  operationId: corporate_card_transactions_export_configurations_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: '../../components/schemas/corporate_card_transactions_export_configurations.yaml#/corporate_card_transactions_export_configuration_in'
+          required:
+            - data
+        examples:
+          csv_export:
+            summary: CSV Export Configuration
+            value:
+              data:
+                name: "Monthly Card Transactions CSV Export"
+                query_string: "state=eq.APPROVED"
+                type: "CSV"
+                config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
+                  columns:
+                    - name: "Employee Email"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "employee"
+                          - "user"
+                          - "email"
+                      is_custom: false
+                      field_name: "employee_email"
+                      formula_text: "GET(employee, user, email)"
+                    - name: "Amount"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "amount"
+                      is_custom: false
+                      field_name: "amount"
+                      formula_text: null
+                  sort_columns:
+                    - display_name: "Transaction Date"
+                      field_name: "transaction_date"
+                      direction: "desc"
+                  date_format: "YYYY-MM-DD"
+          excel_export:
+            summary: Excel Export Configuration
+            value:
+              data:
+                name: "Card Transactions Excel Export"
+                query_string: "state=eq.MATCHED"
+                type: "EXCEL"
+                config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
+                  columns:
+                    - name: "Card Number"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "corporate_card"
+                          - "card_number"
+                      is_custom: true
+                      field_name: "card_number"
+                      formula_text: "GET(corporate_card, card_number)"
+                    - name: "Amount"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "amount"
+                      is_custom: false
+                      field_name: "amount"
+                      formula_text: ""
+                    - name: "Merchant"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "merchant"
+                      is_custom: true
+                      field_name: null
+                      formula_text: "GET(merchant)"
+                  sort_columns:
+                    - display_name: "Created At"
+                      field_name: "created_at"
+                      direction: "asc"
+                  date_format: "DD/MM/YYYY"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../components/schemas/corporate_card_transactions_export_configurations.yaml#/corporate_card_transactions_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.
+
+
+
