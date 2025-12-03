@@ -1,0 +1,120 @@
+get:
+  tags:
+    - Reports
+  summary: List reports export configurations
+  description: |
+    This API gets you the saved export configurations for reports that you created.
+    
+    Export configurations allow users to save and reuse export settings including column selections, 
+    formulas, sort orders, and formatting preferences.
+
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: reports_export_configurations_list_approver
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/reports_export_configurations.yaml#/reports_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+post:
+  tags:
+    - Reports
+  summary: Create or update a report export configuration
+  description: |
+    Create or update a report export configuration.
+    
+    If `id` is provided in the request, the existing configuration will be updated. 
+    If `id` is not provided, a new configuration will be created.
+    
+    Approvers can only create or update their own configurations.
+  operationId: reports_export_configurations_post_approver
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: '../../components/schemas/reports_export_configurations.yaml#/reports_export_configuration_in'
+          required:
+            - data
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../components/schemas/reports_export_configurations.yaml#/reports_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.
+
+
