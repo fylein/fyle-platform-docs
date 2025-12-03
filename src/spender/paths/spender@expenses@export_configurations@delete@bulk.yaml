@@ -1,0 +1,74 @@
+post:
+  tags:
+    - Expenses
+  summary: Deletes expenses export configurations
+  description: |
+    Deletes unused expenses export configurations for the spender. This endpoint allows bulk deletion of export configurations
+    that are no longer needed. If any of the export configurations in the input do not exist or the user 
+    does not have permission to delete them, a validation error is raised.
+  operationId: spender_expenses_export_configurations_delete_bulk_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items: 
+                $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                nullable: true
+                example: You don't have permissions to access this resource
+              data:
+                type: object
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "../../components/schemas/bulk_error.yaml"
+              - type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+
