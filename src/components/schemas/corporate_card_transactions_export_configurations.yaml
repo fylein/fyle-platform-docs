@@ -1,0 +1,212 @@
+corporate_card_transactions_export_configuration_column:
+  type: object
+  properties:
+    name:
+      type: string
+      description: |
+        Name of the column.
+      example: Merchant
+    formula:
+      type: object
+      additionalProperties: true
+      description: |
+        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
+      example:
+        function: Field
+        parameters:
+          - merchant
+    is_custom:
+      type: boolean
+      nullable: false
+      description: |
+        Indicates whether this is a custom column.
+      example: true
+    field_name:
+      type: string
+      nullable: true
+      description: |
+        The field name that this column maps to. This field is required and can be null.
+      example: merchant_name
+    formula_text:
+      type: string
+      nullable: true
+      description: |
+        A text representation of the formula used for the column. This field is required and can be null.
+      example: "GET(merchant)"
+
+
+corporate_card_transactions_export_configuration_sort_column:
+  type: object
+  properties:
+    display_name:
+      type: string
+      description: |
+        Display name of the sort column.
+      example: Transaction Date
+    field_name:
+      type: string
+      description: |
+        Field name to sort by.
+      example: transaction_date
+    direction:
+      type: string
+      enum:
+        - asc
+        - desc
+      description: |
+        Sort direction - ascending or descending.
+      example: desc
+
+
+corporate_card_transactions_export_configuration_separate_line_items_entry:
+  type: object
+  properties:
+    is_enabled:
+      type: boolean
+      description: |
+        Whether to show separate double rows for each line item in the export file.
+      example: false
+    debit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for debit entries only.
+      example: []
+    credit_entries_only:
+      type: array
+      items:
+        type: string
+      description: |
+        Configure which columns to show for credit entries only.
+      example: []
+
+
+corporate_card_transactions_export_configuration_config:
+  type: object
+  additionalProperties: true
+  properties:
+    is_header_visible:
+      type: boolean
+      description: |
+        Whether to include column headers in the export file. Required for CSV and EXCEL export types.
+      example: true
+    separate_line_items_entry:
+      allOf:
+        - $ref: '#/corporate_card_transactions_export_configuration_separate_line_items_entry'
+      description: |
+        Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
+    columns:
+      type: array
+      items:
+        $ref: '#/corporate_card_transactions_export_configuration_column'
+      description: |
+        List of columns to include in the export file with their formulas. For CSV and EXCEL exports.
+    sort_columns:
+      type: array
+      maxItems: 1
+      items:
+        $ref: '#/corporate_card_transactions_export_configuration_sort_column'
+      description: |
+        List of columns to sort the export data by. Maximum of 1 sort column is allowed.
+    date_format:
+      type: string
+      nullable: true
+      description: |
+        Date format to use for date fields in the export. This field is required and can be null. Required for CSV and EXCEL export types.
+      example: "YYYY-MM-DD"
+
+
+corporate_card_transactions_export_configuration_in:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: cctecH2sfdf
+      nullable: true
+      description: |
+        Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+    name:
+      type: string
+      description: |
+        Name of the export configuration.
+      example: "Monthly Card Transactions - Apr'25"
+    query_string:
+      type: string
+      description: |
+        Query string containing filters and parameters for the export.
+      example: "order=transaction_date.desc&state=eq.APPROVED"
+    type:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+      description: |
+        Type of the export file format. Only CSV and EXCEL are supported.
+      example: CSV
+    config:
+      allOf:
+        - $ref: '#/corporate_card_transactions_export_configuration_config'
+      description: |
+        Configuration details for the export including columns, sorting, and formatting options.
+  required:
+    - name
+    - query_string
+    - type
+    - config
+
+
+corporate_card_transactions_export_configuration_in_only_id:
+  type: object
+  required:
+    - id
+  additionalProperties: false
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+
+
+corporate_card_transactions_export_configuration_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: cctecH2sfdf
+      description: |
+        Unique identifier for the export configuration.
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    name:
+      type: string
+      description: |
+        Name of the export configuration.
+      example: "Monthly Card Transactions - Apr'25"
+    query_string:
+      type: string
+      description: |
+        Query string containing filters and parameters for the export.
+      example: "order=transaction_date.desc&state=eq.APPROVED"
+    type:
+      type: string
+      enum:
+        - CSV
+        - EXCEL
+      description: |
+        Type of the export file format. Only CSV and EXCEL are supported.
+      example: CSV
+    config:
+      allOf:
+        - $ref: '#/corporate_card_transactions_export_configuration_config'
+      description: |
+        Configuration details for the export including columns, sorting, and formatting options.
+
