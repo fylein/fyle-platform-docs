@@ -1,0 +1,201 @@
+get:
+  tags:
+    - Employees
+  summary: List employees export configurations
+  description: |
+    This API gets you the saved export configurations for employees in the current organization.
+    
+    Export configurations allow users to save and reuse export settings including column selections, 
+    formulas, sort orders, and formatting preferences.
+    
+    **Note:** Employee exports only support CSV and EXCEL formats. PDF export is not supported.
+
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: employees_export_configurations_list
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+post:
+  tags:
+    - Employees
+  summary: Create or update an employee export configuration
+  description: |
+    Create or update an employee export configuration.
+    
+    If `id` is provided in the request, the existing configuration will be updated. 
+    If `id` is not provided, a new configuration will be created.
+    
+    ### Configuration Types:
+    
+    **CSV/EXCEL Exports (Only supported formats):**
+    - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+    - Columns must include `formula` field with function and parameters
+    - Support multiple sort columns
+    
+    **Note:** PDF export is not supported for employee exports.
+  operationId: employees_export_configurations_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_in'
+          required:
+            - data
+        examples:
+          csv_export:
+            summary: CSV Export Configuration
+            value:
+              data:
+                name: "Active Employees CSV Export"
+                query_string: "is_enabled=eq.true"
+                type: "CSV"
+                config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
+                  columns:
+                    - name: "Employee Email"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "user"
+                          - "email"
+                      is_custom: false
+                      field_name: "employee_email"
+                      formula_text: "GET(user, email)"
+                    - name: "Full Name"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "user"
+                          - "full_name"
+                      is_custom: false
+                      field_name: "employee_name"
+                      formula_text: null
+                    - name: "Department"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "department"
+                          - "name"
+                      is_custom: true
+                      field_name: null
+                      formula_text: "GET(department, name)"
+                  sort_columns:
+                    - display_name: "Joined At"
+                      field_name: "joined_at"
+                      direction: "desc"
+                  date_format: "YYYY-MM-DD"
+          excel_export:
+            summary: Excel Export Configuration
+            value:
+              data:
+                name: "Employee Directory Excel"
+                query_string: "has_accepted_invite=eq.true"
+                type: "EXCEL"
+                config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
+                  columns:
+                    - name: "Employee Code"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "code"
+                      is_custom: false
+                      field_name: "code"
+                      formula_text: "GET(code)"
+                    - name: "Title"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "title"
+                      is_custom: false
+                      field_name: "title"
+                      formula_text: null
+                  sort_columns:
+                    - display_name: "Created At"
+                      field_name: "created_at"
+                      direction: "asc"
+                  date_format: "DD/MM/YYYY"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.
+
+
+
