@@ -2454,6 +2454,279 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/employees/export_configurations:
+    get:
+      tags:
+        - Employees
+      summary: List employees export configurations
+      description: |
+        This API gets you the saved export configurations for employees in the current organization.
+
+        Export configurations allow users to save and reuse export settings including column selections, 
+        formulas, sort orders, and formatting preferences.
+
+        **Note:** Employee exports only support CSV and EXCEL formats. PDF export is not supported.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: employees_export_configurations_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employees_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Employees
+      summary: Create or update an employee export configuration
+      description: |
+        Create or update an employee export configuration.
+
+        If `id` is provided in the request, the existing configuration will be updated. 
+        If `id` is not provided, a new configuration will be created.
+
+        ### Configuration Types:
+
+        **CSV/EXCEL Exports (Only supported formats):**
+        - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+        - Columns must include `formula` field with function and parameters
+        - Support multiple sort columns
+
+        **Note:** PDF export is not supported for employee exports.
+      operationId: employees_export_configurations_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/employees_export_configuration_in'
+              required:
+                - data
+            examples:
+              csv_export:
+                summary: CSV Export Configuration
+                value:
+                  data:
+                    name: Active Employees CSV Export
+                    query_string: is_enabled=eq.true
+                    type: CSV
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Email
+                          formula:
+                            function: GET
+                            parameters:
+                              - user
+                              - email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(user, email)
+                        - name: Full Name
+                          formula:
+                            function: GET
+                            parameters:
+                              - user
+                              - full_name
+                          is_custom: false
+                          field_name: employee_name
+                          formula_text: null
+                        - name: Department
+                          formula:
+                            function: GET
+                            parameters:
+                              - department
+                              - name
+                          is_custom: true
+                          field_name: null
+                          formula_text: GET(department, name)
+                      sort_columns:
+                        - display_name: Joined At
+                          field_name: joined_at
+                          direction: desc
+                      date_format: YYYY-MM-DD
+              excel_export:
+                summary: Excel Export Configuration
+                value:
+                  data:
+                    name: Employee Directory Excel
+                    query_string: has_accepted_invite=eq.true
+                    type: EXCEL
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Code
+                          formula:
+                            function: GET
+                            parameters:
+                              - code
+                          is_custom: false
+                          field_name: code
+                          formula_text: GET(code)
+                        - name: Title
+                          formula:
+                            function: GET
+                            parameters:
+                              - title
+                          is_custom: false
+                          field_name: title
+                          formula_text: null
+                      sort_columns:
+                        - display_name: Created At
+                          field_name: created_at
+                          direction: asc
+                      date_format: DD/MM/YYYY
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/employees/export_configurations/delete/bulk:
+    post:
+      tags:
+        - Employees
+      summary: Deletes employees export configurations
+      description: |
+        Deletes unused employees export configurations. This endpoint allows bulk deletion of export configurations
+        that are no longer needed. If any of the export configurations in the input do not exist or the user 
+        does not have permission to delete them, a validation error is raised.
+      operationId: employees_export_configurations_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/employees_export_configuration_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        nullable: true
+                        example: |
+                          Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                      data:
+                        type: object
+                        example: null
+                      error:
+                        type: string
+                        example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: You don't have permissions to access this resource
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
   /admin/files:
     post:
       operationId: files_post
@@ -3680,6 +3953,19 @@ paths:
 
         If `id` is provided in the request, the existing configuration will be updated. 
         If `id` is not provided, a new configuration will be created.
+
+        ### Configuration Types:
+
+        **CSV/EXCEL Exports:**
+        - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+        - Columns must include `formula` field with function and parameters
+        - Support multiple sort columns
+
+        **PDF Exports:**
+        - Require `include_receipts` field (boolean, cannot be null)
+        - Columns do NOT use `formula` field
+        - Columns require `is_custom`, `field_name`, and `formula_text` fields
+        - Maximum of 1 sort column allowed
       operationId: expenses_export_configurations_post
       requestBody:
         required: true
@@ -3692,6 +3978,70 @@ paths:
                   $ref: '#/components/schemas/expenses_export_configuration_in'
               required:
                 - data
+            examples:
+              csv_export:
+                summary: CSV Export Configuration
+                value:
+                  data:
+                    name: Monthly Expenses CSV Export
+                    query_string: state=eq.APPROVED
+                    type: CSV
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Email
+                          formula:
+                            function: GET
+                            parameters:
+                              - employee
+                              - user
+                              - email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          formula:
+                            function: GET
+                            parameters:
+                              - claim_amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
+                      date_format: YYYY-MM-DD
+              pdf_export:
+                summary: PDF Export Configuration
+                value:
+                  data:
+                    name: Expense Report PDF with Receipts
+                    query_string: state=eq.APPROVED
+                    type: PDF
+                    config:
+                      columns:
+                        - name: Employee Email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                        - name: Merchant
+                          is_custom: true
+                          field_name: merchant
+                          formula_text: GET(merchant)
+                      include_receipts: true
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
       responses:
         '200':
           description: OK
@@ -11501,11 +11851,6 @@ paths:
             type: string
           description: Filter by post date using timestamp operators like gte., lte., etc.
         - in: query
-          name: is_ignored
-          schema:
-            type: string
-          description: Filter by ignored flag using eq.true/eq.false
-        - in: query
           name: is_reconciled
           schema:
             type: string
@@ -12558,6 +12903,277 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/corporate_card_transactions/export_configurations:
+    get:
+      tags:
+        - Corporate Card Transactions
+      summary: List corporate card transactions export configurations
+      description: |
+        This API gets you the saved export configurations for corporate card transactions in the current organization.
+
+        Export configurations allow users to save and reuse export settings including column selections, 
+        formulas, sort orders, and formatting preferences.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_card_transactions_export_configurations_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_transactions_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Create or update a corporate card transactions export configuration
+      description: |
+        Create or update a corporate card transactions export configuration.
+
+        If `id` is provided in the request, the existing configuration will be updated. 
+        If `id` is not provided, a new configuration will be created.
+
+        ### Configuration Types:
+
+        **CSV/EXCEL Exports:**
+        - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+        - Columns must include `formula` field with function and parameters
+        - Support maximum of 1 sort column
+
+        **Note:** PDF exports are NOT supported for corporate card transactions.
+      operationId: corporate_card_transactions_export_configurations_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_transactions_export_configuration_in'
+              required:
+                - data
+            examples:
+              csv_export:
+                summary: CSV Export Configuration
+                value:
+                  data:
+                    name: Monthly Card Transactions CSV Export
+                    query_string: state=eq.APPROVED
+                    type: CSV
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Email
+                          formula:
+                            function: GET
+                            parameters:
+                              - employee
+                              - user
+                              - email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          formula:
+                            function: GET
+                            parameters:
+                              - amount
+                          is_custom: false
+                          field_name: amount
+                          formula_text: null
+                      sort_columns:
+                        - display_name: Transaction Date
+                          field_name: transaction_date
+                          direction: desc
+                      date_format: YYYY-MM-DD
+              excel_export:
+                summary: Excel Export Configuration
+                value:
+                  data:
+                    name: Card Transactions Excel Export
+                    query_string: state=eq.MATCHED
+                    type: EXCEL
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Card Number
+                          formula:
+                            function: GET
+                            parameters:
+                              - corporate_card
+                              - card_number
+                          is_custom: true
+                          field_name: card_number
+                          formula_text: GET(corporate_card, card_number)
+                        - name: Amount
+                          formula:
+                            function: GET
+                            parameters:
+                              - amount
+                          is_custom: false
+                          field_name: amount
+                          formula_text: ''
+                        - name: Merchant
+                          formula:
+                            function: GET
+                            parameters:
+                              - merchant
+                          is_custom: true
+                          field_name: null
+                          formula_text: GET(merchant)
+                      sort_columns:
+                        - display_name: Created At
+                          field_name: created_at
+                          direction: asc
+                      date_format: DD/MM/YYYY
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_transactions_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /admin/corporate_card_transactions/export_configurations/delete/bulk:
+    post:
+      tags:
+        - Corporate Card Transactions
+      summary: Deletes corporate card transactions export configurations
+      description: |
+        Deletes unused corporate card transactions export configurations. This endpoint allows bulk deletion of export configurations
+        that are no longer needed. If any of the export configurations in the input do not exist or the user 
+        does not have permission to delete them, a validation error is raised.
+      operationId: corporate_card_transactions_export_configurations_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/corporate_card_transactions_export_configuration_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        nullable: true
+                        example: |
+                          Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                      data:
+                        type: object
+                        example: null
+                      error:
+                        type: string
+                        example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: You don't have permissions to access this resource
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
 components:
   securitySchemes:
     oauth2:
@@ -15211,6 +15827,227 @@ components:
           nullable: true
           description: |
             Total liability payable to the employee.
+    employees_export_configuration_separate_line_items_entry:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: |
+            Whether to show separate double rows for each line item in the export file.
+          example: false
+        debit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for debit entries only.
+          example: []
+        credit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for credit entries only.
+          example: []
+    employees_export_configuration_column:
+      type: object
+      properties:
+        name:
+          type: string
+          description: |
+            Name of the column.
+          example: Department
+        formula:
+          type: object
+          additionalProperties: true
+          description: |
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
+          example:
+            function: GET
+            parameters:
+              - department
+              - name
+        is_custom:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether this is a custom column. This field is optional and can be null.
+          example: true
+        field_name:
+          type: string
+          nullable: true
+          description: |
+            The field name that this column maps to. This field is optional and can be null.
+          example: department_name
+        formula_text:
+          type: string
+          nullable: true
+          description: |
+            A text representation of the formula used for the column. This field is optional and can be null.
+          example: GET(department, name)
+    employees_export_configuration_sort_column:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: |
+            Display name of the sort column.
+          example: Joined At
+        field_name:
+          type: string
+          description: |
+            Field name to sort by.
+          example: joined_at
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          description: |
+            Sort direction - ascending or descending.
+          example: desc
+    employees_export_configuration_config:
+      type: object
+      additionalProperties: true
+      properties:
+        is_header_visible:
+          type: boolean
+          description: |
+            Whether to include column headers in the export file. Required for CSV and EXCEL export types.
+          example: true
+        separate_line_items_entry:
+          allOf:
+            - $ref: '#/components/schemas/employees_export_configuration_separate_line_items_entry'
+          description: |
+            Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/employees_export_configuration_column'
+          description: |
+            List of columns to include in the export file with their formulas.
+        sort_columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/employees_export_configuration_sort_column'
+          description: |
+            List of columns to sort the export data by.
+        date_format:
+          type: string
+          nullable: true
+          description: |
+            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
+          example: YYYY-MM-DD
+    employees_export_configuration_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: emplecH2sfdf
+          description: |
+            Unique identifier for the export configuration.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who created this export configuration.
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who last updated this export configuration.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Active Employees Export
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: employee_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: is_enabled=eq.true&order=joined_at.desc
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+          description: |
+            Type of the export file format. Only CSV and EXCEL are supported for employee exports.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/employees_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+    employees_export_configuration_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: emplecH2sfdf
+          nullable: true
+          description: |
+            Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Active Employees Export
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: employee_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: is_enabled=eq.true&order=joined_at.desc
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+          description: |
+            Type of the export file format. Only CSV and EXCEL are supported for employee exports.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/employees_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+      required:
+        - name
+        - query_string
+        - type
+        - config
+    employees_export_configuration_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
     file_in:
       type: object
       required:
@@ -17638,7 +18475,7 @@ components:
           type: object
           additionalProperties: true
           description: |
-            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
           example:
             function: Field
             parameters:
@@ -17689,31 +18526,36 @@ components:
         is_column_header_included:
           type: boolean
           description: |
-            Whether to include column headers in the export file.
+            Whether to include column headers in the export file. Required for CSV and EXCEL export types.
           example: true
         separate_line_items_entry:
           allOf:
             - $ref: '#/components/schemas/expenses_export_configuration_separate_line_items_entry'
           description: |
-            Configure how to show separate line items for debit and credit entries in the export file.
+            Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
         columns:
           type: array
           items:
             $ref: '#/components/schemas/expenses_export_configuration_column'
           description: |
-            List of columns to include in the export file with their formulas.
+            List of columns to include in the export file with their formulas. For CSV and EXCEL exports, use expenses_export_configuration_column. For PDF exports, use expenses_export_pdf_configuration_column.
         sort_columns:
           type: array
           items:
             $ref: '#/components/schemas/expenses_export_configuration_sort_column'
           description: |
-            List of columns to sort the export data by.
+            List of columns to sort the export data by. For PDF exports, maximum of 1 sort column is allowed.
         date_format:
           type: string
           nullable: true
           description: |
-            Date format to use for date fields in the export. This field is optional and can be null.
+            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
           example: YYYY-MM-DD
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the PDF export. Required for PDF export type only.
+          example: true
     expenses_export_configuration_out:
       type: object
       additionalProperties: false
@@ -17747,6 +18589,12 @@ components:
           description: |
             Name of the export configuration.
           example: Monthly Expenses - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: expense_report_export
         query_string:
           type: string
           description: |
@@ -17782,6 +18630,12 @@ components:
           description: |
             Name of the export configuration.
           example: Monthly Expenses - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: expense_report_export
         query_string:
           type: string
           description: |
@@ -19228,6 +20082,7 @@ components:
       required:
         - id
         - comment
+        - action_data
         - creator_user_id
         - creator_user
         - created_at
@@ -19238,6 +20093,10 @@ components:
           type: string
           description: comment on the report
           example: We don't accept laundry bills
+        action_data:
+          type: object
+          description: Data related to report action.
+          nullable: true
         creator_user_id:
           $ref: '#/components/schemas/id_string'
         creator_user:
@@ -20366,6 +21225,12 @@ components:
           description: |
             Name of the export configuration.
           example: Monthly Reports - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: report_export
         query_string:
           type: string
           description: |
@@ -20401,6 +21266,12 @@ components:
           description: |
             Name of the export configuration.
           example: Monthly Reports - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: report_export
         query_string:
           type: string
           description: |
@@ -29057,7 +29928,6 @@ components:
         - statement_merchant
         - matched_expenses_count
         - is_reconciled
-        - is_ignored
         - expenses
       properties:
         id:
@@ -29121,10 +29991,6 @@ components:
           type: boolean
           example: false
           description: Indicates whether the statement transaction is reconciled.
-        is_ignored:
-          type: boolean
-          example: false
-          description: Indicates whether the statement transaction is ignored from reconciliation.
         created_at:
           $ref: '#/components/schemas/created_at'
           description: Timestamp when this reconciliation transaction record was created.
@@ -30018,6 +30884,217 @@ components:
             Indicates whether beneficial owner verification needs to be retried
           default: false
           example: false
+    corporate_card_transactions_export_configuration_separate_line_items_entry:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: |
+            Whether to show separate double rows for each line item in the export file.
+          example: false
+        debit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for debit entries only.
+          example: []
+        credit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for credit entries only.
+          example: []
+    corporate_card_transactions_export_configuration_column:
+      type: object
+      properties:
+        name:
+          type: string
+          description: |
+            Name of the column.
+          example: Merchant
+        formula:
+          type: object
+          additionalProperties: true
+          description: |
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
+          example:
+            function: Field
+            parameters:
+              - merchant
+        is_custom:
+          type: boolean
+          nullable: false
+          description: |
+            Indicates whether this is a custom column.
+          example: true
+        field_name:
+          type: string
+          nullable: true
+          description: |
+            The field name that this column maps to. This field is required and can be null.
+          example: merchant_name
+        formula_text:
+          type: string
+          nullable: true
+          description: |
+            A text representation of the formula used for the column. This field is required and can be null.
+          example: GET(merchant)
+    corporate_card_transactions_export_configuration_sort_column:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: |
+            Display name of the sort column.
+          example: Transaction Date
+        field_name:
+          type: string
+          description: |
+            Field name to sort by.
+          example: transaction_date
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          description: |
+            Sort direction - ascending or descending.
+          example: desc
+    corporate_card_transactions_export_configuration_config:
+      type: object
+      additionalProperties: true
+      properties:
+        is_header_visible:
+          type: boolean
+          description: |
+            Whether to include column headers in the export file. Required for CSV and EXCEL export types.
+          example: true
+        separate_line_items_entry:
+          allOf:
+            - $ref: '#/components/schemas/corporate_card_transactions_export_configuration_separate_line_items_entry'
+          description: |
+            Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/corporate_card_transactions_export_configuration_column'
+          description: |
+            List of columns to include in the export file with their formulas. For CSV and EXCEL exports.
+        sort_columns:
+          type: array
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/corporate_card_transactions_export_configuration_sort_column'
+          description: |
+            List of columns to sort the export data by. Maximum of 1 sort column is allowed.
+        date_format:
+          type: string
+          nullable: true
+          description: |
+            Date format to use for date fields in the export. This field is required and can be null. Required for CSV and EXCEL export types.
+          example: YYYY-MM-DD
+    corporate_card_transactions_export_configuration_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: cctecH2sfdf
+          description: |
+            Unique identifier for the export configuration.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Card Transactions - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: card_transaction_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=transaction_date.desc&state=eq.APPROVED
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+          description: |
+            Type of the export file format. Only CSV and EXCEL are supported.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/corporate_card_transactions_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+    corporate_card_transactions_export_configuration_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: cctecH2sfdf
+          nullable: true
+          description: |
+            Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Card Transactions - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: card_transaction_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=transaction_date.desc&state=eq.APPROVED
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+          description: |
+            Type of the export file format. Only CSV and EXCEL are supported.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/corporate_card_transactions_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+      required:
+        - name
+        - query_string
+        - type
+        - config
+    corporate_card_transactions_export_configuration_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
   parameters:
     q:
       in: query

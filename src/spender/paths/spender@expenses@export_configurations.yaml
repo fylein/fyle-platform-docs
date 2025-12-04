@@ -3,13 +3,13 @@ get:
     - Expenses
   summary: List expenses export configurations
   description: |
-    This API gets you the saved export configurations for expenses in the current organization.
+    This API gets you the saved export configurations for expenses in the current organization for the spender.
     
     Export configurations allow users to save and reuse export settings including column selections, 
     formulas, sort orders, and formatting preferences.
 
     This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-  operationId: expenses_export_configurations_list
+  operationId: spender_expenses_export_configurations_list
   responses:
     '200':
       description: OK
@@ -38,12 +38,23 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
 post:
   tags:
     - Expenses
   summary: Create or update an expense export configuration
   description: |
-    Create or update an expense export configuration.
+    Create or update an expense export configuration for the spender.
     
     If `id` is provided in the request, the existing configuration will be updated. 
     If `id` is not provided, a new configuration will be created.
@@ -60,7 +71,7 @@ post:
     - Columns do NOT use `formula` field
     - Columns require `is_custom`, `field_name`, and `formula_text` fields
     - Maximum of 1 sort column allowed
-  operationId: expenses_export_configurations_post
+  operationId: spender_expenses_export_configurations_post
   requestBody:
     required: true
     content:
@@ -180,5 +191,6 @@ post:
                 type: string
                 description: |
                   This error means the requested resource was not found or the requester doesn't have sufficient access.
+
 
 

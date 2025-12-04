@@ -6675,7 +6675,7 @@ paths:
                 properties:
                   data:
                     allOf:
-                      - $ref: '#/components/schemas/dwolla_customer_out'
+                      - $ref: '#/components/schemas/spender_dwolla_customer_out'
                     nullable: true
         '400':
           description: Bad request
@@ -6739,6 +6739,468 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/expenses/export_configurations:
+    get:
+      tags:
+        - Expenses
+      summary: List expenses export configurations
+      description: |
+        This API gets you the saved export configurations for expenses in the current organization for the spender.
+
+        Export configurations allow users to save and reuse export settings including column selections, 
+        formulas, sort orders, and formatting preferences.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: spender_expenses_export_configurations_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expenses_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+    post:
+      tags:
+        - Expenses
+      summary: Create or update an expense export configuration
+      description: |
+        Create or update an expense export configuration for the spender.
+
+        If `id` is provided in the request, the existing configuration will be updated. 
+        If `id` is not provided, a new configuration will be created.
+
+        ### Configuration Types:
+
+        **CSV/EXCEL Exports:**
+        - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+        - Columns must include `formula` field with function and parameters
+        - Support multiple sort columns
+
+        **PDF Exports:**
+        - Require `include_receipts` field (boolean, cannot be null)
+        - Columns do NOT use `formula` field
+        - Columns require `is_custom`, `field_name`, and `formula_text` fields
+        - Maximum of 1 sort column allowed
+      operationId: spender_expenses_export_configurations_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_export_configuration_in'
+              required:
+                - data
+            examples:
+              csv_export:
+                summary: CSV Export Configuration
+                value:
+                  data:
+                    name: Monthly Expenses CSV Export
+                    query_string: state=eq.APPROVED
+                    type: CSV
+                    config:
+                      is_header_visible: true
+                      separate_line_items_entry:
+                        is_enabled: false
+                        debit_entries_only: []
+                        credit_entries_only: []
+                      columns:
+                        - name: Employee Email
+                          formula:
+                            function: GET
+                            parameters:
+                              - employee
+                              - user
+                              - email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          formula:
+                            function: GET
+                            parameters:
+                              - claim_amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
+                      date_format: YYYY-MM-DD
+              pdf_export:
+                summary: PDF Export Configuration
+                value:
+                  data:
+                    name: Expense Report PDF with Receipts
+                    query_string: state=eq.APPROVED
+                    type: PDF
+                    config:
+                      columns:
+                        - name: Employee Email
+                          is_custom: false
+                          field_name: employee_email
+                          formula_text: GET(employee, user, email)
+                        - name: Amount
+                          is_custom: false
+                          field_name: claim_amount
+                          formula_text: null
+                        - name: Merchant
+                          is_custom: true
+                          field_name: merchant
+                          formula_text: GET(merchant)
+                      include_receipts: true
+                      sort_columns:
+                        - display_name: Spent At
+                          field_name: spent_at
+                          direction: desc
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expenses_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /spender/expenses/export_configurations/delete/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Deletes expenses export configurations
+      description: |
+        Deletes unused expenses export configurations for the spender. This endpoint allows bulk deletion of export configurations
+        that are no longer needed. If any of the export configurations in the input do not exist or the user 
+        does not have permission to delete them, a validation error is raised.
+      operationId: spender_expenses_export_configurations_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/expenses_export_configuration_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        nullable: true
+                        example: |
+                          Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                      data:
+                        type: object
+                        example: null
+                      error:
+                        type: string
+                        example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: You don't have permissions to access this resource
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+  /spender/reports/export_configurations:
+    get:
+      tags:
+        - Reports
+      summary: List reports export configurations
+      description: |
+        This API gets you the saved export configurations for reports that you created.
+
+        Export configurations allow users to save and reuse export settings including column selections, 
+        formulas, sort orders, and formatting preferences.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: reports_export_configurations_list_spender
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reports_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+    post:
+      tags:
+        - Reports
+      summary: Create or update a report export configuration
+      description: |
+        Create or update a report export configuration.
+
+        If `id` is provided in the request, the existing configuration will be updated. 
+        If `id` is not provided, a new configuration will be created.
+
+        Spenders can only create or update their own configurations.
+      operationId: reports_export_configurations_post_spender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/reports_export_configuration_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reports_export_configuration_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /spender/reports/export_configurations/delete/bulk:
+    post:
+      tags:
+        - Reports
+      summary: Deletes reports export configurations
+      description: |
+        Deletes unused reports export configurations. This endpoint allows bulk deletion of export configurations
+        that are no longer needed. Spenders can only delete their own export configurations. If any of the 
+        export configurations in the input do not exist or the user does not have permission to delete them, 
+        a validation error is raised.
+      operationId: reports_export_configurations_delete_bulk_post_spender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/reports_export_configuration_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        nullable: true
+                        example: |
+                          Cannot delete export configuration(s) that do not exist or that you do not have permission to delete.
+                      data:
+                        type: object
+                        example: null
+                      error:
+                        type: string
+                        example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: You don't have permissions to access this resource
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
 components:
   securitySchemes:
     oauth2:
@@ -9841,6 +10303,7 @@ components:
       required:
         - id
         - comment
+        - action_data
         - creator_user_id
         - creator_user
         - created_at
@@ -9851,6 +10314,10 @@ components:
           type: string
           description: comment on the report
           example: We don't accept laundry bills
+        action_data:
+          type: object
+          description: Data related to report action.
+          nullable: true
         creator_user_id:
           $ref: '#/components/schemas/id_string'
         creator_user:
@@ -17774,6 +18241,249 @@ components:
       items:
         $ref: '#/components/schemas/advance_request_custom_field_out'
       description: List of advance request custom fields
+    spender_dwolla_customer_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          maxLength: 15
+          description: |
+            This id is provided by Sage Exp Mgmt to identify an object.
+          example: sdfd2391
+          nullable: true
+        org_id:
+          type: string
+          description: |
+            The unique id of the Organization to which the object is associated.
+          readOnly: true
+          example: orwruogwnngg
+          nullable: true
+        created_at:
+          $ref: '#/components/schemas/created_at'
+          nullable: true
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+          nullable: true
+        customer_id:
+          type: string
+          description: |
+            The unique Dwolla customer ID
+          example: dwolla_customer_12345
+          nullable: true
+        customer_email:
+          type: string
+          nullable: true
+          description: |
+            Email address associated with the Dwolla customer
+          example: employee@company.com
+        customer_added_by:
+          type: string
+          description: |
+            User ID of the person who added the Dwolla customer
+          example: user_xyz789
+          nullable: true
+        is_customer_verified:
+          type: boolean
+          description: |
+            Indicates whether the customer has been verified in Dwolla
+          default: false
+          example: true
+          nullable: true
+        is_beneficial_owner_added:
+          type: boolean
+          description: |
+            Indicates whether a beneficial owner has been added
+          default: false
+          example: false
+          nullable: true
+        is_beneficial_owner_verified:
+          type: boolean
+          description: |
+            Indicates whether the beneficial owner has been verified
+          default: false
+          example: false
+          nullable: true
+        is_bank_account_added:
+          type: boolean
+          description: |
+            Indicates whether a bank account has been added
+          default: false
+          example: true
+          nullable: true
+        is_bank_account_verified:
+          type: boolean
+          description: |
+            Indicates whether the bank account has been verified
+          default: false
+          example: false
+          nullable: true
+        bank_account_added_by:
+          type: string
+          nullable: true
+          description: |
+            User ID of the person who added the bank account
+          example: user_xyz789
+        is_customer_document_needed:
+          type: boolean
+          description: |
+            Indicates whether customer documentation is needed
+          default: false
+          example: false
+          nullable: true
+        is_beneficial_owner_document_needed:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner documentation is needed
+          default: false
+          example: false
+          nullable: true
+        is_customer_retry:
+          type: boolean
+          description: |
+            Indicates whether customer verification needs to be retried
+          default: false
+          example: false
+          nullable: true
+        is_customer_suspended:
+          type: boolean
+          description: |
+            Indicates whether the customer account is suspended
+          default: false
+          example: false
+          nullable: true
+        micro_deposit_verification_status:
+          type: string
+          nullable: true
+          description: |
+            Status of micro-deposit verification
+          enum:
+            - null
+            - pending
+            - verified
+            - failed
+          example: verified
+        micro_deposit_verification_attempts:
+          type: integer
+          nullable: true
+          description: |
+            Number of micro-deposit verification attempts
+          example: 2
+        is_beneficial_owner_retry:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner verification needs to be retried
+          default: false
+          example: false
+          nullable: true
+        is_org_customer_verified:
+          type: boolean
+          description: |
+            Indicates whether org's dwolla account is verified or not.
+          default: false
+          example: true
+    dwolla_customer_in:
+      type: object
+      additionalProperties: false
+      properties:
+        customer_id:
+          type: string
+          description: |
+            The unique Dwolla customer ID (required for CREATE operations)
+          example: dwolla_customer_12345
+        customer_email:
+          type: string
+          nullable: true
+          description: |
+            Email address associated with the Dwolla customer
+          example: employee@company.com
+        customer_added_by:
+          type: string
+          description: |
+            User ID of the person who added the Dwolla customer (required for CREATE operations)
+          example: user_xyz789
+        is_customer_verified:
+          type: boolean
+          description: |
+            Indicates whether the customer has been verified in Dwolla
+          default: false
+          example: true
+        is_beneficial_owner_added:
+          type: boolean
+          description: |
+            Indicates whether a beneficial owner has been added
+          default: false
+          example: false
+        is_beneficial_owner_verified:
+          type: boolean
+          description: |
+            Indicates whether the beneficial owner has been verified
+          default: false
+          example: false
+        is_bank_account_added:
+          type: boolean
+          description: |
+            Indicates whether a bank account has been added
+          default: false
+          example: true
+        is_bank_account_verified:
+          type: boolean
+          description: |
+            Indicates whether the bank account has been verified
+          default: false
+          example: false
+        bank_account_added_by:
+          type: string
+          nullable: true
+          description: |
+            User ID of the person who added the bank account
+          example: user_xyz789
+        is_customer_document_needed:
+          type: boolean
+          description: |
+            Indicates whether customer documentation is needed
+          default: false
+          example: false
+        is_beneficial_owner_document_needed:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner documentation is needed
+          default: false
+          example: false
+        is_customer_retry:
+          type: boolean
+          description: |
+            Indicates whether customer verification needs to be retried
+          default: false
+          example: false
+        is_customer_suspended:
+          type: boolean
+          description: |
+            Indicates whether the customer account is suspended
+          default: false
+          example: false
+        micro_deposit_verification_status:
+          type: string
+          nullable: true
+          description: |
+            Status of micro-deposit verification
+          enum:
+            - pending
+            - verified
+            - failed
+          example: verified
+        micro_deposit_verification_attempts:
+          type: integer
+          nullable: true
+          description: |
+            Number of micro-deposit verification attempts
+          example: 2
+        is_beneficial_owner_retry:
+          type: boolean
+          description: |
+            Indicates whether beneficial owner verification needs to be retried
+          default: false
+          example: false
     dwolla_customer_out:
       type: object
       additionalProperties: false
@@ -17886,108 +18596,455 @@ components:
             Indicates whether beneficial owner verification needs to be retried
           default: false
           example: false
-    dwolla_customer_in:
+    expenses_export_configuration_separate_line_items_entry:
+      type: object
+      properties:
+        is_enabled:
+          type: boolean
+          description: |
+            Whether to show separate double rows for each line item in the export file.
+          example: false
+        debit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for debit entries only.
+          example: []
+        credit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for credit entries only.
+          example: []
+    expenses_export_configuration_column:
+      type: object
+      properties:
+        name:
+          type: string
+          description: |
+            Name of the column.
+          example: Merchant
+        formula:
+          type: object
+          additionalProperties: true
+          description: |
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
+          example:
+            function: Field
+            parameters:
+              - merchant
+        is_custom:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether this is a custom column. This field is optional and can be null.
+          example: true
+        field_name:
+          type: string
+          nullable: true
+          description: |
+            The field name that this column maps to. This field is optional and can be null.
+          example: merchant_name
+        formula_text:
+          type: string
+          nullable: true
+          description: |
+            A text representation of the formula used for the column. This field is optional and can be null.
+          example: GET(merchant)
+    expenses_export_configuration_sort_column:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: |
+            Display name of the sort column.
+          example: Spent At
+        field_name:
+          type: string
+          description: |
+            Field name to sort by.
+          example: spent_at
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          description: |
+            Sort direction - ascending or descending.
+          example: desc
+    expenses_export_configuration_config:
+      type: object
+      additionalProperties: true
+      properties:
+        is_column_header_included:
+          type: boolean
+          description: |
+            Whether to include column headers in the export file. Required for CSV and EXCEL export types.
+          example: true
+        separate_line_items_entry:
+          allOf:
+            - $ref: '#/components/schemas/expenses_export_configuration_separate_line_items_entry'
+          description: |
+            Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/expenses_export_configuration_column'
+          description: |
+            List of columns to include in the export file with their formulas. For CSV and EXCEL exports, use expenses_export_configuration_column. For PDF exports, use expenses_export_pdf_configuration_column.
+        sort_columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/expenses_export_configuration_sort_column'
+          description: |
+            List of columns to sort the export data by. For PDF exports, maximum of 1 sort column is allowed.
+        date_format:
+          type: string
+          nullable: true
+          description: |
+            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
+          example: YYYY-MM-DD
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the PDF export. Required for PDF export type only.
+          example: true
+    expenses_export_configuration_out:
       type: object
       additionalProperties: false
       properties:
-        customer_id:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ecH2sfdf
+          description: |
+            Unique identifier for the export configuration.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who created this export configuration.
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who last updated this export configuration.
+        name:
           type: string
           description: |
-            The unique Dwolla customer ID (required for CREATE operations)
-          example: dwolla_customer_12345
-        customer_email:
-          type: string
-          nullable: true
-          description: |
-            Email address associated with the Dwolla customer
-          example: employee@company.com
-        customer_added_by:
-          type: string
-          description: |
-            User ID of the person who added the Dwolla customer (required for CREATE operations)
-          example: user_xyz789
-        is_customer_verified:
-          type: boolean
-          description: |
-            Indicates whether the customer has been verified in Dwolla
-          default: false
-          example: true
-        is_beneficial_owner_added:
-          type: boolean
-          description: |
-            Indicates whether a beneficial owner has been added
-          default: false
-          example: false
-        is_beneficial_owner_verified:
-          type: boolean
-          description: |
-            Indicates whether the beneficial owner has been verified
-          default: false
-          example: false
-        is_bank_account_added:
-          type: boolean
-          description: |
-            Indicates whether a bank account has been added
-          default: false
-          example: true
-        is_bank_account_verified:
-          type: boolean
-          description: |
-            Indicates whether the bank account has been verified
-          default: false
-          example: false
-        bank_account_added_by:
+            Name of the export configuration.
+          example: Monthly Expenses - Apr'25
+        sub_feature:
           type: string
           nullable: true
           description: |
-            User ID of the person who added the bank account
-          example: user_xyz789
-        is_customer_document_needed:
-          type: boolean
-          description: |
-            Indicates whether customer documentation is needed
-          default: false
-          example: false
-        is_beneficial_owner_document_needed:
-          type: boolean
-          description: |
-            Indicates whether beneficial owner documentation is needed
-          default: false
-          example: false
-        is_customer_retry:
-          type: boolean
-          description: |
-            Indicates whether customer verification needs to be retried
-          default: false
-          example: false
-        is_customer_suspended:
-          type: boolean
-          description: |
-            Indicates whether the customer account is suspended
-          default: false
-          example: false
-        micro_deposit_verification_status:
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: expense_report_export
+        query_string:
           type: string
-          nullable: true
           description: |
-            Status of micro-deposit verification
+            Query string containing filters and parameters for the export.
+          example: order=spent_at.desc&report-%3Eseq_num=in.(%22C/2025/07/R/175%22)
+        type:
+          type: string
           enum:
-            - pending
-            - verified
-            - failed
-          example: verified
-        micro_deposit_verification_attempts:
-          type: integer
+            - CSV
+            - EXCEL
+            - PDF
+          description: |
+            Type of the export file format.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/expenses_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+    expenses_export_configuration_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ecH2sfdf
           nullable: true
           description: |
-            Number of micro-deposit verification attempts
-          example: 2
-        is_beneficial_owner_retry:
+            Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Expenses - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: expense_report_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=spent_at.desc&report-%3Eseq_num=in.(%22C/2025/07/R/175%22)
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+            - PDF
+          description: |
+            Type of the export file format.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/expenses_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+      required:
+        - name
+        - query_string
+        - type
+        - config
+    expenses_export_configuration_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    reports_export_configuration_separate_line_items_entry:
+      type: object
+      properties:
+        is_enabled:
           type: boolean
           description: |
-            Indicates whether beneficial owner verification needs to be retried
-          default: false
+            Whether to show separate double rows for each line item in the export file.
           example: false
+        debit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for debit entries only.
+          example: []
+        credit_entries_only:
+          type: array
+          items:
+            type: string
+          description: |
+            Configure which columns to show for credit entries only.
+          example: []
+    reports_export_configuration_column:
+      type: object
+      properties:
+        name:
+          type: string
+          description: |
+            Name of the column.
+          example: Employee Name
+        formula:
+          type: object
+          additionalProperties: true
+          description: |
+            Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+          example:
+            function: Field
+            parameters:
+              - employee->full_name
+        is_custom:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether this is a custom column. This field is optional and can be null.
+          example: false
+        field_name:
+          type: string
+          nullable: true
+          description: |
+            The field name that this column maps to. This field is optional and can be null.
+          example: employee_name
+        formula_text:
+          type: string
+          nullable: true
+          description: |
+            A text representation of the formula used for the column. This field is optional and can be null.
+          example: GET(employee, user, full_name)
+    reports_export_configuration_sort_column:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: |
+            Display name of the sort column.
+          example: Created At
+        field_name:
+          type: string
+          description: |
+            Field name to sort by.
+          example: created_at
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+          description: |
+            Sort direction - ascending or descending.
+          example: desc
+    reports_export_configuration_config:
+      type: object
+      additionalProperties: true
+      properties:
+        is_column_header_included:
+          type: boolean
+          description: |
+            Whether to include column headers in the export file.
+          example: true
+        separate_line_items_entry:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_configuration_separate_line_items_entry'
+          description: |
+            Configure how to show separate line items for debit and credit entries in the export file.
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/reports_export_configuration_column'
+          description: |
+            List of columns to include in the export file with their formulas.
+        sort_columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/reports_export_configuration_sort_column'
+          description: |
+            List of columns to sort the export data by.
+        date_format:
+          type: string
+          nullable: true
+          description: |
+            Date format to use for date fields in the export. This field is optional and can be null.
+          example: MM/DD/YYYY
+    reports_export_configuration_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: rcH2sfdf
+          description: |
+            Unique identifier for the export configuration.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        created_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who created this export configuration.
+        updated_by:
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed_nullable'
+          description: |
+            User who last updated this export configuration.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Reports - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: report_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+            - PDF
+          description: |
+            Type of the export file format.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+    reports_export_configuration_in:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: rcH2sfdf
+          nullable: true
+          description: |
+            Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
+        name:
+          type: string
+          description: |
+            Name of the export configuration.
+          example: Monthly Reports - Apr'25
+        sub_feature:
+          type: string
+          nullable: true
+          description: |
+            Sub-feature identifier for the export configuration. This field is optional and can be null.
+          example: report_export
+        query_string:
+          type: string
+          description: |
+            Query string containing filters and parameters for the export.
+          example: order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)
+        type:
+          type: string
+          enum:
+            - CSV
+            - EXCEL
+            - PDF
+          description: |
+            Type of the export file format.
+          example: CSV
+        config:
+          allOf:
+            - $ref: '#/components/schemas/reports_export_configuration_config'
+          description: |
+            Configuration details for the export including columns, sorting, and formatting options.
+      required:
+        - name
+        - query_string
+        - type
+        - config
+    reports_export_configuration_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
   parameters:
     q:
       in: query

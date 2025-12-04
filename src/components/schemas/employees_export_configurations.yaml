@@ -1,53 +1,54 @@
-reports_export_configuration_column:
+employees_export_configuration_column:
   type: object
   properties:
     name:
       type: string
       description: |
         Name of the column.
-      example: Employee Name
+      example: Department
     formula:
       type: object
       additionalProperties: true
       description: |
-        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details.
+        Formula to transform the data in the column. This is a JSON object containing function name and parameters. Refer https://www.fylehq.com/help/en/articles/4422306-advanced-export-formulas for more details. Required for CSV and EXCEL export types.
       example:
-        function: Field
+        function: GET
         parameters:
-          - employee->full_name
+          - department
+          - name
     is_custom:
       type: boolean
       nullable: true
       description: |
         Indicates whether this is a custom column. This field is optional and can be null.
-      example: false
+      example: true
     field_name:
       type: string
       nullable: true
       description: |
         The field name that this column maps to. This field is optional and can be null.
-      example: employee_name
+      example: department_name
     formula_text:
       type: string
       nullable: true
       description: |
         A text representation of the formula used for the column. This field is optional and can be null.
-      example: "GET(employee, user, full_name)"
+      example: "GET(department, name)"
 
 
-reports_export_configuration_sort_column:
+employees_export_configuration_sort_column:
   type: object
   properties:
     display_name:
       type: string
       description: |
         Display name of the sort column.
-      example: Created At
+      example: Joined At
     field_name:
       type: string
       description: |
         Field name to sort by.
-      example: created_at
+      example: joined_at
     direction:
       type: string
       enum:
@@ -58,7 +59,7 @@ reports_export_configuration_sort_column:
       example: desc
 
 
-reports_export_configuration_separate_line_items_entry:
+employees_export_configuration_separate_line_items_entry:
   type: object
   properties:
     is_enabled:
@@ -82,48 +83,48 @@ reports_export_configuration_separate_line_items_entry:
       example: []
 
 
-reports_export_configuration_config:
+employees_export_configuration_config:
   type: object
   additionalProperties: true
   properties:
-    is_column_header_included:
+    is_header_visible:
       type: boolean
       description: |
-        Whether to include column headers in the export file.
+        Whether to include column headers in the export file. Required for CSV and EXCEL export types.
       example: true
     separate_line_items_entry:
       allOf:
-        - $ref: '#/reports_export_configuration_separate_line_items_entry'
+        - $ref: '#/employees_export_configuration_separate_line_items_entry'
       description: |
-        Configure how to show separate line items for debit and credit entries in the export file.
+        Configure how to show separate line items for debit and credit entries in the export file. Required for CSV and EXCEL export types.
     columns:
       type: array
       items:
-        $ref: '#/reports_export_configuration_column'
+        $ref: '#/employees_export_configuration_column'
       description: |
         List of columns to include in the export file with their formulas.
     sort_columns:
       type: array
       items:
-        $ref: '#/reports_export_configuration_sort_column'
+        $ref: '#/employees_export_configuration_sort_column'
       description: |
         List of columns to sort the export data by.
     date_format:
       type: string
       nullable: true
       description: |
-        Date format to use for date fields in the export. This field is optional and can be null.
-      example: "MM/DD/YYYY"
+        Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
+      example: "YYYY-MM-DD"
 
 
-reports_export_configuration_in:
+employees_export_configuration_in:
   type: object
   additionalProperties: false
   properties:
     id:
       allOf:
         - $ref: './fields.yaml#/id_string'
-      example: rcH2sfdf
+      example: emplecH2sfdf
       nullable: true
       description: |
         Unique identifier for the export configuration. If provided, the configuration will be updated. If not provided, a new configuration will be created.
@@ -131,30 +132,29 @@ reports_export_configuration_in:
       type: string
       description: |
         Name of the export configuration.
-      example: "Monthly Reports - Apr'25"
+      example: "Active Employees Export"
     sub_feature:
       type: string
       nullable: true
       description: |
         Sub-feature identifier for the export configuration. This field is optional and can be null.
-      example: "report_export"
+      example: "employee_export"
     query_string:
       type: string
       description: |
         Query string containing filters and parameters for the export.
-      example: "order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)"
+      example: "is_enabled=eq.true&order=joined_at.desc"
     type:
       type: string
       enum:
         - CSV
         - EXCEL
-        - PDF
       description: |
-        Type of the export file format.
+        Type of the export file format. Only CSV and EXCEL are supported for employee exports.
       example: CSV
     config:
       allOf:
-        - $ref: '#/reports_export_configuration_config'
+        - $ref: '#/employees_export_configuration_config'
       description: |
         Configuration details for the export including columns, sorting, and formatting options.
   required:
@@ -164,7 +164,7 @@ reports_export_configuration_in:
     - config
 
 
-reports_export_configuration_in_only_id:
+employees_export_configuration_in_only_id:
   type: object
   required:
     - id
@@ -174,14 +174,14 @@ reports_export_configuration_in_only_id:
       $ref: './fields.yaml#/id_string'
 
 
-reports_export_configuration_out:
+employees_export_configuration_out:
   type: object
   additionalProperties: false
   properties:
     id:
       allOf:
         - $ref: './fields.yaml#/id_string'
-      example: rcH2sfdf
+      example: emplecH2sfdf
       description: |
         Unique identifier for the export configuration.
     org_id:
@@ -206,29 +206,29 @@ reports_export_configuration_out:
       type: string
       description: |
         Name of the export configuration.
-      example: "Monthly Reports - Apr'25"
+      example: "Active Employees Export"
     sub_feature:
       type: string
       nullable: true
       description: |
         Sub-feature identifier for the export configuration. This field is optional and can be null.
-      example: "report_export"
+      example: "employee_export"
     query_string:
       type: string
       description: |
         Query string containing filters and parameters for the export.
-      example: "order=created_at.desc&seq_num=in.(%22C/2025/07/R/175%22)"
+      example: "is_enabled=eq.true&order=joined_at.desc"
     type:
       type: string
       enum:
         - CSV
         - EXCEL
-        - PDF
       description: |
-        Type of the export file format.
+        Type of the export file format. Only CSV and EXCEL are supported for employee exports.
       example: CSV
     config:
       allOf:
-        - $ref: '#/reports_export_configuration_config'
+        - $ref: '#/employees_export_configuration_config'
       description: |
         Configuration details for the export including columns, sorting, and formatting options.
+

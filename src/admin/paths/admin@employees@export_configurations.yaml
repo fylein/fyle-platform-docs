@@ -1,15 +1,17 @@
 get:
   tags:
-    - Expenses
-  summary: List expenses export configurations
+    - Employees
+  summary: List employees export configurations
   description: |
-    This API gets you the saved export configurations for expenses in the current organization.
+    This API gets you the saved export configurations for employees in the current organization.
     
     Export configurations allow users to save and reuse export settings including column selections, 
     formulas, sort orders, and formatting preferences.
+    
+    **Note:** Employee exports only support CSV and EXCEL formats. PDF export is not supported.
 
     This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-  operationId: expenses_export_configurations_list
+  operationId: employees_export_configurations_list
   responses:
     '200':
       description: OK
@@ -25,7 +27,7 @@ get:
               data:
                 type: array
                 items:
-                  $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_out'
+                  $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_out'
     '400':
       description: Bad request
       content:
@@ -40,27 +42,23 @@ get:
             $ref: '../../components/schemas/401.yaml'
 post:
   tags:
-    - Expenses
-  summary: Create or update an expense export configuration
+    - Employees
+  summary: Create or update an employee export configuration
   description: |
-    Create or update an expense export configuration.
+    Create or update an employee export configuration.
     
     If `id` is provided in the request, the existing configuration will be updated. 
     If `id` is not provided, a new configuration will be created.
     
     ### Configuration Types:
     
-    **CSV/EXCEL Exports:**
+    **CSV/EXCEL Exports (Only supported formats):**
     - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
     - Columns must include `formula` field with function and parameters
     - Support multiple sort columns
     
-    **PDF Exports:**
-    - Require `include_receipts` field (boolean, cannot be null)
-    - Columns do NOT use `formula` field
-    - Columns require `is_custom`, `field_name`, and `formula_text` fields
-    - Maximum of 1 sort column allowed
-  operationId: expenses_export_configurations_post
+    **Note:** PDF export is not supported for employee exports.
+  operationId: employees_export_configurations_post
   requestBody:
     required: true
     content:
@@ -69,7 +67,7 @@ post:
           type: object
           properties:
             data:
-              $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_in'
+              $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_in'
           required:
             - data
         examples:
@@ -77,8 +75,8 @@ post:
             summary: CSV Export Configuration
             value:
               data:
-                name: "Monthly Expenses CSV Export"
-                query_string: "state=eq.APPROVED"
+                name: "Active Employees CSV Export"
+                query_string: "is_enabled=eq.true"
                 type: "CSV"
                 config:
                   is_header_visible: true
@@ -91,51 +89,69 @@ post:
                       formula:
                         function: "GET"
                         parameters:
-                          - "employee"
                           - "user"
                           - "email"
                       is_custom: false
                       field_name: "employee_email"
-                      formula_text: "GET(employee, user, email)"
-                    - name: "Amount"
+                      formula_text: "GET(user, email)"
+                    - name: "Full Name"
                       formula:
                         function: "GET"
                         parameters:
-                          - "claim_amount"
+                          - "user"
+                          - "full_name"
                       is_custom: false
-                      field_name: "claim_amount"
+                      field_name: "employee_name"
                       formula_text: null
+                    - name: "Department"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "department"
+                          - "name"
+                      is_custom: true
+                      field_name: null
+                      formula_text: "GET(department, name)"
                   sort_columns:
-                    - display_name: "Spent At"
-                      field_name: "spent_at"
+                    - display_name: "Joined At"
+                      field_name: "joined_at"
                       direction: "desc"
                   date_format: "YYYY-MM-DD"
-          pdf_export:
-            summary: PDF Export Configuration
+          excel_export:
+            summary: Excel Export Configuration
             value:
               data:
-                name: "Expense Report PDF with Receipts"
-                query_string: "state=eq.APPROVED"
-                type: "PDF"
+                name: "Employee Directory Excel"
+                query_string: "has_accepted_invite=eq.true"
+                type: "EXCEL"
                 config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
                   columns:
-                    - name: "Employee Email"
+                    - name: "Employee Code"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "code"
                       is_custom: false
-                      field_name: "employee_email"
-                      formula_text: "GET(employee, user, email)"
-                    - name: "Amount"
+                      field_name: "code"
+                      formula_text: "GET(code)"
+                    - name: "Title"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "title"
                       is_custom: false
-                      field_name: "claim_amount"
+                      field_name: "title"
                       formula_text: null
-                    - name: "Merchant"
-                      is_custom: true
-                      field_name: "merchant"
-                      formula_text: "GET(merchant)"
-                  include_receipts: true
                   sort_columns:
-                    - display_name: "Spent At"
-                      field_name: "spent_at"
-                      direction: "desc"
+                    - display_name: "Created At"
+                      field_name: "created_at"
+                      direction: "asc"
+                  date_format: "DD/MM/YYYY"
   responses:
     '200':
       description: OK
@@ -145,7 +161,7 @@ post:
             type: object
             properties:
               data:
-                $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_out'
+                $ref: '../../components/schemas/employees_export_configurations.yaml#/employees_export_configuration_out'
     '400':
       description: Bad request
       content:
@@ -180,5 +196,6 @@ post:
                 type: string
                 description: |
                   This error means the requested resource was not found or the requester doesn't have sufficient access.
+
 
 
