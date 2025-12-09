@@ -5243,6 +5243,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/reminders/stats:
+    post:
+      tags:
+        - Reminders
+      summary: Reminders Stats
+      description: |
+        Reminders Stats
+      operationId: reminders_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reminders_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reminders_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reports:
     get:
       tags:
@@ -19746,6 +19801,10 @@ components:
         - CONNECT_MASTERCARD_RTF
         - PROCESS_REPORTS
         - VERIFY_REPORTS
+        - ADD_BANK_ACCOUNT_EMPLOYEES
+        - COMPLETE_EXPENSES
+        - RESUBMIT_REPORTS
+        - SMS_OPT_IN
       maxLength: 255
       description: Represents the type of reminder.
       example: FYLE_EXPENSES
@@ -19908,6 +19967,27 @@ components:
           description: |
             ID of the reminder that needs to be deleted.
           example: remindNZgN7V5pft
+    reminders_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to reminders GET call.
+          nullable: false
+          example: id=in.('remind123','remind1234')
+    reminders_stats_out:
+      type: array
+      items:
+        type: object
+        properties:
+          last_reminded_at:
+            type: string
+            format: date-time
+            nullable: true
+            description: Signifies the time when this reminder was sent. In case of scheduled reminders, signifies when the last reminder was sent. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+            example: '2021-06-01T13:14:54.804+00:00'
+          type:
+            $ref: '#/components/schemas/reminder_type'
     employee_out_embed_for_report:
       type: object
       additionalProperties: false
