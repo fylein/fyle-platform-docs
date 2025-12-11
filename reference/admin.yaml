@@ -1781,6 +1781,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/employees/stats:
+    post:
+      tags:
+        - Employees
+      summary: Employees Stats
+      description: |
+        Employees Stats
+      operationId: employees_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employees_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employees/potential_duplicate_expenses:
     get:
       tags:
@@ -15255,6 +15310,29 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    employees_stats_in:
+      type: object
+      required:
+        - query_params
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to employees GET call.
+          example: id=in.('emp123','emp1234')
+    employees_stats_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          role:
+            $ref: '#/components/schemas/role'
+          count:
+            type: integer
+            description: Count of employees with the given role
+            example: 10
     expense_duplicate_sets_out:
       type: object
       additionalProperties: false
