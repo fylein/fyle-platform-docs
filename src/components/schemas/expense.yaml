@@ -2578,6 +2578,43 @@ expense_permissions_out:
         Indicates whether the user has permission to add this expense to a report.
       example: true
 
+expense_permissions_bulk_in:
+  type: array
+  maxItems: 200
+  description: |
+    Array of expense IDs to check permissions for (maximum 200 expenses per request).
+  items:
+    type: object
+    required:
+      - id
+    additionalProperties: false
+    properties:
+      id:
+        allOf:
+          - $ref: './fields.yaml#/id_string'
+        description: |
+          Expense ID of the expense to check permissions for.
+        example: 'txAcczJOQHGR'
+
+expense_permissions_bulk_out:
+  type: array
+  description: |
+    Array of permission objects for each expense. Each object corresponds to an expense from the request.
+  items:
+    allOf:
+      - type: object
+        required:
+          - id
+        additionalProperties: false
+        properties:
+          id:
+            allOf:
+              - $ref: './fields.yaml#/id_string'
+            description: |
+              Expense ID
+            example: 'txAcczJOQHGR'
+      - $ref: '#/expense_permissions_out'
+
 expenses_verify_bulk_in:
   type: object
   required:
