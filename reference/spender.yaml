@@ -20,6 +20,9 @@ tags:
   - name: Advances
     description: |
       This API gives you access to view your Cash Advances data.
+  - name: Budgets
+    description: |
+      This API gives you access to view budgets that are visible to you based on budget visibility settings.
   - name: Automations
     description: |
       This API gives you access to organisation's automations data.
@@ -91,6 +94,52 @@ tags:
     description: |
       These APIs gives you access to manage Dwolla customer data.
 paths:
+  /spender/budgets:
+    get:
+      tags:
+        - Budgets
+      summary: List budgets
+      operationId: budgets_list
+      description: |
+        This API returns budgets that are visible to the spender based on budget visibility settings.
+        Budgets are filtered based on the user's presence in the budget_user_visibility table.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. 
+        To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/budget_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/projects:
     get:
       tags:
@@ -7365,11 +7414,12 @@ components:
         The second request will have offset as 200 and limit as 200 to return next 200 objects. <br>
       type: integer
       example: 10
-    id_integer:
-      type: integer
+    id_string:
+      type: string
+      maxLength: 15
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
-      example: 1234
+      example: sdfd2391
     org_id:
       type: string
       description: |
@@ -7388,6 +7438,172 @@ components:
       description: |
         Signifies when this object was updated in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-11T13:14:55.201598+00:00'
+    is_enabled:
+      type: boolean
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
+      example: true
+    name:
+      type: string
+      maxLength: 255
+      description: |
+        This represents the name of the resource. This should be unique in an organization
+      example: foo123
+    budget_type:
+      nullable: false
+      type: string
+      enum:
+        - WEEKLY
+        - MONTHLY
+        - QUARTERLY
+        - HALF_YEARLY
+        - YEARLY
+        - ONE_TIME
+      description: |
+        Type of budgets
+      example: WEEKLY
+    amount:
+      type: number
+      description: |
+        amount of money
+      example: 47.99
+    id_integer:
+      type: integer
+      description: |
+        This id is provided by Sage Exp Mgmt to identify an object.
+      example: 1234
+    email:
+      type: string
+      maxLength: 127
+      example: john.doe@example.com
+      description: |
+        An immutable field that represents the email address of the employee.
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
+    budget_visibility:
+      type: string
+      enum:
+        - ONLY_ADMINS
+        - SPECIFIC_EMPLOYEES
+        - ALL_CONTRIBUTING_EMPLOYEES
+      description: |
+        Visibility of the budget
+      example: ONLY_ADMINS
+    budget_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        type:
+          $ref: '#/components/schemas/budget_type'
+        amount_limit:
+          $ref: '#/components/schemas/amount'
+        alert_threshold:
+          nullable: true
+          type: number
+          example: 5000
+        department_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of department ids
+        project_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of project ids
+        cost_center_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of cost center ids
+        category_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_integer'
+          example:
+            - 2222
+            - 1221
+          description: |
+            List of category ids
+        observer_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/id_string'
+          example:
+            - usge49ielgel
+        fiscal_year_start_month:
+          type: number
+          example: 10
+          description: Month number of start of fiscal year
+          minimum: 1
+          maximum: 12
+        budget_start_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-01T00:00:00+00:00'
+          description: Start date of the current budget interval
+        budget_end_date:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2022-04-30T00:00:00+00:00'
+          description: End date of the current budget interval
+        budget_creator:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/id_string'
+            name:
+              $ref: '#/components/schemas/name'
+            email:
+              $ref: '#/components/schemas/email'
+          example:
+            id: usq8rwZj2POy
+            name: John Brown
+            email: admin1@company.com
+        amount_spent:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount spent from the budget interval
+        amount_remaining:
+          type: number
+          nullable: true
+          example: 5000
+          description: Amount remaining in the budget interval
+        utilisation_percentage:
+          type: number
+          nullable: true
+          example: 50
+          description: Utilisation percentage of the budget interval
+        visibility:
+          $ref: '#/components/schemas/budget_visibility'
     code:
       type: string
       nullable: true
@@ -7402,11 +7618,6 @@ components:
       description: |
         This represents the description of the resource.
       example: Win the trophy
-    is_enabled:
-      type: boolean
-      description: |
-        This indicates if the resource is enabled for use within the organisation.
-      example: true
     project_out:
       type: object
       additionalProperties: false
@@ -7709,19 +7920,6 @@ components:
           example: example.com
         currency:
           $ref: '#/components/schemas/currency'
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id is provided by Sage Exp Mgmt to identify an object.
-      example: sdfd2391
-    email:
-      type: string
-      maxLength: 127
-      example: john.doe@example.com
-      description: |
-        An immutable field that represents the email address of the employee.
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
     user_out_embed:
       type: object
       additionalProperties: false
@@ -7889,12 +8087,6 @@ components:
             This id is provided by Sage Exp Mgmt to identify a category.
           nullable: true
           example: 49058
-    name:
-      type: string
-      maxLength: 255
-      description: |
-        This represents the name of the resource. This should be unique in an organization
-      example: foo123
     department_head_user_ids:
       type: array
       nullable: false
@@ -8229,11 +8421,6 @@ components:
       example:
         cf1: string1
         custom_field_2: Value 2
-    amount:
-      type: number
-      description: |
-        amount of money
-      example: 47.99
     report_approval_out_embed:
       type: object
       additionalProperties: false
