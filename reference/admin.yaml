@@ -4272,6 +4272,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/permissions/bulk:
+    post:
+      tags:
+        - Expenses
+        - Expense permissions
+        - Permissions
+      summary: Bulk Expense Permissions
+      description: |
+        Returns the permissions that the principal user can perform on the given expenses, calculated based on the admin role.
+
+        **Note:** Maximum 200 expenses per API call.
+      operationId: bulk_expense_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_permissions_bulk_in'
+            example:
+              data:
+                - id: txAcczJOQHGR
+                - id: txCG82pa4yQQ
+                - id: txuiMc5kJbK4
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_permissions_bulk_out'
+              example:
+                data:
+                  - id: txAcczJOQHGR
+                    can_delete: false
+                    can_edit: true
+                    can_verify: false
+                    can_remove_from_report: true
+                    can_add_to_report: false
+                    can_assign: false
+                  - id: txCG82pa4yQQ
+                    can_delete: true
+                    can_edit: true
+                    can_verify: false
+                    can_remove_from_report: false
+                    can_add_to_report: true
+                    can_assign: true
+                  - id: txuiMc5kJbK4
+                    can_delete: false
+                    can_edit: false
+                    can_verify: true
+                    can_remove_from_report: false
+                    can_add_to_report: false
+                    can_assign: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/merge:
     post:
       tags:
@@ -18852,6 +18940,40 @@ components:
           description: |
             Indicates whether the user has permission to add this expense to a report.
           example: true
+    expense_permissions_bulk_in:
+      type: array
+      maxItems: 200
+      description: |
+        Array of expense IDs to check permissions for (maximum 200 expenses per request).
+      items:
+        type: object
+        required:
+          - id
+        additionalProperties: false
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            description: |
+              Expense ID of the expense to check permissions for.
+            example: txAcczJOQHGR
+    expense_permissions_bulk_out:
+      type: array
+      description: |
+        Array of permission objects for each expense. Each object corresponds to an expense from the request.
+      items:
+        allOf:
+          - type: object
+            required:
+              - id
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                description: |
+                  Expense ID
+                example: txAcczJOQHGR
+          - $ref: '#/components/schemas/expense_permissions_out'
     target_expense_fields:
       type: object
       additionalProperties: false
