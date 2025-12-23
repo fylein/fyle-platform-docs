@@ -1781,6 +1781,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/employees/stats:
+    post:
+      tags:
+        - Employees
+      summary: Employees Stats
+      description: |
+        Employees Stats
+      operationId: employees_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/employees_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employees_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/employees/potential_duplicate_expenses:
     get:
       tags:
@@ -4217,6 +4272,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/permissions/bulk:
+    post:
+      tags:
+        - Expenses
+        - Expense permissions
+        - Permissions
+      summary: Bulk Expense Permissions
+      description: |
+        Returns the permissions that the principal user can perform on the given expenses, calculated based on the admin role.
+
+        **Note:** Maximum 200 expenses per API call.
+      operationId: bulk_expense_permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expense_permissions_bulk_in'
+            example:
+              data:
+                - id: txAcczJOQHGR
+                - id: txCG82pa4yQQ
+                - id: txuiMc5kJbK4
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_permissions_bulk_out'
+              example:
+                data:
+                  - id: txAcczJOQHGR
+                    can_delete: false
+                    can_edit: true
+                    can_verify: false
+                    can_remove_from_report: true
+                    can_add_to_report: false
+                    can_assign: false
+                  - id: txCG82pa4yQQ
+                    can_delete: true
+                    can_edit: true
+                    can_verify: false
+                    can_remove_from_report: false
+                    can_add_to_report: true
+                    can_assign: true
+                  - id: txuiMc5kJbK4
+                    can_delete: false
+                    can_edit: false
+                    can_verify: true
+                    can_remove_from_report: false
+                    can_add_to_report: false
+                    can_assign: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expenses/merge:
     post:
       tags:
@@ -5219,6 +5362,61 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/reminder_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reminders/stats:
+    post:
+      tags:
+        - Reminders
+      summary: Reminders Stats
+      description: |
+        Reminders Stats
+      operationId: reminders_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reminders_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reminders_stats_out'
         '400':
           description: Bad request
           content:
@@ -15200,6 +15398,29 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    employees_stats_in:
+      type: object
+      required:
+        - query_params
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to employees GET call.
+          example: id=in.('emp123','emp1234')
+    employees_stats_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          role:
+            $ref: '#/components/schemas/role'
+          count:
+            type: integer
+            description: Count of employees with the given role
+            example: 10
     expense_duplicate_sets_out:
       type: object
       additionalProperties: false
@@ -18719,6 +18940,40 @@ components:
           description: |
             Indicates whether the user has permission to add this expense to a report.
           example: true
+    expense_permissions_bulk_in:
+      type: array
+      maxItems: 200
+      description: |
+        Array of expense IDs to check permissions for (maximum 200 expenses per request).
+      items:
+        type: object
+        required:
+          - id
+        additionalProperties: false
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            description: |
+              Expense ID of the expense to check permissions for.
+            example: txAcczJOQHGR
+    expense_permissions_bulk_out:
+      type: array
+      description: |
+        Array of permission objects for each expense. Each object corresponds to an expense from the request.
+      items:
+        allOf:
+          - type: object
+            required:
+              - id
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                description: |
+                  Expense ID
+                example: txAcczJOQHGR
+          - $ref: '#/components/schemas/expense_permissions_out'
     target_expense_fields:
       type: object
       additionalProperties: false
@@ -19746,6 +20001,10 @@ components:
         - CONNECT_MASTERCARD_RTF
         - PROCESS_REPORTS
         - VERIFY_REPORTS
+        - ADD_BANK_ACCOUNT_EMPLOYEES
+        - COMPLETE_EXPENSES
+        - RESUBMIT_REPORTS
+        - SMS_OPT_IN
       maxLength: 255
       description: Represents the type of reminder.
       example: FYLE_EXPENSES
@@ -19908,6 +20167,27 @@ components:
           description: |
             ID of the reminder that needs to be deleted.
           example: remindNZgN7V5pft
+    reminders_stats_in:
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to reminders GET call.
+          nullable: false
+          example: id=in.('remind123','remind1234')
+    reminders_stats_out:
+      type: array
+      items:
+        type: object
+        properties:
+          last_reminded_at:
+            type: string
+            format: date-time
+            nullable: true
+            description: Signifies the time when this reminder was sent. In case of scheduled reminders, signifies when the last reminder was sent. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+            example: '2021-06-01T13:14:54.804+00:00'
+          type:
+            $ref: '#/components/schemas/reminder_type'
     employee_out_embed_for_report:
       type: object
       additionalProperties: false
@@ -25663,6 +25943,15 @@ components:
       description: |
         Type of budgets
       example: WEEKLY
+    budget_visibility:
+      type: string
+      enum:
+        - ONLY_ADMINS
+        - SPECIFIC_EMPLOYEES
+        - ALL_CONTRIBUTING_EMPLOYEES
+      description: |
+        Visibility of the budget
+      example: ONLY_ADMINS
     budget_out:
       type: object
       additionalProperties: false
@@ -25777,6 +26066,23 @@ components:
           nullable: true
           example: 50
           description: Utilisation percentage of the budget interval
+        visibility:
+          $ref: '#/components/schemas/budget_visibility'
+    budget_user_ids:
+      type: array
+      nullable: true
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id is provided by Sage Exp Mgmt to identify an object.
+        example: uswoirwlwwg
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
+      description: |
+        List of IDs of users who are associated with the budget.
     budget_in:
       type: object
       required:
@@ -25858,6 +26164,10 @@ components:
           description: Month number of start of fisical year
           minimum: 1
           maximum: 12
+        visibility:
+          $ref: '#/components/schemas/budget_visibility'
+        user_ids:
+          $ref: '#/components/schemas/budget_user_ids'
     budget_out_embed:
       type: object
       additionalProperties: false
