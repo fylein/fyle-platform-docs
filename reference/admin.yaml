@@ -113,6 +113,9 @@ tags:
   - name: Dwolla Customers
     description: |
       This API gives you access to manage Dwolla customer data for your organization.
+  - name: Org Subscriptions
+    description: |
+      This API gives you access to view organisation subscription details.
 paths:
   /admin/projects:
     get:
@@ -13372,6 +13375,225 @@ paths:
                   error:
                     type: string
                     example: InvalidUsage
+  /admin/org_subscriptions/stripe/is_enabled:
+    get:
+      tags:
+        - Org Subscriptions
+      summary: Check if Stripe is Enabled
+      operationId: org_subscriptions_stripe_is_enabled
+      description: |
+        This API returns whether Stripe is enabled
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      is_enabled:
+                        type: boolean
+                        description: |
+                          Indicates whether Stripe is enabled
+                        example: true
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/org_subscriptions/stripe/properties:
+    get:
+      tags:
+        - Org Subscriptions
+      summary: Get Stripe Properties
+      operationId: org_subscriptions_stripe_properties
+      description: |
+        This API returns the Stripe subscription properties for the organisation.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      billing:
+                        type: boolean
+                        description: |
+                          Indicates whether billing is enabled for the organisation.
+                        example: true
+                      plan:
+                        type: string
+                        nullable: true
+                        description: |
+                          The subscription plan identifier.
+                        example: Business_Annually_v5
+                      display_name:
+                        type: string
+                        nullable: true
+                        description: |
+                          The display name of the subscription plan.
+                        example: Business - Billed Annually
+                      unit_cost:
+                        type: number
+                        nullable: true
+                        description: |
+                          The unit cost of the subscription plan.
+                        example: 20.02
+                      is_source_pending:
+                        type: boolean
+                        nullable: true
+                        description: |
+                          Indicates whether the payment source is pending.
+                        example: true
+                      trialing:
+                        type: boolean
+                        nullable: true
+                        description: |
+                          Indicates whether the organisation is in trial period.
+                        example: false
+                      days_left_in_trial:
+                        type: integer
+                        nullable: true
+                        description: |
+                          Number of days left in the trial period. Null if not in trial.
+                        example: null
+                      active_users_in_current_period:
+                        type: integer
+                        nullable: true
+                        description: |
+                          Number of active users in the current billing period.
+                        example: 6
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/org_subscriptions/stripe/customer:
+    get:
+      tags:
+        - Org Subscriptions
+      summary: Get Stripe Customer
+      operationId: org_subscriptions_stripe_customer
+      description: |
+        This API returns the Stripe customer details for the organisation.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: string
+                        description: |
+                          The Stripe customer ID.
+                        example: cus_aauLopkjO5orApjbxs274
+                      sources:
+                        type: object
+                        description: |
+                          The customer's payment sources.
+                        properties:
+                          data:
+                            type: array
+                            description: |
+                              List of payment source objects.
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: |
+                                    Unique identifier for the payment source.
+                                  example: card_1GxYz2ABC123def456
+                                last4:
+                                  type: string
+                                  nullable: true
+                                  description: |
+                                    Last 4 digits of the payment source.
+                                  example: '4242'
+                                card:
+                                  type: object
+                                  nullable: true
+                                  description: |
+                                    Card details if the source is a card.
+                                  properties:
+                                    last4:
+                                      type: string
+                                      description: |
+                                        Last 4 digits of the card.
+                                      example: '4242'
+                                type_data:
+                                  type: object
+                                  nullable: true
+                                  description: |
+                                    Type-specific data for the payment source.
+                                  properties:
+                                    last4:
+                                      type: string
+                                      description: |
+                                        Last 4 digits of the payment method.
+                                      example: '4242'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
 components:
   securitySchemes:
     oauth2:

@@ -20,7 +20,261 @@ tags:
   - name: Employees
     description: |
       These APIs gives you access to manage employees.
+  - name: Org Subscriptions
+    description: |
+      These APIs gives you access to view organisation subscription details.
 paths:
+  /owner/org_subscriptions:
+    get:
+      tags:
+        - Org Subscriptions
+      summary: List Organisation Subscriptions
+      operationId: org_subscriptions_list
+      description: |
+        This API returns the organisation subscription details of the organisation.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_subscription_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Org Subscriptions
+      summary: Update Organisation Subscription
+      operationId: org_subscriptions_update
+      description: |
+        This API updates the organisation subscription plan.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  $ref: '#/components/schemas/org_subscription_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/org_subscription_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /owner/org_subscriptions/stripe/invoices:
+    get:
+      tags:
+        - Org Subscriptions
+      summary: List Stripe Invoices
+      operationId: org_subscriptions_stripe_invoices_list
+      description: |
+        This API returns the Stripe invoices for the organisation.
+      parameters:
+        - name: year
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: |
+            Filter invoices by year.
+          example: 2024
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Filter invoices by status.
+          example: paid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+          description: |
+            Maximum number of invoices to return.
+          example: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    description: |
+                      List of Stripe invoice objects.
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: |
+                            Unique identifier for the invoice.
+                          example: in_1ABC123def456
+                        number:
+                          type: string
+                          nullable: true
+                          description: |
+                            A unique, identifying string for the invoice.
+                          example: INV-0001
+                        created:
+                          type: string
+                          description: |
+                            Time at which the invoice was created.
+                          example: '2020-02-06T07:09:52+00:00'
+                        total:
+                          type: number
+                          description: |
+                            Total invoice amount
+                          example: 899
+                        currency:
+                          type: string
+                          description: |
+                            Three-letter ISO currency code.
+                          example: usd
+                        invoice_pdf:
+                          type: string
+                          nullable: true
+                          description: |
+                            The link to download the PDF for the invoice.
+                          example: https://pay.stripe.com/invoice/acct_123/inv_456/pdf
+                        status:
+                          type: string
+                          nullable: true
+                          description: |
+                            The status of the invoice.
+                          example: paid
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /owner/org_subscriptions/stripe/token_created:
+    post:
+      tags:
+        - Org Subscriptions
+      summary: Add Payment Source Token
+      operationId: org_subscriptions_stripe_token_created
+      description: |
+        This API updates the Stripe customer with a new payment source (card token).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - token
+                  properties:
+                    token:
+                      type: string
+                      description: |
+                        The Stripe token for the payment source.
+                      example: token_133131
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/org_subscription_out'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /owner/orgs:
     post:
       tags:
@@ -290,18 +544,37 @@ components:
           type: string
           description: |
             This error means the requested resource was not found or the requester doesn't have sufficient access.
+    count:
+      type: integer
+      description: |
+        The total number of objects that can be requested.
+      example: 10000
+    offset:
+      description: |
+        offset is used to skip that many number of objects before counting. <br>
+        For example, if there are 2000 objects, <br>
+        The first request will have offset as 0 and limit as 200 to return first 200 objects. <br>
+        The second request will have offset as 200 and limit as 200 to return next 200 objects. <br>
+      type: integer
+      example: 10
+    id_integer:
+      type: integer
+      description: |
+        This id is provided by Sage Exp Mgmt to identify an object.
+      example: 1234
     org_id:
       type: string
       description: |
         The unique id of the Organization to which the object is associated.
       readOnly: true
       example: orwruogwnngg
-    currency:
+    email:
       type: string
+      maxLength: 127
+      example: john.doe@example.com
       description: |
-        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
-      example: USD
-      pattern: ([A-Z]{3})
+        An immutable field that represents the email address of the employee.
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
     created_at:
       type: string
       format: date-time
@@ -314,6 +587,90 @@ components:
       description: |
         Signifies when this object was updated in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-11T13:14:55.201598+00:00'
+    org_subscription_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        plan:
+          type: string
+          nullable: true
+          description: |
+            The subscription plan of the organisation.
+          example: Business_Annually_v5
+        email:
+          nullable: true
+          $ref: '#/components/schemas/email'
+        stripe_customer_id:
+          type: string
+          nullable: true
+          description: |
+            The Stripe customer ID associated with the organisation's subscription.
+          example: cus_aauLopkjO5orApjbxs274
+        trial_start_dt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The start date-time of the trial period in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2020-02-06T07:09:52.332000+00:00'
+        trial_end_dt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The end date-time of the trial period in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2020-02-06T07:12:27.196000+00:00'
+        card_added:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether a payment card has been added to the subscription.
+          example: null
+        card_added_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The date-time when the payment card was added in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: null
+        card_removed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The date-time when the payment card was removed in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: null
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    org_subscription_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - plan
+      properties:
+        id:
+          type: integer
+          description: |
+            The unique identifier of the organisation subscription to update.
+          example: 2411
+        plan:
+          type: string
+          description: |
+            The subscription plan to set for the organisation.
+          example: Business_Annually_v5
+    currency:
+      type: string
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: ([A-Z]{3})
     post_org_out:
       type: object
       additionalProperties: false
