@@ -1,0 +1,106 @@
+get:
+  tags:
+    - Org Subscriptions
+  summary: List Stripe Invoices
+  operationId: org_subscriptions_stripe_invoices_list
+  description: |
+    This API returns the Stripe invoices for the organisation.
+  parameters:
+    - name: year
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: |
+        Filter invoices by year.
+      example: 2024
+    - name: status
+      in: query
+      required: false
+      schema:
+        type: string
+      description: |
+        Filter invoices by status.
+      example: paid
+    - name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 100
+      description: |
+        Maximum number of invoices to return.
+      example: 100
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              data:
+                type: array
+                description: |
+                  List of Stripe invoice objects.
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: |
+                        Unique identifier for the invoice.
+                      example: in_1ABC123def456
+                    number:
+                      type: string
+                      nullable: true
+                      description: |
+                        A unique, identifying string for the invoice.
+                      example: INV-0001
+                    created:
+                      type: string
+                      description: |
+                        Time at which the invoice was created.
+                      example: '2020-02-06T07:09:52+00:00'
+                    total:
+                      type: number
+                      description: |
+                        Total invoice amount
+                      example: 899
+                    currency:
+                      type: string
+                      description: |
+                        Three-letter ISO currency code.
+                      example: usd
+                    invoice_pdf:
+                      type: string
+                      nullable: true
+                      description: |
+                        The link to download the PDF for the invoice.
+                      example: https://pay.stripe.com/invoice/acct_123/inv_456/pdf
+                    status:
+                      type: string
+                      nullable: true
+                      description: |
+                        The status of the invoice.
+                      example: paid
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
+
