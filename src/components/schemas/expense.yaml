@@ -54,6 +54,7 @@ expense_out:
     - seq_num
     - report_id
     - added_to_report_at
+    - added_to_report_by
     - report
     - is_verified
     - last_verified_at
@@ -334,6 +335,15 @@ expense_out:
       description: |
         signifies when this expense was added to a report.
         If this expense is not added to a report, then this could be null.
+    added_to_report_by:
+      type: string
+      nullable: true
+      enum:
+        - USER
+        - SYSTEM
+      description: |
+        Indicates whether the expense was added to the report it belongs to by a user or the system. If the expense is not a part of any report, this field will be null.
+      example: USER
     report:
       $ref: './report.yaml#/report_out_embed'
     is_verified:
@@ -1037,7 +1047,7 @@ admin_expense_in:
     - required:
       - admin_amount
       - assignee_user_email
-    - required: 
+    - required:
       - id
   properties:
     id:
@@ -1053,7 +1063,7 @@ admin_expense_in:
         The expense amount which is added or modified by admin or approver.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: 1900
     spent_at:
       type: string
@@ -1064,7 +1074,7 @@ admin_expense_in:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     assignee_user_email:
       allOf:
@@ -1074,9 +1084,9 @@ admin_expense_in:
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
         - **Note:**
-          - The expense will be assigned/re-assigned to this particular `employee`. 
+          - The expense will be assigned/re-assigned to this particular `employee`.
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
           - Admins can't assign the expense to self.
     source:
       $ref: './fields.yaml#/source'
@@ -1118,7 +1128,7 @@ admin_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
@@ -1216,7 +1226,7 @@ admin_expense_in:
 approver_expense_in:
   type: object
   additionalProperties: false
-  required: 
+  required:
     - id
   properties:
     id:
@@ -1230,7 +1240,7 @@ approver_expense_in:
       description: |
         The expense amount which is added or modified by admin or approver.
         - **Note:**
-          - _This field is non-nullable_. 
+          - _This field is non-nullable_.
       example: 1900
     spent_at:
       type: string
@@ -1240,7 +1250,7 @@ approver_expense_in:
         It signifies when this expense was made.
         This date cannot be in future.
         - **Note:**
-          - _This field is non-nullable_. 
+          - _This field is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     source:
       $ref: './fields.yaml#/source'
@@ -1282,7 +1292,7 @@ approver_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
@@ -1785,9 +1795,9 @@ expense_check_policies_in:
         Invoice number of the expense.
       example: 123456
 
-    # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations 
-    # when mileage support comes to platform world. If we will give APIs for distance and amount calculation, 
-    # then we will link the respective APIs in the description. If we decide to auto compute it in backend, then 
+    # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations
+    # when mileage support comes to platform world. If we will give APIs for distance and amount calculation,
+    # then we will link the respective APIs in the description. If we decide to auto compute it in backend, then
     # these fields might need to be dropped.
     mileage_calculated_distance:
       type: number
@@ -1840,7 +1850,7 @@ expenses_stats_in:
     query_params:
       nullable: False
       type: string
-      description: | 
+      description: |
         Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
       example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
 
@@ -1878,8 +1888,8 @@ expenses_stats_out:
               - PAID
               - UNREPORTABLE
             description: Expense state
-    # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
-    # TODO: @Dev to update the response once the hack is removed from platform-api  
+    # NOTE: This is a hack to maintain backward compatibility with the existing response structure
+    # TODO: @Dev to update the response once the hack is removed from platform-api
     - type: object
       title: "Overall stats"
       description: Overall stats without state grouping
@@ -1950,7 +1960,7 @@ accounting_export_summary_in:
     url:
       type: string
       description: URL Endpoint for exported / failed expense
-      example: https://app.example.com/expense/txwownwrng  
+      example: https://app.example.com/expense/txwownwrng
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false
@@ -2263,7 +2273,7 @@ expense_dismiss_duplicates_in:
       example: ['txwoirwlwwg', 'txwlgwkgw42']
       description: |
         List of expense IDs that needs to be dismissed as a duplicate from the target expense
-  
+
 expense_duplicate_sets_out:
   type: object
   additionalProperties: false
@@ -2300,7 +2310,7 @@ expense_split_object:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     category_id:
       allOf:
@@ -2344,7 +2354,7 @@ split_expense_in:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     is_reimbursable:
       $ref: './fields.yaml#/is_reimbursable'
@@ -2386,7 +2396,7 @@ split_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
