@@ -17517,6 +17517,7 @@ components:
         - seq_num
         - report_id
         - added_to_report_at
+        - added_to_report_by
         - report
         - is_verified
         - last_verified_at
@@ -17797,6 +17798,16 @@ components:
           description: |
             signifies when this expense was added to a report.
             If this expense is not added to a report, then this could be null.
+        added_to_report_by:
+          type: string
+          nullable: true
+          enum:
+            - USER
+            - SYSTEM
+            - null
+          description: |
+            Indicates whether the expense was added to the report it belongs to by a user or the system. If the expense is not a part of any report, this field will be null.
+          example: USER
         report:
           $ref: '#/components/schemas/report_out_embed'
         is_verified:
@@ -18143,7 +18154,7 @@ components:
             The expense amount which is added or modified by admin or approver.
             - **Note:**
               - This field is required while creating an expense.
-              - _Not required when updating an expense, but is non-nullable_. 
+              - _Not required when updating an expense, but is non-nullable_.
           example: 1900
         spent_at:
           type: string
@@ -18154,7 +18165,7 @@ components:
             This date cannot be in future.
             - **Note:**
               - This field is required while creating an expense.
-              - _Not required when updating an expense, but is non-nullable_. 
+              - _Not required when updating an expense, but is non-nullable_.
           example: '2020-06-01T01:18:19.292-08:00'
         assignee_user_email:
           allOf:
@@ -18164,9 +18175,9 @@ components:
             Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
             822.</a>
             - **Note:**
-              - The expense will be assigned/re-assigned to this particular `employee`. 
+              - The expense will be assigned/re-assigned to this particular `employee`.
               - This field is required while creating an expense.
-              - _Not required when updating an expense, but is non-nullable_. 
+              - _Not required when updating an expense, but is non-nullable_.
               - Admins can't assign the expense to self.
         source:
           $ref: '#/components/schemas/source'
@@ -25970,6 +25981,16 @@ components:
       description: |
         Visibility of the budget
       example: ONLY_ADMINS
+    budget_status:
+      type: string
+      enum:
+        - ON_TRACK
+        - NEAR_LIMIT
+        - EXCEEDED
+        - DISABLED
+      description: |
+        Status of budget usage
+      example: ON_TRACK
     budget_out:
       type: object
       additionalProperties: false
@@ -26086,6 +26107,8 @@ components:
           description: Utilisation percentage of the budget interval
         visibility:
           $ref: '#/components/schemas/budget_visibility'
+        status:
+          $ref: '#/components/schemas/budget_status'
     budget_user_ids:
       type: array
       nullable: true
@@ -29642,7 +29665,7 @@ components:
             This date cannot be in future.
             - **Note:**
               - This field is required while creating an expense.
-              - _Not required when updating an expense, but is non-nullable_. 
+              - _Not required when updating an expense, but is non-nullable_.
           example: '2020-06-01T01:18:19.292-08:00'
         is_reimbursable:
           $ref: '#/components/schemas/is_reimbursable'
@@ -29719,7 +29742,7 @@ components:
             This date cannot be in future.
             - **Note:**
               - This field is required while creating an expense.
-              - _Not required when updating an expense, but is non-nullable_. 
+              - _Not required when updating an expense, but is non-nullable_.
           example: '2020-06-01T01:18:19.292-08:00'
         category_id:
           allOf:
