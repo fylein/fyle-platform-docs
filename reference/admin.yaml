@@ -9868,6 +9868,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/budgets/exports:
+    post:
+      tags:
+        - Budgets
+      summary: Create Budget Export
+      description: |
+        Create a Budget Export Request. This exports budget data with the following columns:
+        Budget Name, Budget Frequency, Budget Amount, Utilisation (%, Amount), Remaining, Status, Created By, Start Date.
+        The export is generated in xlsx format.
+      operationId: budgets_exports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/budget_exports_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/budget_exports_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/orgs:
     get:
       tags:
@@ -26293,6 +26342,56 @@ components:
             List of project ids
         budget:
           $ref: '#/components/schemas/budget_out_embed'
+    budget_exports_in:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+      properties:
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+          description: |
+            Query parameters to filter budgets for export.
+          example: status=eq.Exceeded
+    budget_exports_out:
+      type: object
+      additionalProperties: false
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: budexpXXXXXXXX
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        query_params:
+          allOf:
+            - $ref: '#/components/schemas/query_params'
+          nullable: false
+        file_id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          example: filumWHrlPf7K
+        state:
+          type: string
+          nullable: false
+          enum:
+            - ON_TRACK
+            - NEAR_LIMIT
+            - EXCEEDED
+            - DISABLED
+          description: |
+            Status of the export.
+          example: EXCEEDED
     org_out:
       type: object
       additionalProperties: false
