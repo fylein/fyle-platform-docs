@@ -7338,6 +7338,189 @@ paths:
                   error:
                     type: string
                     example: InvalidUsage
+  /spender/mobile_app/versions:
+    get:
+      tags:
+        - Mobile App Versions
+      summary: List mobile app versions
+      operationId: mobile_app_versions_list
+      description: |
+        This API supports filtering and pagination via query parameters. Returns mobile app version entries for the current user.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique identifier for the mobile app version entry
+                          example: appXYZ1234567
+                        user_id:
+                          type: string
+                          description: User ID of the owner
+                          example: usx4eGq0uIPu
+                        version:
+                          type: string
+                          description: Mobile app version
+                          example: 8.0.1
+                        os:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              enum:
+                                - IOS
+                                - ANDROID
+                              description: Operating system name
+                              example: IOS
+                            version:
+                              type: string
+                              description: Operating system version
+                              example: 17.0.0
+                        created_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp when the entry was created
+                        updated_at:
+                          type: string
+                          format: date-time
+                          description: Timestamp when the entry was last updated
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Mobile App Versions
+      summary: Create a mobile app version entry
+      operationId: mobile_app_versions_post
+      description: |
+        Creates a new mobile app version entry for the current user. Throws an error if an entry with the same (user_id, version, os.name, os.version) already exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                data:
+                  type: object
+                  required:
+                    - version
+                    - os
+                  properties:
+                    version:
+                      type: string
+                      description: Mobile app version
+                      example: 8.0.1
+                    os:
+                      type: object
+                      required:
+                        - name
+                        - version
+                      properties:
+                        name:
+                          type: string
+                          enum:
+                            - IOS
+                            - ANDROID
+                          description: Operating system name
+                          example: IOS
+                        version:
+                          type: string
+                          description: Operating system version
+                          example: 17.0.0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the mobile app version entry
+                        example: appXYZ1234567
+                      user_id:
+                        type: string
+                        description: User ID of the owner
+                        example: usx4eGq0uIPu
+                      version:
+                        type: string
+                        description: Mobile app version
+                        example: 8.0.1
+                      os:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            enum:
+                              - IOS
+                              - ANDROID
+                            description: Operating system name
+                            example: IOS
+                          version:
+                            type: string
+                            description: Operating system version
+                            example: 17.0.0
+                      created_at:
+                        type: string
+                        format: date-time
+                        description: Timestamp when the entry was created
+                      updated_at:
+                        type: string
+                        format: date-time
+                        description: Timestamp when the entry was last updated
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
 components:
   securitySchemes:
     oauth2:
