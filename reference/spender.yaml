@@ -7355,48 +7355,22 @@ paths:
                 type: object
                 properties:
                   count:
-                    $ref: '#/components/schemas/count'
+                    description: |
+                      The total number of objects that can be requested.
+                    type: integer
+                    example: 10000
                   offset:
-                    $ref: '#/components/schemas/offset'
+                    description: |
+                      offset is used to skip that many number of objects before counting. <br>
+                      For example, if there are 2000 objects, <br>
+                      The first request will have offset as 0 and limit as 1000 to return first 1000 objects. <br>
+                      The second request will have offset as 1000 and limit as 1000 to return next 1000 objects. <br>
+                    type: integer
+                    example: 10
                   data:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          description: Unique identifier for the mobile app version entry
-                          example: appXYZ1234567
-                        user_id:
-                          type: string
-                          description: User ID of the owner
-                          example: usx4eGq0uIPu
-                        version:
-                          type: string
-                          description: Mobile app version
-                          example: 8.0.1
-                        os:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              enum:
-                                - IOS
-                                - ANDROID
-                              description: Operating system name
-                              example: IOS
-                            version:
-                              type: string
-                              description: Operating system version
-                              example: 17.0.0
-                        created_at:
-                          type: string
-                          format: date-time
-                          description: Timestamp when the entry was created
-                        updated_at:
-                          type: string
-                          format: date-time
-                          description: Timestamp when the entry was last updated
+                      $ref: '#/components/schemas/mobile_app_version_out'
         '400':
           description: Bad request
           content:
@@ -7429,34 +7403,11 @@ paths:
             schema:
               type: object
               additionalProperties: false
+              required:
+                - data
               properties:
                 data:
-                  type: object
-                  required:
-                    - version
-                    - os
-                  properties:
-                    version:
-                      type: string
-                      description: Mobile app version
-                      example: 8.0.1
-                    os:
-                      type: object
-                      required:
-                        - name
-                        - version
-                      properties:
-                        name:
-                          type: string
-                          enum:
-                            - IOS
-                            - ANDROID
-                          description: Operating system name
-                          example: IOS
-                        version:
-                          type: string
-                          description: Operating system version
-                          example: 17.0.0
+                  $ref: '#/components/schemas/mobile_app_version_in'
       responses:
         '200':
           description: OK
@@ -7465,44 +7416,11 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
                 properties:
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        description: Unique identifier for the mobile app version entry
-                        example: appXYZ1234567
-                      user_id:
-                        type: string
-                        description: User ID of the owner
-                        example: usx4eGq0uIPu
-                      version:
-                        type: string
-                        description: Mobile app version
-                        example: 8.0.1
-                      os:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                            enum:
-                              - IOS
-                              - ANDROID
-                            description: Operating system name
-                            example: IOS
-                          version:
-                            type: string
-                            description: Operating system version
-                            example: 17.0.0
-                      created_at:
-                        type: string
-                        format: date-time
-                        description: Timestamp when the entry was created
-                      updated_at:
-                        type: string
-                        format: date-time
-                        description: Timestamp when the entry was last updated
+                    $ref: '#/components/schemas/mobile_app_version_out'
         '400':
           description: Bad request
           content:
@@ -19487,6 +19405,72 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    os_out:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          enum:
+            - IOS
+            - ANDROID
+          description: Operating system name
+          example: IOS
+        version:
+          type: string
+          description: Operating system version
+          example: 17.0.0
+    mobile_app_version_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the mobile app version entry
+          example: appXYZ1234567
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        version:
+          type: string
+          description: Mobile app version
+          example: 8.0.1
+        os:
+          $ref: '#/components/schemas/os_out'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    os_in:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - version
+      properties:
+        name:
+          type: string
+          enum:
+            - IOS
+            - ANDROID
+          description: Operating system name
+          example: IOS
+        version:
+          type: string
+          description: Operating system version
+          example: 17.0.0
+    mobile_app_version_in:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - os
+      properties:
+        version:
+          type: string
+          description: Mobile app version
+          example: 8.0.1
+        os:
+          $ref: '#/components/schemas/os_in'
   parameters:
     q:
       in: query
