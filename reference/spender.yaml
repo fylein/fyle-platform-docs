@@ -7338,6 +7338,107 @@ paths:
                   error:
                     type: string
                     example: InvalidUsage
+  /spender/mobile_app/versions:
+    get:
+      tags:
+        - Mobile App Versions
+      summary: List mobile app versions
+      operationId: mobile_app_versions_list
+      description: |
+        This API supports filtering and pagination via query parameters. Returns mobile app version entries for the current user.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    description: |
+                      The total number of objects that can be requested.
+                    type: integer
+                    example: 10000
+                  offset:
+                    description: |
+                      offset is used to skip that many number of objects before counting. <br>
+                      For example, if there are 2000 objects, <br>
+                      The first request will have offset as 0 and limit as 1000 to return first 1000 objects. <br>
+                      The second request will have offset as 1000 and limit as 1000 to return next 1000 objects. <br>
+                    type: integer
+                    example: 10
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/mobile_app_version_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - Mobile App Versions
+      summary: Create a mobile app version entry
+      operationId: mobile_app_versions_post
+      description: |
+        Creates a new mobile app version entry for the current user. Throws an error if an entry with the same (user_id, version, os.name, os.version) already exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/mobile_app_version_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/mobile_app_version_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
 components:
   securitySchemes:
     oauth2:
@@ -19304,6 +19405,54 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    os:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          enum:
+            - IOS
+            - ANDROID
+          description: Operating system name
+          example: IOS
+        version:
+          type: string
+          description: Operating system version
+          example: 17.0.0
+    mobile_app_version_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the mobile app version entry
+          example: appXYZ1234567
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        version:
+          type: string
+          description: Mobile app version
+          example: 8.0.1
+        os:
+          $ref: '#/components/schemas/os'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    mobile_app_version_in:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - os
+      properties:
+        version:
+          type: string
+          description: Mobile app version
+          example: 8.0.1
+        os:
+          $ref: '#/components/schemas/os'
   parameters:
     q:
       in: query
