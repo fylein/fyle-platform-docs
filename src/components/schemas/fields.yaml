@@ -346,6 +346,15 @@ contains_operator:
     Value signifying the operator for the field
   example: IN
 
+delegation_access_scope:
+  type: array
+  description: |
+    List of scopes for the delegate.
+  items:
+    type: string
+    enum: [ALL, SUBMIT, APPROVE]
+  example: ["SUBMIT", "APPROVE"]
+
 expense_policy_rule_embed:
   type: object
   additionalProperties: false
@@ -1646,15 +1655,9 @@ delegatees:
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
     scopes:
-      type: array
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
       nullable: True
-      items:
-        type: string
-        enum:
-          - ALL
-          - SUBMIT
-          - APPROVE
-      example: ["SUBMIT", "APPROVE"]
 
 locale:
   type: object
@@ -1982,6 +1985,11 @@ delegatee:
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
+      nullable: True
+
 
 subscribed_resources:
   type: array
