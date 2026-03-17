@@ -1,0 +1,53 @@
+get:
+  tags:
+    - Employees
+  summary: List employees hierarchy view
+  description: |
+    This API returns a hierarchical list of employees reporting to the user calling this API. Each employee includes their position in the hierarchy (depth) and their primary approver.
+  operationId: manager_hierarchy_list
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/employee.yaml#/employee_hierarchy_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.

@@ -1,0 +1,54 @@
+get:
+  tags:
+    - Employees
+  summary: List employees in hierarchy
+  operationId: employee_overview_employees_list
+  description: |
+    This API returns a list of employees in the organization hierarchy under the current approver. 
+    The API supports rich filtering on all response fields and pagination via query parameters. 
+    To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    
+    **Note:** This API requires the employee hierarchy overview feature to be enabled for the organization and the user must have APPROVER role.
+  parameters:
+    - $ref: '../../components/parameters/q.yaml'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/employee.yaml#/employee_out
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means either the employee hierarchy overview feature is not enabled for the organization or the user does not have APPROVER role.
+

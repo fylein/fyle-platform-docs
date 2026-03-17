@@ -1,0 +1,75 @@
+post:
+  operationId: employee_hierarchy_overview_stats_post
+  tags:
+    - Employees
+  summary: Get employee overview statistics
+  description: |
+    This API returns statistical information about employees in the hierarchy, including total count and total amount.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              additionalProperties: false
+              properties:
+                query_params:
+                  type: string
+                  nullable: false
+                  description: Required query parameters for filtering
+                  example: "department_id=123"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              data:
+                $ref: ../../components/schemas/employee.yaml#/employee_overview_stats_out
+            example:
+              data:
+                count: 1130
+                total_amount: 30003
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.

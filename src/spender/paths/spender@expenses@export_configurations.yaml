@@ -1,0 +1,196 @@
+get:
+  tags:
+    - Expenses
+  summary: List expenses export configurations
+  description: |
+    This API gets you the saved export configurations for expenses in the current organization for the spender.
+    
+    Export configurations allow users to save and reuse export settings including column selections, 
+    formulas, sort orders, and formatting preferences.
+
+    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: spender_expenses_export_configurations_list
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+post:
+  tags:
+    - Expenses
+  summary: Create or update an expense export configuration
+  description: |
+    Create or update an expense export configuration for the spender.
+    
+    If `id` is provided in the request, the existing configuration will be updated. 
+    If `id` is not provided, a new configuration will be created.
+    
+    ### Configuration Types:
+    
+    **CSV/EXCEL Exports:**
+    - Require `is_header_visible`, `separate_line_items_entry`, `date_format`
+    - Columns must include `formula` field with function and parameters
+    - Support multiple sort columns
+    
+    **PDF Exports:**
+    - Require `include_receipts` field (boolean, cannot be null)
+    - Columns do NOT use `formula` field
+    - Columns require `is_custom`, `field_name`, and `formula_text` fields
+    - Maximum of 1 sort column allowed
+  operationId: spender_expenses_export_configurations_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_in'
+          required:
+            - data
+        examples:
+          csv_export:
+            summary: CSV Export Configuration
+            value:
+              data:
+                name: "Monthly Expenses CSV Export"
+                query_string: "state=eq.APPROVED"
+                type: "CSV"
+                config:
+                  is_header_visible: true
+                  separate_line_items_entry:
+                    is_enabled: false
+                    debit_entries_only: []
+                    credit_entries_only: []
+                  columns:
+                    - name: "Employee Email"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "employee"
+                          - "user"
+                          - "email"
+                      is_custom: false
+                      field_name: "employee_email"
+                      formula_text: "GET(employee, user, email)"
+                    - name: "Amount"
+                      formula:
+                        function: "GET"
+                        parameters:
+                          - "claim_amount"
+                      is_custom: false
+                      field_name: "claim_amount"
+                      formula_text: null
+                  sort_columns:
+                    - display_name: "Spent At"
+                      field_name: "spent_at"
+                      direction: "desc"
+                  date_format: "YYYY-MM-DD"
+          pdf_export:
+            summary: PDF Export Configuration
+            value:
+              data:
+                name: "Expense Report PDF with Receipts"
+                query_string: "state=eq.APPROVED"
+                type: "PDF"
+                config:
+                  columns:
+                    - name: "Employee Email"
+                      is_custom: false
+                      field_name: "employee_email"
+                      formula_text: "GET(employee, user, email)"
+                    - name: "Amount"
+                      is_custom: false
+                      field_name: "claim_amount"
+                      formula_text: null
+                    - name: "Merchant"
+                      is_custom: true
+                      field_name: "merchant"
+                      formula_text: "GET(merchant)"
+                  include_receipts: true
+                  sort_columns:
+                    - display_name: "Spent At"
+                      field_name: "spent_at"
+                      direction: "desc"
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '../../components/schemas/expenses_export_configurations.yaml#/expenses_export_configuration_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means current user does not have enough permissions to perform this operation.
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: |
+                  This error means the requested resource was not found or the requester doesn't have sufficient access.
+
+
+

@@ -6,7 +6,7 @@ reminder_out:
       type: string
       maxLength: 20
       description: |
-        This id provided by Fyle to identify an object.
+        This id provided by Sage Exp Mgmt to identify an object.
       example: 'remindRsjf2WmGd2'
     org_id:
       $ref: ./fields.yaml#/org_id
@@ -20,7 +20,7 @@ reminder_out:
       type: string
       description: |
         The custom message which the admin wants to send alongside the reminder
-      example: Please fyle your expenses before 25th of this month
+      example: Please submit your expenses before 25th of this month
     schedule_config:
       $ref: ./fields.yaml#/reminder_schedule_config
     last_reminded_at:
@@ -44,6 +44,13 @@ reminder_out:
       description: |
         Determines whether this reminder will be added as an event in the google calendar of receiver.
       example: true
+    send_mobile_notification:
+      type: boolean
+      nullable: false
+      default: false
+      description: |
+        Determines whether this reminder will be used to send mobile notification
+      example: true
     receiver_user_ids:
       $ref: ./fields.yaml#/reminder_receiver_user_ids
 
@@ -57,7 +64,7 @@ reminder_in:
       type: string
       maxLength: 20
       description: |
-        This id provided by Fyle to identify an object.
+        This id provided by Sage Exp Mgmt to identify an object.
       example: 'remindRsjf2WmGd2'
     type:
       $ref: './fields.yaml#/reminder_type'
@@ -65,7 +72,7 @@ reminder_in:
       type: string
       description: |
         The custom message which the admin wants send alongside the reminder
-      example: Please fyle your expenses before going on leave
+      example: Please submit your expenses before going on leave
     schedule_config:
       $ref: ./fields.yaml#/reminder_schedule_config
     add_to_calendar:
@@ -74,6 +81,13 @@ reminder_in:
       default: false
       description: |
         Determines whether this reminder will be added as an event in the google calendar of receiver.
+      example: true
+    send_mobile_notification:
+      type: boolean
+      nullable: false
+      default: false
+      description: |
+        Determines whether this reminder will be used to send mobile notification
       example: true
     receiver_user_ids:
       $ref: ./fields.yaml#/reminder_receiver_user_ids
@@ -89,3 +103,27 @@ reminder_delete_in:
       description: |
         ID of the reminder that needs to be deleted.
       example: 'remindNZgN7V5pft'
+
+reminders_stats_in:
+  properties:
+    query_params:
+      type: string
+      description: |
+        Query param string similar to reminders GET call.
+      nullable: false
+      example: id=in.('remind123','remind1234')
+
+reminders_stats_out:
+  type: array
+  items:
+    type: object
+    properties:
+      last_reminded_at:
+        type: string
+        format: date-time
+        nullable: True
+        description:
+          Signifies the time when this reminder was sent. In case of scheduled reminders, signifies when the last reminder was sent. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+        example: '2021-06-01T13:14:54.804+00:00'
+      type:
+        $ref: './fields.yaml#/reminder_type'

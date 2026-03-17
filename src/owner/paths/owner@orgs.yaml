@@ -1,0 +1,69 @@
+post:
+  tags:
+    - Organisations
+  summary: Update Organisation
+  operationId: orgs_upsert
+  description: |
+    This endpoint allows you to create a new sub-organisation or update an existing one.
+
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+              description: |
+                The unique identifier of the organisation to update. 
+              example: orwruogwnngg
+            currency:
+              type: string
+              description: |
+                The currency code for the organisation. This field is mandatory when creating a new org.
+              example: USD
+            name:
+              type: string
+              maxLength: 255
+              description: |
+                The name of the organisation. This field is mandatory when creating a new org.
+              example: Demo Account
+            domain:
+              type: string
+              maxLength: 255
+              description: |
+                The domain with which the organisation is registered. This field is mandatory when creating a new org. And it cannot be updated for existing orgs.
+              example: example.com
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: ../../components/schemas/org.yaml#/post_org_out
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml

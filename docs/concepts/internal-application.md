@@ -1,13 +1,13 @@
 # Internal Application
 
-An internal application is one that will be used by a specific user or organization only. This is the most common type of application that will be built by Fyle customers. If you are a Fyle partner, you will likely want to check out [OAuth 2.0 applications](./oauth2-application.md).
+An internal application is one that will be used by a specific user or organization only. This is the most common type of application that will be built by Sage Exp Mgmt customers. If you are a Sage Exp Mgmt partner, you will likely want to check out [OAuth 2.0 applications](./oauth2-application.md).
 
 > #### Currently, only admins can create applications
 >
 >  We expect this restriction to be removed very soon. Stay tuned. If this makes you angry, send us a note at support@fylehq.com
 
 
-Login to Fyle by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
+Login to Sage Exp Mgmt by going to https://app.fylehq.com and entering your credentials. Then navigate to Settings on the top-right corner.
 
 On the left sidebar, you will see "Integrations". Click on "Custom Apps" below that.
 

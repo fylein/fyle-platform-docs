@@ -8,7 +8,7 @@ id_string:
   type: string
   maxLength: 15
   description: |
-    This id is provided by Fyle to identify an object.
+    This id is provided by Sage Exp Mgmt to identify an object.
   example: 'sdfd2391'
 
 fk_string:
@@ -16,13 +16,13 @@ fk_string:
   nullable: true
   maxLength: 15
   description: |
-    This id is provided by Fyle to identify an object.
+    This id is provided by Sage Exp Mgmt to identify an object.
   example: 'sdfd2391'
 
 id_integer:
   type: integer
   description: |
-    This id is provided by Fyle to identify an object.
+    This id is provided by Sage Exp Mgmt to identify an object.
   example: 1234
 
 card_number:
@@ -36,7 +36,7 @@ fk_integer:
   type: integer
   nullable: true
   description: |
-    This id is provided by Fyle to identify an object.
+    This id is provided by Sage Exp Mgmt to identify an object.
   example: 1234
 
 org_id:
@@ -345,6 +345,15 @@ contains_operator:
   description: >
     Value signifying the operator for the field
   example: IN
+
+delegation_access_scope:
+  type: array
+  description: |
+    List of scopes for the delegate.
+  items:
+    type: string
+    enum: [ALL, SUBMIT, APPROVE]
+  example: ["SUBMIT", "APPROVE"]
 
 expense_policy_rule_embed:
   type: object
@@ -853,17 +862,17 @@ dependent_expense_fields:
     parent_expense_field_id:
       type: integer
       description: |
-        This id provided by Fyle to identify the parent expense field.
+        This id provided by Sage Exp Mgmt to identify the parent expense field.
       example: 123
     dependent_expense_field_id:
       type: integer
       description: |
-        This id provided by Fyle to identify the dependent expense field.
+        This id provided by Sage Exp Mgmt to identify the dependent expense field.
       example: 123
     dependent_expense_field_value_id:
       type: integer
       description: |
-        This id provided by Fyle to identify dependent field value.
+        This id provided by Sage Exp Mgmt to identify dependent field value.
       example: 123
     name:
       type: string
@@ -1008,7 +1017,7 @@ employee_id:
   type: string
   maxLength: 255
   description: >
-    This id provided by Fyle to uniquely identify an employee
+    This id provided by Sage Exp Mgmt to uniquely identify an employee
     within an organization.
 
     This id is always prefixed with `ou`.
@@ -1102,7 +1111,7 @@ missing_mandatory_fields:
         type: integer
         nullable: True
         description: |
-          This id provided by Fyle to identify an expense field.
+          This id provided by Sage Exp Mgmt to identify an expense field.
         example: 123
       example: [ 123, 12423 ]
       description: |
@@ -1236,6 +1245,40 @@ budget_type:
     Type of budgets
   example: WEEKLY
 
+budget_visibility:
+  type: string
+  enum:
+    - ONLY_ADMINS
+    - SPECIFIC_EMPLOYEES
+    - ALL_CONTRIBUTING_EMPLOYEES
+  description: |
+    Visibility of the budget
+  example: ONLY_ADMINS
+
+budget_status:
+  type: string
+  enum:
+    - ON_TRACK
+    - NEAR_LIMIT
+    - EXCEEDED
+    - DISABLED
+  description: |
+    Status of budget usage
+  example: ON_TRACK
+
+budget_user_ids:
+  type: array
+  nullable: True
+  items:
+    type: string
+    nullable: True
+    maxLength: 15
+    description: |
+      This id is provided by Sage Exp Mgmt to identify an object.
+    example: 'uswoirwlwwg'
+  example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
+  description: |
+    List of IDs of users who are associated with the budget.
 
 restricted_spender_user_ids:
   type: array
@@ -1245,7 +1288,7 @@ restricted_spender_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id is provided by Fyle to identify an object.
+      This id is provided by Sage Exp Mgmt to identify an object.
     example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
@@ -1260,7 +1303,7 @@ approver_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id is provided by Fyle to identify an object.
+      This id is provided by Sage Exp Mgmt to identify an object.
     example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
@@ -1273,7 +1316,7 @@ reminder_receiver_user_ids:
     type: string
     nullable: False
     description: |
-      This id is provided by Fyle to identify an object.
+      This id is provided by Sage Exp Mgmt to identify an object.
     example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg', 'uswlgwkgw42' ]
   description: |
@@ -1297,6 +1340,10 @@ reminder_type:
     - CONNECT_MASTERCARD_RTF
     - PROCESS_REPORTS
     - VERIFY_REPORTS
+    - ADD_BANK_ACCOUNT_EMPLOYEES
+    - COMPLETE_EXPENSES
+    - RESUBMIT_REPORTS
+    - SMS_OPT_IN
   maxLength: 255
   description: Represents the type of reminder.
   example: FYLE_EXPENSES
@@ -1442,7 +1489,7 @@ department_head_user_ids:
     nullable: True
     maxLength: 15
     description: |
-      This id is provided by Fyle to identify an object.
+      This id is provided by Sage Exp Mgmt to identify an object.
     example: 'uswoirwlwwg'
   example: [ 'uswoirwlwwg' ]
   description: |
@@ -1606,6 +1653,10 @@ delegatees:
         - $ref: './fields.yaml#/timestamptz_utc'
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
+      nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
       nullable: True
 
 locale:
@@ -1934,6 +1985,11 @@ delegatee:
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
+      nullable: True
+
 
 subscribed_resources:
   type: array
@@ -1941,5 +1997,5 @@ subscribed_resources:
     List of resource types that the subscription is configured for.
   items:
     type: string
-    enum: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, DEPENDENT_EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]
-  example: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, DEPENDENT_EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]
+    enum: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]
+  example: [EXPENSE, REPORT, CATEGORY, PROJECT, COST_CENTER, EXPENSE_FIELD, CORPORATE_CARD, EMPLOYEE, TAX_GROUP, ORG_SETTING]

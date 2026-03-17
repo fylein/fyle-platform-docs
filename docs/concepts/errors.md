@@ -1,9 +1,9 @@
 # Errors
-Fyle uses conventional HTTP response codes to indicate the success or failure of an API request. 
+Sage Expense Management uses conventional HTTP response codes to indicate the success or failure of an API request. 
 In general: 
 *   Codes in the 2xx range indicate success. 
 *   Codes in the 4xx range indicate an error that failed given the information provided (e.g., a required parameter is missing, improper usage of parameters etc.). 
-*   Codes in the 5xx range indicate an error with Fyle's servers(these are rare). 
+*   Codes in the 5xx range indicate an error with Sage Exp Mgmt's servers(these are rare). 
 
 > Please contact us at support@fylehq.com if a 5xx error is encountered. 
 
