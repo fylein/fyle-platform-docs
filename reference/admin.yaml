@@ -12136,6 +12136,306 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/reconciliation_entries/transactions/reconcile/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Bulk reconcile reconciliation transactions
+      description: |
+        Reconcile multiple reconciliation transactions in bulk.
+      operationId: reconciliation_transactions_reconcile_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  description: List of reconciliation transaction identifiers to reconcile.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: string
+                        description: Unique id of the reconciliation transaction to reconcile.
+                        example: rectx8abc123
+                  example:
+                    - id: rectx8abc123
+                    - id: rectx8xyz789
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of bulk reconcile. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/match_and_reconcile/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Bulk match and reconcile reconciliation transactions
+      description: |
+        Match reconciliation transactions with target transactions/expenses and reconcile in bulk.
+      operationId: reconciliation_transactions_match_and_reconcile_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  description: List of source and target reconciliation transaction identifiers to match and reconcile.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - source_id
+                      - target_id
+                    properties:
+                      source_id:
+                        type: string
+                        description: Source reconciliation transaction id.
+                        example: rectx8abc123
+                      target_id:
+                        type: string
+                        description: Target reconciliation transaction or expense id to match with.
+                        example: rectx8xyz789
+                  example:
+                    - source_id: rectx8abc123
+                      target_id: rectx8xyz789
+                    - source_id: rectx8def456
+                      target_id: rectx8uvw000
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of bulk match and reconcile. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/find_match:
+    post:
+      tags:
+        - Reconciliation
+      summary: Find matches for a reconciliation transaction
+      description: |
+        Find potential matching expenses for a reconciliation transaction.
+      operationId: reconciliation_transactions_find_match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: string
+                      description: Unique id of the reconciliation transaction for which to find matches.
+                      example: rectx8abc123
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    description: List of potential matches for the provided reconciliation transaction.
+                    items:
+                      $ref: '#/components/schemas/reconciliation_transaction_out'
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/stats:
+    post:
+      tags:
+        - Reconciliation
+      summary: Reconciliation Transactions Stats
+      description: |
+        Retrieve stats for reconciliation transactions within a reconciliation period and optional filters.
+
+        Use this endpoint to compute counts and totals of statement transactions and matched expenses, and identify differences for reconciliation analysis. Pass filters using `query_params` similar to the reconciliation transactions GET list API.
+      operationId: reconciliation_transactions_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconciliation_transactions_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reconciliation_transactions_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/reconciliation_entries/eligible_cards:
     get:
       tags:
@@ -12263,16 +12563,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/reconciliation_entries/transactions/stats:
+  /admin/reconciliation_entries/eligible_cards/exports:
     post:
       tags:
         - Reconciliation
-      summary: Reconciliation Transactions Stats
+      summary: Create eligible cards export
       description: |
-        Retrieve stats for reconciliation transactions within a reconciliation period and optional filters.
-
-        Use this endpoint to compute counts and totals of statement transactions and matched expenses, and identify differences for reconciliation analysis. Pass filters using `query_params` similar to the reconciliation transactions GET list API.
-      operationId: reconciliation_transactions_stats
+        Create an export request for reconciliation eligible cards. The export is processed asynchronously.
+        When ready, the specified notify_emails will receive the export file. Use query_params to filter
+        the eligible cards (e.g. reconciliation_entry_id=eq.<entry_id>).
+      operationId: reconciliation_eligible_cards_exports_post
       requestBody:
         required: true
         content:
@@ -12284,7 +12584,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/reconciliation_transactions_stats_in'
+                  $ref: '#/components/schemas/reconciliation_export_in'
       responses:
         '200':
           description: OK
@@ -12295,13 +12595,179 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: '#/components/schemas/reconciliation_transactions_stats_out'
+                    $ref: '#/components/schemas/reconciliation_export_out'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/delete/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Bulk delete reconciliation transactions
+      description: |
+        Delete multiple reconciliation transactions in bulk.
+      operationId: reconciliation_transactions_delete_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  description: List of reconciliation transaction identifiers to delete.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: string
+                        description: Unique id of the reconciliation transaction to delete.
+                        example: rectx8abc123
+                  example:
+                    - id: rectx8abc123
+                    - id: rectx8xyz789
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of bulk delete. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/unmatch/bulk:
+    post:
+      tags:
+        - Reconciliation
+      summary: Bulk unmatch reconciliation transactions
+      description: |
+        Unmatch multiple reconciliation transactions in bulk.
+      operationId: reconciliation_transactions_unmatch_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  description: List of reconciliation transaction identifiers to unmatch.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - id
+                    properties:
+                      id:
+                        type: string
+                        description: Unique id of the reconciliation transaction to unmatch.
+                        example: rectx8abc123
+                  example:
+                    - id: rectx8abc123
+                    - id: rectx8xyz789
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of bulk unmatch. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
         '401':
           description: Unauthorized request
           content:
@@ -12378,6 +12844,198 @@ paths:
                 $ref: '#/components/schemas/403'
         '404':
           description: Not Found - Reconciliation transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/resolve_multi_matches:
+    post:
+      tags:
+        - Reconciliation
+      summary: Resolve multiple matches for a reconciliation transaction
+      description: |
+        Resolve multiple potential matches by selecting a specific expense for a reconciliation transaction.
+      operationId: reconciliation_transactions_resolve_multi_matches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - id
+                    - expense_id
+                  properties:
+                    id:
+                      type: string
+                      description: Reconciliation transaction id for which to resolve multiple matches.
+                      example: rectx8abc123
+                    expense_id:
+                      type: string
+                      description: Selected expense id to resolve against.
+                      example: txuXDH16HzK
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of resolve operation. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/transactions/exports:
+    post:
+      tags:
+        - Reconciliation
+      summary: Create transactions export
+      description: |
+        Create an export request for reconciliation transactions. The export is processed asynchronously.
+        When ready, the specified notify_emails will receive the export file. Use query_params to filter
+        the transactions (e.g. reconciliation_entry_id=eq.<entry_id>).
+      operationId: reconciliation_transactions_exports_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/reconciliation_export_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/reconciliation_export_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/reconciliation_entries/close:
+    post:
+      tags:
+        - Reconciliation
+      summary: Close reconciliation entry
+      description: |
+        Mark a reconciliation entry as reconciled/closed.
+      operationId: reconciliation_entries_close
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: string
+                      description: Reconciliation entry id to close.
+                      example: receabc12345
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    description: Result of close operation. Empty object on success.
+                    example: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -30682,6 +31340,63 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
           description: Timestamp when this reconciliation transaction record was last updated.
+    reconciliation_transactions_stats_in:
+      type: object
+      additionalProperties: false
+      description: |
+        Input to fetch reconciliation transactions stats for a specific card or filter.
+        Pass filters using the `query_params` string similar to the GET list API.
+        For example, filter by a single card using `corporate_card_id=eq.<card_id>`.
+      properties:
+        query_params:
+          type: string
+          description: |
+            Query param string similar to reconciliation transactions GET call. Use this to filter the population
+            before computing stats. For individual card stats, pass `corporate_card_id=eq.<card_id>`.
+          example: corporate_card_id=eq.bawownwrng
+    reconciliation_transactions_stats_out:
+      type: object
+      additionalProperties: false
+      description: |
+        Reconciliation transactions statistics for the selected filter period.
+      properties:
+        period_start:
+          type: string
+          format: date-time
+          description: Start of the reconciliation period in UTC.
+          example: '2025-10-01T00:00:00.000+00:00'
+        period_end:
+          type: string
+          format: date-time
+          description: End of the reconciliation period in UTC.
+          example: '2025-10-31T23:59:59.999+00:00'
+        statement_transaction_count:
+          type: integer
+          description: Number of statement transactions considered in the period.
+          example: 3
+        expense_count:
+          type: integer
+          description: Number of expenses considered in the period.
+          example: 2
+        statement_total:
+          type: number
+          format: double
+          description: Sum of statement transaction amounts considered in the period.
+          example: 45
+        expense_total:
+          type: number
+          format: double
+          description: Sum of expense amounts considered in the period.
+          example: 30
+        difference:
+          type: number
+          format: double
+          description: Difference between statement total and expense total (statement_total - expense_total).
+          example: 15
+        matching_issue_count:
+          type: integer
+          description: Count of matching issues for transactions in the period.
+          example: 3
     reconciliation_eligible_card_out:
       type: object
       additionalProperties: false
@@ -30833,63 +31548,140 @@ components:
           type: integer
           description: Number of cards that are reconciled.
           example: 0
-    reconciliation_transactions_stats_in:
+    reconciliation_export_config_column_formula:
+      type: object
+      properties:
+        function:
+          type: string
+          example: Field
+        parameters:
+          type: array
+          items:
+            anyOf:
+              - type: object
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+      description: |
+        Export column formula used to transform the data.
+    reconciliation_export_config:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - is_header_visible
+        - columns
+      properties:
+        type:
+          type: string
+          enum:
+            - xlsx
+            - csv
+          description: Type of the export file.
+          example: csv
+        is_header_visible:
+          type: boolean
+          description: Whether to show the header in the export file.
+          example: true
+        separate_line_items_entry:
+          type: object
+          nullable: true
+          properties:
+            enabled:
+              type: boolean
+              description: Whether to show the double rows for each line item in the export file.
+            debit_entries_only:
+              type: array
+              items:
+                type: string
+              description: Configure which columns to show for debit entries.
+            credit_entries_only:
+              type: array
+              items:
+                type: string
+              description: Configure which columns to show for credit entries.
+          description: Configure how to show the double rows for each line item, if enabled.
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the column.
+              formula:
+                $ref: '#/components/schemas/reconciliation_export_config_column_formula'
+            required:
+              - name
+              - formula
+          description: Configure the columns to show in the export file.
+    reconciliation_export_in:
       type: object
       additionalProperties: false
-      description: |
-        Input to fetch reconciliation transactions stats for a specific card or filter.
-        Pass filters using the `query_params` string similar to the GET list API.
-        For example, filter by a single card using `corporate_card_id=eq.<card_id>`.
+      required:
+        - query_params
+        - notify_emails
+        - config
       properties:
         query_params:
           type: string
+          nullable: false
           description: |
-            Query param string similar to reconciliation transactions GET call. Use this to filter the population
-            before computing stats. For individual card stats, pass `corporate_card_id=eq.<card_id>`.
-          example: corporate_card_id=eq.bawownwrng
-    reconciliation_transactions_stats_out:
+            Query param string similar to the GET list API for the resource (eligible cards or transactions).
+            For eligible cards export use e.g. reconciliation_entry_id=eq.<entry_id>.
+            For transactions export use e.g. reconciliation_entry_id=eq.<entry_id>.
+          example: reconciliation_entry_id=eq.rece_seed_2
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: List of emails to notify when the export is ready.
+        config:
+          $ref: '#/components/schemas/reconciliation_export_config'
+          nullable: false
+          description: Configuration for the export.
+    reconciliation_export_out:
       type: object
       additionalProperties: false
-      description: |
-        Reconciliation transactions statistics for the selected filter period.
       properties:
-        period_start:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Unique id of the export.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        file_id:
+          anyOf:
+            - $ref: '#/components/schemas/null_field'
+            - $ref: '#/components/schemas/id_string'
+          nullable: true
+          description: File id when export is completed (null while pending/processing).
+        state:
           type: string
-          format: date-time
-          description: Start of the reconciliation period in UTC.
-          example: '2025-10-01T00:00:00.000+00:00'
-        period_end:
+          nullable: false
+          enum:
+            - PENDING
+            - PROCESSING
+            - SUCCESS
+            - ERROR
+          description: Status of the export.
+          example: PENDING
+        query_params:
           type: string
-          format: date-time
-          description: End of the reconciliation period in UTC.
-          example: '2025-10-31T23:59:59.999+00:00'
-        statement_transaction_count:
-          type: integer
-          description: Number of statement transactions considered in the period.
-          example: 3
-        expense_count:
-          type: integer
-          description: Number of expenses considered in the period.
-          example: 2
-        statement_total:
-          type: number
-          format: double
-          description: Sum of statement transaction amounts considered in the period.
-          example: 45
-        expense_total:
-          type: number
-          format: double
-          description: Sum of expense amounts considered in the period.
-          example: 30
-        difference:
-          type: number
-          format: double
-          description: Difference between statement total and expense total (statement_total - expense_total).
-          example: 15
-        matching_issue_count:
-          type: integer
-          description: Count of matching issues for transactions in the period.
-          example: 3
+          nullable: false
+          description: Query params used for this export.
+        notify_emails:
+          type: array
+          nullable: false
+          items:
+            $ref: '#/components/schemas/email'
+          description: List of emails to notify when the export is ready.
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     move_to_next_period_from_reconciliation_transaction_in:
       type: object
       additionalProperties: false
