@@ -1,0 +1,93 @@
+get:
+  tags:
+    - In-app Rating
+  summary: Get in-app rating state for the current user
+  operationId: in_app_rating_state_get
+  description: |
+    Returns persisted timestamps for in-app rating pre-prompt cooldowns. Scoped by `user_id`; the same state applies across orgs and devices.
+    The client should apply business rules (e.g. skip pre-prompt if `last_native_review_prompt_at` is within 180 days or
+    `last_rating_pre_prompt_dismiss_at` is within 60 days) in addition to other eligibility checks.
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/in_app_rating_state.yaml#/in_app_rating_state_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
+post:
+  tags:
+    - In-app Rating
+  summary: Update in-app rating state for the current user
+  operationId: in_app_rating_state_post
+  description: |
+    Persists pre-prompt dismiss or native-review prompt timestamps. For each provided field, the stored value becomes
+    the greater of the existing value and the incoming timestamp (GREATEST semantics). At least one of the two timestamp
+    fields must be set in the request body.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/in_app_rating_state.yaml#/in_app_rating_state_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/in_app_rating_state.yaml#/in_app_rating_state_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'

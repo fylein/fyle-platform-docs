@@ -7439,6 +7439,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/in_app_rating/state:
+    get:
+      tags:
+        - In-app Rating
+      summary: Get in-app rating state for the current user
+      operationId: in_app_rating_state_get
+      description: |
+        Returns persisted timestamps for in-app rating pre-prompt cooldowns. Scoped by user_id across orgs and devices.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/in_app_rating_state_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      tags:
+        - In-app Rating
+      summary: Update in-app rating state for the current user
+      operationId: in_app_rating_state_post
+      description: |
+        Persists pre-prompt dismiss or native-review prompt timestamps. At least one timestamp field must be set.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/in_app_rating_state_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/in_app_rating_state_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
 components:
   securitySchemes:
     oauth2:
@@ -19644,6 +19733,34 @@ components:
           example: 8.0.1
         os:
           $ref: '#/components/schemas/os'
+    in_app_rating_state_out:
+      type: object
+      additionalProperties: false
+      properties:
+        last_native_review_prompt_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_rating_pre_prompt_dismiss_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    in_app_rating_state_in:
+      type: object
+      additionalProperties: false
+      properties:
+        last_native_review_prompt_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_rating_pre_prompt_dismiss_at:
+          type: string
+          format: date-time
+          nullable: true
   parameters:
     q:
       in: query
