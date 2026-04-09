@@ -1,0 +1,42 @@
+rating_prompt_state_out:
+  type: object
+  additionalProperties: false
+  properties:
+    last_rating_pre_prompt_dismiss_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        When the user last dismissed the pre-prompt (native rating prompt not shown). Used for cooldown (e.g. 60 days).
+    last_native_review_prompt_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        When the client last invoked the OS in-app review API after the user accepted the pre-prompt.
+        Used for cooldown (e.g. do not pre-prompt again within 180 days).
+    updated_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        Server time of the last persisted update. Null when no row exists yet for the user.
+    created_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: |
+        Server time when the row was first created for the user. Null when no row exists yet.
+
+rating_prompt_state_in:
+  type: object
+  additionalProperties: false
+  required:
+    - is_pre_prompt_dismissed
+  properties:
+    is_pre_prompt_dismissed:
+      type: boolean
+      description: |
+        `true` if the user dismissed the pre-prompt (native rating prompt was not shown); `false` if the native
+        rating prompt was shown. The server records the corresponding timestamp at request time using GREATEST
+        merge with any existing value.

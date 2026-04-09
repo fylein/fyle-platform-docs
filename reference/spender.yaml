@@ -7439,12 +7439,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
-  /spender/mobile_app/in_app_rating_state:
+  /spender/mobile_app/rating_prompt_state:
     get:
       tags:
-        - In-app Rating
-      summary: Get in-app rating state for the current user
-      operationId: in_app_rating_state_get
+        - Mobile app
+      summary: Get mobile app rating prompt state for the current user
+      operationId: mobile_app_rating_prompt_state_get
       description: |
         Returns persisted timestamps for in-app rating pre-prompt cooldowns. Scoped by `user_id`; the same state applies across orgs and devices.
         The client should apply business rules (e.g. skip pre-prompt if `last_native_review_prompt_at` is within 180 days or
@@ -7461,7 +7461,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/in_app_rating_state_out'
+                    $ref: '#/components/schemas/rating_prompt_state_out'
         '400':
           description: Bad request
           content:
@@ -7482,13 +7482,13 @@ paths:
                 $ref: '#/components/schemas/403'
     post:
       tags:
-        - In-app Rating
-      summary: Update in-app rating state for the current user
-      operationId: in_app_rating_state_post
+        - Mobile app
+      summary: Update mobile app rating prompt state for the current user
+      operationId: mobile_app_rating_prompt_state_post
       description: |
-        Records pre-prompt dismiss and/or native-review prompt events using server UTC time for uniformity.
-        For each key set to `true`, the stored timestamp becomes the greater of the existing value and the current server
-        time (GREATEST semantics). At least one of `native_review_prompted` or `rating_pre_prompt_dismissed` must be `true`.
+        Records either a pre-prompt dismiss (`is_pre_prompt_dismissed: true`, native prompt not shown) or that the native
+        rating prompt was shown (`false`), using server UTC time. The stored timestamp for the affected field is the greater
+        of the existing value and the current server time (GREATEST semantics). `created_at` is set only on first insert.
       requestBody:
         required: true
         content:
@@ -7500,7 +7500,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/in_app_rating_state_in'
+                  $ref: '#/components/schemas/rating_prompt_state_in'
       responses:
         '200':
           description: OK
@@ -7513,7 +7513,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/in_app_rating_state_out'
+                    $ref: '#/components/schemas/rating_prompt_state_out'
         '400':
           description: Bad request
           content:
@@ -19737,10 +19737,16 @@ components:
           example: 8.0.1
         os:
           $ref: '#/components/schemas/os'
-    in_app_rating_state_out:
+    rating_prompt_state_out:
       type: object
       additionalProperties: false
       properties:
+        last_rating_pre_prompt_dismiss_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            When the user last dismissed the pre-prompt (native rating prompt not shown). Used for cooldown (e.g. 60 days).
         last_native_review_prompt_at:
           type: string
           format: date-time
@@ -19748,34 +19754,30 @@ components:
           description: |
             When the client last invoked the OS in-app review API after the user accepted the pre-prompt.
             Used for cooldown (e.g. do not pre-prompt again within 180 days).
-        last_rating_pre_prompt_dismiss_at:
-          type: string
-          format: date-time
-          nullable: true
-          description: |
-            When the user last dismissed the pre-prompt. Used for cooldown (e.g. 60 days).
         updated_at:
           type: string
           format: date-time
           nullable: true
           description: |
             Server time of the last persisted update. Null when no row exists yet for the user.
-    in_app_rating_state_in:
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            Server time when the row was first created for the user. Null when no row exists yet.
+    rating_prompt_state_in:
       type: object
       additionalProperties: false
+      required:
+        - is_pre_prompt_dismissed
       properties:
-        native_review_prompted:
+        is_pre_prompt_dismissed:
           type: boolean
-          nullable: true
           description: |
-            When `true`, records a native in-app review prompt event at server time (merged with existing using GREATEST).
-            Omit or `false` to leave that column unchanged.
-        rating_pre_prompt_dismissed:
-          type: boolean
-          nullable: true
-          description: |
-            When `true`, records a pre-prompt dismiss at server time (merged with existing using GREATEST).
-            Omit or `false` to leave that column unchanged.
+            `true` if the user dismissed the pre-prompt (native rating prompt was not shown); `false` if the native
+            rating prompt was shown. The server records the corresponding timestamp at request time using GREATEST
+            merge with any existing value.
   parameters:
     q:
       in: query
