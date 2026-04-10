@@ -7446,9 +7446,7 @@ paths:
       summary: Get mobile app rating prompt state for the current user
       operationId: mobile_app_rating_prompt_state_get
       description: |
-        Returns persisted timestamps for in-app rating pre-prompt cooldowns. Scoped by `user_id`; the same state applies across orgs and devices.
-        The client should apply business rules (e.g. skip pre-prompt if `last_native_review_prompt_at` is within 180 days or
-        `last_rating_pre_prompt_dismiss_at` is within 60 days) in addition to other eligibility checks.
+        Returns persisted timestamps for in-app rating pre-prompt cooldowns. 
       responses:
         '200':
           description: OK
@@ -7487,8 +7485,7 @@ paths:
       operationId: mobile_app_rating_prompt_state_post
       description: |
         Records either a pre-prompt dismiss (`is_pre_prompt_dismissed: true`, native prompt not shown) or that the native
-        rating prompt was shown (`false`), using server UTC time. The stored timestamp for the affected field is the greater
-        of the existing value and the current server time (GREATEST semantics). `created_at` is set only on first insert.
+        rating prompt was shown (`false`), using server UTC time. The stored timestamp for the affected field is the current server time. `created_at` is set only on first insert.
       requestBody:
         required: true
         content:
@@ -19746,14 +19743,14 @@ components:
           format: date-time
           nullable: true
           description: |
-            When the user last dismissed the pre-prompt (native rating prompt not shown). Used for cooldown (e.g. 60 days).
+            When the user last dismissed the pre-prompt (native rating prompt not shown). Used for cooldown.
         last_native_review_prompt_at:
           type: string
           format: date-time
           nullable: true
           description: |
             When the client last invoked the OS in-app review API after the user accepted the pre-prompt.
-            Used for cooldown (e.g. do not pre-prompt again within 180 days).
+            Used for cooldown.
         updated_at:
           type: string
           format: date-time
