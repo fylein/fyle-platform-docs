@@ -1,0 +1,138 @@
+# Shared config for reconciliation exports (eligible cards and transactions)
+reconciliation_export_config_column_formula:
+  type: object
+  properties:
+    function:
+      type: string
+      example: Field
+    parameters:
+      type: array
+      items:
+        anyOf:
+          - type: object
+          - type: string
+          - type: number
+          - type: integer
+          - type: boolean
+  description: |
+    Export column formula used to transform the data.
+
+reconciliation_export_config:
+  type: object
+  additionalProperties: true
+  required:
+    - type
+    - is_header_visible
+    - columns
+  properties:
+    type:
+      type: string
+      enum:
+        - xlsx
+        - csv
+      description: Type of the export file.
+      example: csv
+    is_header_visible:
+      type: boolean
+      description: Whether to show the header in the export file.
+      example: true
+    separate_line_items_entry:
+      type: object
+      nullable: true
+      properties:
+        enabled:
+          type: boolean
+          description: Whether to show the double rows for each line item in the export file.
+        debit_entries_only:
+          type: array
+          items:
+            type: string
+          description: Configure which columns to show for debit entries.
+        credit_entries_only:
+          type: array
+          items:
+            type: string
+          description: Configure which columns to show for credit entries.
+      description: Configure how to show the double rows for each line item, if enabled.
+    columns:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            description: Name of the column.
+          formula:
+            $ref: '#/reconciliation_export_config_column_formula'
+        required:
+          - name
+          - formula
+      description: Configure the columns to show in the export file.
+
+reconciliation_export_in:
+  type: object
+  additionalProperties: false
+  required:
+    - query_params
+    - notify_emails
+    - config
+  properties:
+    query_params:
+      type: string
+      nullable: false
+      description: |
+        Query param string similar to the GET list API for the resource (eligible cards or transactions).
+        For eligible cards export use e.g. reconciliation_entry_id=eq.<entry_id>.
+        For transactions export use e.g. reconciliation_entry_id=eq.<entry_id>.
+      example: reconciliation_entry_id=eq.rece_seed_2
+    notify_emails:
+      type: array
+      nullable: false
+      items:
+        $ref: './fields.yaml#/email'
+      description: List of emails to notify when the export is ready.
+    config:
+      $ref: '#/reconciliation_export_config'
+      nullable: false
+      description: Configuration for the export.
+
+reconciliation_export_out:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: Unique id of the export.
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    file_id:
+      anyOf:
+        - $ref: './fields.yaml#/null_field'
+        - $ref: './fields.yaml#/id_string'
+      nullable: true
+      description: File id when export is completed (null while pending/processing).
+    state:
+      type: string
+      nullable: false
+      enum:
+        - PENDING
+        - PROCESSING
+        - SUCCESS
+        - ERROR
+      description: Status of the export.
+      example: PENDING
+    query_params:
+      type: string
+      nullable: false
+      description: Query params used for this export.
+    notify_emails:
+      type: array
+      nullable: false
+      items:
+        $ref: './fields.yaml#/email'
+      description: List of emails to notify when the export is ready.
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
