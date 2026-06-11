@@ -7529,6 +7529,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_cards/merge:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Merge Duplicate Corporate Cards
+      description: |
+        Merges a source card into a destination card by consolidating all associated data into the destination and removing the source card.
+      operationId: corporate_cards_merge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_merge_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions:
     get:
       tags:
@@ -23449,6 +23503,24 @@ components:
       required:
         - id
         - user_id
+    corporate_card_merge_in:
+      type: object
+      properties:
+        destination_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The ID of the destination card into which the source card will be merged
+          example: bawownwrng
+        source_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The ID of the source card that will be merged into the destination card
+          example: uswjwgnwwgo
+      required:
+        - destination_card_id
+        - source_card_id
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
