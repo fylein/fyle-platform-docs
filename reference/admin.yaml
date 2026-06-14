@@ -7583,6 +7583,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_cards/duplicate_suggestions:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List duplicate corporate card suggestions
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_card_duplicate_suggestions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_duplicate_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /admin/corporate_card_transactions:
     get:
       tags:
@@ -23521,6 +23564,114 @@ components:
       required:
         - destination_card_id
         - source_card_id
+    duplicate_suggestion_corporate_card_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+          example: xxxx-4543
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Sage Exp Mgmt
+          example: 100
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        feed_display_name:
+          type: string
+          nullable: true
+          description: |
+            A user-friendly name for the data feed source.
+          example: Bank Feed
+    corporate_card_duplicate_suggestion_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        destination_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+          description: |
+            The ID of the destination card into which the source card will be merged
+        destination_card:
+          $ref: '#/components/schemas/duplicate_suggestion_corporate_card_out_embed'
+        source_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: baccownwrng
+          description: |
+            The ID of the source card that will be merged into the destination card
+        source_card:
+          $ref: '#/components/schemas/duplicate_suggestion_corporate_card_out_embed'
+        is_dismissed:
+          type: boolean
+          description: |
+            Indicates whether the duplicate suggestion has been dismissed by an admin
+          nullable: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - destination_card_id
+        - destination_card
+        - source_card_id
+        - source_card
+        - is_dismissed
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
