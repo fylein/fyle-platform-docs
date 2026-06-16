@@ -511,6 +511,61 @@ corporate_card_out_embed:
       example: john.doe@example.com
 
 
+duplicate_suggestion_corporate_card_out_embed:
+  type: object
+  additionalProperties: false
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    bank_name:
+      type: string
+      description: |
+        Specifies the name of bank who issued the card.
+      example: Bank of America
+    card_number:
+      type: string
+      description: |
+        Specifies the masked number of the card.
+      example: xxxx-4543
+    nickname:
+      type: string
+      maxLength: 25
+      nullable: true
+      description: |
+        Unique nickname assigned to the card
+      example: 'Business Card'
+    total_transactions_count:
+      type: integer
+      nullable: false
+      description: |
+        The total number of transactions for the card, in Sage Exp Mgmt
+      example: 100
+    is_visa_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with real time feed from visa
+      nullable: false
+    is_mastercard_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with realtime feed from Mastercard
+      nullable: false
+    data_feed_source:
+      type: string
+      nullable: true
+      description: |
+        signifies the source of how card is added and how further card transactions could be synced
+      example: BANK FEED - CDF
+    feed_display_name:
+      type: string
+      nullable: true
+      description: |
+        A user-friendly name for the data feed source.
+      example: Bank Feed
+
+
 corporate_card_stats_in:
   properties:
     query_params:
@@ -652,3 +707,60 @@ corporate_card_merge_in:
   required:
     - destination_card_id
     - source_card_id
+
+
+corporate_card_duplicate_suggestion_out:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        The unique id of an user to whom the card is assigned
+      example: uswjwgnwwgo
+    user:
+      $ref: ./user.yaml#/user_out_embed_nullable
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    destination_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+      description: |
+        The ID of the destination card into which the source card will be merged
+    destination_card:
+      $ref: ./corporate_card.yaml#/duplicate_suggestion_corporate_card_out_embed
+    source_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: baccownwrng
+      description: |
+        The ID of the source card that will be merged into the destination card
+    source_card:
+      $ref: ./corporate_card.yaml#/duplicate_suggestion_corporate_card_out_embed
+    is_dismissed:
+      type: boolean
+      description: |
+        Indicates whether the duplicate suggestion has been dismissed by an admin
+      nullable: false
+  required:
+    - id
+    - org_id
+    - user_id
+    - user
+    - created_at
+    - updated_at
+    - destination_card_id
+    - destination_card
+    - source_card_id
+    - source_card
+    - is_dismissed
