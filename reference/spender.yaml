@@ -5950,7 +5950,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/expense_out'
+                      $ref: '#/components/schemas/expense_out_with_department_name'
         '400':
           description: Bad request
           content:
@@ -10721,6 +10721,23 @@ components:
           $ref: '#/components/schemas/is_enabled'
         webhook_url:
           $ref: '#/components/schemas/webhook_url'
+    department_out_employee_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
     employee_out_embed_for_report:
       type: object
       additionalProperties: false
@@ -10748,7 +10765,7 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         level:
           $ref: '#/components/schemas/level_out_embed'
         ach_account:
@@ -12105,7 +12122,7 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
     user_id_nullable:
       type: string
       description: |
@@ -14975,7 +14992,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -18590,6 +18607,88 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    employee_out_embed_for_expense_with_department_name:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        custom_fields:
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
+        flattened_custom_field:
+          $ref: '#/components/schemas/flattened_custom_field'
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
+      description: |
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
+    expense_out_with_department_name:
+      allOf:
+        - $ref: '#/components/schemas/expense_out'
+        - type: object
+          properties:
+            employee:
+              nullable: true
+              $ref: '#/components/schemas/employee_out_embed_for_expense_with_department_name'
     personal_card_transactions_stats_in:
       properties:
         query_params:
