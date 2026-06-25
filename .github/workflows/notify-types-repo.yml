@@ -20,18 +20,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate token for fyle-platform-types
-        id: types-app-token
-        uses: actions/create-github-app-token@v1
+        id: app-token
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.GH_TYPES_DISPATCH_APP_ID }}
           private-key: ${{ secrets.GH_TYPES_DISPATCH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
+          owner: fylein
           repositories: fyle-platform-types
 
       - name: Notify fyle-platform-types of spec change
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ steps.types-app-token.outputs.token }}
-          repository: ${{ github.repository_owner }}/fyle-platform-types
+          token: ${{ steps.app-token.outputs.token }}
+          repository: fylein/fyle-platform-types
           event-type: specs-updated
           client-payload: '{"sha": "${{ github.sha }}", "ref": "${{ github.ref }}"}'
