@@ -7583,6 +7583,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_cards/archive:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Archive a corporate card
+      description: |
+        Archive a corporate card
+      operationId: corporate_cards_archive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_archive_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_cards/unarchive:
     post:
       tags:
@@ -23785,6 +23839,15 @@ components:
       required:
         - destination_card_id
         - source_card_id
+    corporate_card_archive_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+      required:
+        - id
     corporate_card_unarchive_in:
       type: object
       properties:
@@ -32403,6 +32466,7 @@ components:
         - reconciliation_entry_id
         - card_number
         - card_nickname
+        - is_archived
         - user
         - reconciled_on
         - statement_transaction_count
@@ -32434,6 +32498,10 @@ components:
           maxLength: 25
           description: Unique nickname assigned to the card.
           example: Business Card
+        is_archived:
+          type: boolean
+          description: Indicate whether the card is archived.
+          example: false
         user:
           $ref: '#/components/schemas/user_out_embed_nullable'
         reconciled_on:
