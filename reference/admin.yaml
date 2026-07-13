@@ -1473,6 +1473,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/per_diem_rates/delete/bulk:
+    post:
+      tags:
+        - Per Diem Rates
+      summary: Deletes per diem rates
+      description: |
+        Deletes unused per diem rates. If any of the per diem rate in input is used in other resources then validation error is raised.
+      operationId: per_diem_rates_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/per_diem_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete per diem rate(s) used in other resources like expense.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/per_diem_rates/delete_summary/bulk:
+    post:
+      tags:
+        - Per Diem Rates
+      summary: Create delete summary for per diem rates
+      description: |
+        Delete summary tells that how many per diem rates could be deleted from given per diem rates, it also
+        returns per diem rates that could be deleted.
+      operationId: per_diem_rates_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/per_diem_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/per_diem_rate_delete_summary_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/departments:
     get:
       tags:
@@ -15893,6 +15994,33 @@ components:
           type: number
           example: 10
           description: Amount per night
+    per_diem_rate_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    per_diem_rate_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of per diem rates that could be deleted from input per diem rates.
+              example: 2
+            per_diem_rates:
+              type: array
+              description: Per diem rates that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/per_diem_rate_in_only_id'
     department_head_user_ids:
       type: array
       nullable: false
