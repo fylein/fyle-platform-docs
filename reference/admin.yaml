@@ -11661,6 +11661,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/archived_cards/ignore:
+    post:
+      tags:
+        - Statements
+      summary: Ignore archived cards present in the statement
+      description: |
+        Ignores archived cards present in the statement
+      operationId: archived_cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statement_archived_cards_ignore_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Empty object on successfully ignoring archived cards
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expense_rules:
     post:
       tags:
@@ -31114,6 +31168,21 @@ components:
                 description: |
                   Timestamp when the card was archived in Sage Exp Mgmt
                 nullable: true
+    statement_archived_cards_ignore_in:
+      allOf:
+        - $ref: '#/components/schemas/statement_archived_cards_in'
+        - type: object
+          properties:
+            archived_card_ids:
+              type: array
+              items:
+                type: string
+              description: |
+                List of archived card ids to be ignored in the statement.
+              example:
+                - bawownwrng
+          required:
+            - archived_card_ids
     expense_rule_if_out:
       type: object
       additionalProperties: false
