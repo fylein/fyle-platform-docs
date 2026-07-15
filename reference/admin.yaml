@@ -513,6 +513,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/cost_centers/delete/bulk:
+    post:
+      tags:
+        - Cost Centers
+      summary: Deletes cost centers
+      description: |
+        Deletes unused cost centers. If any of the cost center in input is used in other resources then validation error is raised.
+      operationId: cost_centers_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete cost center(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cost_centers/delete_summary/bulk:
+    post:
+      tags:
+        - Cost Centers
+      summary: Create delete summary for cost centers
+      description: |
+        Delete summary tells that how many cost centers could be deleted from given cost centers, it also
+        returns cost centers that could be deleted.
+      operationId: cost_centers_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cost_center_delete_summary_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/categories:
     get:
       tags:
@@ -15362,6 +15463,33 @@ components:
                   - _While creating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions defaults to `"restricted_spender_user_group": {"with_no_cost_center_restrictions": "true"}`_
                   - _While updating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions remains unchanged._
               example: true
+    cost_center_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    cost_center_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of cost centers that could be deleted from input cost centers.
+              example: 2
+            cost_centers:
+              type: array
+              description: Cost centers that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/cost_center_in_only_id'
     admin_approver_category_out:
       type: object
       additionalProperties: false
