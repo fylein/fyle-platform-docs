@@ -7851,6 +7851,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_cards/archive_suggestions:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card archive suggestions
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_card_archive_suggestions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_archive_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/corporate_cards/archive_suggestions/dismiss:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Dismiss a corporate card archive suggestion
+      description: |
+        Dismiss a corporate card archive suggestion
+      operationId: corporate_cards_archive_suggestion_dismiss
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_archive_suggestion_dismiss_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_archive_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions:
     get:
       tags:
@@ -15268,6 +15365,19 @@ components:
     admin_approver_category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
+        - restricted_spender_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -15402,6 +15512,8 @@ components:
     system_category_out:
       type: object
       additionalProperties: false
+      required:
+        - name
       properties:
         name:
           type: string
@@ -24085,6 +24197,96 @@ components:
             The ID of the duplicate suggestion to be dismissed
       required:
         - id
+    corporate_card_archive_suggestion_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+          example: xxxx-4543
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        is_dismissed:
+          type: boolean
+          description: |
+            Indicates whether the archive suggestion has been dismissed by an admin
+          nullable: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - corporate_card_id
+        - is_dismissed
+        - card_number
+        - bank_name
+        - nickname
+        - data_feed_source
+        - is_visa_enrolled
+        - is_mastercard_enrolled
+    corporate_card_archive_suggestion_dismiss_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ccaswownwrng
+          description: |
+            The ID of the archive suggestion to be dismissed
+      required:
+        - id
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -27991,6 +28193,30 @@ components:
     budget_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - alert_threshold
+        - is_enabled
+        - type
+        - amount_limit
+        - observer_ids
+        - project_ids
+        - cost_center_ids
+        - category_ids
+        - department_ids
+        - budget_start_date
+        - budget_end_date
+        - amount_spent
+        - amount_remaining
+        - utilisation_percentage
+        - budget_creator
+        - visibility
+        - status
+        - user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -28240,6 +28466,14 @@ components:
         - spent
         - amount_limit
         - budget
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - start_date
+        - end_date
+        - budget_department_ids
+        - budget_project_ids
       additionalProperties: false
       properties:
         id:
