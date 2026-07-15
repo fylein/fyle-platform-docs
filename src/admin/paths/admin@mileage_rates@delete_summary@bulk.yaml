@@ -1,0 +1,61 @@
+post:
+  tags:
+    - Mileage Rates
+  security:
+    - oauth2: ['*']
+  summary: Create delete summary for mileage rates
+  description: |
+    Returns how many of the supplied mileage rates can be deleted and lists those rates.
+    A maximum of 200 unique mileage rate IDs can be processed. Repeated IDs are
+    deduplicated in first-seen order before the limit is enforced.
+  operationId: mileage_rates_delete_summary_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/mileage_rate.yaml#/mileage_rate_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/mileage_rate.yaml#/mileage_rate_delete_summary_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Cannot perform action for more than 200 mileage rates at once.
+              data:
+                type: object
+                nullable: true
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"

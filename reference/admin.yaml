@@ -1855,6 +1855,210 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/mileage_rates/bulk:
+    post:
+      operationId: mileage_rates_bulk_post
+      tags:
+        - Mileage Rates
+      security:
+        - oauth2:
+            - '*'
+      summary: Create or update mileage rates in bulk
+      description: |
+        Create or update mileage rates in bulk. The response is an empty object; re-fetch
+        `GET /admin/mileage_rates` after a successful request when the saved rows are needed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/mileage_rate_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/mileage_rates/delete/bulk:
+    post:
+      tags:
+        - Mileage Rates
+      security:
+        - oauth2:
+            - '*'
+      summary: Delete mileage rates
+      description: |
+        Deletes unused mileage rates. If any supplied mileage rate is used by an expense,
+        the request fails without deleting any rates. A maximum of 200 unique mileage rate
+        IDs can be processed. Repeated IDs are deduplicated in first-seen order before the
+        limit is enforced.
+      operationId: mileage_rates_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/mileage_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+              examples:
+                limit_exceeded:
+                  summary: More than 200 unique mileage rate IDs supplied
+                  value:
+                    message: Cannot perform action for more than 200 mileage rates at once.
+                    data: null
+                    error: InvalidUsage
+                dependency_blocked:
+                  summary: A mileage rate is used by an expense
+                  value:
+                    message: Can not delete mileage rate(s) used in other resources like expense.
+                    data: null
+                    error: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/mileage_rates/delete_summary/bulk:
+    post:
+      tags:
+        - Mileage Rates
+      security:
+        - oauth2:
+            - '*'
+      summary: Create delete summary for mileage rates
+      description: |
+        Returns how many of the supplied mileage rates can be deleted and lists those rates.
+        A maximum of 200 unique mileage rate IDs can be processed. Repeated IDs are
+        deduplicated in first-seen order before the limit is enforced.
+      operationId: mileage_rates_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/mileage_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mileage_rate_delete_summary_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cannot perform action for more than 200 mileage rates at once.
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/levels:
     get:
       tags:
@@ -16487,6 +16691,33 @@ components:
           $ref: '#/components/schemas/is_enabled'
         code:
           $ref: '#/components/schemas/code'
+    mileage_rate_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    mileage_rate_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of mileage rates that could be deleted from input mileage rates.
+              example: 2
+            mileage_rates:
+              type: array
+              description: Mileage rates that could be deleted.
+              example:
+                - id: 9080
+                - id: 9081
+              items:
+                $ref: '#/components/schemas/mileage_rate_in_only_id'
     level_out:
       type: object
       additionalProperties: false
