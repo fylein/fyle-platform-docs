@@ -513,6 +513,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/cost_centers/delete/bulk:
+    post:
+      tags:
+        - Cost Centers
+      summary: Deletes cost centers
+      description: |
+        Deletes unused cost centers. If any of the cost center in input is used in other resources then validation error is raised.
+      operationId: cost_centers_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete cost center(s) used in other resources like expense, expense policy, expense rules, budgets, dependent fields.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/cost_centers/delete_summary/bulk:
+    post:
+      tags:
+        - Cost Centers
+      summary: Create delete summary for cost centers
+      description: |
+        Delete summary tells that how many cost centers could be deleted from given cost centers, it also
+        returns cost centers that could be deleted.
+      operationId: cost_centers_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/cost_center_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cost_center_delete_summary_out'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/categories:
     get:
       tags:
@@ -1463,6 +1564,107 @@ paths:
                 $ref: '#/components/schemas/400'
         '401':
           description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/per_diem_rates/delete/bulk:
+    post:
+      tags:
+        - Per Diem Rates
+      summary: Deletes per diem rates
+      description: |
+        Deletes unused per diem rates. If any of the per diem rate in input is used in other resources then validation error is raised.
+      operationId: per_diem_rates_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/per_diem_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    nullable: true
+                    example: |
+                      Can not delete per diem rate(s) used in other resources like expense.
+                  data:
+                    type: object
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/per_diem_rates/delete_summary/bulk:
+    post:
+      tags:
+        - Per Diem Rates
+      summary: Create delete summary for per diem rates
+      description: |
+        Delete summary tells that how many per diem rates could be deleted from given per diem rates, it also
+        returns per diem rates that could be deleted.
+      operationId: per_diem_rates_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/per_diem_rate_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/per_diem_rate_delete_summary_out'
+        '401':
+          description: Unauthorised request
           content:
             application/json:
               schema:
@@ -3519,6 +3721,59 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Update expenses in bulk
+      description: |
+        Update expenses in bulk by admin.
+      operationId: admin_expenses_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_expenses_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
         '400':
           description: Bad request
           content:
@@ -7476,6 +7731,425 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/corporate_cards/merge:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Merge Duplicate Corporate Cards
+      description: |
+        Merges a source card into a destination card by consolidating all associated data into the destination and removing the source card.
+      operationId: corporate_cards_merge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_merge_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/corporate_cards/archive:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Archive a corporate card
+      description: |
+        Archive a corporate card
+      operationId: corporate_cards_archive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_archive_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/corporate_cards/unarchive:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Unarchive a corporate card
+      description: |
+        Unarchive a corporate card
+      operationId: corporate_cards_unarchive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_unarchive_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/corporate_cards/unarchive/bulk:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Bulk unarchive corporate cards
+      description: |
+        Unarchive corporate cards in bulk.
+      operationId: corporate_cards_unarchive_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/corporate_card_unarchive_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                        nullable: true
+                      data:
+                        type: object
+                        nullable: true
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/corporate_cards/duplicate_suggestions:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card duplicate suggestions
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_card_duplicate_suggestions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_duplicate_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/corporate_cards/duplicate_suggestions/dismiss:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Dismiss a corporate card duplicate suggestion
+      description: |
+        Dismiss a corporate card duplicate suggestion
+      operationId: corporate_cards_dismiss_duplicate_suggestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_duplicate_suggestion_dismiss_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_duplicate_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/corporate_cards/archive_suggestions:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate card archive suggestions
+      description: |
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_card_archive_suggestions_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_archive_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /admin/corporate_cards/archive_suggestions/dismiss:
+    post:
+      tags:
+        - Corporate Cards
+      summary: Dismiss a corporate card archive suggestion
+      description: |
+        Dismiss a corporate card archive suggestion
+      operationId: corporate_cards_archive_suggestion_dismiss
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/corporate_card_archive_suggestion_dismiss_in'
+              required:
+                - data
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_archive_suggestion_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/corporate_card_transactions:
     get:
       tags:
@@ -11231,6 +11905,115 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/archived_cards:
+    post:
+      tags:
+        - Statements
+      summary: Archived cards present in Sage Exp Mgmt
+      description: |
+        Returns archived cards present in Sage Exp Mgmt for cards in Statement
+      operationId: archived_cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statement_archived_cards_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/statement_archived_cards_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/statements/archived_cards/ignore:
+    post:
+      tags:
+        - Statements
+      summary: Ignore archived cards present in the statement
+      description: |
+        Ignores archived cards present in the statement
+      operationId: ignore_archived_cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/statement_archived_cards_ignore_in'
+              required:
+                - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Empty object on successfully ignoring archived cards
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expense_rules:
     post:
       tags:
@@ -11468,6 +12251,116 @@ paths:
                     $ref: '#/components/schemas/expense_check_mandatory_fields_out'
         '400':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/check_mandatory_fields/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Check multiple expenses for missing mandatory fields in bulk
+      description: |
+        Before updating multiple expense objects as an admin, you can validate 
+        if all mandatory fields are present using this bulk endpoint.
+      operationId: admin_check_mandatory_fields_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_expense_check_mandatory_fields_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_mandatory_fields_bulk_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /admin/expenses/check_policies/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Check multiple expenses for policy violations in bulk
+      description: |
+        Admin bulk version of the check_policies API that allows checking 
+        multiple expenses for policy violations in one request.
+
+        **NOTE:** This API can only be used to check policies for existing expenses that you want to update. The API will evaluate all the expenses against the configured policy rules and return an array of policy violation information for each expense in the request payload.
+      operationId: admin_check_policies_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/admin_check_policies_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_policies_bulk_out'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -14671,9 +15564,49 @@ components:
                   - _While creating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions defaults to `"restricted_spender_user_group": {"with_no_cost_center_restrictions": "true"}`_
                   - _While updating cost_centers, if both `restricted_spender_user_ids` and `restricted_spender_user_group` keys are not set, restrictions remains unchanged._
               example: true
+    cost_center_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    cost_center_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of cost centers that could be deleted from input cost centers.
+              example: 2
+            cost_centers:
+              type: array
+              description: Cost centers that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/cost_center_in_only_id'
     admin_approver_category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
+        - restricted_spender_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -14808,6 +15741,8 @@ components:
     system_category_out:
       type: object
       additionalProperties: false
+      required:
+        - name
       properties:
         name:
           type: string
@@ -15353,6 +16288,33 @@ components:
           type: number
           example: 10
           description: Amount per night
+    per_diem_rate_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+    per_diem_rate_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          properties:
+            delete_count:
+              type: integer
+              description: Count of per diem rates that could be deleted from input per diem rates.
+              example: 2
+            per_diem_rates:
+              type: array
+              description: Per diem rates that could be deleted.
+              example:
+                - id: 1234
+                - id: 4567
+              items:
+                $ref: '#/components/schemas/per_diem_rate_in_only_id'
     department_head_user_ids:
       type: array
       nullable: false
@@ -18003,6 +18965,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -18120,6 +19087,11 @@ components:
               description: |
                 String denoting the card holder's full name
               example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
             amount:
               $ref: '#/components/schemas/amount'
             currency:
@@ -19355,6 +20327,110 @@ components:
           description: |
             Specific to per diem related expenses, number of days for which per diem claim is made. <br>
             This field is required for creating Per Diem Expenses.
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Expense id of the expense to be updated.
+          example: txwownwrng
+        merchant:
+          $ref: '#/components/schemas/merchant'
+          nullable: true
+          description: |
+            String denoting the name of the merchant to which the expense was made.
+          example: Uber
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Purpose of this expense.
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          description: |
+            This represents the cost_center's id given by Sage Exp Mgmt during creation of cost center
+            for which this expense is created.
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: false
+          description: |
+            This represents the category's id given by Sage Exp Mgmt during creation of category
+            for which this expense is created.
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          description: |
+            This represents the project's id given by Sage Exp Mgmt during creation of project
+            for which this expense is created.
+          example: 92895
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+          nullable: true
+          description: This fields marks whether a given expense is billable or not.
+          example: true
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+          nullable: false
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+          nullable: true
+          description: |
+            Start date for travel or per diem related expenses.
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+          nullable: true
+          description: |
+            End date for travel or per diem related expenses.
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+          nullable: false
+          description: |
+            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+            index 0 holds onward journey class, index 1 holds return journey travel class.
+          example:
+            - ECONOMY
+            - BUSINESS
+        locations:
+          $ref: '#/components/schemas/locations'
+          nullable: false
+          description: |
+            This field will be present for travel related categories.
+            For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+        distance:
+          $ref: '#/components/schemas/distance'
+          nullable: true
+          description: Actual distance travelled by employee in travel related expenses.
+        distance_unit:
+          enum:
+            - KM
+            - MILES
+            - null
+          nullable: true
+          description: Unit of distance travelled.
+          example: MILES
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+    admin_expenses_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be updated in bulk by the admin.
+      items:
+        $ref: '#/components/schemas/items'
     attach_files_to_expense_in:
       type: object
       required:
@@ -22833,6 +23909,23 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
+        archived_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was archived
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        archived_by_user_id:
+          type: string
+          description: |
+            The unique id of an user who archived the card.
+          nullable: true
         total_transactions_count:
           type: integer
           nullable: false
@@ -22872,6 +23965,9 @@ components:
         - virtual_card_id
         - virtual_card_state
         - nickname
+        - is_archived
+        - archived_at
+        - archived_by_user_id
         - total_transactions_count
         - unassigned_transactions_count
     corporate_card_in:
@@ -23143,6 +24239,23 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
+        archived_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was archived
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        archived_by_user_id:
+          type: string
+          description: |
+            The unique id of an user who archived the card.
+          nullable: true
         total_transactions_count:
           type: integer
           nullable: false
@@ -23182,6 +24295,9 @@ components:
         - virtual_card_id
         - virtual_card_state
         - nickname
+        - is_archived
+        - archived_at
+        - archived_by_user_id
         - total_transactions_count
         - unassigned_transactions_count
     corporate_card_reassign_in:
@@ -23199,6 +24315,251 @@ components:
       required:
         - id
         - user_id
+    corporate_card_merge_in:
+      type: object
+      properties:
+        destination_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The ID of the destination card into which the source card will be merged
+          example: bawownwrng
+        source_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The ID of the source card that will be merged into the destination card
+          example: uswjwgnwwgo
+      required:
+        - destination_card_id
+        - source_card_id
+    corporate_card_archive_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+      required:
+        - id
+    corporate_card_unarchive_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+      required:
+        - id
+    duplicate_suggestion_corporate_card_out_embed:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+          example: xxxx-4543
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Sage Exp Mgmt
+          example: 100
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        feed_display_name:
+          type: string
+          nullable: true
+          description: |
+            A user-friendly name for the data feed source.
+          example: Bank Feed
+    corporate_card_duplicate_suggestion_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        destination_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+          description: |
+            The ID of the destination card into which the source card will be merged
+        destination_card:
+          $ref: '#/components/schemas/duplicate_suggestion_corporate_card_out_embed'
+        source_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: baccownwrng
+          description: |
+            The ID of the source card that will be merged into the destination card
+        source_card:
+          $ref: '#/components/schemas/duplicate_suggestion_corporate_card_out_embed'
+        is_dismissed:
+          type: boolean
+          description: |
+            Indicates whether the duplicate suggestion has been dismissed by an admin
+          nullable: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - destination_card_id
+        - destination_card
+        - source_card_id
+        - source_card
+        - is_dismissed
+    corporate_card_duplicate_suggestion_dismiss_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ccdswownwrng
+          description: |
+            The ID of the duplicate suggestion to be dismissed
+      required:
+        - id
+    corporate_card_archive_suggestion_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        card_number:
+          type: string
+          description: |
+            Specifies the masked number of the card.
+          example: xxxx-4543
+        bank_name:
+          type: string
+          description: |
+            Specifies the name of bank who issued the card.
+          example: Bank of America
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        is_dismissed:
+          type: boolean
+          description: |
+            Indicates whether the archive suggestion has been dismissed by an admin
+          nullable: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - corporate_card_id
+        - is_dismissed
+        - card_number
+        - bank_name
+        - nickname
+        - data_feed_source
+        - is_visa_enrolled
+        - is_mastercard_enrolled
+    corporate_card_archive_suggestion_dismiss_in:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: ccaswownwrng
+          description: |
+            The ID of the archive suggestion to be dismissed
+      required:
+        - id
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
@@ -23256,6 +24617,11 @@ components:
           description: |
             String denoting the card holder's email
           example: john.doe@example.com
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
     matched_expense_out_embed:
       type: object
       nullable: true
@@ -23669,6 +25035,10 @@ components:
         - last_user_matched_at
         - is_exported
         - metadata
+        - transaction_status
+        - mcc
+        - bank_transaction_number
+        - capitalone_virtual_card_last_four
     corporate_card_transaction_in:
       type: object
       properties:
@@ -27022,6 +28392,11 @@ components:
           description: percentage of tax levied.
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indicates whether this tax group is the default for its percentage bucket.
+          example: false
         code:
           $ref: '#/components/schemas/code'
     tax_group_in:
@@ -27049,6 +28424,11 @@ components:
           description: percentage of tax levied.
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indicates whether this tax group should be set as default for its percentage bucket.
+          example: false
         code:
           $ref: '#/components/schemas/code'
     budget_type:
@@ -27086,6 +28466,30 @@ components:
     budget_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - alert_threshold
+        - is_enabled
+        - type
+        - amount_limit
+        - observer_ids
+        - project_ids
+        - cost_center_ids
+        - category_ids
+        - department_ids
+        - budget_start_date
+        - budget_end_date
+        - amount_spent
+        - amount_remaining
+        - utilisation_percentage
+        - budget_creator
+        - visibility
+        - status
+        - user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -27335,6 +28739,14 @@ components:
         - spent
         - amount_limit
         - budget
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - start_date
+        - end_date
+        - budget_department_ids
+        - budget_project_ids
       additionalProperties: false
       properties:
         id:
@@ -30216,6 +31628,72 @@ components:
           description: |
             RTF Confidence percentage indicates what % of the transactions in last uploaded statement are already existing in Sage Exp Mgmt via RTF.
           example: 99.22
+    statement_archived_cards_in:
+      allOf:
+        - $ref: '#/components/schemas/summary_from_statement_in'
+        - type: object
+          properties:
+            card_mapping:
+              $ref: '#/components/schemas/card_mapping_in'
+          required:
+            - card_mapping
+    statement_archived_cards_out:
+      properties:
+        number_of_cards:
+          type: integer
+          description: |
+            Number of cards in the statement
+          example: 3
+        number_of_archived_cards:
+          type: integer
+          description: |
+            Number of cards in the statement that are archived in Sage Exp Mgmt
+          example: 1
+        archived_cards:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                allOf:
+                  - $ref: '#/components/schemas/id_string'
+                example: bawownwrng
+              card_number:
+                $ref: '#/components/schemas/card_number'
+              nickname:
+                type: string
+                maxLength: 25
+                nullable: true
+                description: |
+                  Unique nickname assigned to the card
+                example: Business Card
+              user:
+                $ref: '#/components/schemas/user_out_embed_nullable'
+              is_archived:
+                type: boolean
+                description: |
+                  If the card is archived in Sage Exp Mgmt
+                nullable: false
+              archived_at:
+                $ref: '#/components/schemas/timestamptz_utc'
+                description: |
+                  Timestamp when the card was archived in Sage Exp Mgmt
+                nullable: true
+    statement_archived_cards_ignore_in:
+      allOf:
+        - $ref: '#/components/schemas/statement_archived_cards_in'
+        - type: object
+          properties:
+            archived_card_ids:
+              type: array
+              items:
+                type: string
+              description: |
+                List of archived card ids to be ignored in the statement.
+              example:
+                - bawownwrng
+          required:
+            - archived_card_ids
     expense_rule_if_out:
       type: object
       additionalProperties: false
@@ -30553,6 +32031,219 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    admin_expense_check_mandatory_fields_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be checked for missing mandatory fields by admin.
+      items:
+        $ref: '#/components/schemas/items'
+    expense_check_mandatory_fields_bulk_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        required:
+          - id
+          - missing_amount
+          - missing_currency
+          - missing_receipt
+          - missing_expense_field_ids
+        properties:
+          id:
+            $ref: '#/components/schemas/id_string'
+            example: tx0agOdICdbV
+          missing_amount:
+            type: boolean
+            description: |
+              If this is set to true, then you need to send amount field with expense object.
+            example: false
+          missing_currency:
+            type: boolean
+            description: |
+              If this is set to true, then you need to send currency field with expense object.
+            example: false
+          missing_receipt:
+            type: boolean
+            description: |
+              If this is set to true, then you need to attach receipt to the expense.
+            example: false
+          missing_expense_field_ids:
+            type: array
+            nullable: false
+            items:
+              type: integer
+              nullable: true
+              description: |
+                This id provided by Sage Exp Mgmt to identify an expense field.
+              example: 123
+            example:
+              - 123
+              - 12423
+            description: |
+              List of IDs of expense fields which are mandatory but are missing.
+    admin_check_policies_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be validated against expense policy rules by admin.
+      items:
+        $ref: '#/components/schemas/items'
+    expense_check_policies_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        expense_policy_rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: |
+            This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
+            If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+            it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved.
+            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was
+            missing or not set up properly, it will fail to take action on the expense when it is saved.
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+            case some approver was not setup properly for the given violation, this array will contain description of
+            missing approvers. For example, Department approver, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_check_policies_final_desired_state:
+      type: object
+      properties:
+        flag:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
+        is_receipt_mandatory:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_check_policies_bulk_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            example: tx0agOdICdbV
+          individual_desired_states:
+            type: array
+            items:
+              $ref: '#/components/schemas/expense_check_policies_individual_desired_states'
+          final_desired_state:
+            $ref: '#/components/schemas/expense_check_policies_final_desired_state'
     expense_comments_out:
       type: object
       additionalProperties: false
@@ -30959,145 +32650,6 @@ components:
             null or default value will be taken for that attribute in the resultant split.
           allOf:
             - $ref: '#/components/schemas/admin_expense_split_object'
-    expense_check_policies_individual_desired_states:
-      type: object
-      properties:
-        add_approver_user_ids:
-          nullable: true
-          type: array
-          items:
-            type: string
-          description: |
-            List of approver ids that the policy calculation suggests adding to report that contains this expense.
-          example:
-            - usBdsdfscl
-            - usLSsdfwqt
-        approver_policy_order:
-          type: integer
-          nullable: true
-          description: |
-            This represents the order of the approver policy related to this individual desired state record.
-            If the policy does not add any approver, this field will be null.
-          example: 1
-        approver_source:
-          type: string
-          enum:
-            - PRIMARY_APPROVER
-            - SECONDARY_APPROVER_1
-            - SECONDARY_APPROVER_2
-            - PROJECT_APPROVER_1
-            - PROJECT_APPROVER_2
-            - DEPARTMENT_HEAD_APPROVER
-            - EMAIL_APPROVER
-            - null
-          nullable: true
-          description: |
-            This represents the type of approver(source) that was added by the approver policy related to this individual
-            desired state record. If the policy does not add any approver, this field will be null.
-          example: PROJECT_APPROVER_1
-        expense_policy_rule_id:
-          type: string
-          description: |
-            This represents the id of the expense policy rule.
-          example: tprabsdfSYqd
-        expense_policy_rule:
-          $ref: '#/components/schemas/expense_policy_rule_embed'
-        run_status:
-          nullable: false
-          type: string
-          enum:
-            - VIOLATED_ACTION_SUCCESS
-            - VIOLATED_ACTION_FAILURE
-            - UNVIOLATED
-          description: |
-            This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
-            If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`,
-            it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved.
-            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was
-            missing or not set up properly, it will fail to take action on the expense when it is saved.
-          example: SUCCESS
-        run_result:
-          type: array
-          items:
-            type: string
-          description: |
-            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
-            case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department approver, Project head, etc.
-          example:
-            - flag the expense
-            - cap the amount
-        amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            Amount that the policy calculation suggests for this expense.
-          example: 500
-        expenses_query_object_params:
-          nullable: true
-          $ref: '#/components/schemas/expense_policy_expenses_query_object'
-    expense_check_policies_final_desired_state:
-      type: object
-      properties:
-        flag:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation this expense should be flagged.
-          example: true
-        amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            Amount that the policy calculation suggests for this expense.
-          example: 500
-        unreportable:
-          type: boolean
-          nullable: false
-          description: |
-            A true value here means, that as per policy calculation this expense should be made unreportable.
-          example: true
-        is_receipt_mandatory:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation this expense requires receipt.
-          example: true
-        add_approver_user_ids:
-          nullable: true
-          type: array
-          items:
-            type: string
-          description: |
-            List of approver ids that the policy calculation suggests adding to report that contains this expense.
-          example:
-            - usBdsdfscl
-            - usLSsdfwqt
-        remove_employee_approver1:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
-          example: true
-        run_status:
-          nullable: false
-          type: string
-          enum:
-            - SUCCESS
-            - FAILURE
-          description: |
-            This represent the run status of the policy.
-          example: SUCCESS
-        run_summary:
-          type: array
-          items:
-            type: string
-          description: |
-            List of human-readable action summaries that the policy calculation suggests for this expense.
-          example:
-            - flag the expense
-            - cap the amount
     expense_check_policies_out:
       type: object
       additionalProperties: false
@@ -31154,6 +32706,21 @@ components:
     reconciliation_entry_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - period_start
+        - period_end
+        - status
+        - reconciled_on
+        - reconciled_by
+        - bridging_entry_change_type
+        - statement_transaction_count
+        - expense_count
+        - statement_total
+        - expense_total
       properties:
         id:
           type: string
@@ -31551,6 +33118,8 @@ components:
         Input to fetch reconciliation transactions stats for a specific card or filter.
         Pass filters using the `query_params` string similar to the GET list API.
         For example, filter by a single card using `corporate_card_id=eq.<card_id>`.
+      required:
+        - query_params
       properties:
         query_params:
           type: string
@@ -31610,6 +33179,7 @@ components:
         - reconciliation_entry_id
         - card_number
         - card_nickname
+        - is_archived
         - user
         - reconciled_on
         - statement_transaction_count
@@ -31618,6 +33188,8 @@ components:
         - expense_total
         - matching_issue_count
         - status
+        - created_at
+        - updated_at
       properties:
         created_at:
           $ref: '#/components/schemas/created_at'
@@ -31641,6 +33213,10 @@ components:
           maxLength: 25
           description: Unique nickname assigned to the card.
           example: Business Card
+        is_archived:
+          type: boolean
+          description: Indicate whether the card is archived.
+          example: false
         user:
           $ref: '#/components/schemas/user_out_embed_nullable'
         reconciled_on:
@@ -31679,6 +33255,8 @@ components:
         updated_at:
           $ref: '#/components/schemas/updated_at'
     reconciliation_eligible_cards_stats_in:
+      required:
+        - query_params
       properties:
         query_params:
           nullable: false

@@ -7670,6 +7670,19 @@ components:
     spender_budget_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - is_enabled
+        - type
+        - amount_limit
+        - amount_spent
+        - amount_remaining
+        - utilisation_percentage
+        - status
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -7803,6 +7816,18 @@ components:
     category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -9005,6 +9030,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -9122,6 +9152,11 @@ components:
               description: |
                 String denoting the card holder's full name
               example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
             amount:
               $ref: '#/components/schemas/amount'
             currency:
@@ -12720,6 +12755,23 @@ components:
           description: |
             Unique nickname assigned to the card
           example: Business Card
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
+        archived_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was archived
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        archived_by_user_id:
+          type: string
+          description: |
+            The unique id of an user who archived the card.
+          nullable: true
         total_transactions_count:
           type: integer
           nullable: false
@@ -12759,6 +12811,9 @@ components:
         - virtual_card_id
         - virtual_card_state
         - nickname
+        - is_archived
+        - archived_at
+        - archived_by_user_id
         - total_transactions_count
         - unassigned_transactions_count
     yodlee_accounts_out:
@@ -12896,6 +12951,11 @@ components:
           description: |
             String denoting the card holder's email
           example: john.doe@example.com
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
     matched_expense_out_embed:
       type: object
       nullable: true
@@ -13309,6 +13369,10 @@ components:
         - last_user_matched_at
         - is_exported
         - metadata
+        - transaction_status
+        - mcc
+        - bank_transaction_number
+        - capitalone_virtual_card_last_four
     corporate_card_transactions_expenses_stats_in:
       type: object
       properties:
@@ -15963,6 +16027,11 @@ components:
           description: percentage of tax levied.
         is_enabled:
           $ref: '#/components/schemas/is_enabled'
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indicates whether this tax group is the default for its percentage bucket.
+          example: false
         code:
           $ref: '#/components/schemas/code'
     file_in:
@@ -18372,6 +18441,23 @@ components:
     personal_card_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - user_id
+        - card_number
+        - bank_name
+        - currency
+        - account_type
+        - yodlee_account_id
+        - yodlee_login_id
+        - yodlee_last_synced_at
+        - yodlee_is_mfa_required
+        - yodlee_fastlink_params
+        - yodlee_is_credential_update_required
+        - yodlee_provider_account_id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -18690,6 +18776,8 @@ components:
               nullable: true
               $ref: '#/components/schemas/employee_out_embed_for_expense_with_department_name'
     personal_card_transactions_stats_in:
+      required:
+        - query_params
       properties:
         query_params:
           nullable: false

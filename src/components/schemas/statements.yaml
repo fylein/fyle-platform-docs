@@ -1320,3 +1320,74 @@ unassigned_cards_from_statement_in:
       example: stmtwownwrng
   required:
     - statement_id
+
+statement_archived_cards_out:
+  properties:
+    number_of_cards:
+      type: integer
+      description: |
+        Number of cards in the statement
+      example: 3
+    number_of_archived_cards:
+      type: integer
+      description: |
+        Number of cards in the statement that are archived in Sage Exp Mgmt
+      example: 1
+    archived_cards:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            allOf:
+              - $ref: './fields.yaml#/id_string'
+            example: bawownwrng
+          card_number:
+            $ref: './fields.yaml#/card_number'
+          nickname:
+            type: string
+            maxLength: 25
+            nullable: true
+            description: |
+              Unique nickname assigned to the card
+            example: 'Business Card'
+          user:
+            $ref: ./user.yaml#/user_out_embed_nullable
+          is_archived:
+            type: boolean
+            description: |
+              If the card is archived in Sage Exp Mgmt
+            nullable: false
+          archived_at:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Timestamp when the card was archived in Sage Exp Mgmt
+            nullable: true
+
+
+statement_archived_cards_in:
+  allOf:
+    - $ref: '#/summary_from_statement_in'
+    - type: object
+      properties:
+        card_mapping:
+          $ref: '#/card_mapping_in'
+      required:
+        - card_mapping
+
+
+statement_archived_cards_ignore_in:
+  allOf:
+    - $ref: '#/statement_archived_cards_in'
+    - type: object
+      properties:
+        archived_card_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            List of archived card ids to be ignored in the statement.
+          example:
+            - bawownwrng
+      required:
+        - archived_card_ids

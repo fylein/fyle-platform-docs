@@ -25,6 +25,9 @@ tags:
   - name: Cost Centers
     description: |
       These APIs gives you access to manage your organisation's Cost Centers
+  - name: Corporate Cards
+    description: |
+      This API gives you access to view Corporate Cards across organisations where user is approver.
   - name: Per Diem Rates
     description: |
       This API gives you access to manage your organisation's Per Diem Rates
@@ -495,6 +498,59 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Update expenses in bulk
+      description: |
+        Update expenses in bulk by approver.
+      operationId: approver_expenses_post_bulk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/approver_expenses_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
         '400':
           description: Bad request
           content:
@@ -1490,6 +1546,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/corporate_cards:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate cards
+      description: |
+        Returns corporate cards from all organisations where user is approver.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_cards_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/cost_centers:
     get:
       tags:
@@ -1742,6 +1849,116 @@ paths:
                     $ref: '#/components/schemas/expense_check_mandatory_fields_out'
         '400':
           description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/check_mandatory_fields/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Check multiple expenses for missing mandatory fields in bulk
+      description: |
+        Before updating multiple expense objects as an approver, you can validate 
+        if all mandatory fields are present using this bulk endpoint.
+      operationId: approver_check_mandatory_fields_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/approver_expense_check_mandatory_fields_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_mandatory_fields_bulk_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /approver/expenses/check_policies/bulk:
+    post:
+      tags:
+        - Expenses
+      summary: Check multiple expenses for policy violations in bulk
+      description: |
+        Approver bulk version of the check_policies API that allows checking 
+        multiple expenses for policy violations in one request.
+
+        **NOTE:** This API can only be used to check policies for existing expenses that you want to update. The API will evaluate all the expenses against the configured policy rules and return an array of policy violation information for each expense in the request payload.
+      operationId: approver_check_policies_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/approver_check_policies_bulk_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expense_check_policies_bulk_out'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -5580,6 +5797,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -5697,6 +5919,11 @@ components:
               description: |
                 String denoting the card holder's full name
               example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
             amount:
               $ref: '#/components/schemas/amount'
             currency:
@@ -6910,6 +7137,110 @@ components:
           description: |
             Specific to per diem related expenses, number of days for which per diem claim is made. <br>
             This field is required for creating Per Diem Expenses.
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Expense id of the expense to be updated.
+          example: txwownwrng
+        merchant:
+          $ref: '#/components/schemas/merchant'
+          nullable: true
+          description: |
+            String denoting the name of the merchant to which the expense was made.
+          example: Uber
+        purpose:
+          type: string
+          nullable: true
+          description: |
+            Purpose of this expense.
+          example: Team lunch
+        cost_center_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          description: |
+            This represents the cost_center's id given by Sage Exp Mgmt during creation of cost center
+            for which this expense is created.
+          example: 1049
+        category_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: false
+          description: |
+            This represents the category's id given by Sage Exp Mgmt during creation of category
+            for which this expense is created.
+          example: 49058
+        project_id:
+          allOf:
+            - $ref: '#/components/schemas/fk_integer'
+          nullable: true
+          description: |
+            This represents the project's id given by Sage Exp Mgmt during creation of project
+            for which this expense is created.
+          example: 92895
+        is_billable:
+          $ref: '#/components/schemas/is_billable'
+          nullable: true
+          description: This fields marks whether a given expense is billable or not.
+          example: true
+        custom_fields:
+          $ref: '#/components/schemas/custom_fields'
+          nullable: false
+        started_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+          nullable: true
+          description: |
+            Start date for travel or per diem related expenses.
+        ended_at:
+          $ref: '#/components/schemas/timestamptz_pst'
+          nullable: true
+          description: |
+            End date for travel or per diem related expenses.
+        travel_classes:
+          $ref: '#/components/schemas/travel_classes'
+          nullable: false
+          description: |
+            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+            index 0 holds onward journey class, index 1 holds return journey travel class.
+          example:
+            - ECONOMY
+            - BUSINESS
+        locations:
+          $ref: '#/components/schemas/locations'
+          nullable: false
+          description: |
+            This field will be present for travel related categories.
+            For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
+        distance:
+          $ref: '#/components/schemas/distance'
+          nullable: true
+          description: Actual distance travelled by employee in travel related expenses.
+        distance_unit:
+          enum:
+            - KM
+            - MILES
+            - null
+          nullable: true
+          description: Unit of distance travelled.
+          example: MILES
+        hotel_is_breakfast_provided:
+          type: boolean
+          nullable: true
+          description: |
+            This field is applicable for only `Hotel` category.
+    approver_expenses_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be updated in bulk by the approver.
+      items:
+        $ref: '#/components/schemas/items'
     attach_files_to_expense_in:
       type: object
       required:
@@ -7940,6 +8271,19 @@ components:
     admin_approver_category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
+        - restricted_spender_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -7988,6 +8332,213 @@ components:
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
         restricted_spender_user_ids:
           $ref: '#/components/schemas/restricted_spender_user_ids'
+    corporate_card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        bank_name:
+          $ref: '#/components/schemas/bank_name'
+        card_number:
+          $ref: '#/components/schemas/card_number'
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        code:
+          type: string
+          nullable: true
+          description: |
+            Id given by external systems like Gmail. To identify whether that entity
+            has been already added to Sage Exp Mgmt or not.
+          example: wgjwgo3ihwljnlsww
+        yodlee_account_id:
+          type: string
+          nullable: true
+          description: |
+            Identifier for the linked Yodlee account.
+          example: yac2cqC4eSaS6
+        last_synced_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last synced.
+        last_assigned_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last assigned.
+        assignor_user_id:
+          type: string
+          description: |
+            The unique id of an user who assigned the card.
+          nullable: true
+          example: uswjwgnwwgo
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        is_capitalone_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Capital One
+          nullable: true
+        is_dummy:
+          type: boolean
+          description: |
+            If the card is a test card
+          nullable: false
+        last_ready_for_verification_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was ready to be verified 
+          example: '2022-02-01T07:20:30.951475+00:00'
+          nullable: true
+        last_verification_attempt_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the last card verification was attempted
+          nullable: true
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was verified
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        verification_status:
+          type: string
+          nullable: false
+          description: |
+            Verification status of the corporate card
+          enum:
+            - VERIFIED
+            - NOT_VERIFIED
+            - READY_FOR_VERIFICATION
+        virtual_card_id:
+          type: string
+          description: |
+            The unique id of the virtual card, if the card is created from virtual card.
+          nullable: true
+          example: viasdfasdfddd
+        virtual_card_state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
+        archived_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was archived
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        archived_by_user_id:
+          type: string
+          description: |
+            The unique id of an user who archived the card.
+          nullable: true
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Sage Exp Mgmt
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Sage Exp Mgmt
+          example: 50
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - bank_name
+        - card_number
+        - cardholder_name
+        - data_feed_source
+        - code
+        - yodlee_account_id
+        - last_synced_at
+        - last_assigned_at
+        - assignor_user_id
+        - is_visa_enrolled
+        - is_mastercard_enrolled
+        - is_capitalone_enrolled
+        - is_dummy
+        - last_ready_for_verification_at
+        - last_verification_attempt_at
+        - last_verified_at
+        - verification_status
+        - virtual_card_id
+        - virtual_card_state
+        - nickname
+        - is_archived
+        - archived_at
+        - archived_by_user_id
+        - total_transactions_count
+        - unassigned_transactions_count
     approver_cost_center_out:
       type: object
       additionalProperties: false
@@ -8499,6 +9050,219 @@ components:
             - 12423
           description: |
             List of IDs of expense fields which are mandatory but are missing.
+    approver_expense_check_mandatory_fields_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be checked for missing mandatory fields by approver.
+      items:
+        $ref: '#/components/schemas/items'
+    expense_check_mandatory_fields_bulk_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        required:
+          - id
+          - missing_amount
+          - missing_currency
+          - missing_receipt
+          - missing_expense_field_ids
+        properties:
+          id:
+            $ref: '#/components/schemas/id_string'
+            example: tx0agOdICdbV
+          missing_amount:
+            type: boolean
+            description: |
+              If this is set to true, then you need to send amount field with expense object.
+            example: false
+          missing_currency:
+            type: boolean
+            description: |
+              If this is set to true, then you need to send currency field with expense object.
+            example: false
+          missing_receipt:
+            type: boolean
+            description: |
+              If this is set to true, then you need to attach receipt to the expense.
+            example: false
+          missing_expense_field_ids:
+            type: array
+            nullable: false
+            items:
+              type: integer
+              nullable: true
+              description: |
+                This id provided by Sage Exp Mgmt to identify an expense field.
+              example: 123
+            example:
+              - 123
+              - 12423
+            description: |
+              List of IDs of expense fields which are mandatory but are missing.
+    approver_check_policies_bulk_in:
+      type: array
+      additionalProperties: false
+      description: |
+        Array of expenses to be validated against expense policy rules by approver.
+      items:
+        $ref: '#/components/schemas/items'
+    expense_check_policies_individual_desired_states:
+      type: object
+      properties:
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        approver_policy_order:
+          type: integer
+          nullable: true
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
+            If the policy does not add any approver, this field will be null.
+          example: 1
+        approver_source:
+          type: string
+          enum:
+            - PRIMARY_APPROVER
+            - SECONDARY_APPROVER_1
+            - SECONDARY_APPROVER_2
+            - PROJECT_APPROVER_1
+            - PROJECT_APPROVER_2
+            - DEPARTMENT_HEAD_APPROVER
+            - EMAIL_APPROVER
+            - null
+          nullable: true
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
+          example: PROJECT_APPROVER_1
+        expense_policy_rule_id:
+          type: string
+          description: |
+            This represents the id of the expense policy rule.
+          example: tprabsdfSYqd
+        expense_policy_rule:
+          $ref: '#/components/schemas/expense_policy_rule_embed'
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - VIOLATED_ACTION_SUCCESS
+            - VIOLATED_ACTION_FAILURE
+            - UNVIOLATED
+          description: |
+            This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
+            If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+            it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved.
+            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was
+            missing or not set up properly, it will fail to take action on the expense when it is saved.
+          example: SUCCESS
+        run_result:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+            case some approver was not setup properly for the given violation, this array will contain description of
+            missing approvers. For example, Department approver, Project head, etc.
+          example:
+            - flag the expense
+            - cap the amount
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        expenses_query_object_params:
+          nullable: true
+          $ref: '#/components/schemas/expense_policy_expenses_query_object'
+    expense_check_policies_final_desired_state:
+      type: object
+      properties:
+        flag:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense should be flagged.
+          example: true
+        amount:
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/amount'
+            - $ref: '#/components/schemas/null_field'
+          description: |
+            Amount that the policy calculation suggests for this expense.
+          example: 500
+        unreportable:
+          type: boolean
+          nullable: false
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
+          example: true
+        is_receipt_mandatory:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation this expense requires receipt.
+          example: true
+        add_approver_user_ids:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
+          example:
+            - usBdsdfscl
+            - usLSsdfwqt
+        remove_employee_approver1:
+          type: boolean
+          description: |
+            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
+          example: true
+        run_status:
+          nullable: false
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+          description: |
+            This represent the run status of the policy.
+          example: SUCCESS
+        run_summary:
+          type: array
+          items:
+            type: string
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense.
+          example:
+            - flag the expense
+            - cap the amount
+    expense_check_policies_bulk_out:
+      type: array
+      additionalProperties: false
+      items:
+        type: object
+        properties:
+          id:
+            allOf:
+              - $ref: '#/components/schemas/id_string'
+            example: tx0agOdICdbV
+          individual_desired_states:
+            type: array
+            items:
+              $ref: '#/components/schemas/expense_check_policies_individual_desired_states'
+          final_desired_state:
+            $ref: '#/components/schemas/expense_check_policies_final_desired_state'
     expense_comments_out:
       type: object
       additionalProperties: false
@@ -9073,145 +9837,6 @@ components:
             null or default value will be taken for that attribute in the resultant split.
           allOf:
             - $ref: '#/components/schemas/admin_expense_split_object'
-    expense_check_policies_individual_desired_states:
-      type: object
-      properties:
-        add_approver_user_ids:
-          nullable: true
-          type: array
-          items:
-            type: string
-          description: |
-            List of approver ids that the policy calculation suggests adding to report that contains this expense.
-          example:
-            - usBdsdfscl
-            - usLSsdfwqt
-        approver_policy_order:
-          type: integer
-          nullable: true
-          description: |
-            This represents the order of the approver policy related to this individual desired state record.
-            If the policy does not add any approver, this field will be null.
-          example: 1
-        approver_source:
-          type: string
-          enum:
-            - PRIMARY_APPROVER
-            - SECONDARY_APPROVER_1
-            - SECONDARY_APPROVER_2
-            - PROJECT_APPROVER_1
-            - PROJECT_APPROVER_2
-            - DEPARTMENT_HEAD_APPROVER
-            - EMAIL_APPROVER
-            - null
-          nullable: true
-          description: |
-            This represents the type of approver(source) that was added by the approver policy related to this individual
-            desired state record. If the policy does not add any approver, this field will be null.
-          example: PROJECT_APPROVER_1
-        expense_policy_rule_id:
-          type: string
-          description: |
-            This represents the id of the expense policy rule.
-          example: tprabsdfSYqd
-        expense_policy_rule:
-          $ref: '#/components/schemas/expense_policy_rule_embed'
-        run_status:
-          nullable: false
-          type: string
-          enum:
-            - VIOLATED_ACTION_SUCCESS
-            - VIOLATED_ACTION_FAILURE
-            - UNVIOLATED
-          description: |
-            This represents the status of policy computation for the input expense object against the policy represented by `expense_policy_rule_id`.
-            If the state is `UNVIOLATED`, it means that the expense is not violating this policy. If the state is `VIOLATION_ACTION_SUCCESS`,
-            it means that the expense is violating this policy and action stated in the object will be applied to the expense when it is saved.
-            However, if the state is `VIOLATION_ACTION_FAILURE`, it means that this policy is violated for the expense but since some approver was
-            missing or not set up properly, it will fail to take action on the expense when it is saved.
-          example: SUCCESS
-        run_result:
-          type: array
-          items:
-            type: string
-          description: |
-            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
-            case some approver was not setup properly for the given violation, this array will contain description of
-            missing approvers. For example, Department approver, Project head, etc.
-          example:
-            - flag the expense
-            - cap the amount
-        amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            Amount that the policy calculation suggests for this expense.
-          example: 500
-        expenses_query_object_params:
-          nullable: true
-          $ref: '#/components/schemas/expense_policy_expenses_query_object'
-    expense_check_policies_final_desired_state:
-      type: object
-      properties:
-        flag:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation this expense should be flagged.
-          example: true
-        amount:
-          nullable: true
-          anyOf:
-            - $ref: '#/components/schemas/amount'
-            - $ref: '#/components/schemas/null_field'
-          description: |
-            Amount that the policy calculation suggests for this expense.
-          example: 500
-        unreportable:
-          type: boolean
-          nullable: false
-          description: |
-            A true value here means, that as per policy calculation this expense should be made unreportable.
-          example: true
-        is_receipt_mandatory:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation this expense requires receipt.
-          example: true
-        add_approver_user_ids:
-          nullable: true
-          type: array
-          items:
-            type: string
-          description: |
-            List of approver ids that the policy calculation suggests adding to report that contains this expense.
-          example:
-            - usBdsdfscl
-            - usLSsdfwqt
-        remove_employee_approver1:
-          type: boolean
-          description: |
-            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
-          example: true
-        run_status:
-          nullable: false
-          type: string
-          enum:
-            - SUCCESS
-            - FAILURE
-          description: |
-            This represent the run status of the policy.
-          example: SUCCESS
-        run_summary:
-          type: array
-          items:
-            type: string
-          description: |
-            List of human-readable action summaries that the policy calculation suggests for this expense.
-          example:
-            - flag the expense
-            - cap the amount
     expense_check_policies_out:
       type: object
       additionalProperties: false
@@ -10842,15 +11467,13 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
   parameters:
-    id:
+    q:
       in: query
-      name: id
-      description: |
-        A resource ID
+      name: q
+      description: A search query to filter the results.
       schema:
         type: string
-        example:
-          - eq.ouwruogwnngg
+        example: Ritas
     created_at:
       in: query
       name: created_at
@@ -10867,15 +11490,15 @@ components:
       schema:
         type: string
         example: gte.2020-06-01T00:00:00.000-08:00
-    display_name:
+    order:
       in: query
-      name: display_name
+      name: order
       description: |
-        Supported operators are `eq`, `like`, `in`.<br>
-        display_name=in.(value1,value2)
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
       schema:
         type: string
-        example: like.Fast*
+        example: updated_at.desc,id
     offset:
       in: query
       name: offset
@@ -10894,22 +11517,24 @@ components:
         example: 20
         default: 50
         maximum: 200
-    order:
+    id:
       in: query
-      name: order
+      name: id
       description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `column_name.desc`
+        A resource ID
       schema:
         type: string
-        example: updated_at.desc,id
-    q:
+        example:
+          - eq.ouwruogwnngg
+    display_name:
       in: query
-      name: q
-      description: A search query to filter the results.
+      name: display_name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        display_name=in.(value1,value2)
       schema:
         type: string
-        example: Ritas
+        example: like.Fast*
     expense_id:
       in: query
       name: expense_id
