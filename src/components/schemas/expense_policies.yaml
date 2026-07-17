@@ -35,6 +35,8 @@ expense_policy_in:
         - expense_amount_max
         - expense_payment_modes
         - expense_payment_modes_op
+        - expense_merchants
+        - expense_merchants_op
         - expense_without_ccc_match_allowed
         - employee_department_ids
         - employee_department_ids_op
@@ -232,6 +234,21 @@ expense_policy_in:
         - $ref: ./fields.yaml#/contains_operator
       description: |
           _Note: This field is mandatory if the field `expense_payment_modes` is present in the request body._
+    expense_merchants:
+      type: array
+      items:
+        type: string
+      description: |
+        List of merchant names to be checked against expense merchant for applying this policy rule. <br>
+        _Note: You need to use field `expense_merchants_op` along with this field._ <br>
+        _Note: This field is allowed only when `expense_without_receipt_allowed` is false._
+      example: ['Uber', 'Amazon']
+    expense_merchants_op:
+      allOf:
+        - $ref: ./fields.yaml#/contains_from_list_operator
+      description: |
+          _Note: This field is mandatory if the field `expense_merchants` is present in the request body._ <br>
+          _Note: This field is allowed only when `expense_without_receipt_allowed` is false._
     expense_without_ccc_match_allowed:
       type: boolean
       description: |
@@ -669,6 +686,20 @@ expense_policy_out:
       nullable: true
       allOf:
         - $ref: ./fields.yaml#/contains_operator
+    expense_merchants:
+      nullable: true
+      type: array
+      items:
+        type: string
+      description: |
+        List of merchant names considered by this policy rule.
+      example: ['Uber', 'Amazon']
+    expense_merchants_op:
+      nullable: true
+      allOf:
+        - $ref: ./fields.yaml#/contains_from_list_operator
+      description: |
+        Operator to apply on `expense_merchants`.
     expense_without_ccc_match_allowed:
       type: boolean
       description: |
