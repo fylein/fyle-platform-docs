@@ -42,6 +42,58 @@ mileage_rate_out:
       $ref: ./fields.yaml#/is_enabled
     code:
       $ref: ./fields.yaml#/code
+    vehicle_ownership:
+      type: string
+      nullable: true
+      enum:
+        - PERSONAL
+        - COMPANY
+        - null
+      description: Vehicle ownership for advanced mileage rates. `null` for basic mileage rates.
+    vehicle_category:
+      type: string
+      nullable: true
+      enum:
+        - CAR
+        - MOTORCYCLE
+        - BICYCLE
+        - null
+      description: Vehicle category for advanced mileage rates. `null` for basic mileage rates.
+    fuel_type:
+      type: string
+      nullable: true
+      enum:
+        - PETROL
+        - DIESEL
+        - LPG
+        - ELECTRIC
+        - null
+      description: Fuel type for advanced car mileage rates. `null` otherwise.
+    engine_capacity:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: Engine capacity band for petrol, diesel, and LPG advanced car rates. An empty object for basic mileage rates.
+      properties:
+        from:
+          type: string
+          nullable: true
+          example: '0'
+        to:
+          type: string
+          nullable: true
+          example: '1400'
+        unit:
+          type: string
+          example: cc
+    charging_location:
+      type: string
+      nullable: true
+      enum:
+        - HOME
+        - PUBLIC
+        - null
+      description: Charging location for advanced electric car mileage rates. `null` otherwise.
 
 mileage_rate_out_embed:
   type: object
@@ -81,6 +133,11 @@ mileage_rate_in:
     - rate
     - vehicle_type
     - is_enabled
+    - vehicle_ownership
+    - vehicle_category
+    - fuel_type
+    - engine_capacity
+    - charging_location
   properties:
     id:
       $ref: './fields.yaml#/id_integer'
@@ -119,3 +176,55 @@ mileage_rate_in:
       $ref: ./fields.yaml#/is_enabled
     code:
       $ref: ./fields.yaml#/code
+    vehicle_ownership:
+      type: string
+      nullable: true
+      enum:
+        - PERSONAL
+        - COMPANY
+        - null
+      description: Required in every request. Use `null` for a basic mileage rate; an advanced rate requires a non-null value.
+    vehicle_category:
+      type: string
+      nullable: true
+      enum:
+        - CAR
+        - MOTORCYCLE
+        - BICYCLE
+        - null
+      description: Required in every request. Use `null` for a basic mileage rate; an advanced rate requires a non-null value.
+    fuel_type:
+      type: string
+      nullable: true
+      enum:
+        - PETROL
+        - DIESEL
+        - LPG
+        - ELECTRIC
+        - null
+      description: Required in every request. Use `null` for motorcycles, bicycles, and basic mileage rates.
+    engine_capacity:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: Required in every request. Use an empty object for electric and basic mileage rates.
+      properties:
+        from:
+          type: string
+          nullable: true
+          example: '0'
+        to:
+          type: string
+          nullable: true
+          example: '1400'
+        unit:
+          type: string
+          example: cc
+    charging_location:
+      type: string
+      nullable: true
+      enum:
+        - HOME
+        - PUBLIC
+        - null
+      description: Required in every request. Use `null` unless the rate is an advanced electric car.
