@@ -1281,7 +1281,7 @@ components:
       description: |
         This represents the name of the resource. This should be unique in an organization
       example: foo123
-    department_out_embed:
+    department_out_employee_embed:
       type: object
       additionalProperties: false
       nullable: true
@@ -1298,11 +1298,6 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-        display_name:
-          type: string
-          example: Sales / Outbound Sales
-          description: |
-            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
     timestamptz_utc:
       type: string
       format: date-time
@@ -1717,7 +1712,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         is_enabled:
           allOf:
             - $ref: '#/components/schemas/is_enabled'
@@ -2243,6 +2238,28 @@ components:
       maxLength: 255
       nullable: true
       example: dept9in4oIHpdR
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
@@ -2405,6 +2422,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -2522,6 +2544,11 @@ components:
               description: |
                 String denoting the card holder's full name
               example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
             amount:
               $ref: '#/components/schemas/amount'
             currency:

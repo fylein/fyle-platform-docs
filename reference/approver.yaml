@@ -25,6 +25,9 @@ tags:
   - name: Cost Centers
     description: |
       These APIs gives you access to manage your organisation's Cost Centers
+  - name: Corporate Cards
+    description: |
+      This API gives you access to view Corporate Cards across organisations where user is approver.
   - name: Per Diem Rates
     description: |
       This API gives you access to manage your organisation's Per Diem Rates
@@ -1543,6 +1546,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/corporate_cards:
+    get:
+      tags:
+        - Corporate Cards
+      summary: List corporate cards
+      description: |
+        Returns corporate cards from all organisations where user is approver.
+
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      operationId: corporate_cards_list
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/corporate_card_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /approver/cost_centers:
     get:
       tags:
@@ -5729,6 +5783,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -5846,6 +5905,11 @@ components:
               description: |
                 String denoting the card holder's full name
               example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
             amount:
               $ref: '#/components/schemas/amount'
             currency:
@@ -7783,6 +7847,23 @@ components:
             - APPROVAL_REJECTED
           description: |
             State of this advance request approval
+    department_out_employee_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
     employee_out_embed:
       type: object
       additionalProperties: false
@@ -7808,7 +7889,7 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
     user_id_nullable:
       type: string
       description: |
@@ -8193,6 +8274,19 @@ components:
     admin_approver_category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
+        - restricted_spender_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -8241,6 +8335,213 @@ components:
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
         restricted_spender_user_ids:
           $ref: '#/components/schemas/restricted_spender_user_ids'
+    corporate_card_out:
+      type: object
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        user_id:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            The unique id of an user to whom the card is assigned
+          example: uswjwgnwwgo
+        user:
+          $ref: '#/components/schemas/user_out_embed_nullable'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        bank_name:
+          $ref: '#/components/schemas/bank_name'
+        card_number:
+          $ref: '#/components/schemas/card_number'
+        cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        data_feed_source:
+          type: string
+          nullable: true
+          description: |
+            signifies the source of how card is added and how further card transactions could be synced
+          example: BANK FEED - CDF
+        code:
+          type: string
+          nullable: true
+          description: |
+            Id given by external systems like Gmail. To identify whether that entity
+            has been already added to Sage Exp Mgmt or not.
+          example: wgjwgo3ihwljnlsww
+        yodlee_account_id:
+          type: string
+          nullable: true
+          description: |
+            Identifier for the linked Yodlee account.
+          example: yac2cqC4eSaS6
+        last_synced_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last synced.
+        last_assigned_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: |
+            Signifies when this card was last assigned.
+        assignor_user_id:
+          type: string
+          description: |
+            The unique id of an user who assigned the card.
+          nullable: true
+          example: uswjwgnwwgo
+        is_visa_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with real time feed from visa
+          nullable: false
+        is_mastercard_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Mastercard
+          nullable: false
+        is_capitalone_enrolled:
+          type: boolean
+          description: |
+            If the card is enrolled with realtime feed from Capital One
+          nullable: true
+        is_dummy:
+          type: boolean
+          description: |
+            If the card is a test card
+          nullable: false
+        last_ready_for_verification_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was ready to be verified 
+          example: '2022-02-01T07:20:30.951475+00:00'
+          nullable: true
+        last_verification_attempt_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the last card verification was attempted
+          nullable: true
+        last_verified_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was verified
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        verification_status:
+          type: string
+          nullable: false
+          description: |
+            Verification status of the corporate card
+          enum:
+            - VERIFIED
+            - NOT_VERIFIED
+            - READY_FOR_VERIFICATION
+        virtual_card_id:
+          type: string
+          description: |
+            The unique id of the virtual card, if the card is created from virtual card.
+          nullable: true
+          example: viasdfasdfddd
+        virtual_card_state:
+          type: string
+          description: |
+            Status of the virtual card
+          nullable: true
+          enum:
+            - ACTIVE
+            - PREACTIVE
+            - INACTIVE
+            - EXPIRED
+            - DELETED
+            - USED
+            - null
+          example: ACTIVE
+        nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        is_archived:
+          type: boolean
+          description: |
+            Indicates whether the corporate card is archived.
+          nullable: false
+        archived_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the card was archived
+          example: '2022-02-01T07:20:39.207250+00:00'
+          nullable: true
+        archived_by_user_id:
+          type: string
+          description: |
+            The unique id of an user who archived the card.
+          nullable: true
+        total_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of transactions for the card, in Sage Exp Mgmt
+          example: 100
+        unassigned_transactions_count:
+          type: integer
+          nullable: false
+          description: |
+            The total number of unassigned transactions for the card, in Sage Exp Mgmt
+          example: 50
+      required:
+        - id
+        - org_id
+        - user_id
+        - user
+        - created_at
+        - updated_at
+        - bank_name
+        - card_number
+        - cardholder_name
+        - data_feed_source
+        - code
+        - yodlee_account_id
+        - last_synced_at
+        - last_assigned_at
+        - assignor_user_id
+        - is_visa_enrolled
+        - is_mastercard_enrolled
+        - is_capitalone_enrolled
+        - is_dummy
+        - last_ready_for_verification_at
+        - last_verification_attempt_at
+        - last_verified_at
+        - verification_status
+        - virtual_card_id
+        - virtual_card_state
+        - nickname
+        - is_archived
+        - archived_at
+        - archived_by_user_id
+        - total_transactions_count
+        - unassigned_transactions_count
     approver_cost_center_out:
       type: object
       additionalProperties: false
@@ -9858,7 +10159,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         is_enabled:
           allOf:
             - $ref: '#/components/schemas/is_enabled'
@@ -11174,15 +11475,13 @@ components:
         id:
           $ref: '#/components/schemas/id_string'
   parameters:
-    id:
+    q:
       in: query
-      name: id
-      description: |
-        A resource ID
+      name: q
+      description: A search query to filter the results.
       schema:
         type: string
-        example:
-          - eq.ouwruogwnngg
+        example: Ritas
     created_at:
       in: query
       name: created_at
@@ -11199,15 +11498,15 @@ components:
       schema:
         type: string
         example: gte.2020-06-01T00:00:00.000-08:00
-    display_name:
+    order:
       in: query
-      name: display_name
+      name: order
       description: |
-        Supported operators are `eq`, `like`, `in`.<br>
-        display_name=in.(value1,value2)
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
       schema:
         type: string
-        example: like.Fast*
+        example: updated_at.desc,id
     offset:
       in: query
       name: offset
@@ -11226,22 +11525,24 @@ components:
         example: 20
         default: 50
         maximum: 200
-    order:
+    id:
       in: query
-      name: order
+      name: id
       description: |
-        use comma separated column names for sorting the results. <br>
-        For sorting in descending order, use `column_name.desc`
+        A resource ID
       schema:
         type: string
-        example: updated_at.desc,id
-    q:
+        example:
+          - eq.ouwruogwnngg
+    display_name:
       in: query
-      name: q
-      description: A search query to filter the results.
+      name: display_name
+      description: |
+        Supported operators are `eq`, `like`, `in`.<br>
+        display_name=in.(value1,value2)
       schema:
         type: string
-        example: Ritas
+        example: like.Fast*
     expense_id:
       in: query
       name: expense_id
