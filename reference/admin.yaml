@@ -18783,6 +18783,9 @@ components:
           example: epc1a2f3farmk
         comment_type:
           type: string
+          enum:
+            - LOST_RECEIPT_REASON
+            - POLICY_VIOLATION_REASON
           description: Type of the policy comment
         comment_text:
           type: string
@@ -29061,6 +29064,15 @@ components:
           - COMPANY_ACCOUNT
           - null
       example: PERSONAL_CASH_ACCOUNT
+    contains_from_list_operator:
+      nullable: true
+      type: string
+      enum:
+        - CONTAINS_ANY_FROM_LIST
+        - CONTAINS_NONE_FROM_LIST
+      description: |
+        Value signifying the operator for matching values from a list field.
+      example: CONTAINS_ANY_FROM_LIST
     vehicle_type:
       type: string
       enum:
@@ -29303,6 +29315,22 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
+        expense_merchants:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of merchant names considered by this policy rule.
+          example:
+            - Uber
+            - Amazon
+        expense_merchants_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_from_list_operator'
+          description: |
+            Operator to apply on `expense_merchants`.
         expense_without_ccc_match_allowed:
           type: boolean
           description: |
@@ -29441,6 +29469,12 @@ components:
             If it is set to true, then a warning is shown to the employee, whenever he attempts to create an expense that violates this policy rule.
           default: false
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            If it is set to true, then entering a policy violation reason becomes mandatory for expenses violating this policy rule.
+          default: false
+          example: false
         action_make_unreportable:
           type: boolean
           description: |
@@ -29547,6 +29581,8 @@ components:
             - expense_amount_max
             - expense_payment_modes
             - expense_payment_modes_op
+            - expense_merchants
+            - expense_merchants_op
             - expense_without_ccc_match_allowed
             - employee_department_ids
             - employee_department_ids_op
@@ -29557,6 +29593,7 @@ components:
             - employee_titles_op
             - action_flag
             - action_show_warning
+            - policy_violation_reason_required
             - action_make_unreportable
             - description
           default: true
@@ -29749,6 +29786,23 @@ components:
             - $ref: '#/components/schemas/contains_operator'
           description: |
             _Note: This field is mandatory if the field `expense_payment_modes` is present in the request body._
+        expense_merchants:
+          type: array
+          items:
+            type: string
+          description: |
+            List of merchant names to be checked against expense merchant for applying this policy rule. <br>
+            _Note: You need to use field `expense_merchants_op` along with this field._ <br>
+            _Note: This field is allowed only when `expense_without_receipt_allowed` is false._
+          example:
+            - Uber
+            - Amazon
+        expense_merchants_op:
+          allOf:
+            - $ref: '#/components/schemas/contains_from_list_operator'
+          description: |
+            _Note: This field is mandatory if the field `expense_merchants` is present in the request body._ <br>
+            _Note: This field is allowed only when `expense_without_receipt_allowed` is false._
         expense_without_ccc_match_allowed:
           type: boolean
           description: |
@@ -29900,6 +29954,13 @@ components:
             If it is set to true, then a warning is shown to the employee, whenever he attempts to create an expense that violates this policy rule.
           default: false
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            If it is set to true, then entering a policy violation reason becomes mandatory for expenses violating this policy rule. <br>
+            _Note: This can be true only when `action_show_warning` is true._
+          default: false
+          example: false
         action_make_unreportable:
           type: boolean
           description: |
@@ -29995,6 +30056,11 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            A true value here means that entering a policy violation reason is mandatory for this policy rule.
+          example: false
         action_make_unreportable:
           type: boolean
           nullable: false
