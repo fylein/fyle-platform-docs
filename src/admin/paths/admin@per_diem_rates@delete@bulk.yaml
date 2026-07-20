@@ -1,0 +1,58 @@
+post:
+  tags:
+    - Per Diem Rates
+  summary: Deletes per diem rates
+  description: |
+    Deletes unused per diem rates. If any of the per diem rate in input is used in other resources then validation error is raised.
+  operationId: per_diem_rates_delete_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/per_diem_rate.yaml#/per_diem_rate_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                nullable: true
+                example: |
+                  Can not delete per diem rate(s) used in other resources like expense.
+              data:
+                type: object
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
