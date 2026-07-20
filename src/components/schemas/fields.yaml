@@ -346,6 +346,16 @@ contains_operator:
     Value signifying the operator for the field
   example: IN
 
+contains_from_list_operator:
+  nullable: true
+  type: string
+  enum:
+    - CONTAINS_ANY_FROM_LIST
+    - CONTAINS_NONE_FROM_LIST
+  description: >
+    Value signifying the operator for matching values from a list field.
+  example: CONTAINS_ANY_FROM_LIST
+
 delegation_access_scope:
   type: array
   description: |
@@ -374,6 +384,11 @@ expense_policy_rule_embed:
       description: |
         A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
       example: True
+    policy_violation_reason_required:
+      type: boolean
+      description: |
+        A true value here means that entering a policy violation reason is mandatory for this policy rule.
+      example: false
     action_make_unreportable:
       type: boolean
       nullable: false
@@ -1133,6 +1148,9 @@ missing_mandatory_fields:
 schedule_config:
   type: object
   nullable: false
+  required:
+    - type
+    - when
   properties:
     type:
       nullable: false
@@ -1897,6 +1915,13 @@ commute_details:
 commute_location_not_nullable:
   type: object
   nullable: false
+  required:
+    - city
+    - state
+    - country
+    - formatted_address
+    - latitude
+    - longitude
   properties:
     city:
       type: string
@@ -1929,6 +1954,11 @@ commute_details_in:
   additionalProperties: False
   description: |
     Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+  required:
+    - distance
+    - distance_unit
+    - home_location
+    - work_location
   properties:
     home_location:
       allOf:
@@ -1967,6 +1997,11 @@ has_accepted_invite:
 delegatee:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - start_at
+    - end_at
+    - scopes
   properties:
     user_id:
       type: string
