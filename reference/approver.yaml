@@ -5575,6 +5575,9 @@ components:
           example: epc1a2f3farmk
         comment_type:
           type: string
+          enum:
+            - LOST_RECEIPT_REASON
+            - POLICY_VIOLATION_REASON
           description: Type of the policy comment
         comment_text:
           type: string
@@ -7844,6 +7847,23 @@ components:
             - APPROVAL_REJECTED
           description: |
             State of this advance request approval
+    department_out_employee_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
     employee_out_embed:
       type: object
       additionalProperties: false
@@ -7869,7 +7889,7 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
     user_id_nullable:
       type: string
       description: |
@@ -8254,6 +8274,19 @@ components:
     admin_approver_category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
+        - restricted_spender_user_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -8642,6 +8675,11 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            A true value here means that entering a policy violation reason is mandatory for this policy rule.
+          example: false
         action_make_unreportable:
           type: boolean
           nullable: false
@@ -10123,7 +10161,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         is_enabled:
           allOf:
             - $ref: '#/components/schemas/is_enabled'
