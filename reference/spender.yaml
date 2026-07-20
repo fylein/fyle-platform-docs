@@ -5950,7 +5950,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/expense_out'
+                      $ref: '#/components/schemas/expense_out_with_department_name'
         '400':
           description: Bad request
           content:
@@ -6121,6 +6121,9 @@ paths:
                       type: array
                       items:
                         type: object
+                        required:
+                          - comment_type
+                          - comment_text
                         properties:
                           comment_type:
                             type: string
@@ -7670,6 +7673,19 @@ components:
     spender_budget_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - is_enabled
+        - type
+        - amount_limit
+        - amount_spent
+        - amount_remaining
+        - utilisation_percentage
+        - status
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -7728,6 +7744,19 @@ components:
     project_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - sub_project
+        - display_name
+        - is_enabled
+        - code
+        - description
+        - category_ids
+        - default_billable
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -7803,6 +7832,18 @@ components:
     category_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - display_name
+        - code
+        - is_enabled
+        - name
+        - sub_category
+        - system_category
+        - restricted_project_ids
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -7966,6 +8007,17 @@ components:
     mileage_rate_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - unit
+        - vehicle_type
+        - rate
+        - slab_rates
+        - is_enabled
+        - code
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -7992,6 +8044,9 @@ components:
           type: array
           items:
             type: object
+            required:
+              - rate
+              - limit
             properties:
               rate:
                 type: number
@@ -8094,6 +8149,17 @@ components:
     recently_used_fields_out:
       type: object
       additionalProperties: false
+      required:
+        - org_id
+        - user_id
+        - category_ids
+        - cost_center_ids
+        - project_ids
+        - start_locations
+        - locations
+        - end_locations
+        - vehicle_types
+        - currencies
       properties:
         user_id:
           $ref: '#/components/schemas/user_id'
@@ -8225,6 +8291,20 @@ components:
     department_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - sub_department
+        - is_enabled
+        - code
+        - description
+        - department_head_user_ids
+        - doc_url
+        - department_head_users
+        - display_name
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -8719,6 +8799,9 @@ components:
           example: epc1a2f3farmk
         comment_type:
           type: string
+          enum:
+            - LOST_RECEIPT_REASON
+            - POLICY_VIOLATION_REASON
           description: Type of the policy comment
         comment_text:
           type: string
@@ -10656,6 +10739,17 @@ components:
     per_diem_rate_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - is_enabled
+        - name
+        - currency
+        - rate
+        - code
+        - description
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -11676,6 +11770,16 @@ components:
     report_filters_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - is_shared
+        - name
+        - org_id
+        - query_string
+        - user_id
+        - sub_feature
       properties:
         id:
           allOf:
@@ -12095,6 +12199,23 @@ components:
             - APPROVAL_REJECTED
           description: |
             State of this advance request approval
+    department_out_employee_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
     employee_out_embed:
       type: object
       additionalProperties: false
@@ -12120,7 +12241,7 @@ components:
           $ref: '#/components/schemas/department_id'
         department:
           nullable: true
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
     user_id_nullable:
       type: string
       description: |
@@ -13332,6 +13453,10 @@ components:
         - last_user_matched_at
         - is_exported
         - metadata
+        - transaction_status
+        - mcc
+        - bank_transaction_number
+        - capitalone_virtual_card_last_four
     corporate_card_transactions_expenses_stats_in:
       type: object
       properties:
@@ -15015,7 +15140,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         level_id:
           $ref: '#/components/schemas/fk_string'
         level:
@@ -15620,20 +15745,24 @@ components:
           nullable: true
           additionalProperties: false
           description: Settings for user's locale and timezone
+          required:
+            - timezone
+            - abbreviation
+            - offset
           properties:
             timezone:
               type: string
-              nullable: true
+              nullable: false
               example: Asia/Kolkata
               description: User's timezone
             abbreviation:
               type: string
-              nullable: true
+              nullable: false
               example: IST
               description: Timezone abbreviation
             offset:
               type: string
-              nullable: true
+              nullable: false
               example: '05:30:00'
               description: Timezone offset from UTC
         is_personal_cards_enabled:
@@ -15658,13 +15787,16 @@ components:
     spender_employee_settings_in:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - employee_id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
-          description: Unique identifier for the employee settings (optional)
+          description: Unique identifier for the employee settings
         employee_id:
           $ref: '#/components/schemas/id_string'
-          description: Unique identifier of the employee (optional)
+          description: Unique identifier of the employee
         cost_center_ids:
           type: array
           items:
@@ -15692,22 +15824,35 @@ components:
           description: List of categories that the employee has access to
         locale:
           type: object
+          nullable: true
           additionalProperties: false
           description: Settings for user's locale and timezone
+          required:
+            - timezone
+            - abbreviation
+            - offset
           properties:
             timezone:
               type: string
+              nullable: false
               description: User's timezone
             abbreviation:
               type: string
+              nullable: false
               description: Timezone abbreviation
             offset:
               type: string
+              nullable: false
               description: Timezone offset from UTC
         insta_fyle_settings:
           type: object
           additionalProperties: false
           description: Settings for InstaFyle receipt scanning and data extraction
+          required:
+            - allowed
+            - enabled
+            - static_camera_overlay_enabled
+            - extract_fields
           properties:
             allowed:
               type: boolean
@@ -15727,6 +15872,15 @@ components:
           type: object
           additionalProperties: false
           description: Settings for email and push notifications
+          required:
+            - email_allowed
+            - email_enabled
+            - email_unsubscribed_events
+            - push_allowed
+            - push_enabled
+            - push_unsubscribed_events
+            - notify_user
+            - notify_delegatee
           properties:
             email_allowed:
               type: boolean
@@ -15760,6 +15914,9 @@ components:
           type: object
           additionalProperties: false
           description: Settings for automatic form filling in expenses
+          required:
+            - allowed
+            - enabled
           properties:
             allowed:
               type: boolean
@@ -15771,6 +15928,9 @@ components:
           type: object
           additionalProperties: false
           description: Settings for data extraction from receipts
+          required:
+            - allowed
+            - enabled
           properties:
             allowed:
               type: boolean
@@ -15782,6 +15942,9 @@ components:
           type: object
           additionalProperties: false
           description: Settings for in-app chat functionality
+          required:
+            - allowed
+            - enabled
           properties:
             allowed:
               type: boolean
@@ -15797,6 +15960,10 @@ components:
           type: object
           additionalProperties: false
           description: Settings for payment modes
+          required:
+            - allowed
+            - enabled
+            - allowed_payment_modes
           properties:
             allowed:
               type: boolean
@@ -15962,6 +16129,16 @@ components:
     tax_group_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - code
+        - name
+        - percentage
+        - is_enabled
+        - is_default
       properties:
         id:
           allOf:
@@ -16061,6 +16238,8 @@ components:
             Returns null if linked to an expense or advance request in approved or higher state.
     file_generate_urls_action_in:
       type: object
+      required:
+        - id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -16149,6 +16328,15 @@ components:
           - COMPANY_ACCOUNT
           - null
       example: PERSONAL_CASH_ACCOUNT
+    contains_from_list_operator:
+      nullable: true
+      type: string
+      enum:
+        - CONTAINS_ANY_FROM_LIST
+        - CONTAINS_NONE_FROM_LIST
+      description: |
+        Value signifying the operator for matching values from a list field.
+      example: CONTAINS_ANY_FROM_LIST
     vehicle_type:
       type: string
       enum:
@@ -16164,6 +16352,74 @@ components:
     expense_policy_out:
       type: object
       additionalProperties: true
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - is_enabled
+        - is_retired
+        - description
+        - source
+        - creator_user_id
+        - creator_user
+        - approver_order
+        - is_approver_policy
+        - employee_department_ids
+        - employee_department_ids_op
+        - employee_level_ids
+        - employee_level_ids_op
+        - employee_titles
+        - employee_titles_op
+        - employee_user_ids
+        - employee_user_ids_op
+        - employee_custom_fields
+        - employee_custom_fields_op
+        - employee_locations
+        - employee_locations_op
+        - expense_category_ids
+        - expense_category_ids_op
+        - expense_limit_type
+        - expense_amount_max
+        - expense_amount_min
+        - expense_creation_delay_days_max
+        - expense_currency
+        - expense_without_receipt_allowed
+        - expense_allowed_distance_difference_percentage
+        - expense_flight_travel_class
+        - expense_project_ids
+        - expense_project_ids_op
+        - expense_train_travel_class
+        - expense_spent_at_max
+        - expense_spent_at_min
+        - expense_locations
+        - expense_locations_op
+        - expense_allowed_exchange_rate_difference_percentage
+        - expense_include_foreign_currency
+        - expense_annual_distance_max
+        - expense_vehicle_type
+        - expense_cost_center_ids
+        - expense_cost_center_ids_op
+        - expense_distance_max
+        - expense_distance_min
+        - expense_custom_fields
+        - expense_custom_fields_op
+        - expense_without_ccc_match_allowed
+        - expense_fiscal_start_month
+        - expense_payment_modes
+        - expense_payment_modes_op
+        - action_flag
+        - action_show_warning
+        - action_cap_amount
+        - action_make_unreportable
+        - action_remove_employee_approver1
+        - action_add_employee_approver2
+        - action_add_employee_approver3
+        - action_add_project_approver1
+        - action_add_project_approver2
+        - action_add_department_head_approver
+        - action_add_approver_user_ids
+        - action_override_distance_slab_rate
       properties:
         id:
           allOf:
@@ -16391,6 +16647,22 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/contains_operator'
+        expense_merchants:
+          nullable: true
+          type: array
+          items:
+            type: string
+          description: |
+            List of merchant names considered by this policy rule.
+          example:
+            - Uber
+            - Amazon
+        expense_merchants_op:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/contains_from_list_operator'
+          description: |
+            Operator to apply on `expense_merchants`.
         expense_without_ccc_match_allowed:
           type: boolean
           description: |
@@ -16529,6 +16801,12 @@ components:
             If it is set to true, then a warning is shown to the employee, whenever he attempts to create an expense that violates this policy rule.
           default: false
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            If it is set to true, then entering a policy violation reason becomes mandatory for expenses violating this policy rule.
+          default: false
+          example: false
         action_make_unreportable:
           type: boolean
           description: |
@@ -16617,6 +16895,11 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            A true value here means that entering a policy violation reason is mandatory for this policy rule.
+          example: false
         action_make_unreportable:
           type: boolean
           nullable: false
@@ -16828,6 +17111,10 @@ components:
     expense_policy_states_out:
       type: object
       additionalProperties: false
+      required:
+        - expense_id
+        - individual_desired_states
+        - final_desired_state
       properties:
         expense_id:
           type: string
@@ -17777,6 +18064,16 @@ components:
     expense_filters_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - user_id
+        - name
+        - is_shared
+        - query_string
+        - sub_feature
       properties:
         id:
           allOf:
@@ -18400,6 +18697,23 @@ components:
     personal_card_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - user_id
+        - card_number
+        - bank_name
+        - currency
+        - account_type
+        - yodlee_account_id
+        - yodlee_login_id
+        - yodlee_last_synced_at
+        - yodlee_is_mfa_required
+        - yodlee_fastlink_params
+        - yodlee_is_credential_update_required
+        - yodlee_provider_account_id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -18635,7 +18949,91 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    employee_out_embed_for_expense_with_department_name:
+      type: object
+      additionalProperties: false
+      nullable: true
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        user:
+          $ref: '#/components/schemas/user_out_embed'
+        code:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: E84122
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        org_name:
+          $ref: '#/components/schemas/org_name'
+        department_id:
+          nullable: true
+          $ref: '#/components/schemas/department_id'
+        department:
+          nullable: true
+          $ref: '#/components/schemas/department_out_embed'
+        level:
+          $ref: '#/components/schemas/level_out_embed'
+        location:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Bangalore Ofc
+        title:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Branch Manager
+        business_unit:
+          type: string
+          maxLength: 255
+          nullable: true
+          example: Finance ops
+        custom_fields:
+          type: array
+          nullable: true
+          description: |
+            Custom fields
+          items:
+            $ref: '#/components/schemas/custom_field'
+        flattened_custom_field:
+          $ref: '#/components/schemas/flattened_custom_field'
+        has_accepted_invite:
+          $ref: '#/components/schemas/has_accepted_invite'
+        is_enabled:
+          allOf:
+            - $ref: '#/components/schemas/is_enabled'
+          description: |
+            This field indicates whether the employee is enabled in the org.
+        mobile:
+          type: string
+          nullable: true
+          example: '+12131234567'
+          items:
+            $ref: '#/components/schemas/phone_number'
+          description: |
+            Mobile number of the employee
+        joined_at:
+          $ref: '#/components/schemas/joined_at'
+      description: |
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
+    expense_out_with_department_name:
+      allOf:
+        - $ref: '#/components/schemas/expense_out'
+        - type: object
+          properties:
+            employee:
+              nullable: true
+              $ref: '#/components/schemas/employee_out_embed_for_expense_with_department_name'
     personal_card_transactions_stats_in:
+      required:
+        - query_params
       properties:
         query_params:
           nullable: false
