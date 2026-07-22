@@ -2187,7 +2187,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/advance_request_in'
+                  $ref: '#/components/schemas/spender_advance_request_in'
       responses:
         '200':
           description: OK
@@ -6218,7 +6218,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/advance_request_in'
+                  $ref: '#/components/schemas/advance_request_submit_in'
       responses:
         '200':
           description: OK
@@ -12166,6 +12166,11 @@ components:
       type: object
       description: |
         Advance request custom field
+      required:
+        - id
+        - name
+        - type
+        - value
       properties:
         name:
           type: string
@@ -12316,6 +12321,34 @@ components:
     advance_request_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - user_id
+        - org_id
+        - project_id
+        - advance_id
+        - seq_num
+        - currency
+        - amount
+        - last_approved_at
+        - notes
+        - purpose
+        - source
+        - state
+        - custom_fields
+        - user
+        - project
+        - advance
+        - approvals
+        - is_exported
+        - employee_id
+        - employee
+        - code
+        - comments
+        - file_ids
+        - files
       properties:
         id:
           allOf:
@@ -12427,7 +12460,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/file_out_embed'
-    advance_request_in:
+    advance_request_in_base:
       type: object
       properties:
         id:
@@ -12465,6 +12498,13 @@ components:
           $ref: '#/components/schemas/fk_integer'
         custom_fields:
           $ref: '#/components/schemas/advance_request_custom_fields'
+    spender_advance_request_in:
+      allOf:
+        - $ref: '#/components/schemas/advance_request_in_base'
+        - type: object
+          required:
+            - currency
+            - amount
     advance_requests_stats_in:
       properties:
         query_params:
@@ -12575,6 +12615,36 @@ components:
     advance_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - advance_request_id
+        - user_id
+        - org_id
+        - project_id
+        - seq_num
+        - amount
+        - issued_at
+        - card_number
+        - currency
+        - custom_fields
+        - foreign_amount
+        - foreign_currency
+        - payment_mode
+        - purpose
+        - code
+        - source
+        - advance_account_id
+        - advance_wallet_id
+        - is_exported
+        - last_exported_at
+        - user
+        - project
+        - employee_id
+        - employee
+        - creator_user
+        - advance_request
       properties:
         id:
           allOf:
@@ -12706,6 +12776,14 @@ components:
     advance_wallet_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - user_id
+        - currency
+        - balance_amount
       properties:
         id:
           allOf:
@@ -19150,6 +19228,13 @@ components:
           type: boolean
           example: true
           description: This field contains a boolean value indicating if a bank account has been added to the organisation.
+    advance_request_submit_in:
+      allOf:
+        - $ref: '#/components/schemas/advance_request_in_base'
+        - type: object
+          required:
+            - currency
+            - amount
     advance_request_permissions_in:
       type: object
       additionalProperties: false
@@ -19326,6 +19411,17 @@ components:
     advance_request_custom_field_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - type
+        - options
+        - is_mandatory
+        - is_enabled
+        - placeholder
       properties:
         id:
           type: integer
