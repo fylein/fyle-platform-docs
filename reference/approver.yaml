@@ -3258,7 +3258,7 @@ paths:
                 - data
               properties:
                 data:
-                  $ref: '#/components/schemas/advance_request_in'
+                  $ref: '#/components/schemas/advance_request_submit_in'
       responses:
         '200':
           description: OK
@@ -5010,6 +5010,9 @@ components:
       example: state=eq.PAID
     reports_export_config_column_formula:
       type: object
+      required:
+        - function
+        - parameters
       properties:
         function:
           type: string
@@ -5035,6 +5038,8 @@ components:
     reports_export_config:
       type: object
       additionalProperties: true
+      required:
+        - type
       properties:
         type:
           type: string
@@ -5057,6 +5062,10 @@ components:
           example: true
         separate_line_items_entry:
           type: object
+          required:
+            - enabled
+            - debit_entries_only
+            - credit_entries_only
           properties:
             enabled:
               type: boolean
@@ -5085,6 +5094,9 @@ components:
           type: array
           items:
             type: object
+            required:
+              - name
+              - formula
             properties:
               name:
                 type: string
@@ -5101,6 +5113,17 @@ components:
     reports_exports_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - user_id
+        - file_id
+        - state
+        - query_params
+        - notify_emails
+        - config
       properties:
         created_at:
           $ref: '#/components/schemas/created_at'
@@ -7794,6 +7817,11 @@ components:
       type: object
       description: |
         Advance request custom field
+      required:
+        - id
+        - name
+        - type
+        - value
       properties:
         name:
           type: string
@@ -7944,6 +7972,34 @@ components:
     advance_request_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - user_id
+        - org_id
+        - project_id
+        - advance_id
+        - seq_num
+        - currency
+        - amount
+        - last_approved_at
+        - notes
+        - purpose
+        - source
+        - state
+        - custom_fields
+        - user
+        - project
+        - advance
+        - approvals
+        - is_exported
+        - employee_id
+        - employee
+        - code
+        - comments
+        - file_ids
+        - files
       properties:
         id:
           allOf:
@@ -8056,6 +8112,8 @@ components:
           items:
             $ref: '#/components/schemas/file_out_embed'
     advance_requests_approver_stats_in:
+      required:
+        - query_params
       properties:
         query_params:
           description: |
@@ -9607,6 +9665,9 @@ components:
           example: exfilumWHrlPf7K
     expenses_export_config_column_formula:
       type: object
+      required:
+        - function
+        - parameters
       properties:
         function:
           type: string
@@ -10827,7 +10888,6 @@ components:
       required:
         - id
         - approver_email
-        - comment
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -10881,7 +10941,7 @@ components:
           type: string
           description: Reason for sending the advance request back to the spender
           example: Please provide additional documentation
-    advance_request_in:
+    advance_request_in_base:
       type: object
       properties:
         id:
@@ -10919,9 +10979,27 @@ components:
           $ref: '#/components/schemas/fk_integer'
         custom_fields:
           $ref: '#/components/schemas/advance_request_custom_fields'
+    advance_request_submit_in:
+      allOf:
+        - $ref: '#/components/schemas/advance_request_in_base'
+        - type: object
+          required:
+            - currency
+            - amount
     advance_request_custom_field_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - type
+        - options
+        - is_mandatory
+        - is_enabled
+        - placeholder
       properties:
         id:
           type: integer
@@ -11231,6 +11309,10 @@ components:
           example: GET(merchant)
     expenses_export_configuration_sort_column:
       type: object
+      required:
+        - display_name
+        - field_name
+        - direction
       properties:
         display_name:
           type: string
@@ -11254,7 +11336,7 @@ components:
       type: object
       additionalProperties: true
       properties:
-        is_column_header_included:
+        is_header_visible:
           type: boolean
           description: |
             Whether to include column headers in the export file. Required for CSV and EXCEL export types.
@@ -11290,6 +11372,17 @@ components:
     expenses_export_configuration_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - name
+        - query_string
+        - sub_feature
+        - config
+        - type
+        - org_id
+        - user_id
       properties:
         id:
           allOf:
@@ -11388,9 +11481,9 @@ components:
             Configuration details for the export including columns, sorting, and formatting options.
       required:
         - name
-        - query_string
         - type
         - config
+        - sub_feature
     expenses_export_configuration_in_only_id:
       type: object
       required:
@@ -11458,6 +11551,10 @@ components:
           example: GET(employee, user, full_name)
     reports_export_configuration_sort_column:
       type: object
+      required:
+        - display_name
+        - field_name
+        - direction
       properties:
         display_name:
           type: string
@@ -11512,6 +11609,17 @@ components:
     reports_export_configuration_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - name
+        - query_string
+        - sub_feature
+        - config
+        - type
+        - org_id
+        - user_id
       properties:
         id:
           allOf:
@@ -11610,9 +11718,9 @@ components:
             Configuration details for the export including columns, sorting, and formatting options.
       required:
         - name
-        - query_string
         - type
         - config
+        - sub_feature
     reports_export_configuration_in_only_id:
       type: object
       required:
