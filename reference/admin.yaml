@@ -1766,6 +1766,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/departments/delete/bulk:
+    post:
+      tags:
+        - Departments
+      security:
+        - oauth2:
+            - '*'
+      summary: Delete departments
+      description: |
+        Deletes unused departments. If any supplied department is assigned to an employee or used
+        by a budget, expense policy, or expense rule, the request fails without deleting any
+        departments. A maximum of 200 unique department IDs can be processed. Repeated IDs are
+        deduplicated in first-seen order before the limit is enforced.
+      operationId: departments_delete_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/department_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+              examples:
+                limit_exceeded:
+                  summary: More than 200 unique department IDs supplied
+                  value:
+                    message: Cannot perform action for more than 200 departments at once.
+                    data: null
+                    error: InvalidUsage
+                dependency_blocked:
+                  summary: A department is assigned or used by another resource
+                  value:
+                    message: Can not delete department(s) used in other resources like employee assignments, budgets, expense policy, expense rules.
+                    data: null
+                    error: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /admin/departments/delete_summary/bulk:
+    post:
+      tags:
+        - Departments
+      security:
+        - oauth2:
+            - '*'
+      summary: Create delete summary for departments
+      description: |
+        Returns how many of the supplied departments can be deleted and lists those departments.
+        Departments assigned to employees or used by budgets, expense policies, or expense rules
+        are excluded. A maximum of 200 unique department IDs can be processed. Repeated IDs are
+        deduplicated in first-seen order before the limit is enforced.
+      operationId: departments_delete_summary_bulk_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/department_in_only_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/department_delete_summary_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cannot perform action for more than 200 departments at once.
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  error:
+                    type: string
+                    example: InvalidUsage
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/mileage_rates:
     get:
       tags:
@@ -16674,6 +16815,34 @@ components:
           description: |
             Link to an external document that would be shared with employees
           example: https://stoplight.io/
+    department_in_only_id:
+      type: object
+      required:
+        - id
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+    department_delete_summary_out:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          properties:
+            delete_count:
+              type: integer
+              description: Count of departments that can be deleted from the supplied departments.
+              example: 2
+            departments:
+              type: array
+              description: Departments that can be deleted.
+              example:
+                - id: deptTqSvgYSlMk
+                - id: deptISw67iupk3
+              items:
+                $ref: '#/components/schemas/department_in_only_id'
     mileage_rate_out:
       type: object
       additionalProperties: false
