@@ -1,6 +1,17 @@
 mileage_rate_out:
   type: object
   additionalProperties: false
+  required:
+    - created_at
+    - updated_at
+    - id
+    - org_id
+    - unit
+    - vehicle_type
+    - rate
+    - slab_rates
+    - is_enabled
+    - code
   properties:
     id:
       $ref: './fields.yaml#/id_integer'
@@ -31,6 +42,9 @@ mileage_rate_out:
       type: array
       items:
         type: object
+        required:
+          - rate
+          - limit
         properties:
           rate:
             type: number
@@ -99,10 +113,12 @@ mileage_rate_in:
     rate:
       type: number
       example: 10.0
-      nullable: true
+      minimum: 0
+      exclusiveMinimum: true
       description: Amount (in Home currency) per unit.
     slab_rates:
       type: array
+      maxItems: 1
       items:
         type: object
         required:
@@ -111,11 +127,38 @@ mileage_rate_in:
         properties:
           rate:
             type: number
-            nullable: true
           limit:
             type: number
-            nullable: true
     is_enabled:
       $ref: ./fields.yaml#/is_enabled
     code:
       $ref: ./fields.yaml#/code
+
+mileage_rate_in_only_id:
+  type: object
+  required:
+    - id
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_integer'
+
+mileage_rate_delete_summary_out:
+  type: object
+  additionalProperties: False
+  properties:
+    data:
+      type: object
+      properties:
+        delete_count:
+          type: integer
+          description: Count of mileage rates that could be deleted from input mileage rates.
+          example: 2
+        mileage_rates:
+          type: array
+          description: Mileage rates that could be deleted.
+          example:
+            - id: 9080
+            - id: 9081
+          items:
+            $ref: './mileage_rate.yaml#/mileage_rate_in_only_id'

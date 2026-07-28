@@ -238,19 +238,12 @@ card_transaction_from_statement_in:
           example: VISA
           nullable: true
       required:
-        - description_column
         - transaction_date_column
-        - transaction_id_column
         - amount_column
         - card_number_column
         - merchant_column
-        - foreign_amount_column
-        - foreign_currency_column
-        - post_date_column
         - bank_name
         - is_debit_positive
-        - name
-        - card_network
     ignored_line_item_ids:
       type: array
       items: 
@@ -269,10 +262,17 @@ card_transaction_from_statement_in:
         - stlisfdfadssd
     card_mapping:
       $ref: '#/card_mapping_in'
+    ignore_archived_cards:
+      type: boolean
+      nullable: true
+      description: |
+        Controls how transactions associated with archived cards are handled during statement processing:
+        If true, transactions associated with archived cards are ignored.
+        If false, the archived cards are unarchived, and their associated transactions are processed.
+      example: false
   required:
     - id
     - statement_mapping
-    - ignored_line_item_ids
 
 preview_from_statement_in:
   type: object
@@ -473,19 +473,12 @@ summary_from_statement_in:
           example: VISA
           nullable: true
       required:
-        - description_column
         - transaction_date_column
-        - transaction_id_column
         - amount_column
         - card_number_column
         - merchant_column
-        - foreign_amount_column
-        - foreign_currency_column
-        - post_date_column
         - bank_name
         - is_debit_positive
-        - name
-        - card_network
     ignored_line_item_ids:
       type: array
       items:
@@ -494,10 +487,18 @@ summary_from_statement_in:
         This specifies list of statement line items to be ignored in the statement.
       example:
         - stlisfdfadssd
+    card_mapping:
+      $ref: '#/card_mapping_in'
+    ignore_archived_cards:
+      type: boolean
+      nullable: true
+      description: |
+        Controls how transactions associated with archived cards are handled during statement processing:
+        If true, transactions associated with archived cards are ignored.
+        If false, the archived cards are unarchived, and their associated transactions are processed.
   required:
     - id
     - statement_mapping
-    - ignored_line_item_ids
 
 card_mapping_in:
   type: array
@@ -729,19 +730,12 @@ reconciliation_summary_from_statement_in:
           example: VISA
           nullable: true
       required:
-        - description_column
         - transaction_date_column
-        - transaction_id_column
         - amount_column
         - card_number_column
         - merchant_column
-        - foreign_amount_column
-        - foreign_currency_column
-        - post_date_column
         - bank_name
         - is_debit_positive
-        - name
-        - card_network
     ignored_line_item_ids:
       type: array
       items:
@@ -769,10 +763,16 @@ reconciliation_summary_from_statement_in:
         type: string
       example:
         - recexxxxxx
+    ignore_archived_cards:
+      type: boolean
+      nullable: true
+      description: |
+        Controls how transactions associated with archived cards are handled during statement processing:
+        If true, transactions associated with archived cards are ignored.
+        If false, the archived cards are unarchived, and their associated transactions are processed.
   required:
     - id
     - statement_mapping
-    - ignored_line_item_ids
     - reconciliation_entry_ids
 
 reconcile_from_statement_in:
@@ -859,19 +859,12 @@ reconcile_from_statement_in:
           example: VISA
           nullable: true
       required:
-        - description_column
         - transaction_date_column
-        - transaction_id_column
         - amount_column
         - card_number_column
         - merchant_column
-        - foreign_amount_column
-        - foreign_currency_column
-        - post_date_column
         - bank_name
         - is_debit_positive
-        - name
-        - card_network
     ignored_line_item_ids:
       type: array
       items:
@@ -907,10 +900,16 @@ reconcile_from_statement_in:
         type: string
       example:
         - recexxxxxx
+    ignore_archived_cards:
+      type: boolean
+      nullable: true
+      description: |
+        Controls how transactions associated with archived cards are handled during statement processing:
+        If true, transactions associated with archived cards are ignored.
+        If false, the archived cards are unarchived, and their associated transactions are processed.
   required:
     - id
     - statement_mapping
-    - ignored_line_item_ids
     - reconciliation_method
     - reconciliation_entry_ids
 
@@ -1320,3 +1319,178 @@ unassigned_cards_from_statement_in:
       example: stmtwownwrng
   required:
     - statement_id
+
+statement_archived_cards_out:
+  properties:
+    number_of_cards:
+      type: integer
+      description: |
+        Number of cards in the statement
+      example: 3
+    number_of_archived_cards:
+      type: integer
+      description: |
+        Number of cards in the statement that are archived in Sage Exp Mgmt
+      example: 1
+    archived_cards:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            allOf:
+              - $ref: './fields.yaml#/id_string'
+            example: bawownwrng
+          card_number:
+            $ref: './fields.yaml#/card_number'
+          nickname:
+            type: string
+            maxLength: 25
+            nullable: true
+            description: |
+              Unique nickname assigned to the card
+            example: 'Business Card'
+          user:
+            $ref: ./user.yaml#/user_out_embed_nullable
+          is_archived:
+            type: boolean
+            description: |
+              If the card is archived in Sage Exp Mgmt
+            nullable: false
+          archived_at:
+            $ref: './fields.yaml#/timestamptz_utc'
+            description: |
+              Timestamp when the card was archived in Sage Exp Mgmt
+            nullable: true
+
+
+statement_archived_cards_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: stmtadfdsdf
+    statement_mapping:
+      type: object
+      properties:
+        description_column:
+          type: string
+          description: |
+            Specifies the mapping of description column on the statement
+          nullable: true
+          example: description
+        transaction_date_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction date on the statement.
+          example: txn date
+        transaction_id_column:
+          type: string
+          description: |
+            Specifies the mapping of transaction id / unique id on the statement.
+          example: reference number
+          nullable: true
+        amount_column:
+          type: string
+          description: |
+            Specifies the mapping of amount on the statement.
+          example: amount
+        card_number_column:
+          type: string
+          description: |
+            Specifies the mapping of card number on the statement.
+          example: account number
+        merchant_column:
+          type: string
+          description: |
+            Specifies the mapping of merchant on the statement.
+          example: Amazon
+        foreign_amount_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign amount on the statement.
+          example: foreign amount
+          nullable: true
+        foreign_currency_column:
+          type: string
+          description: |
+            Specifies the mapping of foreign currency on the statement.
+          example: foreign currency
+          nullable: true
+        post_date_column:
+          type: string
+          description: |
+            Specifies the header name of the post date column in the statement.
+          example: post date
+          nullable: true
+        bank_name:
+          type: string
+          description: |
+            Specifies the bank name of the statement
+          example: American Express
+        is_debit_positive:
+          type: boolean
+          description: |
+            Specifies the representation of the the amount in the statement, if true then the amount represented by |
+            positive sign are debits, and if false then the amount represented by negative sign are debits.
+          example: true
+        name:
+          type: string
+          description: |
+            Specifies the mapping name.
+          example: USD
+          nullable: true
+        card_network:
+          type: string
+          description: |
+            Specifies the credit card network used by the card
+          example: VISA
+          nullable: true
+      required:
+        - transaction_date_column
+        - amount_column
+        - card_number_column
+        - merchant_column
+        - bank_name
+        - is_debit_positive
+    ignored_line_item_ids:
+      type: array
+      items:
+        type: string
+      description: >
+        This specifies list of statement line items to be ignored in the statement.
+      example:
+        - stlisfdfadssd
+    start_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Start date of the statement period
+      nullable: true
+    end_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        End date of the statement period
+      nullable: true
+    card_mapping:
+      $ref: '#/card_mapping_in'
+  required:
+    - id
+    - statement_mapping
+
+
+statement_archived_cards_ignore_in:
+  allOf:
+    - $ref: '#/statement_archived_cards_in'
+    - type: object
+      properties:
+        archived_card_ids:
+          type: array
+          items:
+            type: string
+          description: |
+            List of archived card ids to be ignored in the statement.
+          example:
+            - bawownwrng
+      required:
+        - archived_card_ids

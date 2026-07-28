@@ -1,0 +1,75 @@
+post:
+  tags:
+    - Mileage Rates
+  security:
+    - oauth2: ['*']
+  summary: Delete mileage rates
+  description: |
+    Deletes unused mileage rates. If any supplied mileage rate is used by an expense,
+    the request fails without deleting any rates. A maximum of 200 unique mileage rate
+    IDs can be processed. Repeated IDs are deduplicated in first-seen order before the
+    limit is enforced.
+  operationId: mileage_rates_delete_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/mileage_rate.yaml#/mileage_rate_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                nullable: true
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
+          examples:
+            limit_exceeded:
+              summary: More than 200 unique mileage rate IDs supplied
+              value:
+                message: Cannot perform action for more than 200 mileage rates at once.
+                data: null
+                error: InvalidUsage
+            dependency_blocked:
+              summary: A mileage rate is used by an expense
+              value:
+                message: Can not delete mileage rate(s) used in other resources like expense.
+                data: null
+                error: InvalidUsage
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/401.yaml"
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/403.yaml"
