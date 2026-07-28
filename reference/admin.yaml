@@ -1003,6 +1003,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expense_fields/reorder:
+    post:
+      tags:
+        - Expenses
+      summary: Reorder custom expense fields
+      description: |
+        Reorders all enabled, non-dependent custom expense fields for the
+        organization. Every eligible expense field must be included exactly once.
+        The order of the request items determines the `display_order`, starting from 1.
+      operationId: expense_fields_reorder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  description: The complete ordered list of eligible expense field IDs.
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    $ref: '#/components/schemas/expense_field_reorder_in'
+      responses:
+        '200':
+          description: Expense fields reordered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    description: The reordered expense fields.
+                    items:
+                      $ref: '#/components/schemas/expense_field_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/bulk_error'
+                  - $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/dependent_expense_field_values:
     get:
       tags:
@@ -16409,6 +16472,13 @@ components:
           description: |
             This specifies the `id` of the parent expense field and denotes that the expense field is a dependent custom field. NOTE: `type` must be `DEPENDENT_SELECT`.
           example: 1234
+        display_order:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: |
+            The 1-based position of an enabled, non-dependent custom expense field in the organization's custom order.
+          example: 1
     expense_field_in:
       type: object
       additionalProperties: false
@@ -16484,6 +16554,14 @@ components:
           description: |
             This specifies the `id` of the parent expense field and denotes that the expense field is a dependent custom field. NOTE: `type` must be `DEPENDENT_SELECT`.
           example: 1234
+    expense_field_reorder_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
     dependent_expense_field_values_out:
       type: object
       additionalProperties: false
