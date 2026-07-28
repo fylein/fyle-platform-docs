@@ -1,10 +1,15 @@
 get:
   tags:
-    - Statements
-  summary: Get RTF Stats of the last uploaded statement
+    - Organisations
+  summary: Get weekly employee invitation usage
   description: |
-    This API is used to get the RTF stats of the last uploaded statement for an organization.
-  operationId: get_rtf_stats
+    This API returns the current week's employee invitation usage for the organisation.
+    It shows how many invitations have been sent this week, the configured weekly limit,
+    and whether the limit has been reached.
+
+    If the organisation is still within its onboarding period, no weekly limit is enforced
+    and `weekly_limit` will be `null`.
+  operationId: orgs_get_weekly_invitation_usage
   responses:
     '200':
       description: OK
@@ -12,14 +17,12 @@ get:
         application/json:
           schema:
             type: object
-            additionalProperties: False
+            additionalProperties: false
             required:
               - data
             properties:
               data:
-                type: object
-                items:
-                  $ref: ../../components/schemas/statements.yaml#/rtf_stats_out
+                $ref: '../../components/schemas/org.yaml#/org_weekly_invitation_usage_out'
     '400':
       description: Bad request
       content:
@@ -38,9 +41,3 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/403.yaml'
-    '404':
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/404.yaml'
