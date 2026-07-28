@@ -11246,6 +11246,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /admin/orgs/weekly_invitation_usage:
+    get:
+      tags:
+        - Organisations
+      summary: Get weekly employee invitation usage
+      description: |
+        This API returns the current week's employee invitation usage for the organisation.
+        It shows how many invitations have been sent this week, the configured weekly limit,
+        and whether the limit has been reached.
+
+        If the organisation is still within its onboarding period, no weekly limit is enforced
+        and `weekly_limit` will be `null`.
+      operationId: orgs_get_weekly_invitation_usage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/org_weekly_invitation_usage_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expense_policy_rules:
     post:
       tags:
@@ -30022,6 +30066,34 @@ components:
           nullable: false
           description: |
             Determines whether this organization has been verified.
+    org_weekly_invitation_usage_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - invitation_sent
+        - is_limit_reached
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        weekly_limit:
+          type: integer
+          nullable: true
+          description: |
+            The maximum number of employee invitations allowed per week.
+            This is `null` when the organisation is within its onboarding period and no limit applies.
+          example: 50
+        invitation_sent:
+          type: integer
+          description: |
+            The number of successful employee invitations sent during the current calendar week.
+          example: 12
+        is_limit_reached:
+          type: boolean
+          description: |
+            Indicates whether the weekly invitation limit has been reached.
+            Always `false` when `weekly_limit` is `null`.
+          example: false
     expense_policy_limit_type:
       nullable: true
       type: string
