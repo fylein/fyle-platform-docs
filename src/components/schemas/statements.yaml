@@ -154,6 +154,7 @@ statements_out:
     - is_processed
     - statement_mappings_id
 
+    - creator_user
 card_transaction_from_statement_in:
   type: object
   properties:
@@ -915,6 +916,13 @@ reconcile_from_statement_in:
 
 rtf_missing_transaction_from_statement_out:
   type: object
+  required:
+    - error
+    - missing_rtf_transactions
+    - rtf_confidence
+    - rtf_count
+    - total_count
+    - status
   properties:
     error:
       type: string
@@ -1028,6 +1036,9 @@ rtf_missing_transaction_from_statement_out:
 
 rtf_stats_out:
   type: object
+  required:
+    - last_uploaded_at
+    - rtf_confidence
   properties:
     last_uploaded_at:
       $ref: './fields.yaml#/timestamptz_utc'
@@ -1145,6 +1156,16 @@ preview_out:
     - no_of_transactions
 
 summary_out:
+  type: object
+  required:
+    - id
+    - status
+    - period_start
+    - period_end
+    - statement_transaction_count
+    - statement_total
+    - total_cards
+    - bridging_entry_change_type
   properties:
     id:
       allOf:
@@ -1191,6 +1212,12 @@ summary_out:
 
 
 _reconciliation_summary_object:
+  type: object
+  required:
+    - expense_count
+    - is_recommended
+    - reconciliation_method
+    - statement_transaction_count
   properties:
     expense_count:
       description: Number of expense matches found
@@ -1210,6 +1237,9 @@ _reconciliation_summary_object:
 
 
 reconciliation_summary_out:
+  type: object
+  required:
+    - reconciliation_summary
   properties:
     reconciliation_summary:
       type: array
@@ -1269,7 +1299,13 @@ card_stats_out:
     - is_rtf_statement
 
 
+    - rtf_card_network
+    - missing_corporate_card_details
 matching_cards_out:
+  type: object
+  required:
+    - statement_card_number
+    - matching_cards
   properties:
     statement_card_number:
       type: string
@@ -1321,6 +1357,10 @@ unassigned_cards_from_statement_in:
     - statement_id
 
 statement_archived_cards_out:
+  required:
+    - number_of_cards
+    - number_of_archived_cards
+    - archived_cards
   properties:
     number_of_cards:
       type: integer
