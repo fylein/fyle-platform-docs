@@ -19860,6 +19860,58 @@ components:
           example: 10
           nullable: true
           description: Amount (in Home currency) per unit.
+        vehicle_ownership:
+          type: string
+          nullable: true
+          enum:
+            - PERSONAL
+            - COMPANY
+            - null
+          description: Vehicle ownership for advanced mileage rates. `null` for basic mileage rates.
+        vehicle_category:
+          type: string
+          nullable: true
+          enum:
+            - CAR
+            - MOTORCYCLE
+            - BICYCLE
+            - null
+          description: Vehicle category for advanced mileage rates. `null` for basic mileage rates.
+        fuel_type:
+          type: string
+          nullable: true
+          enum:
+            - PETROL
+            - DIESEL
+            - LPG
+            - ELECTRIC
+            - null
+          description: Fuel type for advanced car mileage rates. `null` otherwise.
+        engine_capacity:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Engine capacity band for petrol, diesel, and LPG advanced car rates. An empty object for basic mileage rates.
+          properties:
+            from:
+              type: string
+              nullable: true
+              example: '0'
+            to:
+              type: string
+              nullable: true
+              example: '1400'
+            unit:
+              type: string
+              example: cc
+        charging_location:
+          type: string
+          nullable: true
+          enum:
+            - HOME
+            - PUBLIC
+            - null
+          description: Charging location for advanced electric car mileage rates. `null` otherwise.
     expense_custom_field:
       type: object
       description: |
@@ -20816,6 +20868,11 @@ components:
         - distance_unit
         - mileage_calculated_distance
         - mileage_calculated_amount
+        - selected_vehicle_ownership
+        - selected_vehicle_category
+        - passenger_count
+        - passenger_mileage_rate
+        - passenger_amount
         - mileage_rate_id
         - mileage_rate
         - mileage_is_round_trip
@@ -21020,6 +21077,36 @@ components:
           type: number
           nullable: true
           description: Amount computed by Sage Exp Mgmt in mileage expenses.
+        selected_vehicle_ownership:
+          type: string
+          nullable: true
+          enum:
+            - PERSONAL
+            - COMPANY
+            - null
+          description: Selected vehicle ownership for an advanced mileage expense. `null` for a basic mileage expense.
+        selected_vehicle_category:
+          type: string
+          nullable: true
+          enum:
+            - CAR
+            - MOTORCYCLE
+            - BICYCLE
+            - null
+          description: Selected vehicle category for an advanced mileage expense. `null` for a basic mileage expense.
+        passenger_count:
+          type: integer
+          nullable: true
+          description: Number of passengers carried on the mileage journey.
+        passenger_mileage_rate:
+          type: number
+          nullable: true
+          readOnly: true
+          description: Passenger mileage rate snapshot applied to this expense. `null` when passenger mileage does not apply.
+        passenger_amount:
+          type: number
+          nullable: true
+          description: Passenger mileage reimbursement amount for this expense.
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -21629,6 +21716,16 @@ components:
           type: number
           nullable: true
           description: Amount computed by Sage Exp Mgmt in mileage expenses.
+        passenger_count:
+          type: integer
+          nullable: true
+          description: |
+            Number of passengers carried on the mileage journey. This is required for advanced CAR mileage when passenger mileage is enabled, and must be between 0 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+        passenger_amount:
+          type: number
+          nullable: true
+          description: |
+            Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` for basic mileage or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
         commute_details_id:
           type: integer
           nullable: true
@@ -33896,6 +33993,16 @@ components:
           $ref: '#/components/schemas/distance'
         distance_unit:
           $ref: '#/components/schemas/distance_unit'
+        passenger_count:
+          type: integer
+          nullable: true
+          description: |
+            Number of passengers carried on the mileage journey. This is required for advanced CAR mileage when passenger mileage is enabled, and must be between 0 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+        passenger_amount:
+          type: number
+          nullable: true
+          description: |
+            Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` for basic mileage or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
         started_at:
           $ref: '#/components/schemas/timestamptz_pst'
         ended_at:
