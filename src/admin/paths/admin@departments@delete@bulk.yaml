@@ -1,0 +1,75 @@
+post:
+  tags:
+    - Departments
+  security:
+    - oauth2: ['*']
+  summary: Delete departments
+  description: |
+    Deletes unused departments. If any supplied department is assigned to an employee or used
+    by a budget, expense policy, or expense rule, the request fails without deleting any
+    departments. A maximum of 200 unique department IDs can be processed. Repeated IDs are
+    deduplicated in first-seen order before the limit is enforced.
+  operationId: departments_delete_bulk_post
+  requestBody:
+    required: True
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '../../components/schemas/department.yaml#/department_in_only_id'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              data:
+                type: object
+                nullable: true
+                example: null
+              error:
+                type: string
+                example: InvalidUsage
+          examples:
+            limit_exceeded:
+              summary: More than 200 unique department IDs supplied
+              value:
+                message: Cannot perform action for more than 200 departments at once.
+                data: null
+                error: InvalidUsage
+            dependency_blocked:
+              summary: A department is assigned or used by another resource
+              value:
+                message: Can not delete department(s) used in other resources like employee assignments, budgets, expense policy, expense rules.
+                data: null
+                error: InvalidUsage
+    '401':
+      description: Unauthorised request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
