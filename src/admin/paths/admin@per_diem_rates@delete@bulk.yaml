@@ -33,26 +33,21 @@ post:
           schema:
             $ref: "../../components/schemas/401.yaml"
     '403':
-      description: Forbidden
+      description: Forbidden. The response body uses the InvalidUsage error format.
       content:
         application/json:
           schema:
-            $ref: "../../components/schemas/403.yaml"
+            $ref: '../../components/schemas/invalid_usage_error.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              message:
-                type: string
-                nullable: true
-                example: |
-                  Can not delete per diem rate(s) used in other resources like expense.
-              data:
-                type: object
-                example: null
-              error:
-                type: string
-                example: InvalidUsage
+            $ref: '../../components/schemas/bulk_action_error.yaml'
+          examples:
+            resource_in_use:
+              summary: One or more per diem rates are used by an expense
+              value:
+                data: null
+                error: InvalidUsage
+                message: Can not delete per diem rate(s) used in other resources like expense.
