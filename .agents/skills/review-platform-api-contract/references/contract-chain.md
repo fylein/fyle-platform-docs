@@ -26,7 +26,12 @@ fyle-platform-api runtime
 git status --short --branch
 git symbolic-ref --short refs/remotes/origin/HEAD
 git log -1 --format='%H %cI %s'
+gh pr view <number> --json baseRefOid,headRefOid,state,url
 ```
+
+The PR base branch may advance after the PR opens. Resolve both PR refs, then use their merge base for the reviewed diff. For runtime evidence, use a linked `fyle-platform-api` PR or commit when one exists. Otherwise, an exact default-branch commit can prove only current behavior. A checked-out branch, similar timestamp, or current file is not evidence for a historical PR unless its commit is the selected revision.
+
+Record the evidence role beside every commit: proposed change, current behavior, or historical context. Read files with `git show <commit>:<path>` or from an isolated worktree so paths from different revisions are not mixed.
 
 Do not switch, pull, install into, or generate inside a dirty sibling. Use read-only evidence or an isolated worktree instead.
 
@@ -34,14 +39,23 @@ Do not switch, pull, install into, or generate inside a dirty sibling. Use read-
 
 `src/<role>/openapi.yaml` declares the document version, tags, security, and path references. Endpoint definitions live in `src/<role>/paths/`; shared schemas live in `src/components/schemas/`. Filenames use `@` for URL separators.
 
-`reference/<role>.yaml` is generated. Use the repository's current Redocly version and run affected roles only:
+Inventory a docs diff before tracing it:
+
+```bash
+python3 <skill-dir>/scripts/contract_diff_inventory.py \
+  --repo <fyle-platform-docs> --base <base-ref> --head <head-ref>
+```
+
+The script resolves immutable commits, computes the merge base, counts changed source files and risk-marker lines, discovers role roots from `src/*/openapi.yaml`, and selects bulk mode for more than 10 source files or more than 3 directly changed roles. Use `--format json` when file-level details are needed.
+
+`reference/<role>.yaml` is generated. Read the pinned Redocly version from `.github/workflows/bundler.yml` at the reviewed revision and verify its bundle steps cover every discovered role root. Lint and bundle every role reported by the inventory:
 
 ```bash
 openapi lint src/<role>/openapi.yaml
 openapi bundle -o /tmp/<role>.yaml src/<role>/openapi.yaml
 ```
 
-Compare the temporary bundle with `reference/<role>.yaml`. Inspect `.github/workflows/bundler.yml` when the role list or tool version matters.
+Compare temporary base and head bundles with their corresponding committed `reference/<role>.yaml` files, then compare base with head. A shared `src/components/**` change requires all role roots because shared-schema fan-out is not reliably visible from changed paths alone.
 
 ## Trace runtime behavior
 
@@ -74,12 +88,26 @@ OPENAPI_SPECS_DIR=<specs> OPENAPI_OUTPUT_DIR=<output> pnpm exec openapi-ts
 
 Use temporary base/head spec and output directories. `pnpm run build` syncs local docs into the types worktree, so run it only in an isolated worktree.
 
+`dist/` and `.generated/` are ignored rather than committed. If generation dependencies cannot run, compare the input specs and generator configuration, state that generated TypeScript and semver are unverified, and stop short of claiming full-chain validation.
+
 The classifier's highest result wins:
 
 - `major`: `oasdiff breaking` reports a breaking OpenAPI change or a role disappears.
 - `minor`: generated structure changes without an OpenAPI breaking result, or a role appears.
 - `patch`: only generated documentation changes.
 - `none`: no generated or documentation change.
+
+## Account for broad changes
+
+For bulk mode, keep a coverage manifest with these denominators:
+
+- changed `src/**` files reviewed;
+- risk-marker lines triaged and resulting candidates traced to runtime evidence;
+- bundle roles linted and regenerated;
+- generated roles compared when shape changes;
+- affected symbols checked in every known available consumer.
+
+Report each as `reviewed/total` and name the deterministic check used for grouped mechanical edits. Do not describe a sampled review as exhaustive; list any uncovered files, roles, or consumers as evidence gaps.
 
 ## Find consumers
 

@@ -9,10 +9,12 @@ Compare the proposed API contract change with runtime behavior, OpenAPI, and dow
 
 ## 1. Fix the review scope
 
-- Record the PR base and head commits and the current API, docs, and types commits.
+- Resolve the PR base and head to immutable commits. Resolve the runtime revision separately: prefer a linked API PR or commit; otherwise use the API default-branch commit only as evidence of current behavior. Never use a sibling checkout unless its commit matches the recorded revision.
+- Label each repository commit as proposed, current, or historical evidence. Do not use current behavior to prove what an old or closed PR did.
 - Read the repository-local guidance files that exist, such as `AGENTS.md` or `CLAUDE.md`, and inspect each working-tree status.
 - Preserve local changes. Use GitHub, `git show`, temporary copies, or a temporary worktree when a sibling repository is dirty.
 - Inspect changed files, checks, reviews, and existing comments so findings are scoped and not duplicated.
+- For docs-backed changes, run `<skill-dir>/scripts/contract_diff_inventory.py` with the PR base and head. Use its source-file, risk, role, and bulk-mode counts as review denominators.
 - Triage changed source lines first. Prioritize `$ref`, requiredness, nullability, enums, shared schemas, and request/response shape changes; trace high-risk candidates through the full chain before expanding the review.
 
 If a required repository is unavailable, continue only with supported conclusions and state the evidence gap.
@@ -22,11 +24,13 @@ If a required repository is unavailable, continue only with supported conclusion
 - Treat `fyle-platform-docs/src/**` as source and `reference/*.yaml` as generated output.
 - Map generated changes back to the exact source schema or path and attach findings there.
 - Read the affected root document's OpenAPI version.
-- Rebuild roles touched by supported candidates or suspected bundle drift.
+- Lint and rebuild every role reported by the inventory. A change under `src/components/**` requires every discoverable role root; a role-local change requires that role.
 
 ## 3. Prove runtime behavior
 
-Trace each changed field from the endpoint through the exact runtime path.
+Trace each high-risk changed field from the endpoint through the exact runtime path.
+
+Read runtime files from the selected immutable commit with `git show` or an isolated worktree. If no revision is linked strongly enough to support the claim, report the gap instead of treating an unrelated current checkout as proof.
 
 - For requests, inspect the loaded Marshmallow schema, validation, defaults, `post_load`, action logic, and request/error fixtures.
 - For responses, inspect the handler's dump schema, serialization hooks, the object being dumped, models, current database views and constraints, relevant migrations, and response fixtures.
@@ -46,7 +50,7 @@ Do not infer runtime behavior from the OpenAPI diff or a Marshmallow field flag 
 
 - Compare base and proposed bundles in isolated directories in `fyle-platform-types`.
 - Run the version classifier and generate representative before/after TypeScript when the contract shape changes.
-- If dependencies are unavailable, inspect the relevant generator configuration and committed types, then mark generation and semver as unverified instead of installing into a sibling repository.
+- If dependencies are unavailable, compare the specs and generator configuration only. Generated output is not committed in `fyle-platform-types`; mark TypeScript shape and semver as unverified instead of installing into a sibling repository.
 - Search identifiable consumers for affected imports, enum members, request arguments, optional fields, and null handling.
 - Classify runtime compatibility, documentation accuracy, generated-source compatibility, and semver impact separately.
 
@@ -55,6 +59,12 @@ Do not call a change runtime-breaking only because a generated type breaks, or c
 ## 5. Validate and report
 
 Run the smallest relevant checks from the repository map. Report failures and skipped checks without hiding them.
+
+When the inventory selects bulk mode, account for the whole diff:
+
+- Disposition every changed source file as manually reviewed or covered by a named deterministic check.
+- Triage every risk-marker line and trace every resulting high-risk candidate; group mechanical edits only after proving the same rule covers every member.
+- Report `reviewed/total` for source files, risk-marker lines, high-risk candidates, bundle roles, generated roles, and known consumer symbols. Sampling can support a finding, but cannot support a claim of complete review.
 
 Return findings in severity order. Each finding must include:
 
