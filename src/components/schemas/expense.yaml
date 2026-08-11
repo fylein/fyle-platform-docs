@@ -83,6 +83,26 @@ expense_out:
     - invoice_number
     - is_duplicate_present
     - expense_policy_comments
+    - custom_fields_flattened
+    - approvals
+    - verifications
+    - employee_id
+    - split_group_amount
+    - expense_rule_id
+    - expense_rule_data
+    - is_split
+    - tax_group
+    - approver_comments
+    - verifier_comments
+    - policy_checks
+    - accounting_export_summary
+    - report_last_paid_at
+    - report_last_approved_at
+    - commute_deduction
+    - commute_details_id
+    - commute_details
+    - is_reconciled
+    - report_auto_approval_state
   properties:
     id:
       allOf:
@@ -794,8 +814,6 @@ expense_in:
 spender_expense_in:
   type: object
   additionalProperties: false
-  required:
-    - claim_amount
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -1461,6 +1479,15 @@ approver_expense_in:
         Specific to per diem related expenses, number of days for which per diem claim is made. <br>
         This field is required for creating Per Diem Expenses.
 
+expense_out_with_department_name:
+  allOf:
+    - $ref: '#/expense_out'
+    - type: object
+      properties:
+        employee:
+          nullable: true
+          $ref: './employee.yaml#/employee_out_embed_for_expense_with_department_name'
+
 expense_out_embed:
   type: object
   required:
@@ -1566,6 +1593,21 @@ matched_corporate_card_transaction_out_embed:
     - id
     - corporate_card_id
     - corporate_card_number
+    - corporate_card_nickname
+    - masked_corporate_card_number
+    - bank_name
+    - corporate_card_user_full_name
+    - amount
+    - currency
+    - spent_at
+    - posted_at
+    - status
+    - description
+    - foreign_currency
+    - foreign_amount
+    - merchant
+    - category
+    - matched_by
   properties:
     id:
       allOf:
@@ -2023,6 +2065,9 @@ expense_check_policies_in:
 expense_check_policies_out:
   type: object
   additionalProperties: False
+  required:
+    - individual_desired_states
+    - final_desired_state
   properties:
     individual_desired_states:
       type: array
@@ -2058,6 +2103,8 @@ expense_delete_in:
 
 
 expenses_stats_in:
+  required:
+    - query_params
   properties:
     query_params:
       nullable: False
@@ -2389,6 +2436,8 @@ expense_comments_out:
     - org_id
     - updated_at
     - created_at
+    - creator_user_id
+    - creator_user
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -2455,7 +2504,6 @@ expense_comments_bulk_in:
     required:
       - expense_id
       - comment
-      - notify
     properties:
       expense_id:
         $ref: './fields.yaml#/id_string'
@@ -2489,6 +2537,8 @@ expense_dismiss_duplicates_in:
 expense_duplicate_sets_out:
   type: object
   additionalProperties: false
+  required:
+    - expense_ids
   properties:
     expense_ids:
       type: array
@@ -2502,6 +2552,9 @@ expense_duplicate_sets_out:
 expense_verification_out_embed:
   type: object
   additionalProperties: false
+  required:
+    - verifier_user_id
+    - verifier_user
   properties:
     verifier_user_id:
       allOf:
@@ -2980,6 +3033,9 @@ expense_policy_comment_out_embed:
       example: epc1a2f3farmk
     comment_type:
       type: string
+      enum:
+        - LOST_RECEIPT_REASON
+        - POLICY_VIOLATION_REASON
       description: Type of the policy comment
     comment_text:
       type: string

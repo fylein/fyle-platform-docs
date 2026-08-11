@@ -11,6 +11,12 @@ reconciliation_transaction_out:
     - matched_expenses_count
     - is_reconciled
     - expenses
+    - statement_line_item_id
+    - expense_ids
+    - statement_transaction_date
+    - statement_post_date
+    - created_at
+    - updated_at
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -86,6 +92,12 @@ reconciliation_expense_split_out_embed:
     - amount
     - state
     - purpose
+    - currency
+    - merchant
+    - spent_at
+    - file_ids
+    - category
+    - project
   properties:
     id:
       allOf:
@@ -187,6 +199,7 @@ reconciliation_matched_expense_out_embed:
     - project
     - purpose
     - splits
+    - currency
   properties:
     id:
       allOf:
@@ -289,6 +302,8 @@ reconciliation_transactions_stats_in:
     Input to fetch reconciliation transactions stats for a specific card or filter.
     Pass filters using the `query_params` string similar to the GET list API.
     For example, filter by a single card using `corporate_card_id=eq.<card_id>`.
+  required:
+    - query_params
   properties:
     query_params:
       type: string
@@ -299,6 +314,15 @@ reconciliation_transactions_stats_in:
 
 reconciliation_transactions_stats_out:
   type: object
+  required:
+    - period_start
+    - period_end
+    - statement_transaction_count
+    - expense_count
+    - statement_total
+    - expense_total
+    - difference
+    - matching_issue_count
   additionalProperties: False
   description: |
     Reconciliation transactions statistics for the selected filter period.
