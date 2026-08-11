@@ -10,7 +10,7 @@ Compare the proposed API contract change with runtime behavior, OpenAPI, and dow
 ## 1. Fix the review scope
 
 - Record the PR base and head commits and the current API, docs, and types commits.
-- Read each repository's `AGENTS.md` and inspect its working-tree status.
+- Read the repository-local guidance files that exist, such as `AGENTS.md` or `CLAUDE.md`, and inspect each working-tree status.
 - Preserve local changes. Use GitHub, `git show`, temporary copies, or a temporary worktree when a sibling repository is dirty.
 - Inspect changed files, checks, reviews, and existing comments so findings are scoped and not duplicated.
 - Triage changed source lines first. Prioritize `$ref`, requiredness, nullability, enums, shared schemas, and request/response shape changes; trace high-risk candidates through the full chain before expanding the review.

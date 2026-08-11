@@ -60,7 +60,7 @@ Use history when removed enum values or legacy storage are relevant:
 git log -p -G '<field-or-enum>' --all -- <relevant-paths>
 ```
 
-Run the narrowest affected test group or test case using the commands in `fyle-platform-api/AGENTS.md` when runtime verification is needed.
+Run the narrowest affected test group or test case using the commands in `fyle-platform-api/CLAUDE.md` when runtime verification is needed.
 
 ## Compare generated types
 
@@ -86,7 +86,7 @@ The classifier's highest result wins:
 `TYPES_CONSUMER_REPOS` is a GitHub repository variable and is not enumerated in source. Search available sibling repositories instead:
 
 ```bash
-rg -l '"@fylein/types"' ../*/package.json
+rg -l '"@fylein/types"\s*:' .. -g 'package.json' -g '!**/node_modules/**' -g '!**/.pnpm-store/**'
 rg '<affected-generated-symbol>' ../<consumer> -g '*.ts' -g '*.tsx' -g '!**/node_modules/**'
 ```
 
