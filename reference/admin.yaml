@@ -4891,6 +4891,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/expenses/count:
+    get:
+      tags:
+        - Expenses
+      summary: Get expense count
+      description: |
+        Returns the number of expenses in the requested state that belong to enabled employees in the organization.
+      operationId: expenses_count
+      parameters:
+        - in: query
+          name: state
+          required: true
+          description: Expense state for which the count should be returned.
+          schema:
+            type: string
+            enum:
+              - DRAFT
+              - COMPLETE
+              - APPROVER_PENDING
+              - APPROVED
+              - PAYMENT_PENDING
+              - PAYMENT_PROCESSING
+              - PAID
+              - UNREPORTABLE
+            example: DRAFT
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/expenses_count_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /admin/expenses/exports:
     post:
       tags:
@@ -22621,6 +22677,18 @@ components:
         - state: UNREPORTABLE
           count: 0
           total_amount: 0
+    expenses_count_out:
+      type: object
+      additionalProperties: false
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
+          nullable: false
+          description: Number of expenses matching the requested state and enabled-employee criteria.
+          example: 33
     query_params:
       type: string
       description: |
