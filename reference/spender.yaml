@@ -3176,7 +3176,10 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/spender_employee_current_out'
+                    anyOf:
+                      - $ref: '#/components/schemas/spender_employee_current_out'
+                      - type: object
+                        additionalProperties: false
         '400':
           description: Bad request
           content:
@@ -16643,21 +16646,7 @@ components:
               example: true
               description: Whether to notify the delegatee about events
         mileage_settings:
-          type: object
-          nullable: true
-          additionalProperties: false
-          description: Settings for mileage tracking and rates
-          properties:
-            mileage_rate_labels:
-              type: object
-              nullable: true
-              example: null
-              description: Labels for different mileage rates
-            annual_mileage_of_user_before_joining_fyle:
-              type: object
-              nullable: true
-              example: {}
-              description: Annual mileage limit for user before joining Sage Exp Mgmt
+          $ref: '#/components/schemas/mileage_settings'
         expense_form_autofills:
           type: object
           nullable: true
@@ -17963,6 +17952,7 @@ components:
           example: eq.ouNSnadfaLA
     expense_policy_expenses_query_object:
       type: object
+      nullable: true
       description: |
         An expense may be violating an expense policy rule due to a group of other expenses.
         These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
@@ -17982,6 +17972,17 @@ components:
           $ref: '#/components/schemas/expense_policy_expenses_query_object_params'
     expense_policy_individual_desired_states:
       type: object
+      required:
+        - add_approver_user_ids
+        - approver_policy_order
+        - approver_source
+        - expense_id
+        - expense_policy_rule_id
+        - expense_policy_rule
+        - run_status
+        - run_result
+        - amount
+        - expenses_query_object
       properties:
         add_approver_user_ids:
           nullable: true
@@ -18052,7 +18053,7 @@ components:
           description: |
             This represents the id of the expense policy rule.
           example: tprabsdfSYqd
-        rule:
+        expense_policy_rule:
           $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
           nullable: true
@@ -18062,11 +18063,21 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
-        expenses_query_object_params:
+        expenses_query_object:
           nullable: true
           $ref: '#/components/schemas/expense_policy_expenses_query_object'
     expense_policy_final_desired_state:
       type: object
+      required:
+        - expense_id
+        - flag
+        - amount
+        - unreportable
+        - is_receipt_mandatory
+        - add_approver_user_ids
+        - remove_employee_approver1
+        - run_status
+        - run_summary
       properties:
         expense_id:
           type: string
