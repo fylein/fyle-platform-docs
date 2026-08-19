@@ -1,0 +1,66 @@
+get:
+  tags:
+    - Expenses
+  summary: Get expense count
+  description: |
+    Returns the number of expenses in the requested state that belong to enabled employees in the organization.
+  operationId: expenses_count
+  parameters:
+    - in: query
+      name: state
+      required: true
+      description: |
+        Valid expense state for which the count should be returned.<br>
+        Supported operators are `eq`.<br>
+        state=eq.DRAFT
+      schema:
+        type: string
+        example: eq.DRAFT
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/expense.yaml#/expenses_count_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+              - error
+              - message
+            properties:
+              data:
+                type: object
+                nullable: true
+                example: null
+              error:
+                type: string
+                enum:
+                  - InvalidUsage
+              message:
+                type: string
+                example: You don't have permissions to access this resource
