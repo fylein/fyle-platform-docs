@@ -33378,10 +33378,10 @@ components:
       additionalProperties: false
       properties:
         id:
-          allOf:
+          anyOf:
             - $ref: '#/components/schemas/id_string'
+            - $ref: '#/components/schemas/null_field'
           example: stmpwownwrng
-          nullable: true
         bank_name:
           type: string
           description: |
@@ -33400,11 +33400,13 @@ components:
           description: |
             Specifies the header name of the transaction date column in the statement.
           example: spent date
+          nullable: true
         merchant_column:
           type: string
           description: |
             Specifies the header name of the merchant column in the statement.
           example: merchant
+          nullable: true
         transaction_id_column:
           type: string
           description: |
@@ -33416,6 +33418,7 @@ components:
           description: |
             Specifies the header name of the amount column in the statement.
           example: amount
+          nullable: true
         name:
           type: string
           description: |
@@ -33463,14 +33466,17 @@ components:
           example: VISA
           nullable: true
         org_id:
-          $ref: '#/components/schemas/org_id'
-          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_id'
+            - $ref: '#/components/schemas/null_field'
         created_at:
-          $ref: '#/components/schemas/created_at'
-          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/created_at'
+            - $ref: '#/components/schemas/null_field'
         updated_at:
-          $ref: '#/components/schemas/updated_at'
-          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/updated_at'
+            - $ref: '#/components/schemas/null_field'
       required:
         - id
         - bank_name
@@ -34456,7 +34462,7 @@ components:
               - unique_id
             properties:
               amount:
-                type: number
+                type: string
                 description: |
                   Specifies the amount on the statement.
                 example: 30
@@ -34690,9 +34696,13 @@ components:
         - rtf_confidence
       properties:
         last_uploaded_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          oneOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+            - type: string
+              maxLength: 0
           description: |
             Timestamp of the last uploaded statement.
+            Either a date-time string or an empty string.
         rtf_confidence:
           type: string
           description: |
