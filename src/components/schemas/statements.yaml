@@ -934,6 +934,21 @@ rtf_missing_transaction_from_statement_out:
       type: array
       items:
         type: object
+        required:
+          - amount
+          - bank_name
+          - card_number
+          - currency
+          - description
+          - foreign_amount
+          - foreign_currency
+          - merchant
+          - post_date
+          - statement_line_item_id
+          - transaction_date
+          - transaction_id
+          - transaction_type
+          - unique_id
         properties:
           amount:
             type: number
@@ -1264,7 +1279,7 @@ card_stats_out:
         Card network of the statement if the statement has atleast one card enrolled in RTF.
       example: VISA
       nullable: true
-    missing_corporate_card_details:
+    corporate_card_details:
       type: array
       items:
         type: object
@@ -1312,8 +1327,15 @@ matching_cards_out:
     matching_cards:
       type: array
       items:
-        type:
-          object
+        type: object
+        required:
+          - id
+          - card_number
+          - is_visa_enrolled
+          - is_mastercard_enrolled
+          - nickname
+          - user
+          - is_archived
         properties:
           id:
             allOf:
@@ -1340,7 +1362,11 @@ matching_cards_out:
             example: 'Business Card'
           user:
             $ref: ./user.yaml#/user_out_embed_nullable
-
+          is_archived:
+            type: boolean
+            description: |
+              If the card is archived in Sage Exp Mgmt
+            nullable: false
 unassigned_cards_from_statement_in:
   type: object
   properties:
@@ -1373,6 +1399,13 @@ statement_archived_cards_out:
       type: array
       items:
         type: object
+        required:
+          - id
+          - card_number
+          - nickname
+          - user
+          - is_archived
+          - archived_at
         properties:
           id:
             allOf:
