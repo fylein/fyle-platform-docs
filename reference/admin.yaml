@@ -33504,6 +33504,12 @@ components:
         statement_mapping:
           type: object
           properties:
+            id:
+              type: string
+              nullable: true
+              description: |
+                Specifies the id of the statement mapping.
+              example: stmpabcd1234
             description_column:
               type: string
               description: |
@@ -33578,19 +33584,12 @@ components:
               example: VISA
               nullable: true
           required:
-            - description_column
             - transaction_date_column
-            - transaction_id_column
             - amount_column
             - card_number_column
             - merchant_column
-            - foreign_amount_column
-            - foreign_currency_column
-            - post_date_column
             - bank_name
             - is_debit_positive
-            - name
-            - card_network
         ignored_line_item_ids:
           type: array
           items:
@@ -33604,10 +33603,23 @@ components:
           description: |
             Card number from statement can be passed to get transactions only from specific card
           example: xxx5-4543
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          description: |
+            Filter transactions on or after this date. Format should be YYYY-MM-DD.
+          example: '2024-01-01'
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          description: |
+            Filter transactions on or before this date. Format should be YYYY-MM-DD.
+          example: '2024-12-31'
       required:
         - id
         - statement_mapping
-        - ignored_line_item_ids
     preview_out:
       properties:
         no_of_debit:
@@ -34060,6 +34072,12 @@ components:
         statement_mapping:
           type: object
           properties:
+            id:
+              type: string
+              nullable: true
+              description: |
+                Specifies the id of the statement mapping.
+              example: stmpabcd1234
             description_column:
               type: string
               description: |
@@ -34149,15 +34167,19 @@ components:
           example:
             - stlisfdfadssd
         start_date:
-          $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            Start date of the statement period
+          type: string
+          format: date
           nullable: true
+          description: |
+            Filter transactions on or after this date. Format should be YYYY-MM-DD.
+          example: '2024-01-01'
         end_date:
-          $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            End date of the statement period
+          type: string
+          format: date
           nullable: true
+          description: |
+            Filter transactions on or before this date. Format should be YYYY-MM-DD.
+          example: '2024-12-31'
         card_mapping:
           $ref: '#/components/schemas/card_mapping_in'
         reconciliation_method:
