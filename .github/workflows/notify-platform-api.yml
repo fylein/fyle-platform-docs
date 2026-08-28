@@ -1,0 +1,56 @@
+name: Notify platform-api on spec change
+
+# Non-blocking spec-sync gate (step 1 / option 2A).
+#
+# On every PR, dispatch to fyle-platform-api so it can run its test suite against
+# this PR's specs and report the result back as an advisory check. It never blocks
+# the docs merge.
+#
+# The head SHA we send carries freshly bundled reference/ specs: bundler.yml runs
+# on pull_request and commits the regenerated reference/ back to the PR branch,
+# and that push re-triggers this workflow (synchronize) with the bundled commit as
+# the head.
+#
+# Coordinated changes: if the spec change needs a matching backend change, add a
+# line `platform-api: #NNNN` to the PR body. Testing against platform-api master
+# would fail by design, so we forward that PR number and platform-api tests the
+# docs specs against it instead.
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Dispatch to fyle-platform-api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse linked platform-api PR from body
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const match = body.match(/platform-api:\s*#(\d+)/i);
+            return match ? match[1] : '';
+
+      - name: Dispatch docs-pr event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          # POC: personal access token (Contents: write on fyle-platform-api).
+          # Swap for a GitHub App token before this leaves POC.
+          token: ${{ secrets.PLATFORM_API_DISPATCH_TOKEN }}
+          repository: fylein/fyle-platform-api
+          event-type: docs-pr
+          client-payload: |
+            {
+              "docs_sha": "${{ github.event.pull_request.head.sha }}",
+              "docs_pr": "${{ github.event.pull_request.number }}",
+              "api_pr": "${{ steps.parse.outputs.result }}"
+            }
