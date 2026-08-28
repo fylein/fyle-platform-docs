@@ -2632,6 +2632,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/corporate_cards/rtf_monthly_enrollment_usage:
+    get:
+      tags:
+        - Corporate Cards
+      summary: Get RTF monthly enrollment usage
+      description: |
+        This API returns the spender's current-month RTF corporate card enrollment usage, 
+        including the number of cards enrolled, the configured monthly limit, and whether the limit has been reached.
+      operationId: corporate_cards_rtf_monthly_enrollment_usage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/corporate_card_rtf_monthly_enrollment_usage_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/corporate_card_transactions:
     get:
       tags:
@@ -13819,6 +13859,29 @@ components:
         - created_at
         - updated_at
         - corporate_card_id
+    corporate_card_rtf_monthly_enrollment_usage_out:
+      type: object
+      properties:
+        monthly_limit:
+          type: integer
+          default: 3
+          description: |
+            The monthly limit for the RTF card enrollment usage.
+          example: 3
+        enrolled_cards:
+          type: integer
+          description: |
+            The number of RTF cards enrolled in the current month.
+          example: 1
+        is_limit_reached:
+          type: boolean
+          description: |
+            Indicates whether the monthly limit for RTF card enrollment usage has been reached.
+          example: false
+      required:
+        - monthly_limit
+        - enrolled_cards
+        - is_limit_reached
     string_detail:
       type: string
       description: Additional string details of the card transaction. Can hold details upto 256 characters in length.
