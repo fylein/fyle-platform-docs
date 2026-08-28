@@ -30942,6 +30942,8 @@ components:
         - card_holder_name
         - card_nickname
         - user_id
+        - user_full_name
+        - user_email
         - amount
         - percentage
         - change_percentage
@@ -30971,6 +30973,18 @@ components:
           description: |
             This id provided by Sage Exp Mgmt to identify a user. This can be null if the corporate card is not assigned to any user.
           example: sdfd2391
+        user_full_name:
+          type: string
+          nullable: true
+          description: |
+            Full name of the user assigned to the corporate card. Can be null if card is not assigned.
+          example: John Doe
+        user_email:
+          type: string
+          nullable: true
+          description: |
+            Email of the user assigned to the corporate card. Can be null if card is not assigned.
+          example: john.doe@example.com
         amount:
           $ref: '#/components/schemas/amount'
         percentage:
@@ -33504,6 +33518,12 @@ components:
         statement_mapping:
           type: object
           properties:
+            id:
+              type: string
+              nullable: true
+              description: |
+                Specifies the id of the statement mapping.
+              example: stmpabcd1234
             description_column:
               type: string
               description: |
@@ -33578,19 +33598,12 @@ components:
               example: VISA
               nullable: true
           required:
-            - description_column
             - transaction_date_column
-            - transaction_id_column
             - amount_column
             - card_number_column
             - merchant_column
-            - foreign_amount_column
-            - foreign_currency_column
-            - post_date_column
             - bank_name
             - is_debit_positive
-            - name
-            - card_network
         ignored_line_item_ids:
           type: array
           items:
@@ -33604,10 +33617,17 @@ components:
           description: |
             Card number from statement can be passed to get transactions only from specific card
           example: xxx5-4543
+        start_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Start date of the statement period
+        end_date:
+          $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            End date of the statement period
       required:
         - id
         - statement_mapping
-        - ignored_line_item_ids
     preview_out:
       properties:
         no_of_debit:
@@ -34060,6 +34080,12 @@ components:
         statement_mapping:
           type: object
           properties:
+            id:
+              type: string
+              nullable: true
+              description: |
+                Specifies the id of the statement mapping.
+              example: stmpabcd1234
             description_column:
               type: string
               description: |
@@ -34152,12 +34178,10 @@ components:
           $ref: '#/components/schemas/timestamptz_utc'
           description: |
             Start date of the statement period
-          nullable: true
         end_date:
           $ref: '#/components/schemas/timestamptz_utc'
           description: |
             End date of the statement period
-          nullable: true
         card_mapping:
           $ref: '#/components/schemas/card_mapping_in'
         reconciliation_method:

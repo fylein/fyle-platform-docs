@@ -288,6 +288,12 @@ preview_from_statement_in:
     statement_mapping:
       type: object
       properties:
+        id:
+          type: string
+          nullable: true
+          description: |
+            Specifies the id of the statement mapping.
+          example: stmpabcd1234
         description_column:
           type: string
           description: |
@@ -362,19 +368,12 @@ preview_from_statement_in:
           example: VISA
           nullable: true
       required:
-        - description_column
         - transaction_date_column
-        - transaction_id_column
         - amount_column
         - card_number_column
         - merchant_column
-        - foreign_amount_column
-        - foreign_currency_column
-        - post_date_column
         - bank_name
         - is_debit_positive
-        - name
-        - card_network
     ignored_line_item_ids:
       type: array
       items:
@@ -388,10 +387,17 @@ preview_from_statement_in:
       description: |
         Card number from statement can be passed to get transactions only from specific card
       example: xxx5-4543
+    start_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Start date of the statement period
+    end_date:
+      $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        End date of the statement period
   required:
     - id
     - statement_mapping
-    - ignored_line_item_ids
 
 summary_from_statement_in:
   type: object
@@ -789,6 +795,12 @@ reconcile_from_statement_in:
     statement_mapping:
       type: object
       properties:
+        id:
+          type: string
+          nullable: true
+          description: |
+            Specifies the id of the statement mapping.
+          example: stmpabcd1234
         description_column:
           type: string
           description: |
@@ -881,12 +893,10 @@ reconcile_from_statement_in:
       $ref: './fields.yaml#/timestamptz_utc'
       description: |
         Start date of the statement period
-      nullable: true
     end_date:
       $ref: './fields.yaml#/timestamptz_utc'
       description: |
         End date of the statement period
-      nullable: true
     card_mapping:
       $ref: '#/card_mapping_in'
     reconciliation_method:
