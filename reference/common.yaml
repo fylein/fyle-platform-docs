@@ -16,10 +16,237 @@ tags:
   - name: Currencies
     description: |
       These APIs gives you list of currencies supported by Sage Exp Mgmt and their exchange rates.
+  - name: Employees
+    description: |
+      These APIs give you access to employee-related operations.
+  - name: Organizations
+    description: |
+      These APIs give you access to organization signup operations.
   - name: Places
     description: |
       These APIs gives the places suggestions and geographic data of a place.
+  - name: Secondary Emails
+    description: |
+      These APIs give you access to secondary-email operations.
 paths:
+  /common/employees/approver_allowed:
+    get:
+      tags:
+        - Employees
+      security:
+        - oauth2:
+            - '*'
+      summary: Check whether an approver is allowed
+      description: Checks whether the user with the supplied email can be selected as an approver.
+      operationId: common_employees_approver_allowed_get
+      parameters:
+        - in: query
+          name: email
+          required: true
+          description: Email address of the user to check.
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/common_employee_approver_allowed_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+  /common/employees/is_mobile_verified:
+    post:
+      tags:
+        - Employees
+      security:
+        - oauth2:
+            - '*'
+      summary: Check whether a mobile number is verified
+      description: Checks whether the supplied mobile number is verified for an employee.
+      operationId: common_employees_is_mobile_verified_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/common_employee_mobile_verification_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/common_employee_mobile_verification_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_request_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/orgs/signup:
+    post:
+      tags:
+        - Organizations
+      security: []
+      summary: Create an organization account
+      description: Creates a new organization and its owner account using an internal signup token.
+      operationId: common_orgs_signup_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/org_signup_in'
+      responses:
+        '200':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_request_error_out'
+        '403':
+          description: Invalid or missing internal signup token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+  /common/orgs/signup/validate:
+    post:
+      tags:
+        - Organizations
+      security: []
+      summary: Validate an organization signup
+      description: Checks whether the supplied email can be used to create an organization account.
+      operationId: common_orgs_signup_validate_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/org_signup_validate_in'
+      responses:
+        '200':
+          description: Signup is allowed
+        '400':
+          description: Bad request or verified organization domain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_request_error_out'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+  /common/secondary_emails/verify:
+    post:
+      tags:
+        - Secondary Emails
+      security: []
+      summary: Verify a secondary email
+      description: Marks the secondary email identified by the supplied ID as verified.
+      operationId: common_secondary_emails_verify_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/secondary_email_verify_in'
+      responses:
+        '200':
+          description: Secondary email verified
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_request_error_out'
+        '404':
+          description: Secondary email not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
+        '409':
+          description: Email is already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/common_invalid_usage_error_out'
   /common/places/autocomplete:
     get:
       tags:
@@ -480,6 +707,188 @@ components:
           type: string
           description: |
             This error means the requested resource was not found or the requester doesn't have sufficient access.
+    common_employee_approver_allowed_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_approver_allowed
+      properties:
+        is_approver_allowed:
+          type: boolean
+          description: Whether the user can be selected as an approver.
+          example: true
+    common_invalid_usage_error_out:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - error
+        - message
+      properties:
+        data:
+          type: object
+          nullable: true
+          description: Additional error data. These operations return null.
+          example: null
+        error:
+          type: string
+          enum:
+            - InvalidUsage
+        message:
+          type: string
+          description: Reason the operation could not be completed.
+    common_employee_mobile_verification_in:
+      type: object
+      additionalProperties: false
+      required:
+        - mobile_number
+      properties:
+        mobile_number:
+          type: string
+          description: Mobile number to check.
+          example: '+1234567890'
+    common_employee_mobile_verification_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_mobile_number_verified
+      properties:
+        is_mobile_number_verified:
+          type: boolean
+          description: Whether the mobile number is verified for an employee.
+          example: true
+    common_request_error_out:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - error
+        - message
+      properties:
+        data:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Validation messages keyed by request field, or null for usage errors.
+        error:
+          type: string
+          enum:
+            - InvalidUsage
+            - ValidationError
+        message:
+          type: string
+          nullable: true
+          description: Usage-error details, or null for request validation errors.
+    currency:
+      type: string
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      example: USD
+      pattern: ([A-Z]{3})
+    org_signup_params_in:
+      type: object
+      additionalProperties: false
+      required:
+        - org_currency
+        - org_name
+      properties:
+        auth:
+          type: string
+          nullable: true
+        asset:
+          type: string
+          nullable: true
+        utm_source:
+          type: string
+          nullable: true
+        utm_medium:
+          type: string
+          nullable: true
+        utm_campaign:
+          type: string
+          nullable: true
+        employee_type:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        employee_count:
+          type: string
+          nullable: true
+        org_name:
+          type: string
+          example: Cresco
+        org_currency:
+          $ref: '#/components/schemas/currency'
+    org_signup_in:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+        - full_name
+        - signup_params
+        - title
+        - internal_signup_token
+      properties:
+        email:
+          type: string
+          format: email
+          example: owner@example.com
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 12
+          maxLength: 32
+          description: |
+            Password containing at least one uppercase letter, lowercase letter, digit, and symbol.
+        full_name:
+          type: string
+          example: Test User
+        mobile:
+          anyOf:
+            - type: string
+            - type: number
+          description: Mobile numbers supplied as JSON numbers are converted to strings.
+          example: '+1234567890'
+        signup_params:
+          $ref: '#/components/schemas/org_signup_params_in'
+        title:
+          type: string
+          example: Admin
+        internal_signup_token:
+          type: string
+          writeOnly: true
+          description: Internal token authorizing organization creation.
+    org_signup_validate_in:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: owner@example.com
+    id_string:
+      type: string
+      maxLength: 15
+      description: |
+        This id is provided by Sage Exp Mgmt to identify an object.
+      example: sdfd2391
+    secondary_email_verify_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Identifier of the secondary email to verify.
+          example: seu2gy8ulk32
     count:
       type: integer
       description: |
@@ -551,12 +960,6 @@ components:
         exchange_rate:
           type: number
           example: 12.123456
-    id_string:
-      type: string
-      maxLength: 15
-      description: |
-        This id is provided by Sage Exp Mgmt to identify an object.
-      example: sdfd2391
     logo_file_generate_download_url_action_out:
       type: object
       required:

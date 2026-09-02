@@ -298,3 +298,93 @@ post_org_out:
       nullable: false
       description: |
         Determines whether this organization has been verified.
+
+org_signup_params_in:
+  type: object
+  additionalProperties: false
+  required:
+    - org_currency
+    - org_name
+  properties:
+    auth:
+      type: string
+      nullable: true
+    asset:
+      type: string
+      nullable: true
+    utm_source:
+      type: string
+      nullable: true
+    utm_medium:
+      type: string
+      nullable: true
+    utm_campaign:
+      type: string
+      nullable: true
+    employee_type:
+      type: string
+      nullable: true
+    country:
+      type: string
+      nullable: true
+    employee_count:
+      type: string
+      nullable: true
+    org_name:
+      type: string
+      example: Cresco
+    org_currency:
+      $ref: './fields.yaml#/currency'
+
+org_signup_in:
+  type: object
+  additionalProperties: false
+  required:
+    - email
+    - password
+    - full_name
+    - signup_params
+    - title
+    - internal_signup_token
+  properties:
+    email:
+      type: string
+      format: email
+      example: owner@example.com
+    password:
+      type: string
+      format: password
+      writeOnly: true
+      minLength: 12
+      maxLength: 32
+      description: |
+        Password containing at least one uppercase letter, lowercase letter, digit, and symbol.
+    full_name:
+      type: string
+      example: Test User
+    mobile:
+      anyOf:
+        - type: string
+        - type: number
+      description: Mobile numbers supplied as JSON numbers are converted to strings.
+      example: '+1234567890'
+    signup_params:
+      $ref: '#/org_signup_params_in'
+    title:
+      type: string
+      example: Admin
+    internal_signup_token:
+      type: string
+      writeOnly: true
+      description: Internal token authorizing organization creation.
+
+org_signup_validate_in:
+  type: object
+  additionalProperties: false
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      format: email
+      example: owner@example.com

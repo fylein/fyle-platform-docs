@@ -1,0 +1,47 @@
+get:
+  tags:
+    - Employees
+  security:
+    - oauth2: ['*']
+  summary: Check whether an approver is allowed
+  description: Checks whether the user with the supplied email can be selected as an approver.
+  operationId: common_employees_approver_allowed_get
+  parameters:
+    - in: query
+      name: email
+      required: true
+      description: Email address of the user to check.
+      schema:
+        type: string
+        example: user@example.com
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/employee.yaml#/common_employee_approver_allowed_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common_error.yaml#/common_invalid_usage_error_out'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '404':
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common_error.yaml#/common_invalid_usage_error_out'
