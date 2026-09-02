@@ -20,6 +20,170 @@ tags:
     description: |
       These APIs gives the places suggestions and geographic data of a place.
 paths:
+  /common/location/autocomplete:
+    post:
+      tags:
+        - Places
+      security:
+        - oauth2:
+            - '*'
+      summary: Suggest locations
+      description: Returns location suggestions matching the supplied search query.
+      operationId: location_autocomplete_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_autocomplete_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/location_autocomplete_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/location_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/location/directions:
+    post:
+      tags:
+        - Places
+      security:
+        - oauth2:
+            - '*'
+      summary: Get directions
+      description: Returns an encoded route polyline between the supplied coordinates.
+      operationId: location_directions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_route_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/location_directions_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/location_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/location/distance:
+    post:
+      tags:
+        - Places
+      security:
+        - oauth2:
+            - '*'
+      summary: Get distance
+      description: Returns the route distance in metres between the supplied coordinates.
+      operationId: location_distance_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_route_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/location_distance_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/location_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+  /common/location/geocode:
+    post:
+      tags:
+        - Places
+      security:
+        - oauth2:
+            - '*'
+      summary: Geocode a location
+      description: Returns geographic details for the supplied place identifier.
+      operationId: location_geocode_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_geocode_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/location_geocode_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/location_error_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
   /common/places/autocomplete:
     get:
       tags:
@@ -480,6 +644,259 @@ components:
           type: string
           description: |
             This error means the requested resource was not found or the requester doesn't have sufficient access.
+    location_autocomplete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - search_query
+        - user_id
+      properties:
+        search_query:
+          type: string
+          description: Text used to search for matching places.
+          example: Bangalore
+        user_id:
+          type: string
+          description: ID of the user requesting place suggestions.
+          example: usx4eGq0uIPu
+        location:
+          type: string
+          nullable: true
+          description: Latitude and longitude used to bias the results.
+          example: 12.971599,77.594566
+        types:
+          type: string
+          nullable: true
+          description: Place type used to restrict the results.
+          example: (cities)
+    location_matched_substring_out:
+      type: object
+      additionalProperties: true
+      required:
+        - length
+        - offset
+      properties:
+        length:
+          type: integer
+          example: 3
+        offset:
+          type: integer
+          example: 0
+    location_structured_formatting_out:
+      type: object
+      additionalProperties: true
+      required:
+        - main_text
+        - main_text_matched_substrings
+        - secondary_text
+      properties:
+        main_text:
+          type: string
+          example: Bengaluru
+        main_text_matched_substrings:
+          type: array
+          items:
+            $ref: '#/components/schemas/location_matched_substring_out'
+        secondary_text:
+          type: string
+          example: Karnataka, India
+        secondary_text_matched_substrings:
+          type: array
+          items:
+            $ref: '#/components/schemas/location_matched_substring_out'
+    location_term_out:
+      type: object
+      additionalProperties: true
+      required:
+        - offset
+        - value
+      properties:
+        offset:
+          type: integer
+          example: 0
+        value:
+          type: string
+          example: Bengaluru
+    location_autocomplete_prediction_out:
+      type: object
+      additionalProperties: true
+      required:
+        - description
+        - matched_substrings
+        - place_id
+        - reference
+        - structured_formatting
+        - terms
+        - types
+      properties:
+        description:
+          type: string
+          example: Bengaluru, Karnataka, India
+        matched_substrings:
+          type: array
+          items:
+            $ref: '#/components/schemas/location_matched_substring_out'
+        place_id:
+          type: string
+          example: ChIJbU60yXAWrjsR4E9-UejD3_g
+        reference:
+          type: string
+          example: ChIJbU60yXAWrjsR4E9-UejD3_g
+        structured_formatting:
+          $ref: '#/components/schemas/location_structured_formatting_out'
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/location_term_out'
+        types:
+          type: array
+          items:
+            type: string
+          example:
+            - geocode
+            - locality
+            - political
+    location_autocomplete_out:
+      type: object
+      additionalProperties: false
+      required:
+        - predictions
+        - status
+      properties:
+        predictions:
+          type: array
+          items:
+            $ref: '#/components/schemas/location_autocomplete_prediction_out'
+        status:
+          type: string
+          example: OK
+    location_error_out:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - error
+        - message
+      properties:
+        data:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Validation messages keyed by request field, or null for provider errors.
+        error:
+          type: string
+          enum:
+            - InvalidUsage
+            - ValidationError
+        message:
+          type: string
+          nullable: true
+          description: Provider error details, or null for request validation errors.
+    location_coordinate_in:
+      type: string
+      description: |
+        A latitude or longitude represented as a string. Latitudes must be between -90 and 90;
+        longitudes must be between -180 and 180.
+      example: '33.7501275'
+    location_route_in:
+      type: object
+      additionalProperties: false
+      required:
+        - origin_lat
+        - origin_long
+        - destination_lat
+        - destination_long
+      properties:
+        origin_lat:
+          $ref: '#/components/schemas/location_coordinate_in'
+        origin_long:
+          $ref: '#/components/schemas/location_coordinate_in'
+        destination_lat:
+          $ref: '#/components/schemas/location_coordinate_in'
+        destination_long:
+          $ref: '#/components/schemas/location_coordinate_in'
+        mode:
+          type: string
+          nullable: true
+          default: driving
+          example: driving
+        waypoints:
+          type: string
+          nullable: true
+          description: |
+            Pipe-separated latitude and longitude pairs in `latitude,longitude` format.
+          example: 35.0,-80.0|37.0,-78.0
+    location_directions_out:
+      type: object
+      additionalProperties: false
+      required:
+        - direction
+      properties:
+        direction:
+          type: string
+          nullable: true
+          description: Encoded route polyline, or null when no route is available.
+          example: encoded_polyline_string
+    location_distance_out:
+      type: object
+      additionalProperties: false
+      required:
+        - distance
+      properties:
+        distance:
+          type: integer
+          description: Distance in metres. Returns 0 when no distance is available.
+          example: 1391308
+    location_geocode_in:
+      type: object
+      additionalProperties: false
+      required:
+        - place_id
+      properties:
+        place_id:
+          type: string
+          description: Provider identifier of the place to geocode.
+          example: ChIJbU60yXAWrjsR4E9-UejD3_g
+    location_geocode_out:
+      type: object
+      additionalProperties: false
+      required:
+        - city
+        - state
+        - country
+        - formatted_address
+        - latitude
+        - longitude
+      properties:
+        city:
+          type: string
+          nullable: true
+          example: Erquelinnes
+        state:
+          type: string
+          nullable: true
+          example: Wallonia
+        country:
+          type: string
+          nullable: true
+          example: Belgium
+        formatted_address:
+          type: string
+          nullable: true
+          example: 6560 Erquelinnes, Belgium
+        latitude:
+          type: number
+          format: double
+          nullable: true
+          example: 50.309363
+        longitude:
+          type: number
+          format: double
+          nullable: true
+          example: 4.1192047
     count:
       type: integer
       description: |
