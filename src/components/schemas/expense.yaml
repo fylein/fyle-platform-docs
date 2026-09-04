@@ -30,12 +30,18 @@ expense_out:
     - source_account
     - tax_amount
     - tax_group_id
+    - calculated_tax_amount
     - is_billable
     - is_reimbursable
     - distance
     - distance_unit
     - mileage_calculated_distance
     - mileage_calculated_amount
+    - selected_vehicle_ownership
+    - selected_vehicle_category
+    - passenger_count
+    - passenger_mileage_rate
+    - passenger_amount
     - mileage_rate_id
     - mileage_rate
     - mileage_is_round_trip
@@ -54,6 +60,7 @@ expense_out:
     - seq_num
     - report_id
     - added_to_report_at
+    - added_to_report_by
     - report
     - is_verified
     - last_verified_at
@@ -66,6 +73,8 @@ expense_out:
     - is_corporate_card_transaction_auto_matched
     - matched_corporate_card_transaction_ids
     - matched_corporate_card_transactions
+    - matched_corporate_card_transaction_id
+    - matched_corporate_card_transaction
     - last_settled_at
     - missing_mandatory_fields
     - activity_details
@@ -79,6 +88,26 @@ expense_out:
     - invoice_number
     - is_duplicate_present
     - expense_policy_comments
+    - custom_fields_flattened
+    - approvals
+    - verifications
+    - employee_id
+    - split_group_amount
+    - expense_rule_id
+    - expense_rule_data
+    - is_split
+    - tax_group
+    - approver_comments
+    - verifier_comments
+    - policy_checks
+    - accounting_export_summary
+    - report_last_paid_at
+    - report_last_approved_at
+    - commute_deduction
+    - commute_details_id
+    - commute_details
+    - is_reconciled
+    - report_auto_approval_state
   properties:
     id:
       allOf:
@@ -201,6 +230,12 @@ expense_out:
       allOf:
         - $ref: './fields.yaml#/fk_string'
       nullable: true
+    calculated_tax_amount:
+      type: number
+      nullable: true
+      readOnly: true
+      description: |
+        System-derived tax amount for the expense amount and the selected tax group's rate.
     is_billable:
       type: boolean
       nullable: true
@@ -231,6 +266,36 @@ expense_out:
       type: number
       nullable: true
       description: Amount computed by Sage Exp Mgmt in mileage expenses.
+    selected_vehicle_ownership:
+      type: string
+      nullable: true
+      enum:
+        - PERSONAL
+        - COMPANY
+        - null
+      description: Selected vehicle ownership for an advanced mileage expense. `null` for a basic mileage expense.
+    selected_vehicle_category:
+      type: string
+      nullable: true
+      enum:
+        - CAR
+        - MOTORCYCLE
+        - BICYCLE
+        - null
+      description: Selected vehicle category for an advanced mileage expense. `null` for a basic mileage expense.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: Number of passengers carried on the mileage journey.
+    passenger_mileage_rate:
+      type: number
+      nullable: true
+      readOnly: true
+      description: Passenger mileage rate snapshot applied to this expense. `null` when passenger mileage does not apply.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: Passenger mileage reimbursement amount for this expense.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
@@ -334,6 +399,16 @@ expense_out:
       description: |
         signifies when this expense was added to a report.
         If this expense is not added to a report, then this could be null.
+    added_to_report_by:
+      type: string
+      nullable: true
+      enum:
+        - USER
+        - SYSTEM
+        - null
+      description: |
+        Indicates whether the expense was added to the report it belongs to by a user or the system. If the expense is not a part of any report, this field will be null.
+      example: USER
     report:
       $ref: './report.yaml#/report_out_embed'
     is_verified:
@@ -413,6 +488,8 @@ expense_out:
         $ref: './fields.yaml#/id_string'
       description: |
         Holds the corporate card transaction ids which are matched to this expense
+        
+        **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction_id` instead, as this array always contains a single value.
       example:
         - btxnwownwrng
     matched_corporate_card_transactions:
@@ -422,6 +499,20 @@ expense_out:
       description: |
         Holds the corporate card transactions which are matched to this expense.
         NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+        
+        **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction` instead, as this array always contains a single value.
+    matched_corporate_card_transaction_id:
+      type: string
+      nullable: true
+      description: |
+        Holds the corporate card transaction id which is matched to this expense
+      example: btxnwownwrng
+    matched_corporate_card_transaction:
+      allOf:
+        - $ref: '#/matched_corporate_card_transaction_out_embed_new'
+      description: |
+        Holds the corporate card transaction which is matched to this expense.
+        NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_id` is already up-to-date.
     last_settled_at:
       allOf:
         - $ref: './fields.yaml#/timestamptz_utc'
@@ -590,6 +681,15 @@ expense_out:
       description: |
         Whether expenses is reconciled or not.
       example: true
+    report_auto_approval_state:
+      type: string
+      nullable: true
+      description: Indicates the auto approval evaluation status of the expense's report.
+      enum:
+        - PENDING
+        - NOT_ELIGIBLE
+        - AUTO_APPROVED
+        - null
 
 expense_in:
   type: object
@@ -688,6 +788,16 @@ expense_in:
       type: number
       nullable: true
       description: Amount computed by Sage Exp Mgmt in mileage expenses.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
     mileage_rate_id:
       allOf:
         - $ref: './fields.yaml#/fk_integer'
@@ -749,8 +859,6 @@ expense_in:
 spender_expense_in:
   type: object
   additionalProperties: false
-  required:
-    - claim_amount
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -900,6 +1008,16 @@ spender_expense_in:
       type: number
       nullable: true
       description: Amount computed by Sage Exp Mgmt in mileage expenses.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
     commute_details_id:
       type: integer
       nullable: true
@@ -1030,6 +1148,54 @@ spender_check_policies_bulk_in:
   items:
     $ref: '#/spender_expenses_bulk_in/items'
 
+admin_expenses_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be updated in bulk by the admin.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
+admin_expense_check_mandatory_fields_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be checked for missing mandatory fields by admin.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
+admin_check_policies_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be validated against expense policy rules by admin.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
+approver_expenses_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be updated in bulk by the approver.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
+approver_expense_check_mandatory_fields_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be checked for missing mandatory fields by approver.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
+approver_check_policies_bulk_in:
+  type: array
+  additionalProperties: false
+  description: |
+    Array of expenses to be validated against expense policy rules by approver.
+  items:
+    $ref: '#/spender_expenses_bulk_in/items'
+
 admin_expense_in:
   type: object
   additionalProperties: false
@@ -1037,7 +1203,7 @@ admin_expense_in:
     - required:
       - admin_amount
       - assignee_user_email
-    - required: 
+    - required:
       - id
   properties:
     id:
@@ -1053,7 +1219,7 @@ admin_expense_in:
         The expense amount which is added or modified by admin or approver.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: 1900
     spent_at:
       type: string
@@ -1064,7 +1230,7 @@ admin_expense_in:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     assignee_user_email:
       allOf:
@@ -1074,9 +1240,9 @@ admin_expense_in:
         Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
         822.</a>
         - **Note:**
-          - The expense will be assigned/re-assigned to this particular `employee`. 
+          - The expense will be assigned/re-assigned to this particular `employee`.
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
           - Admins can't assign the expense to self.
     source:
       $ref: './fields.yaml#/source'
@@ -1118,7 +1284,7 @@ admin_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
@@ -1178,6 +1344,16 @@ admin_expense_in:
       type: number
       nullable: true
       description: Amount computed by Sage Exp Mgmt in mileage expenses.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
     commute_details_id:
       type: integer
       nullable: true
@@ -1216,7 +1392,7 @@ admin_expense_in:
 approver_expense_in:
   type: object
   additionalProperties: false
-  required: 
+  required:
     - id
   properties:
     id:
@@ -1230,7 +1406,7 @@ approver_expense_in:
       description: |
         The expense amount which is added or modified by admin or approver.
         - **Note:**
-          - _This field is non-nullable_. 
+          - _This field is non-nullable_.
       example: 1900
     spent_at:
       type: string
@@ -1240,7 +1416,7 @@ approver_expense_in:
         It signifies when this expense was made.
         This date cannot be in future.
         - **Note:**
-          - _This field is non-nullable_. 
+          - _This field is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     source:
       $ref: './fields.yaml#/source'
@@ -1282,7 +1458,7 @@ approver_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
@@ -1333,6 +1509,16 @@ approver_expense_in:
       type: number
       nullable: true
       description: Amount computed by Sage Exp Mgmt in mileage expenses.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
     commute_details_id:
       type: integer
       nullable: true
@@ -1367,6 +1553,15 @@ approver_expense_in:
       description: |
         Specific to per diem related expenses, number of days for which per diem claim is made. <br>
         This field is required for creating Per Diem Expenses.
+
+expense_out_with_department_name:
+  allOf:
+    - $ref: '#/expense_out'
+    - type: object
+      properties:
+        employee:
+          nullable: true
+          $ref: './employee.yaml#/employee_out_embed_for_expense_with_department_name'
 
 expense_out_embed:
   type: object
@@ -1473,6 +1668,21 @@ matched_corporate_card_transaction_out_embed:
     - id
     - corporate_card_id
     - corporate_card_number
+    - corporate_card_nickname
+    - masked_corporate_card_number
+    - bank_name
+    - corporate_card_user_full_name
+    - amount
+    - currency
+    - spent_at
+    - posted_at
+    - status
+    - description
+    - foreign_currency
+    - foreign_amount
+    - merchant
+    - category
+    - matched_by
   properties:
     id:
       allOf:
@@ -1517,6 +1727,11 @@ matched_corporate_card_transaction_out_embed:
       description: |
         String denoting the card holder's full name
       example: John Doe
+    is_corporate_card_archived:
+      type: boolean
+      description: |
+        Signifies whether the corporate card is archived or not.
+      nullable: false
     amount:
       $ref: './fields.yaml#/amount'
     currency:
@@ -1579,6 +1794,130 @@ matched_corporate_card_transaction_out_embed:
       description: |
         String denoting the email of the user who matched the card transaction to an expense.
       example: john.ooe@sage.com
+
+
+matched_corporate_card_transaction_out_embed_new:
+  anyOf:
+    - type: object
+      additionalProperties: false
+      properties: {}
+      description: Empty object when no corporate card transaction is matched
+    - type: object
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: './fields.yaml#/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: './fields.yaml#/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: './fields.yaml#/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: 'Business Card'
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: "4521"
+        masked_corporate_card_number:
+          $ref: './fields.yaml#/card_number'
+        bank_name:
+          nullable: true
+          $ref: './fields.yaml#/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+           - $ref: './fields.yaml#/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
+        amount:
+          $ref: './fields.yaml#/amount'
+        currency:
+          $ref: './fields.yaml#/currency'
+        spent_at:
+          allOf:
+           - $ref: './fields.yaml#/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+           - $ref: './fields.yaml#/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+           - $ref: './fields.yaml#/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+           - $ref: './fields.yaml#/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+           - $ref: './fields.yaml#/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@sage.com
 
 
 expense_attach_receipt_in:
@@ -1785,9 +2124,9 @@ expense_check_policies_in:
         Invoice number of the expense.
       example: 123456
 
-    # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations 
-    # when mileage support comes to platform world. If we will give APIs for distance and amount calculation, 
-    # then we will link the respective APIs in the description. If we decide to auto compute it in backend, then 
+    # TODO: Update the below remaining fields in this object based on how do we decide to do mileage calculations
+    # when mileage support comes to platform world. If we will give APIs for distance and amount calculation,
+    # then we will link the respective APIs in the description. If we decide to auto compute it in backend, then
     # these fields might need to be dropped.
     mileage_calculated_distance:
       type: number
@@ -1797,10 +2136,23 @@ expense_check_policies_in:
       type: number
       nullable: true
       description: Specific to mileage expense. Amount computed by Sage Exp Mgmt for mileage expenses.
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
 
 expense_check_policies_out:
   type: object
   additionalProperties: False
+  required:
+    - individual_desired_states
+    - final_desired_state
   properties:
     individual_desired_states:
       type: array
@@ -1835,12 +2187,28 @@ expense_delete_in:
       $ref: './fields.yaml#/id_string'
 
 
+expenses_count_out:
+  type: object
+  additionalProperties: False
+  required:
+    - count
+  properties:
+    count:
+      type: integer
+      minimum: 0
+      nullable: false
+      description: Number of expenses matching the requested state and enabled-employee criteria.
+      example: 33
+
+
 expenses_stats_in:
+  required:
+    - query_params
   properties:
     query_params:
       nullable: False
       type: string
-      description: | 
+      description: |
         Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
       example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
 
@@ -1878,8 +2246,8 @@ expenses_stats_out:
               - PAID
               - UNREPORTABLE
             description: Expense state
-    # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
-    # TODO: @Dev to update the response once the hack is removed from platform-api  
+    # NOTE: This is a hack to maintain backward compatibility with the existing response structure
+    # TODO: @Dev to update the response once the hack is removed from platform-api
     - type: object
       title: "Overall stats"
       description: Overall stats without state grouping
@@ -1950,7 +2318,7 @@ accounting_export_summary_in:
     url:
       type: string
       description: URL Endpoint for exported / failed expense
-      example: https://app.example.com/expense/txwownwrng  
+      example: https://app.example.com/expense/txwownwrng
 spender_expense_check_mandatory_fields_in:
   type: object
   additionalProperties: false
@@ -2029,6 +2397,16 @@ spender_expense_check_mandatory_fields_in:
       $ref: './fields.yaml#/distance'
     distance_unit:
       $ref: './fields.yaml#/distance_unit'
+    passenger_count:
+      type: integer
+      nullable: true
+      description: |
+        Number of passengers carried on the mileage journey. For advanced CAR mileage when passenger mileage is enabled, this is optional; when provided, it must be between 1 and 6. It must be `0` for MOTORCYCLE or BICYCLE mileage, and `null` for basic mileage or when passenger mileage is disabled.
+    passenger_amount:
+      type: number
+      nullable: true
+      description: |
+        Passenger mileage reimbursement amount for this expense. For advanced CAR mileage when passenger mileage is enabled and `passenger_count` is provided, it must equal `passenger_count * passenger_mileage_rate * distance`, rounded to two decimal places. It must be `null` when `passenger_count` is `null`, for basic mileage, or when passenger mileage is disabled; no passenger reimbursement is applied for MOTORCYCLE or BICYCLE mileage.
     started_at:
       $ref: './fields.yaml#/timestamptz_pst'
     ended_at:
@@ -2167,6 +2545,8 @@ expense_comments_out:
     - org_id
     - updated_at
     - created_at
+    - creator_user_id
+    - creator_user
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -2199,9 +2579,7 @@ expense_comments_out:
         - UNMATCHED
       example: COMMENTED_WITH_NOTIFICATION
     action_data:
-      type: object
-      description: Data related to expense action.
-      nullable: true
+      $ref: './expense.yaml#/expense_action_data_embed'
     expense_id:
       $ref: './fields.yaml#/id_string'
     creator_type:
@@ -2233,7 +2611,6 @@ expense_comments_bulk_in:
     required:
       - expense_id
       - comment
-      - notify
     properties:
       expense_id:
         $ref: './fields.yaml#/id_string'
@@ -2246,6 +2623,11 @@ expense_comments_bulk_in:
         description: Whether to notify the user about the comment
         example: true
 
+expense_action_data_embed:
+  type: object
+  description: Data related to expense action.
+  nullable: true
+  
 expense_dismiss_duplicates_in:
   type: object
   required:
@@ -2263,10 +2645,12 @@ expense_dismiss_duplicates_in:
       example: ['txwoirwlwwg', 'txwlgwkgw42']
       description: |
         List of expense IDs that needs to be dismissed as a duplicate from the target expense
-  
+
 expense_duplicate_sets_out:
   type: object
   additionalProperties: false
+  required:
+    - expense_ids
   properties:
     expense_ids:
       type: array
@@ -2280,6 +2664,9 @@ expense_duplicate_sets_out:
 expense_verification_out_embed:
   type: object
   additionalProperties: false
+  required:
+    - verifier_user_id
+    - verifier_user
   properties:
     verifier_user_id:
       allOf:
@@ -2300,7 +2687,7 @@ expense_split_object:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     category_id:
       allOf:
@@ -2344,7 +2731,7 @@ split_expense_in:
         This date cannot be in future.
         - **Note:**
           - This field is required while creating an expense.
-          - _Not required when updating an expense, but is non-nullable_. 
+          - _Not required when updating an expense, but is non-nullable_.
       example: '2020-06-01T01:18:19.292-08:00'
     is_reimbursable:
       $ref: './fields.yaml#/is_reimbursable'
@@ -2386,7 +2773,7 @@ split_expense_in:
     tax_amount:
       type: number
       nullable: true
-      description: | 
+      description: |
         Tax amount as setup by your organization.
         - _Note:_
           - Tax amount cannot be greater than the expense amount.
@@ -2758,6 +3145,9 @@ expense_policy_comment_out_embed:
       example: epc1a2f3farmk
     comment_type:
       type: string
+      enum:
+        - LOST_RECEIPT_REASON
+        - POLICY_VIOLATION_REASON
       description: Type of the policy comment
     comment_text:
       type: string

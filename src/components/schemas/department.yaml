@@ -1,6 +1,20 @@
 department_out:
   type: object
   additionalProperties: False
+  required:
+    - created_at
+    - updated_at
+    - id
+    - org_id
+    - name
+    - sub_department
+    - is_enabled
+    - code
+    - description
+    - department_head_user_ids
+    - doc_url
+    - department_head_users
+    - display_name
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -52,6 +66,12 @@ department_out_embed:
   type: object
   additionalProperties: False
   nullable: true
+  required:
+    - id
+    - code
+    - name
+    - sub_department
+    - display_name
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -72,6 +92,31 @@ department_out_embed:
         This is a combination of name and sub_department separated by a / and
         spaces.
         In case if no sub_department is present it is same as name of the department.
+
+
+department_out_employee_embed:
+  type: object
+  additionalProperties: False
+  nullable: true
+  required:
+    - id
+    - code
+    - name
+    - sub_department
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+    code:
+      $ref: ./fields.yaml#/code
+    name:
+      allOf:
+        - $ref: ./fields.yaml#/name
+      example: Sales
+    sub_department:
+      type: string
+      nullable: true
+      example: Outbound Sales
+
 
 department_in:
   type: object
@@ -103,3 +148,37 @@ department_in:
       description: |
         Link to an external document that would be shared with employees
       example: https://stoplight.io/
+
+
+department_in_only_id:
+  type: object
+  required:
+    - id
+  additionalProperties: False
+  properties:
+    id:
+      $ref: './fields.yaml#/id_string'
+
+
+department_delete_summary_out:
+  type: object
+  additionalProperties: False
+  required:
+    - data
+  properties:
+    data:
+      type: object
+      additionalProperties: False
+      properties:
+        delete_count:
+          type: integer
+          description: Count of departments that can be deleted from the supplied departments.
+          example: 2
+        departments:
+          type: array
+          description: Departments that can be deleted.
+          example:
+            - id: deptTqSvgYSlMk
+            - id: deptISw67iupk3
+          items:
+            $ref: './department.yaml#/department_in_only_id'

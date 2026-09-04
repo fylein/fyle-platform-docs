@@ -346,6 +346,26 @@ contains_operator:
     Value signifying the operator for the field
   example: IN
 
+contains_from_list_operator:
+  nullable: true
+  type: string
+  enum:
+    - CONTAINS_ANY_FROM_LIST
+    - CONTAINS_NONE_FROM_LIST
+    - null
+  description: >
+    Value signifying the operator for matching values from a list field.
+  example: CONTAINS_ANY_FROM_LIST
+
+delegation_access_scope:
+  type: array
+  description: |
+    List of scopes for the delegate.
+  items:
+    type: string
+    enum: [ALL, SUBMIT, APPROVE]
+  example: ["SUBMIT", "APPROVE"]
+
 expense_policy_rule_embed:
   type: object
   additionalProperties: false
@@ -365,6 +385,11 @@ expense_policy_rule_embed:
       description: |
         A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
       example: True
+    policy_violation_reason_required:
+      type: boolean
+      description: |
+        A true value here means that entering a policy violation reason is mandatory for this policy rule.
+      example: false
     action_make_unreportable:
       type: boolean
       nullable: false
@@ -374,6 +399,11 @@ expense_policy_rule_embed:
 
 expense_policy_expenses_query_object:
   type: object
+  required:
+    - limit_start_date
+    - limit_end_date
+    - params
+  nullable: true
   description: |
     An expense may be violating an expense policy rule due to a group of other expenses.
     These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
@@ -384,6 +414,7 @@ expense_policy_expenses_query_object:
       description: |
         Spend start date query param to find the list of violating expenses.
       example: "2021-12-01"
+      nullable: true
     limit_end_date:
       type: string
       description: |
@@ -394,6 +425,16 @@ expense_policy_expenses_query_object:
 
 expense_check_policies_individual_desired_states:
   type: object
+  required:
+    - add_approver_user_ids
+    - approver_policy_order
+    - approver_source
+    - expense_policy_rule_id
+    - expense_policy_rule
+    - run_status
+    - run_result
+    - amount
+    - expenses_query_object
   properties:
     add_approver_user_ids:
       nullable: true
@@ -468,12 +509,21 @@ expense_check_policies_individual_desired_states:
       description: |
         Amount that the policy calculation suggests for this expense.
       example: 500
-    expenses_query_object_params:
+    expenses_query_object:
       nullable: true
       $ref: '#/expense_policy_expenses_query_object'
 
 expense_check_policies_final_desired_state:
   type: object
+  required:
+    - flag
+    - amount
+    - unreportable
+    - is_receipt_mandatory
+    - add_approver_user_ids
+    - remove_employee_approver1
+    - run_status
+    - run_summary
   properties:
     flag:
       type: boolean
@@ -535,6 +585,17 @@ expense_check_policies_final_desired_state:
 
 expense_policy_individual_desired_states:
   type: object
+  required:
+    - add_approver_user_ids
+    - approver_policy_order
+    - approver_source
+    - expense_id
+    - expense_policy_rule_id
+    - expense_policy_rule
+    - run_status
+    - run_result
+    - amount
+    - expenses_query_object
   properties:
     add_approver_user_ids:
       nullable: true
@@ -605,7 +666,7 @@ expense_policy_individual_desired_states:
       description: |
         This represents the id of the expense policy rule.
       example: "tprabsdfSYqd"
-    rule:
+    expense_policy_rule:
       $ref: '#/expense_policy_rule_embed'
     amount:
       nullable: true
@@ -615,7 +676,7 @@ expense_policy_individual_desired_states:
       description: |
         Amount that the policy calculation suggests for this expense.
       example: 500
-    expenses_query_object_params:
+    expenses_query_object:
       nullable: true
       $ref: '#/expense_policy_expenses_query_object'
 
@@ -655,6 +716,16 @@ expense_policy_expenses_query_object_params:
 
 expense_policy_final_desired_state:
   type: object
+  required:
+    - expense_id
+    - flag
+    - amount
+    - unreportable
+    - is_receipt_mandatory
+    - add_approver_user_ids
+    - remove_employee_approver1
+    - run_status
+    - run_summary
   properties:
     expense_id:
       type: string
@@ -1124,6 +1195,9 @@ missing_mandatory_fields:
 schedule_config:
   type: object
   nullable: false
+  required:
+    - type
+    - when
   properties:
     type:
       nullable: false
@@ -1245,6 +1319,17 @@ budget_visibility:
   description: |
     Visibility of the budget
   example: ONLY_ADMINS
+
+budget_status:
+  type: string
+  enum:
+    - ON_TRACK
+    - NEAR_LIMIT
+    - EXCEEDED
+    - DISABLED
+  description: |
+    Status of budget usage
+  example: ON_TRACK
 
 budget_user_ids:
   type: array
@@ -1380,6 +1465,14 @@ reminder_schedule_config:
               pattern: '^[1-7](?:,[1-7])*$'
               example: 1,3,5
               description: comma-separated day numbers (e.g. "1,3,5" for mon,wed,fri)
+        week:
+          oneOf:
+            - type: number
+              example: 2
+              description: Week of the month (number, e.g. 2)
+            - type: string
+              example: '*/1'
+              description: cron expression (e.g. '*/1' for every week, '*/2' for every alternate week)
         hour:
           type: number
           example: 22
@@ -1595,6 +1688,14 @@ ach_transfer_state:
 delegatees:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - type
+    - user_id
+    - email
+    - full_name
+    - start_at
+    - scopes
   properties:
     id:
       allOf:
@@ -1633,6 +1734,10 @@ delegatees:
         - $ref: './fields.yaml#/timestamptz_utc'
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
+      nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
       nullable: True
 
 locale:
@@ -1801,7 +1906,9 @@ any_type:
       items:
         $ref: './fields.yaml#/any_type'
     - type: object
-
+      additionalProperties:
+        $ref: '#/components/schemas/any_type'
+    - {}
 commute_location:
   type: object
   nullable: true
@@ -1833,6 +1940,12 @@ commute_location:
 
 commute_details:
   type: object
+  required:
+    - id
+    - distance
+    - distance_unit
+    - home_location
+    - work_location
   nullable: true
   description: |
     Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
@@ -1873,6 +1986,13 @@ commute_details:
 commute_location_not_nullable:
   type: object
   nullable: false
+  required:
+    - city
+    - state
+    - country
+    - formatted_address
+    - latitude
+    - longitude
   properties:
     city:
       type: string
@@ -1905,6 +2025,11 @@ commute_details_in:
   additionalProperties: False
   description: |
     Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
+  required:
+    - distance
+    - distance_unit
+    - home_location
+    - work_location
   properties:
     home_location:
       allOf:
@@ -1943,6 +2068,11 @@ has_accepted_invite:
 delegatee:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - start_at
+    - end_at
+    - scopes
   properties:
     user_id:
       type: string
@@ -1961,6 +2091,11 @@ delegatee:
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
+      nullable: True
+
 
 subscribed_resources:
   type: array
