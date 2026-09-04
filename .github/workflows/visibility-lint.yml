@@ -1,0 +1,40 @@
+name: OpenAPI visibility lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**/*.yaml'
+      - 'plugins/visibility-rules.mjs'
+      - 'redocly.visibility.yaml'
+      - 'scripts/lint-visibility.sh'
+      - 'tests/visibility-rules.test.mjs'
+      - '.githooks/pre-commit'
+      - '.github/workflows/visibility-lint.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  visibility-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Test visibility rule
+        run: node --test tests/visibility-rules.test.mjs
+
+      - name: Lint changed operations
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: scripts/lint-visibility.sh --range "$BASE_SHA" "$HEAD_SHA"
