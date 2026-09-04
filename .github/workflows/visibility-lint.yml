@@ -8,7 +8,9 @@ on:
       - 'src/**/*.yaml'
       - 'plugins/visibility-rules.mjs'
       - 'redocly.visibility.yaml'
+      - 'scripts/lint-visibility.sh'
       - 'tests/visibility-rules.test.mjs'
+      - '.githooks/pre-commit'
       - '.github/workflows/visibility-lint.yml'
 
 permissions:
@@ -28,40 +30,11 @@ jobs:
         with:
           node-version: 22.x
 
-      - name: Install Redocly CLI
-        run: npm install -g @redocly/cli@2.19.0
-
       - name: Test visibility rule
         run: node --test tests/visibility-rules.test.mjs
 
-      - name: Find changed OpenAPI source files
-        id: changed-files
+      - name: Lint changed operations
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          changed_files="$(git diff --name-only --diff-filter=ACMR "$BASE_SHA" "$HEAD_SHA" -- 'src/**/*.yaml')"
-          {
-            echo 'files<<EOF'
-            echo "$changed_files"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Lint changed operations
-        if: steps.changed-files.outputs.files != ''
-        env:
-          X_INTERNAL_CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
-        run: |
-          redocly lint \
-            src/authorization/openapi.yaml \
-            src/admin/openapi.yaml \
-            src/spender/openapi.yaml \
-            src/approver/openapi.yaml \
-            src/hod/openapi.yaml \
-            src/hop/openapi.yaml \
-            src/common/openapi.yaml \
-            src/accountant/openapi.yaml \
-            src/super_admin/openapi.yaml \
-            src/owner/openapi.yaml \
-            src/manager/openapi.yaml \
-            --config redocly.visibility.yaml
+        run: scripts/lint-visibility.sh --range "$BASE_SHA" "$HEAD_SHA"
