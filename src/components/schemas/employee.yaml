@@ -1,6 +1,48 @@
 employee_out:
   type: object
   additionalProperties: False
+  required:
+    - created_at
+    - updated_at
+    - id
+    - business_unit
+    - code
+    - custom_fields
+    - department
+    - department_id
+    - is_enabled
+    - joined_at
+    - level
+    - level_id
+    - location
+    - org_id
+    - roles
+    - special_email
+    - title
+    - user_id
+    - user
+    - mileage_rate_ids
+    - mileage_rates
+    - cost_center_ids
+    - cost_centers
+    - per_diem_rate_ids
+    - per_diem_rates
+    - project_ids
+    - projects
+    - approver_user_ids
+    - approver_users
+    - has_accepted_invite
+    - branch_account
+    - branch_ifsc
+    - mobile
+    - locale
+    - mileage_settings
+    - ach_account
+    - delegatees
+    - category_ids
+    - categories
+    - flattened_custom_field
+    - is_mobile_verified
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -33,7 +75,7 @@ employee_out:
     department_id:
       $ref: './fields.yaml#/fk_string'
     department:
-      $ref: './department.yaml#/department_out_embed'
+      $ref: './department.yaml#/department_out_employee_embed'
     is_enabled:
       allOf:
         - $ref: ./fields.yaml#/is_enabled
@@ -232,6 +274,14 @@ employee_out:
 employee_out_embed:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - user_id
+    - user
+    - code
+    - org_id
+    - department_id
+    - department
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -257,7 +307,7 @@ employee_out_embed:
       $ref: './fields.yaml#/department_id'
     department:
       nullable: True
-      $ref: './department.yaml#/department_out_embed'
+      $ref: './department.yaml#/department_out_employee_embed'
 #    level:
 #      $ref: './level.yaml#/level_out_embed'
 #    location:
@@ -279,6 +329,11 @@ employee_out_embed:
 employee_out_potential_duplicate_expenses:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - email
+    - full_name
+    - potential_duplicate_expenses
   properties:
     user_id:
       $ref: './fields.yaml#/user_id'
@@ -299,6 +354,115 @@ employee_out_embed_for_expense:
   type: object
   additionalProperties: False
   nullable: True
+  required:
+    - id
+    - user_id
+    - user
+    - code
+    - org_id
+    - department_id
+    - department
+    - location
+    - title
+    - business_unit
+    - custom_fields
+    - flattened_custom_field
+  properties:
+    id:
+      $ref: ./fields.yaml#/id_string
+    user_id:
+      $ref: './fields.yaml#/user_id'
+    user:
+      $ref: ./user.yaml#/user_out_embed
+    code:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: E84122
+      description: >
+        This field refers to any string that the client programs can use to refer
+        to an employee's unique id.
+
+        This could be any field such as an UUID from an Active Directory server or
+        employee id in a HRMS system.
+    org_id:
+      $ref: ./fields.yaml#/org_id
+    org_name:
+      $ref: ./fields.yaml#/org_name
+    department_id:
+      nullable: True
+      $ref: './fields.yaml#/department_id'
+    department:
+      nullable: True
+      $ref: './department.yaml#/department_out_embed'
+    level:
+      $ref: './level.yaml#/level_out_embed'
+    location:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Bangalore Ofc
+    title:
+      type: string
+      maxLength: 255
+      nullable: True
+      example: Branch Manager
+    business_unit:
+      type: string
+      maxLength: 255
+      nullable: true
+      example: Finance ops
+    custom_fields:
+      type: array
+      nullable: true
+      description: |
+        Custom fields
+      items:
+        $ref: './fields.yaml#/custom_field'
+    flattened_custom_field:
+      $ref: './fields.yaml#/flattened_custom_field'
+    has_accepted_invite:
+      $ref: ./fields.yaml#/has_accepted_invite
+    is_enabled:
+      allOf:
+        - $ref: ./fields.yaml#/is_enabled
+      description: |
+        This field indicates whether the employee is enabled in the org.
+    mobile:
+      type: string
+      nullable: True
+      example: '+12131234567'
+      items:
+        $ref: './fields.yaml#/phone_number'
+      description: |
+        Mobile number of the employee
+    joined_at:
+      $ref: ./fields.yaml#/joined_at
+  description: |
+    NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
+
+
+employee_out_embed_for_expense_with_department_name:
+  type: object
+  additionalProperties: False
+  nullable: True
+  required:
+    - id
+    - user_id
+    - user
+    - code
+    - org_id
+    - org_name
+    - department_id
+    - department
+    - level
+    - location
+    - title
+    - business_unit
+    - custom_fields
+    - flattened_custom_field
+    - has_accepted_invite
+    - is_enabled
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -377,6 +541,18 @@ employee_out_embed_for_expense:
 employee_out_embed_for_report:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - user_id
+    - user
+    - code
+    - org_id
+    - department_id
+    - department
+    - ach_account
+    - business_unit
+    - location
+    - title
   properties:
     id:
       $ref: ./fields.yaml#/id_string
@@ -550,6 +726,19 @@ employee_in:
 spender_employee_out:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - user_id
+    - email
+    - full_name
+    - roles
+    - commute_details
+    - mobile
+    - is_mobile_verified
+    - sms_opt_out_source
+    - is_enabled
+    - has_accepted_invite
+    - delegatees
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -619,6 +808,15 @@ employees_upload_in:
 employees_upload_out:
   type: object
   additionalProperties: False
+  required:
+    - created_at
+    - updated_at
+    - id
+    - user_id
+    - org_id
+    - file_id
+    - error_file_id
+    - state
   properties:
     id:
       allOf:
@@ -656,6 +854,13 @@ employees_upload_out:
 employees_download_out:
   type: object
   additionalProperties: False
+  required:
+    - created_at
+    - updated_at
+    - id
+    - org_id
+    - file_id
+    - state
   properties:
     id:
       allOf:
@@ -687,6 +892,19 @@ employees_download_out:
 spender_commute_details_out:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - user_id
+    - email
+    - full_name
+    - roles
+    - commute_details
+    - mobile
+    - is_mobile_verified
+    - sms_opt_out_source
+    - is_enabled
+    - has_accepted_invite
+    - delegatees
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -745,6 +963,10 @@ spender_commute_details_out:
 spender_delegators_out:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - email
+    - full_name
   properties:
     user_id:
       $ref: './fields.yaml#/user_id'
@@ -760,6 +982,13 @@ spender_delegators_out:
 spender_delegatees_delete_out:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - org_id
+    - delegator_user_id
+    - delegatee_user_id
+    - start_date
+    - end_date
   properties:
     id:
       $ref: './fields.yaml#/id_integer'
@@ -786,6 +1015,10 @@ spender_delegatees_delete_out:
 spender_delegatees_post_in:
   type: object
   additionalProperties: False
+  required:
+    - delegatee_user_id
+    - start_at
+    - end_at
   properties:
     delegatee_user_id:
       $ref: ./fields.yaml#/fk_string
@@ -801,10 +1034,27 @@ spender_delegatees_post_in:
       description: |
         Date and time till which the delegation is active. If null, delegation is active indefinitely.
       nullable: True
+    scopes:
+      allOf:
+        - $ref: './fields.yaml#/delegation_access_scope'
+      nullable: True
 
 spender_delegatees_post_out:
   type: object
   additionalProperties: False
+  required:
+    - id
+    - user_id
+    - email
+    - full_name
+    - roles
+    - commute_details
+    - mobile
+    - is_mobile_verified
+    - sms_opt_out_source
+    - is_enabled
+    - has_accepted_invite
+    - delegatees
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -863,6 +1113,20 @@ spender_delegatees_post_out:
 employee_summary_out:
   type: object
   additionalProperties: False
+  required:
+    - created_at
+    - updated_at
+    - id
+    - org_id
+    - user_id
+    - user
+    - approver_users
+    - unreported_expenses_total
+    - unapproved_reports_total
+    - reimbursable_amount
+    - advance_account_ids
+    - advance_accounts_balance
+    - liability_amount
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -929,6 +1193,12 @@ employee_change_owner_in:
 
 employees_send_mobile_verification_code_post_out:
   type: object
+  required:
+    - to
+    - channel
+    - status
+    - date_created
+    - attempts_left
   additionalProperties: False
   properties:
     to:
@@ -946,11 +1216,6 @@ employees_send_mobile_verification_code_post_out:
       description: |
         Current status of the verification attempt
       example: "pending"
-    valid:
-      type: boolean
-      description: |
-        Whether the verification is valid
-      example: false
     date_created:
       type: string
       format: date-time
@@ -994,6 +1259,15 @@ spender_employee_in:
 employee_hierarchy_out:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - org_id
+    - name
+    - email
+    - title
+    - depth
+    - has_accepted_invite
+    - primary_approver_user_id
   properties:
     user_id:
       $ref: './fields.yaml#/user_id'
@@ -1027,6 +1301,44 @@ employee_hierarchy_out:
 
 spender_employee_current_out:
   type: object
+  required:
+    - id
+    - org_id
+    - user_id
+    - created_at
+    - updated_at
+    - user
+    - code
+    - joined_at
+    - title
+    - business_unit
+    - special_email
+    - roles
+    - location
+    - is_enabled
+    - has_accepted_invite
+    - branch_account
+    - branch_ifsc
+    - department_id
+    - department
+    - level_id
+    - level
+    - mobile
+    - is_mobile_verified
+    - mobile_verification_attempts_left
+    - mobile_verification_attempted_at
+    - org_name
+    - currency
+    - approver_user_ids
+    - approver_users
+    - locale
+    - delegatees
+    - mileage_settings
+    - custom_fields
+    - flattened_custom_field
+    - commute_details_id
+    - commute_details
+    - is_primary
   additionalProperties: False
   properties:
     id:
@@ -1103,7 +1415,7 @@ spender_employee_current_out:
     department_id:
       $ref: './fields.yaml#/fk_string'
     department:
-      $ref: './department.yaml#/department_out_embed'
+      $ref: './department.yaml#/department_out_employee_embed'
     level_id:
       $ref: './fields.yaml#/fk_string'
     level:
@@ -1183,6 +1495,18 @@ spender_employee_current_out:
 employee_overview_out:
   type: object
   additionalProperties: False
+  required:
+    - user_id
+    - org_id
+    - user
+    - employee_id
+    - employee
+    - primary_approver_id
+    - primary_approver
+    - department_id
+    - department
+    - expense_total_amount
+    - expense_count
   properties:
     user:
       type: object
@@ -1283,6 +1607,9 @@ employee_overview_out:
 employee_overview_stats_out:
   type: object
   additionalProperties: false
+  required:
+    - count
+    - total_amount
   properties:
     count:
       type: integer
@@ -1296,6 +1623,9 @@ employee_overview_stats_out:
 employee_overview_expense_stats_out:
   type: object
   additionalProperties: false
+  required:
+    - count
+    - total_amount
   properties:
     count:
       type: integer
@@ -1332,6 +1662,9 @@ employees_stats_out:
   additionalProperties: false
   items:
     type: object
+    required:
+      - role
+      - count
     additionalProperties: false
     properties:
       role:

@@ -144,6 +144,23 @@ corporate_card_out:
       description: |
         Unique nickname assigned to the card
       example: 'Business Card'
+    is_archived:
+      type: boolean
+      description: |
+        Indicates whether the corporate card is archived.
+      nullable: false
+    archived_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies when the card was archived
+      example: "2022-02-01T07:20:39.207250+00:00"
+      nullable: true
+    archived_by_user_id:
+      type: string
+      description: |
+        The unique id of an user who archived the card.
+      nullable: true
     total_transactions_count:
       type: integer
       nullable: false
@@ -183,6 +200,8 @@ corporate_card_out:
     - virtual_card_id
     - virtual_card_state
     - nickname
+    - archived_at
+    - archived_by_user_id
     - total_transactions_count
     - unassigned_transactions_count
 corporate_card_in:
@@ -416,6 +435,23 @@ corporate_card_unassign_out:
       description: |
         Unique nickname assigned to the card
       example: 'Business Card'
+    is_archived:
+      type: boolean
+      description: |
+        Indicates whether the corporate card is archived.
+      nullable: false
+    archived_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies when the card was archived
+      example: "2022-02-01T07:20:39.207250+00:00"
+      nullable: true
+    archived_by_user_id:
+      type: string
+      description: |
+        The unique id of an user who archived the card.
+      nullable: true
     total_transactions_count:
       type: integer
       nullable: false
@@ -455,11 +491,22 @@ corporate_card_unassign_out:
     - virtual_card_id
     - virtual_card_state
     - nickname
+    - archived_at
+    - archived_by_user_id
     - total_transactions_count
     - unassigned_transactions_count
 corporate_card_out_embed:
   type: object
   additionalProperties: false
+  required:
+    - id
+    - bank_name
+    - card_number
+    - nickname
+    - cardholder_name
+    - masked_number
+    - user_full_name
+    - user_email
   properties:
     id:
       allOf:
@@ -509,9 +556,81 @@ corporate_card_out_embed:
       description: |
         String denoting the card holder's email
       example: john.doe@example.com
+    is_archived:
+      type: boolean
+      description: |
+        Indicates whether the corporate card is archived.
+      nullable: false
+
+
+duplicate_suggestion_corporate_card_out_embed:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - bank_name
+    - card_number
+    - nickname
+    - total_transactions_count
+    - is_visa_enrolled
+    - is_mastercard_enrolled
+    - data_feed_source
+    - feed_display_name
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    bank_name:
+      type: string
+      description: |
+        Specifies the name of bank who issued the card.
+      example: Bank of America
+    card_number:
+      type: string
+      description: |
+        Specifies the masked number of the card.
+      example: xxxx-4543
+    nickname:
+      type: string
+      maxLength: 25
+      nullable: true
+      description: |
+        Unique nickname assigned to the card
+      example: 'Business Card'
+    total_transactions_count:
+      type: integer
+      nullable: false
+      description: |
+        The total number of transactions for the card, in Sage Exp Mgmt
+      example: 100
+    is_visa_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with real time feed from visa
+      nullable: false
+    is_mastercard_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with realtime feed from Mastercard
+      nullable: false
+    data_feed_source:
+      type: string
+      nullable: true
+      description: |
+        signifies the source of how card is added and how further card transactions could be synced
+      example: BANK FEED - CDF
+    feed_display_name:
+      type: string
+      nullable: true
+      description: |
+        A user-friendly name for the data feed source.
+      example: Bank Feed
 
 
 corporate_card_stats_in:
+  required:
+    - query_params
   properties:
     query_params:
       nullable: False
@@ -522,6 +641,9 @@ corporate_card_stats_in:
 
 corporate_card_stats_out:
   type: object
+  required:
+    - count
+    - transactions_count
   properties:
     count:
       type: integer
@@ -632,3 +754,229 @@ yodlee_accounts_out:
     - yodlee_fastlink_params
     - created_at
     - updated_at
+    - corporate_card_id
+corporate_card_merge_in:
+  type: object
+  properties:
+    destination_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        The ID of the destination card into which the source card will be merged
+      example: bawownwrng
+    source_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        The ID of the source card that will be merged into the destination card
+      example: uswjwgnwwgo
+  required:
+    - destination_card_id
+    - source_card_id
+
+
+corporate_card_duplicate_suggestion_out:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        The unique id of an user to whom the card is assigned
+      example: uswjwgnwwgo
+    user:
+      $ref: ./user.yaml#/user_out_embed_nullable
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    destination_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+      description: |
+        The ID of the destination card into which the source card will be merged
+    destination_card:
+      $ref: ./corporate_card.yaml#/duplicate_suggestion_corporate_card_out_embed
+    source_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: baccownwrng
+      description: |
+        The ID of the source card that will be merged into the destination card
+    source_card:
+      $ref: ./corporate_card.yaml#/duplicate_suggestion_corporate_card_out_embed
+    is_dismissed:
+      type: boolean
+      description: |
+        Indicates whether the duplicate suggestion has been dismissed by an admin
+      nullable: false
+  required:
+    - id
+    - org_id
+    - user_id
+    - user
+    - created_at
+    - updated_at
+    - destination_card_id
+    - destination_card
+    - source_card_id
+    - source_card
+    - is_dismissed
+
+corporate_card_duplicate_suggestion_dismiss_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ccdswownwrng
+      description: |
+        The ID of the duplicate suggestion to be dismissed
+  required:
+    - id
+
+corporate_card_archive_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+  required:
+    - id
+
+corporate_card_unarchive_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+  required:
+    - id
+
+corporate_card_archive_suggestion_out:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    user_id:
+      type: string
+      maxLength: 255
+      nullable: true
+      description: |
+        The unique id of an user to whom the card is assigned
+      example: uswjwgnwwgo
+    user:
+      $ref: ./user.yaml#/user_out_embed_nullable
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    corporate_card_id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: bawownwrng
+    card_number:
+      type: string
+      description: |
+        Specifies the masked number of the card.
+      example: xxxx-4543
+    bank_name:
+      type: string
+      description: |
+        Specifies the name of bank who issued the card.
+      example: Bank of America
+    nickname:
+      type: string
+      maxLength: 25
+      nullable: true
+      description: |
+        Unique nickname assigned to the card
+      example: 'Business Card'
+    data_feed_source:
+      type: string
+      nullable: true
+      description: |
+        signifies the source of how card is added and how further card transactions could be synced
+      example: BANK FEED - CDF
+    is_visa_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with real time feed from visa
+      nullable: false
+    is_mastercard_enrolled:
+      type: boolean
+      description: |
+        If the card is enrolled with realtime feed from Mastercard
+      nullable: false
+    is_dismissed:
+      type: boolean
+      description: |
+        Indicates whether the archive suggestion has been dismissed by an admin
+      nullable: false
+  required:
+    - id
+    - org_id
+    - user_id
+    - user
+    - created_at
+    - updated_at
+    - corporate_card_id
+    - is_dismissed
+    - card_number
+    - bank_name
+    - nickname
+    - data_feed_source
+    - is_visa_enrolled
+    - is_mastercard_enrolled
+
+
+corporate_card_archive_suggestion_dismiss_in:
+  type: object
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: ccaswownwrng
+      description: |
+        The ID of the archive suggestion to be dismissed
+  required:
+    - id
+
+
+corporate_card_rtf_monthly_enrollment_usage_out:
+  type: object
+  properties:
+    monthly_limit:
+      type: integer
+      default: 3
+      description: |
+        The monthly limit for the RTF card enrollment usage.
+      example: 3
+    enrolled_cards:
+      type: integer
+      description: |
+        The number of RTF cards enrolled in the current month.
+      example: 1
+    is_limit_reached:
+      type: boolean
+      description: |
+        Indicates whether the monthly limit for RTF card enrollment usage has been reached.
+      example: false
+  required:
+    - monthly_limit
+    - enrolled_cards
+    - is_limit_reached

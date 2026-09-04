@@ -35,7 +35,7 @@ You can add the redirect URIs that you want to allow in the OAuth 2.0 flows. Aft
 We currently support the "Authorization Code" flow and "Refresh Token Flow" of OAuth 2.0. If you want a primer on these flows, head to this great [blogpost](https://darutk.medium.com/diagrams-and-movies-of-all-the-oauth-2-0-flows-194f3c3ade85), but come back soon! We plan on adding support for PKCE Authorization request in the near future.
 
 To authorize the app:
-* use the following URL: `https://app.fylehq.com/app/developers/#/oauth/authorize?client_id=<client_id>&redirect_uri=<redirect_uri>`
+* use the following URL: `https://app.fylehq.com/app/developers/oauth/authorize?client_id=<client_id>&redirect_uri=<redirect_uri>`
 * replace the `<client_id>` with your `client_id`
 * replace the `<redirect_uri>` with your redirect URI
   * if no redirect URI is setup for your app, you may remove the following from the above URL `&redirect_uri=<redirect_uri>`

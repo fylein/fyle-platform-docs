@@ -31,6 +31,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - count
+                  - offset
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -110,6 +114,8 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
                 properties:
                   data:
                     type: array
@@ -177,6 +183,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -235,6 +245,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
                 properties:
                   data:
                     type: array
@@ -289,6 +301,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - count
+                  - offset
                 properties:
                   data:
                     type: array
@@ -367,6 +383,8 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
                 properties:
                   data:
                     $ref: '#/components/schemas/employee_overview_stats_out'
@@ -430,6 +448,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -477,6 +499,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - count
+                  - offset
                 properties:
                   count:
                     $ref: '#/components/schemas/count'
@@ -548,6 +574,8 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
+                required:
+                  - data
                 properties:
                   data:
                     $ref: '#/components/schemas/employee_overview_expense_stats_out'
@@ -586,7 +614,7 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: https://app.fylehq.com/app/developers/#/oauth/authorize
+          authorizationUrl: https://app.fylehq.com/app/developers/oauth/authorize
           tokenUrl: https://accounts.fylehq.com/oauth/token
           scopes:
             '*': Grant all actions
@@ -671,6 +699,10 @@ components:
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
       example: sdfd2391
+    expense_action_data_embed:
+      type: object
+      description: Data related to expense action.
+      nullable: true
     user_id_nullable:
       type: string
       description: |
@@ -689,6 +721,10 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - email
+        - full_name
       properties:
         id:
           allOf:
@@ -733,6 +769,8 @@ components:
         - org_id
         - updated_at
         - created_at
+        - creator_user_id
+        - creator_user
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -765,9 +803,7 @@ components:
             - UNMATCHED
           example: COMMENTED_WITH_NOTIFICATION
         action_data:
-          type: object
-          description: Data related to expense action.
-          nullable: true
+          $ref: '#/components/schemas/expense_action_data_embed'
         expense_id:
           $ref: '#/components/schemas/id_string'
         creator_type:
@@ -790,12 +826,20 @@ components:
           $ref: '#/components/schemas/org_id'
     file_generate_urls_action_in:
       type: object
+      required:
+        - id
       properties:
         id:
           $ref: '#/components/schemas/id_string'
     file_generate_urls_action_out:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - name
+        - content_type
+        - download_url
+        - upload_url
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -843,6 +887,11 @@ components:
           description: |
             A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
+        policy_violation_reason_required:
+          type: boolean
+          description: |
+            A true value here means that entering a policy violation reason is mandatory for this policy rule.
+          example: false
         action_make_unreportable:
           type: boolean
           nullable: false
@@ -892,6 +941,11 @@ components:
           example: eq.ouNSnadfaLA
     expense_policy_expenses_query_object:
       type: object
+      required:
+        - limit_start_date
+        - limit_end_date
+        - params
+      nullable: true
       description: |
         An expense may be violating an expense policy rule due to a group of other expenses.
         These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
@@ -902,6 +956,7 @@ components:
           description: |
             Spend start date query param to find the list of violating expenses.
           example: '2021-12-01'
+          nullable: true
         limit_end_date:
           type: string
           description: |
@@ -911,6 +966,17 @@ components:
           $ref: '#/components/schemas/expense_policy_expenses_query_object_params'
     expense_policy_individual_desired_states:
       type: object
+      required:
+        - add_approver_user_ids
+        - approver_policy_order
+        - approver_source
+        - expense_id
+        - expense_policy_rule_id
+        - expense_policy_rule
+        - run_status
+        - run_result
+        - amount
+        - expenses_query_object
       properties:
         add_approver_user_ids:
           nullable: true
@@ -981,7 +1047,7 @@ components:
           description: |
             This represents the id of the expense policy rule.
           example: tprabsdfSYqd
-        rule:
+        expense_policy_rule:
           $ref: '#/components/schemas/expense_policy_rule_embed'
         amount:
           nullable: true
@@ -991,11 +1057,21 @@ components:
           description: |
             Amount that the policy calculation suggests for this expense.
           example: 500
-        expenses_query_object_params:
+        expenses_query_object:
           nullable: true
           $ref: '#/components/schemas/expense_policy_expenses_query_object'
     expense_policy_final_desired_state:
       type: object
+      required:
+        - expense_id
+        - flag
+        - amount
+        - unreportable
+        - is_receipt_mandatory
+        - add_approver_user_ids
+        - remove_employee_approver1
+        - run_status
+        - run_summary
       properties:
         expense_id:
           type: string
@@ -1062,6 +1138,10 @@ components:
     expense_policy_states_out:
       type: object
       additionalProperties: false
+      required:
+        - expense_id
+        - individual_desired_states
+        - final_desired_state
       properties:
         expense_id:
           type: string
@@ -1088,6 +1168,15 @@ components:
     employee_hierarchy_out:
       type: object
       additionalProperties: false
+      required:
+        - user_id
+        - org_id
+        - name
+        - email
+        - title
+        - depth
+        - has_accepted_invite
+        - primary_approver_user_id
       properties:
         user_id:
           $ref: '#/components/schemas/user_id'
@@ -1132,6 +1221,18 @@ components:
     employee_overview_out:
       type: object
       additionalProperties: false
+      required:
+        - user_id
+        - org_id
+        - user
+        - employee_id
+        - employee
+        - primary_approver_id
+        - primary_approver
+        - department_id
+        - department
+        - expense_total_amount
+        - expense_count
       properties:
         user:
           type: object
@@ -1231,6 +1332,9 @@ components:
     employee_overview_stats_out:
       type: object
       additionalProperties: false
+      required:
+        - count
+        - total_amount
       properties:
         count:
           type: integer
@@ -1250,6 +1354,10 @@ components:
     user_out_embed:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - email
+        - full_name
       properties:
         id:
           allOf:
@@ -1276,10 +1384,15 @@ components:
       description: |
         This represents the name of the resource. This should be unique in an organization
       example: foo123
-    department_out_embed:
+    department_out_employee_embed:
       type: object
       additionalProperties: false
       nullable: true
+      required:
+        - id
+        - code
+        - name
+        - sub_department
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1293,11 +1406,6 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-        display_name:
-          type: string
-          example: Sales / Outbound Sales
-          description: |
-            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
     timestamptz_utc:
       type: string
       format: date-time
@@ -1457,6 +1565,12 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - name
+        - sub_project
+        - code
+        - display_name
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1483,6 +1597,10 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - name
+        - code
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1498,6 +1616,10 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - name
+        - code
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1511,6 +1633,10 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - vehicle_type
+        - code
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1590,9 +1716,30 @@ components:
       description: |
         String denoting the full name of an employee.
       example: Jon Snow
+    delegation_access_scope:
+      type: array
+      description: |
+        List of scopes for the delegate.
+      items:
+        type: string
+        enum:
+          - ALL
+          - SUBMIT
+          - APPROVE
+      example:
+        - SUBMIT
+        - APPROVE
     delegatees:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - type
+        - user_id
+        - email
+        - full_name
+        - start_at
+        - scopes
       properties:
         id:
           allOf:
@@ -1632,10 +1779,21 @@ components:
           description: |
             Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
+        scopes:
+          allOf:
+            - $ref: '#/components/schemas/delegation_access_scope'
+          nullable: true
     category_out_embed:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - system_category
+        - name
+        - sub_category
+        - code
+        - display_name
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1666,6 +1824,48 @@ components:
     employee_out:
       type: object
       additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - business_unit
+        - code
+        - custom_fields
+        - department
+        - department_id
+        - is_enabled
+        - joined_at
+        - level
+        - level_id
+        - location
+        - org_id
+        - roles
+        - special_email
+        - title
+        - user_id
+        - user
+        - mileage_rate_ids
+        - mileage_rates
+        - cost_center_ids
+        - cost_centers
+        - per_diem_rate_ids
+        - per_diem_rates
+        - project_ids
+        - projects
+        - approver_user_ids
+        - approver_users
+        - has_accepted_invite
+        - branch_account
+        - branch_ifsc
+        - mobile
+        - locale
+        - mileage_settings
+        - ach_account
+        - delegatees
+        - category_ids
+        - categories
+        - flattened_custom_field
+        - is_mobile_verified
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -1695,7 +1895,7 @@ components:
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
-          $ref: '#/components/schemas/department_out_embed'
+          $ref: '#/components/schemas/department_out_employee_embed'
         is_enabled:
           allOf:
             - $ref: '#/components/schemas/is_enabled'
@@ -1923,6 +2123,9 @@ components:
       example: 1234
     account_out_embed:
       type: object
+      required:
+        - id
+        - type
       properties:
         id:
           allOf:
@@ -1942,6 +2145,11 @@ components:
       type: object
       nullable: true
       additionalProperties: false
+      required:
+        - id
+        - vehicle_type
+        - code
+        - rate
       properties:
         id:
           $ref: '#/components/schemas/id_integer'
@@ -1955,6 +2163,58 @@ components:
           example: 10
           nullable: true
           description: Amount (in Home currency) per unit.
+        vehicle_ownership:
+          type: string
+          nullable: true
+          enum:
+            - PERSONAL
+            - COMPANY
+            - null
+          description: Vehicle ownership for advanced mileage rates. `null` for basic mileage rates.
+        vehicle_category:
+          type: string
+          nullable: true
+          enum:
+            - CAR
+            - MOTORCYCLE
+            - BICYCLE
+            - null
+          description: Vehicle category for advanced mileage rates. `null` for basic mileage rates.
+        fuel_type:
+          type: string
+          nullable: true
+          enum:
+            - PETROL
+            - DIESEL
+            - LPG
+            - ELECTRIC
+            - null
+          description: Fuel type for advanced car mileage rates. `null` otherwise.
+        engine_capacity:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Engine capacity band for petrol, diesel, and LPG advanced car rates. An empty object for basic mileage rates.
+          properties:
+            from:
+              type: string
+              nullable: true
+              example: '0'
+            to:
+              type: string
+              nullable: true
+              example: '1400'
+            unit:
+              type: string
+              example: cc
+        charging_location:
+          type: string
+          nullable: true
+          enum:
+            - HOME
+            - PUBLIC
+            - null
+          description: Charging location for advanced electric car mileage rates. `null` otherwise.
     expense_custom_field:
       type: object
       description: |
@@ -2017,13 +2277,34 @@ components:
     report_approval_out_embed:
       type: object
       additionalProperties: false
+      required:
+        - approver_user_id
+        - approver_user
+        - state
       properties:
         approver_user_id:
           allOf:
             - $ref: '#/components/schemas/id_string'
+          nullable: true
+          description: |
+            The user ID of the approver. This is null when approver_type is SYSTEM (auto-approval).
           example: usge49ielgel
+        approver_type:
+          type: string
+          enum:
+            - USER
+            - SYSTEM
+          description: |
+            Type of approver.
+            - USER: A human approver identified by approver_user_id
+            - SYSTEM: Automatic approval by the system (auto-approval feature). When approver_type is SYSTEM, approver_user_id is null.
+          example: USER
         approver_user:
-          $ref: '#/components/schemas/user_out_embed'
+          allOf:
+            - $ref: '#/components/schemas/user_out_embed'
+          nullable: true
+          description: |
+            The user object of the approver. This is null when approver_type is SYSTEM.
         state:
           type: string
           enum:
@@ -2052,6 +2333,9 @@ components:
         - last_paid_at
         - reimbursement_id
         - reimbursement_seq_num
+        - amount
+        - last_verified_at
+        - approvals
       properties:
         id:
           anyOf:
@@ -2140,6 +2424,11 @@ components:
             List of report_approval objects
     file_out_embed:
       type: object
+      required:
+        - id
+        - name
+        - type
+        - content_type
       properties:
         id:
           allOf:
@@ -2175,6 +2464,9 @@ components:
           example: epc1a2f3farmk
         comment_type:
           type: string
+          enum:
+            - LOST_RECEIPT_REASON
+            - POLICY_VIOLATION_REASON
           description: Type of the policy comment
         comment_text:
           type: string
@@ -2182,6 +2474,9 @@ components:
     expense_verification_out_embed:
       type: object
       additionalProperties: false
+      required:
+        - verifier_user_id
+        - verifier_user
       properties:
         verifier_user_id:
           allOf:
@@ -2201,10 +2496,51 @@ components:
       maxLength: 255
       nullable: true
       example: dept9in4oIHpdR
+    department_out_embed:
+      type: object
+      additionalProperties: false
+      nullable: true
+      required:
+        - id
+        - code
+        - name
+        - sub_department
+        - display_name
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        code:
+          $ref: '#/components/schemas/code'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
       nullable: true
+      required:
+        - id
+        - user_id
+        - user
+        - code
+        - org_id
+        - department_id
+        - department
+        - location
+        - title
+        - business_unit
+        - custom_fields
+        - flattened_custom_field
       properties:
         id:
           $ref: '#/components/schemas/id_string'
@@ -2319,6 +2655,21 @@ components:
         - id
         - corporate_card_id
         - corporate_card_number
+        - corporate_card_nickname
+        - masked_corporate_card_number
+        - bank_name
+        - corporate_card_user_full_name
+        - amount
+        - currency
+        - spent_at
+        - posted_at
+        - status
+        - description
+        - foreign_currency
+        - foreign_amount
+        - merchant
+        - category
+        - matched_by
       properties:
         id:
           allOf:
@@ -2363,6 +2714,11 @@ components:
           description: |
             String denoting the card holder's full name
           example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
         amount:
           $ref: '#/components/schemas/amount'
         currency:
@@ -2425,6 +2781,128 @@ components:
           description: |
             String denoting the email of the user who matched the card transaction to an expense.
           example: john.ooe@sage.com
+    matched_corporate_card_transaction_out_embed_new:
+      anyOf:
+        - type: object
+          additionalProperties: false
+          properties: {}
+          description: Empty object when no corporate card transaction is matched
+        - type: object
+          required:
+            - id
+            - corporate_card_id
+            - corporate_card_number
+          properties:
+            id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: btxnwownwrng
+            corporate_card_id:
+              allOf:
+                - $ref: '#/components/schemas/id_string'
+              example: bawownwrng
+            corporate_card_number:
+              $ref: '#/components/schemas/card_number'
+            corporate_card_nickname:
+              type: string
+              maxLength: 25
+              nullable: true
+              description: |
+                Unique nickname assigned to the card
+              example: Business Card
+            corporate_card_cardholder_name:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: |
+                String denoting the card holder's name
+              example: John Cena
+            capitalone_virtual_card_last_four:
+              type: string
+              nullable: true
+              description: |
+                Last four digits of capitalone virtual card.
+              example: '4521'
+            masked_corporate_card_number:
+              $ref: '#/components/schemas/card_number'
+            bank_name:
+              nullable: true
+              $ref: '#/components/schemas/bank_name'
+            corporate_card_user_full_name:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/name_nullable'
+              maxLength: 255
+              description: |
+                String denoting the card holder's full name
+              example: John Doe
+            is_corporate_card_archived:
+              type: boolean
+              description: |
+                Signifies whether the corporate card is archived or not.
+              nullable: false
+            amount:
+              $ref: '#/components/schemas/amount'
+            currency:
+              $ref: '#/components/schemas/currency'
+            spent_at:
+              allOf:
+                - $ref: '#/components/schemas/spent_at'
+              description: |
+                Signifies spent date of a card transaction.
+                This date cannot be in future.
+            posted_at:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/timestamptz_utc'
+              description: |
+                Signifies post date of a card transaction.
+                This date cannot be in future.
+            status:
+              type: string
+              nullable: true
+              enum:
+                - PENDING
+                - POSTED
+                - null
+              example: PENDING
+              description: |
+                Signifies status of a card transaction.
+            description:
+              type: string
+              nullable: true
+              description: |
+                Holds the description of the card transaction
+              example: Team lunch
+            foreign_currency:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/foreign_currency'
+            foreign_amount:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/foreign_amount'
+            merchant:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/merchant'
+              description: |
+                String denoting the name of the vendor to which the card transaction was made.
+                Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+            category:
+              type: string
+              maxLength: 255
+              nullable: true
+              description: |
+                String denoting the category of the card transaction
+                Note: This is not same as the category added in Sage Exp Mgmt but just a string
+              example: Travel
+            matched_by:
+              type: string
+              nullable: true
+              description: |
+                String denoting the email of the user who matched the card transaction to an expense.
+              example: john.ooe@sage.com
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -2676,6 +3154,12 @@ components:
           example: 77.594566
     commute_details:
       type: object
+      required:
+        - id
+        - distance
+        - distance_unit
+        - home_location
+        - work_location
       nullable: true
       description: |
         Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
@@ -2744,12 +3228,18 @@ components:
         - source_account
         - tax_amount
         - tax_group_id
+        - calculated_tax_amount
         - is_billable
         - is_reimbursable
         - distance
         - distance_unit
         - mileage_calculated_distance
         - mileage_calculated_amount
+        - selected_vehicle_ownership
+        - selected_vehicle_category
+        - passenger_count
+        - passenger_mileage_rate
+        - passenger_amount
         - mileage_rate_id
         - mileage_rate
         - mileage_is_round_trip
@@ -2768,6 +3258,7 @@ components:
         - seq_num
         - report_id
         - added_to_report_at
+        - added_to_report_by
         - report
         - is_verified
         - last_verified_at
@@ -2780,6 +3271,8 @@ components:
         - is_corporate_card_transaction_auto_matched
         - matched_corporate_card_transaction_ids
         - matched_corporate_card_transactions
+        - matched_corporate_card_transaction_id
+        - matched_corporate_card_transaction
         - last_settled_at
         - missing_mandatory_fields
         - activity_details
@@ -2793,6 +3286,26 @@ components:
         - invoice_number
         - is_duplicate_present
         - expense_policy_comments
+        - custom_fields_flattened
+        - approvals
+        - verifications
+        - employee_id
+        - split_group_amount
+        - expense_rule_id
+        - expense_rule_data
+        - is_split
+        - tax_group
+        - approver_comments
+        - verifier_comments
+        - policy_checks
+        - accounting_export_summary
+        - report_last_paid_at
+        - report_last_approved_at
+        - commute_deduction
+        - commute_details_id
+        - commute_details
+        - is_reconciled
+        - report_auto_approval_state
       properties:
         id:
           allOf:
@@ -2915,6 +3428,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/fk_string'
           nullable: true
+        calculated_tax_amount:
+          type: number
+          nullable: true
+          readOnly: true
+          description: |
+            System-derived tax amount for the expense amount and the selected tax group's rate.
         is_billable:
           type: boolean
           nullable: true
@@ -2945,6 +3464,36 @@ components:
           type: number
           nullable: true
           description: Amount computed by Sage Exp Mgmt in mileage expenses.
+        selected_vehicle_ownership:
+          type: string
+          nullable: true
+          enum:
+            - PERSONAL
+            - COMPANY
+            - null
+          description: Selected vehicle ownership for an advanced mileage expense. `null` for a basic mileage expense.
+        selected_vehicle_category:
+          type: string
+          nullable: true
+          enum:
+            - CAR
+            - MOTORCYCLE
+            - BICYCLE
+            - null
+          description: Selected vehicle category for an advanced mileage expense. `null` for a basic mileage expense.
+        passenger_count:
+          type: integer
+          nullable: true
+          description: Number of passengers carried on the mileage journey.
+        passenger_mileage_rate:
+          type: number
+          nullable: true
+          readOnly: true
+          description: Passenger mileage rate snapshot applied to this expense. `null` when passenger mileage does not apply.
+        passenger_amount:
+          type: number
+          nullable: true
+          description: Passenger mileage reimbursement amount for this expense.
         mileage_rate_id:
           allOf:
             - $ref: '#/components/schemas/fk_integer'
@@ -3048,6 +3597,16 @@ components:
           description: |
             signifies when this expense was added to a report.
             If this expense is not added to a report, then this could be null.
+        added_to_report_by:
+          type: string
+          nullable: true
+          enum:
+            - USER
+            - SYSTEM
+            - null
+          description: |
+            Indicates whether the expense was added to the report it belongs to by a user or the system. If the expense is not a part of any report, this field will be null.
+          example: USER
         report:
           $ref: '#/components/schemas/report_out_embed'
         is_verified:
@@ -3120,6 +3679,8 @@ components:
             $ref: '#/components/schemas/id_string'
           description: |
             Holds the corporate card transaction ids which are matched to this expense
+
+            **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction_id` instead, as this array always contains a single value.
           example:
             - btxnwownwrng
         matched_corporate_card_transactions:
@@ -3129,6 +3690,20 @@ components:
           description: |
             Holds the corporate card transactions which are matched to this expense.
             NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
+
+            **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction` instead, as this array always contains a single value.
+        matched_corporate_card_transaction_id:
+          type: string
+          nullable: true
+          description: |
+            Holds the corporate card transaction id which is matched to this expense
+          example: btxnwownwrng
+        matched_corporate_card_transaction:
+          allOf:
+            - $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed_new'
+          description: |
+            Holds the corporate card transaction which is matched to this expense.
+            NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_id` is already up-to-date.
         last_settled_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3297,7 +3872,18 @@ components:
           description: |
             Whether expenses is reconciled or not.
           example: true
+        report_auto_approval_state:
+          type: string
+          nullable: true
+          description: Indicates the auto approval evaluation status of the expense's report.
+          enum:
+            - PENDING
+            - NOT_ELIGIBLE
+            - AUTO_APPROVED
+            - null
     expenses_stats_in:
+      required:
+        - query_params
       properties:
         query_params:
           nullable: false
@@ -3308,6 +3894,9 @@ components:
     employee_overview_expense_stats_out:
       type: object
       additionalProperties: false
+      required:
+        - count
+        - total_amount
       properties:
         count:
           type: integer
