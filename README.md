@@ -36,6 +36,21 @@ You can check the version by running
     openapi lint src/accountant/openapi.yaml
     openapi lint src/super_admin/openapi.yaml    
 
+### Visibility linting ###
+
+Every added or modified OpenAPI operation must explicitly set `x-internal` to
+the boolean value `true` or `false`.
+
+Enable the repository's pre-commit hook once per local clone:
+
+    git config core.hooksPath .githooks
+
+The hook runs the visibility rule against staged OpenAPI source files and blocks
+the commit when the marker is missing or is not a boolean. Run the same check
+manually with:
+
+    scripts/lint-visibility.sh --staged
+
 ## Bundling ##
 
     openapi bundle -o reference/authorization.yaml src/authorization/openapi.yaml
@@ -74,4 +89,3 @@ The admin APIs will be available at port 4011, spender APIs in port 4012, approv
 
 Note that the mock server works off the bundled yaml files. So if you make some changes in development, please bundle
 the file. The mock server will reload automatically.
-
