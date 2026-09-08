@@ -2632,7 +2632,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
-  /spender/corporate_cards/rtf_monthly_enrollment_usage:
+  /spender/corporate_cards/monthly_rtf_enrollment_usage:
     get:
       tags:
         - Corporate Cards
@@ -2653,7 +2653,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/corporate_card_rtf_monthly_enrollment_usage_out'
+                    $ref: '#/components/schemas/corporate_card_monthly_rtf_enrollment_usage_out'
         '400':
           description: Bad request
           content:
@@ -10461,6 +10461,7 @@ components:
         - approver_comments
         - verifier_comments
         - policy_checks
+        - c1_policy_violation_reasons
         - accounting_export_summary
         - report_last_paid_at
         - report_last_approved_at
@@ -10950,6 +10951,13 @@ components:
             - This is a comment by verifier
         policy_checks:
           $ref: '#/components/schemas/policy_checks'
+        c1_policy_violation_reasons:
+          type: array
+          nullable: true
+          description: |
+            C1 policy violations on this expense.
+          items:
+            type: string
         accounting_export_summary:
           type: object
           description: |
@@ -14024,7 +14032,7 @@ components:
         - created_at
         - updated_at
         - corporate_card_id
-    corporate_card_rtf_monthly_enrollment_usage_out:
+    corporate_card_monthly_rtf_enrollment_usage_out:
       type: object
       properties:
         monthly_limit:
@@ -15997,6 +16005,14 @@ components:
     delegatees:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - type
+        - user_id
+        - email
+        - full_name
+        - start_at
+        - scopes
       properties:
         id:
           allOf:
@@ -19903,6 +19919,9 @@ components:
           items:
             $ref: '#/components/schemas/any_type'
         - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+        - {}
     feature_config_out:
       type: object
       additionalProperties: false
