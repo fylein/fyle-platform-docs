@@ -8962,6 +8962,18 @@ components:
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
       example: sdfd2391
+    account_type:
+      type: string
+      description: |
+        The type of account.
+      enum:
+        - PERSONAL_CASH_ACCOUNT
+        - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        - PERSONAL_ADVANCE_ACCOUNT
+        - COMPANY_EXPENSE_ACCOUNT
+        - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+        - COMPANY_CATEGORY_ACCOUNT
+      example: PERSONAL_CASH_ACCOUNT
     account_out_embed:
       type: object
       required:
@@ -8973,14 +8985,8 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: acwbl222wlg
         type:
-          type: string
-          enum:
-            - PERSONAL_CASH_ACCOUNT
-            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-            - PERSONAL_ADVANCE_ACCOUNT
-            - COMPANY_EXPENSE_ACCOUNT
-            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
-            - COMPANY_CATEGORY_ACCOUNT
+          allOf:
+            - $ref: '#/components/schemas/account_type'
           example: PERSONAL_CASH_ACCOUNT
     mileage_rate_out_embed_for_expense:
       type: object
@@ -9085,7 +9091,7 @@ components:
           type: string
           nullable: true
           example: London
-        display_name:
+        display:
           type: string
           nullable: true
         country:
@@ -9196,6 +9202,20 @@ components:
       example:
         cf1: string1
         custom_field_2: Value 2
+    expense_state:
+      type: string
+      description: |
+        The state of the Expense.
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      example: COMPLETE
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -9303,8 +9323,7 @@ components:
             - null
           nullable: true
         amount:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
+          allOf:
             - $ref: '#/components/schemas/amount'
           nullable: true
         last_paid_at:
@@ -9379,6 +9398,8 @@ components:
         - id
         - comment_type
         - comment_text
+        - created_at
+        - updated_at
       properties:
         id:
           allOf:
@@ -9393,6 +9414,10 @@ components:
         comment_text:
           type: string
           description: Text content of the policy comment
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -9967,6 +9992,10 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+        service_tax:
+          type: number
+          nullable: true
+          example: 2.5
     split_group_amount:
       type: number
       nullable: true
@@ -10560,16 +10589,8 @@ components:
             has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-            - UNREPORTABLE
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -12077,6 +12098,81 @@ components:
         reason:
           type: string
           example: comment given by Approver while approving the report.
+    schedule_config_interval_when:
+      type: object
+      additionalProperties: false
+      properties:
+        weeks:
+          type: number
+          example: 2
+        days:
+          type: number
+          example: 12
+        hours:
+          type: number
+          example: 6
+        minutes:
+          type: number
+          example: 30
+        seconds:
+          type: number
+          example: 30
+        end_date:
+          nullable: true
+          type: string
+          example: '2020-11-11T16:29:30.965869Z'
+        start_date:
+          nullable: true
+          type: string
+          example: '2020-11-11T16:29:30.965869Z'
+        jitter:
+          nullable: true
+          type: number
+          example: 20
+    schedule_config_cron_when:
+      type: object
+      additionalProperties: false
+      properties:
+        year:
+          type: string
+          example: 2022
+        month:
+          type: string
+          example: 10
+        day:
+          type: string
+          example: last, 15
+        week:
+          type: string
+          example: 2
+        day_of_week:
+          type: string
+          example: mon
+        hour:
+          type: string
+          example: 23
+        minute:
+          type: string
+          example: 23
+        second:
+          type: string
+          example: 23
+        end_date:
+          nullable: true
+          type: string
+          example: '2020-11-11T16:29:30.965869Z'
+        start_date:
+          nullable: true
+          type: string
+          example: '2020-11-11T16:29:30.965869Z'
+    schedule_config_date_when:
+      type: object
+      additionalProperties: false
+      properties:
+        run_date:
+          nullable: true
+          type: string
+          example: '2021-05-12T10:16:50.410Z'
     schedule_config:
       type: object
       nullable: false
@@ -12095,78 +12191,9 @@ components:
         when:
           nullable: false
           oneOf:
-            - type: object
-              additionalProperties: false
-              properties:
-                weeks:
-                  type: number
-                  example: 2
-                days:
-                  type: number
-                  example: 12
-                hours:
-                  type: number
-                  example: 6
-                minutes:
-                  type: number
-                  example: 30
-                seconds:
-                  type: number
-                  example: 30
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                jitter:
-                  nullable: true
-                  type: number
-                  example: 20
-            - type: object
-              additionalProperties: false
-              properties:
-                year:
-                  type: string
-                  example: 2022
-                month:
-                  type: string
-                  example: 10
-                day:
-                  type: string
-                  example: last, 15
-                week:
-                  type: string
-                  example: 2
-                day_of_week:
-                  type: string
-                  example: mon
-                hour:
-                  type: string
-                  example: 23
-                minute:
-                  type: string
-                  example: 23
-                second:
-                  type: string
-                  example: 23
-                end_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-                start_date:
-                  nullable: true
-                  type: string
-                  example: '2020-11-11T16:29:30.965869Z'
-            - type: object
-              additionalProperties: false
-              properties:
-                run_date:
-                  nullable: true
-                  type: string
-                  example: '2021-05-12T10:16:50.410Z'
+            - $ref: '#/components/schemas/schedule_config_interval_when'
+            - $ref: '#/components/schemas/schedule_config_cron_when'
+            - $ref: '#/components/schemas/schedule_config_date_when'
     schedule_out:
       type: object
       additionalProperties: false
@@ -14010,16 +14037,8 @@ components:
           nullable: true
           example: Team lunch
         state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-            - UNREPORTABLE
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
           description: The state of the Expense.
         seq_num:
           type: string
@@ -19176,16 +19195,8 @@ components:
                 description: Sum of amounts for matching expenses in this state
                 example: 44545.4
               state:
-                type: string
-                enum:
-                  - COMPLETE
-                  - DRAFT
-                  - APPROVER_PENDING
-                  - APPROVED
-                  - PAYMENT_PENDING
-                  - PAYMENT_PROCESSING
-                  - PAID
-                  - UNREPORTABLE
+                allOf:
+                  - $ref: '#/components/schemas/expense_state'
                 description: Expense state
         - type: object
           title: Overall stats
