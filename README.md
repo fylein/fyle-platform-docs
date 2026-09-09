@@ -43,6 +43,13 @@ Every OpenAPI operation must explicitly set `x-internal` to the boolean value
 
     npx --yes @redocly/cli@2.51.2 lint --config redocly.visibility.yaml
 
+To run the same rule before commits that contain staged OpenAPI source changes,
+configure this repository's tracked Git hooks once:
+
+    git config core.hooksPath dev/githooks
+
+The pre-commit hook skips commits that do not change YAML files under `src/`.
+
 ## Bundling ##
 
     openapi bundle -o reference/authorization.yaml src/authorization/openapi.yaml
