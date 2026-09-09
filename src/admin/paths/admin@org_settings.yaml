@@ -38,3 +38,64 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/404.yaml'
+
+post:
+  x-internal: true
+  tags:
+    - Organisation Settings
+  security:
+    - oauth2: ['*']
+  summary: Update organisation settings
+  description: |
+    Partially updates the authenticated user's organisation settings. The `id`
+    identifies the existing settings record; all other top-level fields are
+    optional.
+  operationId: admin_org_settings_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/org_settings_input.yaml#/org_settings_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/org_settings.yaml#/org_settings_out'
+    '400':
+      description: Invalid request payload or settings combination
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+    '404':
+      description: Organisation settings not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
