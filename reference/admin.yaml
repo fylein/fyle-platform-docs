@@ -15638,14 +15638,7 @@ paths:
                       expense_policy_comments:
                         type: array
                         items:
-                          type: object
-                          properties:
-                            comment_type:
-                              type: string
-                              description: The comment type
-                            comment_text:
-                              type: string
-                              description: The comment text
+                          $ref: '#/components/schemas/expense_policy_comment_out_embed'
                     required:
                       - expense_id
                       - expense_policy_comments
@@ -15654,8 +15647,18 @@ paths:
                 data:
                   expense_id: txGCcvnhUbrP
                   expense_policy_comments:
-                    - comment_type: MISSING_FIELDS
-                      comment_text: Reason for missing fields
+                    - id: epc1a2f3farmk
+                      expense_id: txGCcvnhUbrP
+                      org_id: orGCcvnhUbrP
+                      comment_type: POLICY_VIOLATION_REASON
+                      comment_text: This expense was required for a client meeting
+                      created_at: '2026-09-08T06:30:00.000Z'
+                      updated_at: '2026-09-08T06:30:00.000Z'
+                      creator_user_id: usRahul123
+                      creator_user:
+                        id: usRahul123
+                        email: rahul@example.com
+                        full_name: Rahul
         '400':
           description: Unauthorised request
           content:
@@ -20790,15 +20793,23 @@ components:
       additionalProperties: false
       required:
         - id
+        - expense_id
+        - org_id
         - comment_type
         - comment_text
         - created_at
         - updated_at
+        - creator_user_id
+        - creator_user
       properties:
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
           example: epc1a2f3farmk
+        expense_id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
         comment_type:
           type: string
           enum:
@@ -20812,6 +20823,10 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
     expense_verification_out_embed:
       type: object
       additionalProperties: false
