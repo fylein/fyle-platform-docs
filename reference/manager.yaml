@@ -1472,7 +1472,7 @@ components:
           type: string
           nullable: true
           example: London
-        display_name:
+        display:
           type: string
           nullable: true
         country:
@@ -1732,6 +1732,14 @@ components:
     delegatees:
       type: object
       additionalProperties: false
+      required:
+        - id
+        - type
+        - user_id
+        - email
+        - full_name
+        - start_at
+        - scopes
       properties:
         id:
           allOf:
@@ -2113,6 +2121,18 @@ components:
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
       example: 1234
+    account_type:
+      type: string
+      description: |
+        The type of account.
+      enum:
+        - PERSONAL_CASH_ACCOUNT
+        - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        - PERSONAL_ADVANCE_ACCOUNT
+        - COMPANY_EXPENSE_ACCOUNT
+        - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+        - COMPANY_CATEGORY_ACCOUNT
+      example: PERSONAL_CASH_ACCOUNT
     account_out_embed:
       type: object
       required:
@@ -2124,14 +2144,8 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: acwbl222wlg
         type:
-          type: string
-          enum:
-            - PERSONAL_CASH_ACCOUNT
-            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-            - PERSONAL_ADVANCE_ACCOUNT
-            - COMPANY_EXPENSE_ACCOUNT
-            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
-            - COMPANY_CATEGORY_ACCOUNT
+          allOf:
+            - $ref: '#/components/schemas/account_type'
           example: PERSONAL_CASH_ACCOUNT
     mileage_rate_out_embed_for_expense:
       type: object
@@ -2266,6 +2280,20 @@ components:
         Expense custom fields
       items:
         $ref: '#/components/schemas/expense_custom_field'
+    expense_state:
+      type: string
+      description: |
+        The state of the Expense.
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      example: COMPLETE
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -2373,8 +2401,7 @@ components:
             - null
           nullable: true
         amount:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
+          allOf:
             - $ref: '#/components/schemas/amount'
           nullable: true
         last_paid_at:
@@ -2449,6 +2476,8 @@ components:
         - id
         - comment_type
         - comment_text
+        - created_at
+        - updated_at
       properties:
         id:
           allOf:
@@ -2463,6 +2492,10 @@ components:
         comment_text:
           type: string
           description: Text content of the policy comment
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -2961,6 +2994,10 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+        service_tax:
+          type: number
+          nullable: true
+          example: 2.5
     split_group_amount:
       type: number
       nullable: true
@@ -3290,6 +3327,7 @@ components:
         - approver_comments
         - verifier_comments
         - policy_checks
+        - c1_policy_violation_reasons
         - accounting_export_summary
         - report_last_paid_at
         - report_last_approved_at
@@ -3553,16 +3591,8 @@ components:
             has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-            - UNREPORTABLE
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -3779,6 +3809,13 @@ components:
             - This is a comment by verifier
         policy_checks:
           $ref: '#/components/schemas/policy_checks'
+        c1_policy_violation_reasons:
+          type: array
+          nullable: true
+          description: |
+            C1 policy violations on this expense.
+          items:
+            type: string
         accounting_export_summary:
           type: object
           description: |
