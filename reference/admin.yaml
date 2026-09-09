@@ -92,6 +92,9 @@ tags:
   - name: Organisations
     description: |
       These APIs gives you access to manage organisations.
+  - name: Organisation Settings
+    description: |
+      These APIs give you access to your organisation's feature and workflow settings.
   - name: Statements
     description: |
       These APIs gives you access to add / view a bank statement for reconciliation.
@@ -11984,6 +11987,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /admin/org_settings:
+    get:
+      tags:
+        - Organisation Settings
+      security:
+        - oauth2:
+            - '*'
+      summary: Get organisation settings
+      description: Returns the feature and workflow settings for the authenticated user's organisation.
+      operationId: admin_org_settings_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/org_settings_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Organisation settings not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/expense_policy_rules:
     post:
       tags:
@@ -31787,6 +31831,2148 @@ components:
             Indicates whether the weekly invitation limit has been reached.
             Always `false` when `weekly_limit` is `null`.
           example: false
+    org_settings_config_mileage_out:
+      type: object
+      additionalProperties: false
+      required:
+        - unit
+        - fiscal_year_start_date
+        - fiscal_year_end_date
+        - two_wheeler
+        - four_wheeler
+        - four_wheeler1
+        - four_wheeler3
+        - four_wheeler4
+        - bicycle
+        - electric_car
+        - two_wheeler_slabbed_rate
+        - four_wheeler_slabbed_rate
+        - four_wheeler1_slabbed_rate
+        - four_wheeler3_slabbed_rate
+        - four_wheeler4_slabbed_rate
+        - bicycle_slabbed_rate
+        - electric_car_slabbed_rate
+        - two_wheeler_distance_limit
+        - four_wheeler_distance_limit
+        - four_wheeler1_distance_limit
+        - four_wheeler3_distance_limit
+        - four_wheeler4_distance_limit
+        - bicycle_distance_limit
+        - electric_car_distance_limit
+        - location_mandatory
+        - enable_individual_mileage_rates
+        - passenger_mileage_rate
+        - engine_capacity_bands
+      properties:
+        unit:
+          type: string
+          nullable: true
+        fiscal_year_start_date:
+          type: string
+          nullable: true
+        fiscal_year_end_date:
+          type: string
+          nullable: true
+        two_wheeler:
+          type: number
+          nullable: true
+        four_wheeler:
+          type: number
+          nullable: true
+        four_wheeler1:
+          type: number
+          nullable: true
+        four_wheeler3:
+          type: number
+          nullable: true
+        four_wheeler4:
+          type: number
+          nullable: true
+        bicycle:
+          type: number
+          nullable: true
+        electric_car:
+          type: number
+          nullable: true
+        two_wheeler_slabbed_rate:
+          type: number
+          nullable: true
+        four_wheeler_slabbed_rate:
+          type: number
+          nullable: true
+        four_wheeler1_slabbed_rate:
+          type: number
+          nullable: true
+        four_wheeler3_slabbed_rate:
+          type: number
+          nullable: true
+        four_wheeler4_slabbed_rate:
+          type: number
+          nullable: true
+        bicycle_slabbed_rate:
+          type: number
+          nullable: true
+        electric_car_slabbed_rate:
+          type: number
+          nullable: true
+        two_wheeler_distance_limit:
+          type: number
+          nullable: true
+        four_wheeler_distance_limit:
+          type: number
+          nullable: true
+        four_wheeler1_distance_limit:
+          type: number
+          nullable: true
+        four_wheeler3_distance_limit:
+          type: number
+          nullable: true
+        four_wheeler4_distance_limit:
+          type: number
+          nullable: true
+        bicycle_distance_limit:
+          type: number
+          nullable: true
+        electric_car_distance_limit:
+          type: number
+          nullable: true
+        location_mandatory:
+          type: boolean
+          nullable: true
+        enable_individual_mileage_rates:
+          type: boolean
+          nullable: true
+        passenger_mileage_rate:
+          type: number
+          nullable: true
+        engine_capacity_bands:
+          type: object
+          additionalProperties: true
+    org_settings_null_out:
+      type: string
+      nullable: true
+      enum:
+        - null
+    org_settings_auto_fyle_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - background_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        background_enabled:
+          type: boolean
+          nullable: true
+    org_settings_default_org_user_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - auto_fyle_settings
+      properties:
+        auto_fyle_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_auto_fyle_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+    org_settings_policy_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - is_enabled
+        - is_self_serve_enabled
+        - is_duplicate_detection_enabled
+        - policy_approval_workflow
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        is_enabled:
+          type: boolean
+          nullable: true
+        is_self_serve_enabled:
+          type: boolean
+          nullable: true
+        is_duplicate_detection_enabled:
+          type: boolean
+          nullable: true
+        policy_approval_workflow:
+          type: boolean
+          nullable: true
+    org_settings_toggle_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+    org_settings_per_diem_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_individual_per_diem_rates
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_individual_per_diem_rates:
+          type: boolean
+          nullable: true
+    org_settings_tally_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - default_org_category_ledger_name
+        - default_org_user_personal_ledger_name
+        - separate_org_user_advance_ledger
+        - default_org_user_advance_ledger_name
+        - expense_dt
+        - advance_dt
+        - reimbursement_dt
+        - refund_dt
+        - cost_center
+        - cost_category
+        - collapse_expenses
+        - blocked_payment_types
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        default_org_category_ledger_name:
+          type: string
+          nullable: true
+        default_org_user_personal_ledger_name:
+          type: string
+          nullable: true
+        separate_org_user_advance_ledger:
+          type: boolean
+          nullable: true
+        default_org_user_advance_ledger_name:
+          type: string
+          nullable: true
+        expense_dt:
+          type: string
+          nullable: true
+        advance_dt:
+          type: string
+          nullable: true
+        reimbursement_dt:
+          type: string
+          nullable: true
+        refund_dt:
+          type: string
+          nullable: true
+        cost_center:
+          type: string
+          nullable: true
+        cost_category:
+          type: string
+          nullable: true
+        collapse_expenses:
+          type: boolean
+          nullable: true
+        blocked_payment_types:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_quick_books_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - expense_dt
+        - advance_dt
+        - expense_type
+        - advance_type
+        - collapse_expenses
+        - enable_departments
+        - enable_classes
+        - debit_ledger_calculation_key
+        - account_mappings
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        expense_dt:
+          type: string
+          nullable: true
+        advance_dt:
+          type: string
+          nullable: true
+        expense_type:
+          type: string
+          nullable: true
+        advance_type:
+          type: string
+          nullable: true
+        collapse_expenses:
+          type: boolean
+          nullable: true
+        enable_departments:
+          type: boolean
+          nullable: true
+        enable_classes:
+          type: boolean
+          nullable: true
+        debit_ledger_calculation_key:
+          type: string
+          nullable: true
+        account_mappings:
+          type: object
+          additionalProperties: true
+          nullable: true
+    org_settings_accounting_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - export_name
+        - export_type
+        - entries_generator_info
+        - entries_exporter_info
+        - custom_fields
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        export_name:
+          type: string
+          nullable: true
+        export_type:
+          type: string
+          nullable: true
+        entries_generator_info:
+          type: object
+          additionalProperties: true
+          nullable: true
+        entries_exporter_info:
+          type: object
+          additionalProperties: true
+          nullable: true
+        custom_fields:
+          type: object
+          additionalProperties: true
+          nullable: true
+    org_settings_accounting_export_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - tally_settings
+        - quick_books_settings
+        - accounting_settings
+        - integration_exports_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        tally_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_tally_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        quick_books_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_quick_books_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        accounting_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_accounting_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        integration_exports_enabled:
+          type: boolean
+          nullable: true
+    org_settings_tax_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - name
+        - groups
+        - is_default_tax_group_allowed
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          nullable: true
+        is_default_tax_group_allowed:
+          type: boolean
+          nullable: true
+    org_settings_taxi_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - distance_mandatory
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        distance_mandatory:
+          type: boolean
+          nullable: true
+    org_settings_approval_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - admin_approve_own_report
+        - enable_secondary_approvers
+        - enable_sequential_approvers
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        admin_approve_own_report:
+          type: boolean
+          nullable: true
+        enable_secondary_approvers:
+          type: boolean
+          nullable: true
+        enable_sequential_approvers:
+          type: boolean
+          nullable: true
+    org_settings_verification_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - late_mode_enabled
+        - self_verification_enabled
+        - mandatory
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        late_mode_enabled:
+          type: boolean
+          nullable: true
+        self_verification_enabled:
+          type: boolean
+          nullable: true
+        mandatory:
+          type: boolean
+    org_settings_transaction_fields_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - transaction_mandatory_fields
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        transaction_mandatory_fields:
+          type: object
+          additionalProperties: true
+          nullable: true
+    org_settings_user_fields_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - org_user_mandatory_fields
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        org_user_mandatory_fields:
+          type: object
+          additionalProperties: true
+          nullable: true
+    org_settings_logo_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - file_id
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        file_id:
+          type: string
+          nullable: true
+    org_settings_bank_statement_parser_endpoint_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - bank_name
+        - file_type
+        - parser_url
+      properties:
+        bank_name:
+          type: string
+          nullable: true
+        file_type:
+          type: string
+          nullable: true
+        parser_url:
+          type: string
+          nullable: true
+    org_settings_bank_statement_upload_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - generic_statement_parser_enabled
+        - bank_statement_parser_endpoint_settings
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        generic_statement_parser_enabled:
+          type: boolean
+          nullable: true
+        bank_statement_parser_endpoint_settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/org_settings_bank_statement_parser_endpoint_settings_out'
+          nullable: true
+    org_settings_corporate_card_bank_data_aggregation_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+        - aggregator
+        - auto_assign
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        aggregator:
+          type: string
+          nullable: true
+        auto_assign:
+          type: boolean
+          nullable: true
+    org_settings_corporate_credit_card_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - bank_statement_upload_settings
+        - bank_data_aggregation_settings
+        - auto_match_allowed
+        - enable_auto_match
+        - allow_approved_plus_states
+        - disable_mark_personal
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        bank_statement_upload_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_bank_statement_upload_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        bank_data_aggregation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_corporate_card_bank_data_aggregation_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        auto_match_allowed:
+          type: boolean
+          nullable: true
+        enable_auto_match:
+          type: boolean
+          nullable: true
+        allow_approved_plus_states:
+          type: boolean
+          nullable: true
+        disable_mark_personal:
+          type: boolean
+          nullable: true
+    org_settings_settlements_excel_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - cost_center_wise_split
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        cost_center_wise_split:
+          type: boolean
+          nullable: true
+    org_settings_advance_account_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - multiple_accounts
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        multiple_accounts:
+          type: boolean
+          nullable: true
+    org_settings_advance_request_fields_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - advance_request_mandatory_fields
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        advance_request_mandatory_fields:
+          type: object
+          additionalProperties: true
+          nullable: true
+    org_settings_partial_save_expense_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+    org_settings_expense_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - split_expense_settings
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        split_expense_settings:
+          type: object
+          additionalProperties: true
+          nullable: true
+        partial_save_expense_settings:
+          $ref: '#/components/schemas/org_settings_partial_save_expense_settings_out'
+    org_settings_integrations_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - integrations
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        integrations:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_admin_allowed_ip_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - allowed_cidrs
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        allowed_cidrs:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_advances_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - advance_requests_enabled
+        - advance_wallets_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        advance_requests_enabled:
+          type: boolean
+          nullable: true
+        advance_wallets_enabled:
+          type: boolean
+          nullable: true
+    org_settings_advanced_cost_center_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_employee_restriction
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_employee_restriction:
+          type: boolean
+          nullable: true
+    org_settings_advanced_project_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_individual_projects
+        - enable_category_restriction
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_individual_projects:
+          type: boolean
+          nullable: true
+        enable_category_restriction:
+          type: boolean
+          nullable: true
+    org_settings_mileage_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - mileage_location_enabled
+        - is_gbp_advanced_mileage_enabled
+        - is_passenger_mileage_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        mileage_location_enabled:
+          type: boolean
+          nullable: true
+        is_gbp_advanced_mileage_enabled:
+          type: boolean
+          nullable: true
+        is_passenger_mileage_enabled:
+          type: boolean
+          nullable: true
+    org_settings_advanced_per_diems_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_employee_restriction
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_employee_restriction:
+          type: boolean
+          nullable: true
+    org_settings_admin_email_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - unsubscribed_events
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        unsubscribed_events:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_mobile_notification_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - unsubscribed_events
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        unsubscribed_events:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_sso_integration_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - idp_name
+        - meta_data_file_id
+        - email_regex
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        idp_name:
+          type: string
+          nullable: true
+        meta_data_file_id:
+          type: string
+          nullable: true
+        email_regex:
+          type: string
+          nullable: true
+    org_settings_ach_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - provider
+        - expedite_source
+        - expedite_destination
+        - is_suspended
+        - pipeline_amount_limit
+        - is_express_ach_enabled
+        - express_ach_threshold_amount
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        provider:
+          type: string
+          nullable: true
+        expedite_source:
+          type: boolean
+          nullable: true
+        expedite_destination:
+          type: boolean
+          nullable: true
+        is_suspended:
+          type: boolean
+          nullable: true
+        pipeline_amount_limit:
+          type: number
+          nullable: true
+        is_express_ach_enabled:
+          type: boolean
+          nullable: true
+        express_ach_threshold_amount:
+          type: number
+          nullable: true
+    org_settings_amp_email_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - report_approval
+        - submit_expense_reports_beta
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        report_approval:
+          type: boolean
+          nullable: true
+        submit_expense_reports_beta:
+          type: boolean
+          nullable: true
+    org_settings_workflow_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - report_workflow_settings
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        report_workflow_settings:
+          type: boolean
+          nullable: true
+    org_settings_bank_feed_request_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - bank_name
+        - card_provider
+        - number_of_cards
+        - status
+        - last_updated_at
+        - secret_key
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        bank_name:
+          type: string
+          nullable: true
+        card_provider:
+          type: string
+          nullable: true
+        number_of_cards:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        last_updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        secret_key:
+          type: string
+          nullable: true
+    org_settings_receipt_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_magnifier
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_magnifier:
+          type: boolean
+          nullable: true
+    org_settings_bank_data_aggregation_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        date_to_sync_from:
+          type: string
+          format: date-time
+          nullable: true
+    org_settings_payment_mode_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - payment_modes_order
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        payment_modes_order:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_mastercard_enrollment_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        integration:
+          type: string
+          nullable: true
+    org_settings_session_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - inactivity_timeout
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        inactivity_timeout:
+          type: integer
+    org_settings_advanced_category_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - enable_employee_restriction
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        enable_employee_restriction:
+          type: boolean
+          nullable: true
+    org_settings_amex_feed_enrollment_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - virtual_card_settings_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        virtual_card_settings_enabled:
+          type: boolean
+          nullable: true
+    org_settings_sms_expense_conversation_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - cost_center_autofill_enabled
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        cost_center_autofill_enabled:
+          type: boolean
+          nullable: true
+    org_settings_expense_limit_settings_out:
+      type: object
+      additionalProperties: false
+      properties:
+        policy_ids:
+          type: array
+          items:
+            type: string
+          nullable: true
+    org_settings_reconciliation_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - type
+        - day_of_the_month
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        type:
+          type: string
+          enum:
+            - CALENDAR_MONTH
+            - STATEMENT_CYCLE
+            - null
+          nullable: true
+        day_of_the_month:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 28
+    org_settings_currency_format_out:
+      type: object
+      additionalProperties: false
+      required:
+        - symbol_position
+        - decimal_separator
+        - thousand_separator
+      properties:
+        symbol_position:
+          type: string
+          enum:
+            - before
+            - after
+        decimal_separator:
+          type: string
+          enum:
+            - .
+            - ','
+        thousand_separator:
+          type: string
+          enum:
+            - .
+            - ','
+    org_settings_regional_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - date_format
+        - time_format
+        - currency_format
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        date_format:
+          type: string
+          enum:
+            - MMM dd, yyyy
+            - MM/dd/yyyy
+            - dd/MM/yyyy
+            - yyyy/MM/dd
+            - MM-dd-yyyy
+            - dd-MM-yyyy
+            - yyyy-MM-dd
+            - MM.dd.yyyy
+            - dd.MM.yyyy
+            - yyyy.MM.dd
+            - MM dd yyyy
+            - dd MM yyyy
+            - yyyy MM dd
+        time_format:
+          type: string
+          enum:
+            - h:mm a
+            - HH:mm
+        currency_format:
+          $ref: '#/components/schemas/org_settings_currency_format_out'
+    org_settings_auto_report_submission_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - expense_grouping_dimensions
+      properties:
+        expense_grouping_dimensions:
+          type: array
+          items:
+            type: string
+            enum:
+              - PAYMENT_MODE
+              - PROJECT
+              - COST_CENTER
+          uniqueItems: true
+          maxItems: 2
+    org_settings_auto_report_approval_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - amount_threshold
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        amount_threshold:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+    org_settings_bin_lock_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - bank_partner_id
+      properties:
+        allowed:
+          type: boolean
+          nullable: true
+        enabled:
+          type: boolean
+          nullable: true
+        bank_partner_id:
+          type: integer
+          nullable: true
+    org_settings_enable_access_delegation_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+    org_settings_fyler_ccc_flow_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - advanced_auto_match_enabled
+      properties:
+        allowed:
+          type: boolean
+        enabled:
+          type: boolean
+        advanced_auto_match_enabled:
+          type: boolean
+    org_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - mileage_details
+        - default_ou_settings
+        - policy_settings
+        - org_personal_cards_settings
+        - per_diem_settings
+        - activity_settings
+        - accounting_export_settings
+        - tax_settings
+        - taxi_settings
+        - approval_settings
+        - verification_settings
+        - transaction_fields_settings
+        - org_user_fields_settings
+        - org_logo_settings
+        - corporate_credit_card_settings
+        - settlements_excel_settings
+        - advance_account_settings
+        - advance_request_fields_settings
+        - expense_settings
+        - bank_payment_file_settings
+        - integrations_settings
+        - exchange_rate_settings
+        - gmail_addon_settings
+        - admin_allowed_ip_settings
+        - advances_settings
+        - multi_org_settings
+        - custom_category_settings
+        - org_cost_center_settings
+        - advanced_cost_center_settings
+        - project_settings
+        - advanced_project_settings
+        - org_mileage_settings
+        - advanced_per_diems_settings
+        - hrms_integration_settings
+        - duplicate_detection_settings
+        - org_access_delegation_settings
+        - advanced_access_delegation_settings
+        - dynamic_form_settings
+        - budget_settings
+        - org_bulk_fyle_settings
+        - whatsapp_settings
+        - fmr_settings
+        - admin_email_settings
+        - mobile_notification_settings
+        - auto_reminder_settings
+        - analytics_settings
+        - advanced_analytics_settings
+        - advanced_rbac_settings
+        - google_sso_settings
+        - sso_integration_settings
+        - ach_settings
+        - amp_email_settings
+        - org_branding_settings
+        - saved_filters_settings
+        - org_currency_settings
+        - card_expense_creation_settings
+        - recurrences_settings
+        - mis_reporting_settings
+        - currencylayer_provider_settings
+        - fixer_provider_settings
+        - openexchangerates_provider_settings
+        - oanda_provider_settings
+        - xe_provider_settings
+        - workflow_settings
+        - bank_feed_request_settings
+        - risk_score_settings
+        - receipt_settings
+        - org_in_app_chat_settings
+        - card_assignment_settings
+        - transaction_reversal_settings
+        - auto_match_settings
+        - universal_statement_parser_settings
+        - org_hotjar_settings
+        - ccc_draft_expense_settings
+        - expense_widget_settings
+        - org_expense_form_autofills
+        - bank_data_aggregation_settings
+        - data_extractor_settings
+        - suggested_expense_merge_settings
+        - visa_enrollment_settings
+        - company_expenses_beta_settings
+        - unify_ccce_expenses_settings
+        - payment_mode_settings
+        - mcc_settings
+        - mastercard_enrollment_settings
+        - simplified_report_closure_settings
+        - expense_rules_settings
+        - session_settings
+        - advanced_category_settings
+        - amex_feed_enrollment_settings
+        - commute_deduction_settings
+        - sms_expense_conversation_settings
+        - turn_around_time_analytics_settings
+        - risk_analytics_settings
+        - edit_expenses_in_all_states_settings
+        - personal_cards_v2_settings
+        - copilot_settings
+        - simplified_multi_stage_approvals
+        - expense_limit_settings
+        - transaction_field_configurations
+        - pending_cct_expense_restriction
+        - timezone_fix
+        - employee_hierarchy_overview_settings
+        - reconciliation_settings
+        - pre_fill_merchant_from_card_transaction
+        - regional_settings
+        - unassign_cards_from_disabled_users
+        - auto_report_submission_settings
+        - auto_report_approval_settings
+        - card_expense_field_edit_restriction
+        - enable_auto_report
+        - mobile_app_my_expenses_beta_enabled
+        - my_expenses_beta_enabled
+        - sms_expense_completion_without_receipt_enabled
+        - is_new_critical_policy_violation_flow_enabled
+        - is_mileage_duplicate_detection_enabled
+        - expense_rule_suggestions_settings
+        - bin_locking_settings
+        - enable_mileage
+        - enable_mileage_location
+        - enable_projects
+        - enable_cost_centers
+        - enable_advance_requests
+        - enable_advances
+        - enable_org_creation
+        - enable_access_delegation
+        - org_fyler_ccc_flow_settings
+      properties:
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        mileage_details:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_config_mileage_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        default_ou_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_default_org_user_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        policy_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_policy_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_personal_cards_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        per_diem_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_per_diem_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        activity_settings:
+          type: object
+          additionalProperties: true
+          nullable: true
+        accounting_export_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_accounting_export_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        tax_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_tax_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        taxi_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_taxi_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        approval_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_approval_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        verification_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_verification_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        transaction_fields_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_transaction_fields_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_user_fields_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_user_fields_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_logo_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_logo_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        corporate_credit_card_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_corporate_credit_card_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        settlements_excel_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_settlements_excel_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advance_account_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advance_account_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advance_request_fields_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advance_request_fields_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        expense_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_expense_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        bank_payment_file_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        integrations_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_integrations_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        exchange_rate_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        gmail_addon_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        admin_allowed_ip_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_admin_allowed_ip_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advances_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advances_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        multi_org_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        custom_category_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_cost_center_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_cost_center_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advanced_cost_center_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        project_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_project_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advanced_project_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_mileage_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_mileage_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_per_diems_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advanced_per_diems_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        hrms_integration_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        duplicate_detection_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_access_delegation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_access_delegation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        dynamic_form_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        budget_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_bulk_fyle_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        whatsapp_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        fmr_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        admin_email_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_admin_email_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        mobile_notification_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_mobile_notification_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        auto_reminder_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        analytics_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_analytics_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_rbac_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        google_sso_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        sso_integration_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_sso_integration_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        ach_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_ach_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        amp_email_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_amp_email_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_branding_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        saved_filters_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_currency_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        card_expense_creation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        recurrences_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        mis_reporting_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        currencylayer_provider_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        fixer_provider_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        openexchangerates_provider_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        oanda_provider_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        xe_provider_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        workflow_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_workflow_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        bank_feed_request_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_bank_feed_request_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        risk_score_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        receipt_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_receipt_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_in_app_chat_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        card_assignment_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        transaction_reversal_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        auto_match_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        universal_statement_parser_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_hotjar_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        ccc_draft_expense_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        expense_widget_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_expense_form_autofills:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        bank_data_aggregation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_bank_data_aggregation_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        data_extractor_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        suggested_expense_merge_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        visa_enrollment_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        company_expenses_beta_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        unify_ccce_expenses_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        payment_mode_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_payment_mode_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        mcc_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        mastercard_enrollment_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_mastercard_enrollment_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        simplified_report_closure_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        expense_rules_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        session_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_session_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        advanced_category_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_advanced_category_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        amex_feed_enrollment_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_amex_feed_enrollment_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        commute_deduction_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        sms_expense_conversation_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_sms_expense_conversation_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        turn_around_time_analytics_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        risk_analytics_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        edit_expenses_in_all_states_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        personal_cards_v2_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        copilot_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        simplified_multi_stage_approvals:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        expense_limit_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_expense_limit_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        transaction_field_configurations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          nullable: true
+        pending_cct_expense_restriction:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        timezone_fix:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        employee_hierarchy_overview_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        reconciliation_settings:
+          $ref: '#/components/schemas/org_settings_reconciliation_settings_out'
+        pre_fill_merchant_from_card_transaction:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        regional_settings:
+          $ref: '#/components/schemas/org_settings_regional_settings_out'
+        unassign_cards_from_disabled_users:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_toggle_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        auto_report_submission_settings:
+          $ref: '#/components/schemas/org_settings_auto_report_submission_settings_out'
+        auto_report_approval_settings:
+          $ref: '#/components/schemas/org_settings_auto_report_approval_settings_out'
+        card_expense_field_edit_restriction:
+          $ref: '#/components/schemas/org_settings_toggle_out'
+        enable_auto_report:
+          type: boolean
+          nullable: true
+        mobile_app_my_expenses_beta_enabled:
+          type: boolean
+          nullable: true
+        my_expenses_beta_enabled:
+          type: boolean
+          nullable: true
+        sms_expense_completion_without_receipt_enabled:
+          type: boolean
+          nullable: true
+        is_new_critical_policy_violation_flow_enabled:
+          type: boolean
+          nullable: true
+        is_mileage_duplicate_detection_enabled:
+          type: boolean
+          nullable: true
+        expense_rule_suggestions_settings:
+          $ref: '#/components/schemas/org_settings_toggle_out'
+        bin_locking_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_bin_lock_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        enable_mileage:
+          type: boolean
+          nullable: true
+        enable_mileage_location:
+          type: boolean
+          nullable: true
+        enable_projects:
+          type: boolean
+          nullable: true
+        enable_cost_centers:
+          type: boolean
+          nullable: true
+        enable_advance_requests:
+          type: boolean
+          nullable: true
+        enable_advances:
+          type: boolean
+          nullable: true
+        enable_org_creation:
+          type: boolean
+          nullable: true
+        enable_access_delegation:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_enable_access_delegation_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
+        org_fyler_ccc_flow_settings:
+          type: object
+          nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_fyler_ccc_flow_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
     expense_policy_limit_type:
       nullable: true
       type: string
