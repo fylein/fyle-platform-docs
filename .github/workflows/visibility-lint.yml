@@ -7,10 +7,6 @@ on:
     paths:
       - 'src/**/*.yaml'
       - 'redocly.visibility.yaml'
-      - 'scripts/lint-visibility.sh'
-      - 'tests/visibility/**'
-      - 'tests/visibility-rule.test.sh'
-      - '.githooks/pre-commit'
       - '.github/workflows/visibility-lint.yml'
 
 permissions:
@@ -22,19 +18,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
 
-      - name: Test visibility rule
-        run: bash tests/visibility-rule.test.sh
-
-      - name: Lint changed operations
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: scripts/lint-visibility.sh --range "$BASE_SHA" "$HEAD_SHA"
+      - name: Lint operation visibility
+        run: npx --yes @redocly/cli@2.51.2 lint --config redocly.visibility.yaml
