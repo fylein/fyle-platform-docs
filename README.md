@@ -39,7 +39,8 @@ You can check the version by running
 ### Visibility linting ###
 
 Every added or modified OpenAPI operation must explicitly set `x-internal` to
-the boolean value `true` or `false`.
+the boolean value `true` or `false`. The check uses a native Redocly
+configurable rule and is scoped to changed modular path files.
 
 Enable the repository's pre-commit hook once per local clone:
 

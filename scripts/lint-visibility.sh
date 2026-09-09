@@ -22,24 +22,41 @@ case "${1:---staged}" in
     ;;
 esac
 
-if [ -z "$changed_files" ]; then
-  echo 'No changed OpenAPI source files to lint.'
+changed_path_files=()
+while IFS= read -r changed_file; do
+  case "$changed_file" in
+    src/*/paths/*.yaml)
+      changed_path_files+=("$changed_file")
+      ;;
+  esac
+done <<< "$changed_files"
+
+if [ "${#changed_path_files[@]}" -eq 0 ]; then
+  echo 'No changed OpenAPI path files to lint.'
   exit 0
 fi
 
 echo 'Checking explicit x-internal decisions in:'
-echo "$changed_files"
+printf '%s\n' "${changed_path_files[@]}"
 
-X_INTERNAL_CHANGED_FILES="$changed_files" npx --yes @redocly/cli@2.19.0 lint \
-  src/authorization/openapi.yaml \
-  src/admin/openapi.yaml \
-  src/spender/openapi.yaml \
-  src/approver/openapi.yaml \
-  src/hod/openapi.yaml \
-  src/hop/openapi.yaml \
-  src/common/openapi.yaml \
-  src/accountant/openapi.yaml \
-  src/super_admin/openapi.yaml \
-  src/owner/openapi.yaml \
-  src/manager/openapi.yaml \
+lint_root="$(mktemp "${TMPDIR:-/tmp}/visibility-lint.yaml.XXXXXX")"
+trap 'rm -f "$lint_root"' EXIT
+
+{
+  printf '%s\n' 'openapi: 3.0.3'
+  printf '%s\n' 'info:'
+  printf '%s\n' '  title: Changed operation visibility lint'
+  printf '%s\n' '  version: 1.0.0'
+  printf '%s\n' 'paths:'
+
+  path_index=0
+  for changed_file in "${changed_path_files[@]}"; do
+    printf '  /visibility-lint-%d:\n' "$path_index"
+    printf '    $ref: '
+    printf "'%s/%s'\n" "$repository_root" "$changed_file"
+    path_index=$((path_index + 1))
+  done
+} > "$lint_root"
+
+npx --yes @redocly/cli@2.51.2 lint "$lint_root" \
   --config redocly.visibility.yaml
