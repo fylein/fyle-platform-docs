@@ -96,6 +96,12 @@ tags:
   - name: Dwolla Customers
     description: |
       These APIs gives you access to manage Dwolla customer data.
+  - name: Device Tokens
+    description: |
+      These APIs gives you access to manage your mobile device tokens for push notifications.
+  - name: Users
+    description: |
+      These APIs gives you access to manage your user account.
 paths:
   /spender/budgets:
     get:
@@ -3761,6 +3767,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/employees/unverify_mobile:
+    post:
+      x-internal: true
+      tags:
+        - Employees
+      summary: Unverify mobile number
+      description: |
+        Marks the authenticated employee's mobile number as unverified.
+      operationId: employees_unverify_mobile_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/employee_settings:
     get:
       x-internal: false
@@ -3841,6 +3889,242 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/spender_employee_settings_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/device_token:
+    get:
+      x-internal: true
+      tags:
+        - Device Tokens
+      summary: Get device token
+      description: |
+        Returns the device token registered for the authenticated user's mobile device. Returns an
+        empty object if no device token has been registered yet.
+      operationId: device_token_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/device_token_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      x-internal: true
+      tags:
+        - Device Tokens
+      summary: Create or update device token
+      description: |
+        Registers the device token for the authenticated user's mobile device. If a device token
+        already exists for the user, it is updated; otherwise a new one is created.
+      operationId: device_token_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/device_token_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/device_token_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/users:
+    post:
+      x-internal: true
+      tags:
+        - Users
+      summary: Update user profile
+      description: |
+        Allows the authenticated user to update their full name, and to set an initial password if one
+        has not been set yet. Once a password is set, use the change password action to update it.
+      operationId: users_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/user_update_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/user_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/users/change_password:
+    post:
+      x-internal: true
+      tags:
+        - Users
+      summary: Change password
+      description: |
+        Allows the authenticated user to change their password by providing their current password
+        for verification along with a new password.
+      operationId: users_change_password_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/change_password_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/users/password_required:
+    get:
+      x-internal: true
+      tags:
+        - Users
+      summary: Check if password is required
+      description: |
+        Returns whether the authenticated user is required to set a password (for example, because no
+        SSO integration is configured for their email), and whether a password has already been set.
+      operationId: users_password_required_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/password_required_out'
         '400':
           description: Bad request
           content:
@@ -17267,6 +17551,149 @@ components:
           type: string
           nullable: true
           description: Default vehicle type for mileage expenses
+    device_token_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the device token record.
+          example: ndtwjwgnwwgo
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        tokens:
+          type: array
+          items:
+            type: string
+          description: |
+            List of Firebase Cloud Messaging (FCM) device tokens for the authenticated user's mobile devices.
+          example:
+            - fcm_token_abc123
+    device_token_in:
+      type: object
+      additionalProperties: false
+      required:
+        - tokens
+      properties:
+        tokens:
+          type: array
+          items:
+            type: string
+          description: |
+            List of Firebase Cloud Messaging (FCM) device tokens for the authenticated user's mobile devices.
+          example:
+            - fcm_token_abc123
+    user_update_in:
+      type: object
+      additionalProperties: false
+      required:
+        - full_name
+      properties:
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Full name of the authenticated user.
+          example: John Doe
+        password:
+          type: string
+          nullable: true
+          description: |
+            Password to set for the authenticated user. Can only be used to set an initial password;
+            once a password is set, use the change password action to update it.
+          example: S3cur3P@ssw0rd
+    user_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - created_at
+        - updated_at
+        - email
+        - full_name
+        - email_verified_at
+        - is_email_verified
+        - is_onboarded
+        - password_changed_at
+        - signup_params
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+        email_verified_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        is_email_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether the user's email address has been verified.
+          example: true
+        is_onboarded:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether the user has completed onboarding.
+          example: true
+        password_changed_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the user's password was last changed. Null if the password has never been changed.
+        signup_params:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: |
+            Free-form parameters captured at signup time.
+          example: {}
+    change_password_in:
+      type: object
+      additionalProperties: false
+      required:
+        - current_password
+        - new_password
+      properties:
+        current_password:
+          type: string
+          description: |
+            The authenticated user's current password, used for verification.
+          example: OldP@ssw0rd
+        new_password:
+          type: string
+          description: |
+            The new password to set for the authenticated user. Must be different from the current password.
+          example: NewP@ssw0rd
+    password_required_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_password_required
+        - is_password_set
+      properties:
+        is_password_required:
+          type: boolean
+          description: |
+            Indicates whether the authenticated user is required to set a password, for example
+            because no SSO integration is configured for their email domain.
+          example: true
+        is_password_set:
+          type: boolean
+          description: |
+            Indicates whether the authenticated user already has a password set.
+          example: false
     virtual_card_out:
       type: object
       properties:
