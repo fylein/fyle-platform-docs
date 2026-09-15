@@ -76,7 +76,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/location_route_in'
+              $ref: '#/components/schemas/location_directions_in'
       responses:
         '200':
           description: OK
@@ -783,6 +783,45 @@ components:
         A latitude or longitude represented as a string. Latitudes must be between -90 and 90;
         longitudes must be between -180 and 180.
       example: '33.7501275'
+    location_directions_in:
+      type: object
+      additionalProperties: false
+      required:
+        - origin_lat
+        - origin_long
+        - destination_lat
+        - destination_long
+        - mode
+      properties:
+        origin_lat:
+          $ref: '#/components/schemas/location_coordinate_in'
+        origin_long:
+          $ref: '#/components/schemas/location_coordinate_in'
+        destination_lat:
+          $ref: '#/components/schemas/location_coordinate_in'
+        destination_long:
+          $ref: '#/components/schemas/location_coordinate_in'
+        mode:
+          type: string
+          nullable: true
+          example: driving
+        waypoints:
+          type: string
+          nullable: true
+          description: |
+            Pipe-separated latitude and longitude pairs in `latitude,longitude` format.
+          example: 35.0,-80.0|37.0,-78.0
+    location_directions_out:
+      type: object
+      additionalProperties: false
+      required:
+        - direction
+      properties:
+        direction:
+          type: string
+          nullable: true
+          description: Encoded route polyline, or null when no route is available.
+          example: encoded_polyline_string
     location_route_in:
       type: object
       additionalProperties: false
@@ -811,17 +850,6 @@ components:
           description: |
             Pipe-separated latitude and longitude pairs in `latitude,longitude` format.
           example: 35.0,-80.0|37.0,-78.0
-    location_directions_out:
-      type: object
-      additionalProperties: false
-      required:
-        - direction
-      properties:
-        direction:
-          type: string
-          nullable: true
-          description: Encoded route polyline, or null when no route is available.
-          example: encoded_polyline_string
     location_distance_out:
       type: object
       additionalProperties: false
