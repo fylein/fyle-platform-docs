@@ -59,6 +59,9 @@ tags:
   - name: Merchants
     description: |
       This API gives you access to merchants, primarily to help with autocomplete.
+  - name: SMS Merchant Exclusions
+    description: |
+      These APIs manage merchant patterns excluded from SMS notifications.
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
@@ -1275,6 +1278,277 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/employee_sms_merchant_exclusions:
+    get:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: List employee SMS merchant exclusions
+      description: Returns SMS merchant exclusions belonging to the authenticated employee.
+      operationId: spender_employee_sms_merchant_exclusions_get
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/org_id'
+        - $ref: '#/components/parameters/user_id'
+        - in: query
+          name: merchant_pattern
+          description: Merchant pattern with a supported filtering operator.
+          schema:
+            type: string
+            example: eq.ikea
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - in: query
+          name: offset
+          description: Number of records to skip.
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            maximum: 200
+            default: 200
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+        '400':
+          description: Invalid filter or pagination parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: Create or update an employee SMS merchant exclusion
+      description: Creates an employee-level exclusion when `id` is omitted or `null`, or updates the authenticated employee's exclusion identified by `id`.
+      operationId: spender_employee_sms_merchant_exclusions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/sms_merchant_exclusion_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+        '400':
+          description: Invalid payload, blank merchant pattern, or an exclusion already present at employee or organisation level
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Employee SMS merchant exclusion not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/employee_sms_merchant_exclusions/delete:
+    post:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: Delete an employee SMS merchant exclusion
+      description: Deletes the authenticated employee's exclusion identified by `id` and returns the deleted record.
+      operationId: spender_employee_sms_merchant_exclusions_delete_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/sms_merchant_exclusion_delete_in'
+                reason:
+                  type: string
+                  description: Optional reason for deleting the exclusion.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Employee SMS merchant exclusion not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/sms_merchant_exclusions:
+    get:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: List organisation SMS merchant exclusions
+      description: Returns organisation-level merchant patterns that suppress SMS notifications for the authenticated employee.
+      operationId: spender_sms_merchant_exclusions_get
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/org_id'
+        - in: query
+          name: merchant_pattern
+          description: Merchant pattern with a supported filtering operator.
+          schema:
+            type: string
+            example: eq.uber
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - in: query
+          name: offset
+          description: Number of records to skip.
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            maximum: 200
+            default: 200
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/sms_merchant_exclusion_out'
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+        '400':
+          description: Invalid filter or pagination parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/subscriptions:
     post:
       x-internal: false
@@ -11997,6 +12271,81 @@ components:
           description: |
             Merchant name
           example: Uber
+    employee_sms_merchant_exclusion_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - merchant_pattern
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: esmeNdvxUKg48b
+        org_id:
+          type: string
+          example: oriSOntNdZGd
+        user_id:
+          type: string
+          example: usplIdJBA5OP
+        merchant_pattern:
+          type: string
+          description: Merchant name or pattern excluded from SMS notifications for the employee.
+          example: ikea
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    sms_merchant_exclusion_in:
+      type: object
+      required:
+        - merchant_pattern
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Existing exclusion ID. Omit this field or provide `null` to create an exclusion.
+          example: smeBKgVniE0mH
+        merchant_pattern:
+          type: string
+          minLength: 1
+          description: Non-blank merchant name or pattern to exclude from SMS notifications.
+          example: uber eats
+    sms_merchant_exclusion_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: smeBKgVniE0mH
+    sms_merchant_exclusion_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - merchant_pattern
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: smeBKgVniE0mH
+        org_id:
+          type: string
+          example: oriSOntNdZGd
+        merchant_pattern:
+          type: string
+          description: Merchant name or pattern excluded from SMS notifications.
+          example: uber eats
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     webhook_url:
       type: string
       description: |
@@ -24436,6 +24785,23 @@ components:
       schema:
         type: string
         example: updated_at.desc,id
+    org_id:
+      in: query
+      name: org_id
+      description: |
+        The unique id of the organization to which the object is associated.
+      schema:
+        type: string
+        example: org_id=eq.orwruogwnngg
+    user_id:
+      in: query
+      name: user_id
+      description: |
+        User IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(us123,us456)
     expense_id:
       in: query
       name: expense_id
