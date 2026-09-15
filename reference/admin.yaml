@@ -13625,6 +13625,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/statements/unmatched_cards:
+    post:
+      x-internal: true
+      tags:
+        - Statements
+      summary: Get unmatched cards from a statement
+      description: |
+        Returns the masked card numbers found in a statement that don't match any existing corporate
+        card in the organisation, using the provided column mapping.
+      operationId: statements_unmatched_cards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/unmatched_cards_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/unmatched_cards_out'
+        '400':
+          description: |
+            Bad request. Also returned for statement-mapping validation failures (missing mandatory
+            fields, no matching transactions, or a bank name mismatch for bin-locked organisations).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/statements/matching_cards:
     post:
       x-internal: false
@@ -38637,6 +38698,131 @@ components:
         - is_rtf_statement
         - rtf_card_network
         - corporate_card_details
+    unmatched_cards_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - statement_mapping
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the statement to check for unmatched cards.
+          example: stmtadfdsdf
+        statement_mapping:
+          type: object
+          additionalProperties: false
+          required:
+            - amount_column
+            - card_number_column
+            - transaction_date_column
+            - merchant_column
+            - is_debit_positive
+            - bank_name
+          properties:
+            amount_column:
+              type: string
+              description: |
+                Specifies the mapping of amount on the statement.
+              example: amount
+            card_number_column:
+              type: string
+              description: |
+                Specifies the mapping of card number on the statement.
+              example: account number
+            transaction_date_column:
+              type: string
+              description: |
+                Specifies the mapping of transaction date on the statement.
+              example: txn date
+            merchant_column:
+              type: string
+              description: |
+                Specifies the mapping of merchant on the statement.
+              example: Amazon
+            is_debit_positive:
+              type: boolean
+              description: |
+                Specifies the representation of the amount in the statement. If true, amounts
+                represented by a positive sign are debits; if false, amounts represented by a negative
+                sign are debits.
+              example: true
+            bank_name:
+              type: string
+              nullable: true
+              description: |
+                Specifies the bank name of the statement. Required (and must match the organisation's
+                configured bank name) for organisations with bin locking enabled.
+              example: American Express
+            id:
+              type: string
+              nullable: true
+              description: |
+                Unique identifier of an existing statement mapping to reuse.
+              example: smpadfdsdf
+            description_column:
+              type: string
+              nullable: true
+              description: |
+                Specifies the mapping of description column on the statement.
+              example: description
+            foreign_amount_column:
+              type: string
+              nullable: true
+              description: |
+                Specifies the mapping of foreign amount on the statement.
+              example: foreign amount
+            foreign_currency_column:
+              type: string
+              nullable: true
+              description: |
+                Specifies the mapping of foreign currency on the statement.
+              example: foreign currency
+            post_date_column:
+              type: string
+              nullable: true
+              description: |
+                Specifies the header name of the post date column in the statement.
+              example: post date
+            transaction_id_column:
+              type: string
+              nullable: true
+              description: |
+                Specifies the mapping of transaction id / unique id on the statement.
+              example: reference number
+            name:
+              type: string
+              description: |
+                Specifies the mapping name.
+              example: USD
+            card_network:
+              type: string
+              nullable: true
+              description: |
+                Specifies the credit card network used by the card.
+              example: VISA
+    unmatched_cards_out:
+      type: object
+      additionalProperties: false
+      required:
+        - unmatched_card_numbers
+        - all_cards_unmatched
+      properties:
+        unmatched_card_numbers:
+          type: array
+          items:
+            type: string
+          description: |
+            Masked card numbers found in the statement that don't match any existing corporate card.
+          example:
+            - '****9871'
+        all_cards_unmatched:
+          type: boolean
+          description: |
+            Indicates whether every distinct card number found in the statement is unmatched.
+          example: false
     matching_cards_out:
       type: object
       required:
