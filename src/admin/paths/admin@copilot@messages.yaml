@@ -1,0 +1,108 @@
+get:
+  x-internal: true
+  tags:
+    - Copilot
+  summary: List Copilot chat messages
+  description: |
+    Returns the authenticated admin's own Copilot chat messages. This API supports very rich
+    filtering on all response fields and pagination via query parameters. To understand how to use
+    these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: admin_copilot_messages_list
+  parameters:
+    - $ref: '../../components/parameters/q.yaml'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+              - count
+              - offset
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/copilot.yaml#/copilot_chat_message_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden. Also returned when Copilot is not enabled for the organisation.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
+post:
+  x-internal: true
+  tags:
+    - Copilot
+  summary: Send a Copilot chat message
+  description: |
+    Sends a message to Copilot. When `chat_id` is omitted, a new chat is created using `title` (which
+    becomes required in that case) and the message is posted to it. Returns the Copilot-generated
+    response message. The exact `metadata` shape returned depends on the query type (for example,
+    graph or tabular data) and is not further constrained here.
+  operationId: admin_copilot_messages_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/copilot.yaml#/copilot_chat_message_create_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/copilot.yaml#/copilot_chat_message_out'
+    '400':
+      description: |
+        Bad request. Also returned when `chat_id` does not match a chat owned by the authenticated
+        admin (`error: CopilotChatNotFoundException`).
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden. Also returned when Copilot is not enabled for the organisation.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'

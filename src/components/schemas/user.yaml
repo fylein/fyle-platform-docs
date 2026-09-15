@@ -8,6 +8,10 @@ user_out:
     - email
     - full_name
     - email_verified_at
+    - is_email_verified
+    - is_onboarded
+    - password_changed_at
+    - signup_params
   properties:
     id:
       $ref: './fields.yaml#/id_string'
@@ -25,6 +29,87 @@ user_out:
       example: John Doe
     email_verified_at:
       $ref: './fields.yaml#/timestamptz_utc'
+    is_email_verified:
+      type: boolean
+      nullable: true
+      description: |
+        Indicates whether the user's email address has been verified.
+      example: true
+    is_onboarded:
+      type: boolean
+      nullable: true
+      description: |
+        Indicates whether the user has completed onboarding.
+      example: true
+    password_changed_at:
+      allOf:
+        - $ref: './fields.yaml#/timestamptz_utc'
+      description: |
+        Signifies when the user's password was last changed. Null if the password has never been changed.
+    signup_params:
+      type: object
+      nullable: true
+      additionalProperties: true
+      description: |
+        Free-form parameters captured at signup time.
+      example: {}
+
+user_update_in:
+  type: object
+  additionalProperties: False
+  required:
+    - full_name
+  properties:
+    full_name:
+      type: string
+      maxLength: 255
+      description: |
+        Full name of the authenticated user.
+      example: John Doe
+    password:
+      type: string
+      nullable: true
+      description: |
+        Password to set for the authenticated user. Can only be used to set an initial password;
+        once a password is set, use the change password action to update it.
+      example: 'S3cur3P@ssw0rd'
+
+change_password_in:
+  type: object
+  additionalProperties: False
+  required:
+    - current_password
+    - new_password
+  properties:
+    current_password:
+      type: string
+      description: |
+        The authenticated user's current password, used for verification.
+      example: 'OldP@ssw0rd'
+    new_password:
+      type: string
+      description: |
+        The new password to set for the authenticated user. Must be different from the current password.
+      example: 'NewP@ssw0rd'
+
+password_required_out:
+  type: object
+  additionalProperties: False
+  required:
+    - is_password_required
+    - is_password_set
+  properties:
+    is_password_required:
+      type: boolean
+      description: |
+        Indicates whether the authenticated user is required to set a password, for example
+        because no SSO integration is configured for their email domain.
+      example: true
+    is_password_set:
+      type: boolean
+      description: |
+        Indicates whether the authenticated user already has a password set.
+      example: false
 
 user_out_embed:
   type: object
