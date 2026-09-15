@@ -1,0 +1,110 @@
+get:
+  x-internal: true
+  tags:
+    - Copilot
+  summary: List Copilot chats
+  description: |
+    Returns the authenticated admin's own Copilot chats. This API supports very rich filtering on
+    all response fields and pagination via query parameters. To understand how to use these
+    parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+  operationId: admin_copilot_chats_list
+  parameters:
+    - $ref: '../../components/parameters/q.yaml'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+              - count
+              - offset
+            properties:
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/copilot.yaml#/copilot_chat_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden. Also returned when Copilot is not enabled for the organisation.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
+post:
+  x-internal: true
+  tags:
+    - Copilot
+  summary: Create or update a Copilot chat
+  description: |
+    Creates a new Copilot chat, or updates the title of an existing one owned by the authenticated
+    admin when `id` is provided.
+  operationId: admin_copilot_chats_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: False
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/copilot.yaml#/copilot_chat_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: False
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/copilot.yaml#/copilot_chat_out'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden. Also returned when Copilot is not enabled for the organisation.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+    '404':
+      description: Not Found. Returned when `id` does not match a chat owned by the authenticated admin.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
