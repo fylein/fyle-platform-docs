@@ -38054,7 +38054,6 @@ components:
               example: reference number
             name:
               type: string
-              nullable: true
               description: |
                 Specifies the mapping name.
               example: USD
@@ -38084,6 +38083,19 @@ components:
           description: |
             Indicates whether every distinct card number found in the statement is unmatched.
           example: false
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+        - {}
     bank_feed_transaction_payload_in:
       type: object
       additionalProperties: false
@@ -38098,7 +38110,6 @@ components:
           $ref: '#/components/schemas/org_id'
         amount:
           type: number
-          format: double
           description: |
             Amount of the transaction.
           example: 99.5
@@ -38108,7 +38119,11 @@ components:
             Currency of the transaction.
           example: USD
         spent_at:
-          $ref: '#/components/schemas/timestamptz_utc'
+          type: string
+          format: date-time
+          description: |
+            Date and time the transaction was spent, in ISO8601 format.
+          example: '2020-06-01T13:14:54.804+00:00'
         corporate_card_id:
           type: string
           description: |
@@ -38134,7 +38149,6 @@ components:
           example: EUR
         foreign_amount:
           type: number
-          format: double
           nullable: true
           description: |
             Amount of the transaction in its foreign currency, if applicable.
@@ -38175,9 +38189,10 @@ components:
             Unique identifier of the user who assigned this card, if applicable.
           example: uswjwgnwwgo
         metadata:
-          type: object
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
           nullable: true
-          additionalProperties: true
           description: |
             Free-form additional metadata for the transaction, as provided by the bank feed.
           example:
@@ -39438,19 +39453,6 @@ components:
           description: |
             This field represents the total number of expense duplicate sets that match the criteria specified in the query_params within the body of the request.
           example: 45
-    any_type:
-      anyOf:
-        - type: string
-        - type: number
-        - type: integer
-        - type: boolean
-        - type: array
-          items:
-            $ref: '#/components/schemas/any_type'
-        - type: object
-          additionalProperties:
-            $ref: '#/components/schemas/any_type'
-        - {}
     feature_config_out:
       type: object
       additionalProperties: false

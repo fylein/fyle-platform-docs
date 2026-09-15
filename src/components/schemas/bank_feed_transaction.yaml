@@ -12,7 +12,6 @@ bank_feed_transaction_payload_in:
       $ref: './fields.yaml#/org_id'
     amount:
       type: number
-      format: double
       description: |
         Amount of the transaction.
       example: 99.5
@@ -22,7 +21,11 @@ bank_feed_transaction_payload_in:
         Currency of the transaction.
       example: USD
     spent_at:
-      $ref: './fields.yaml#/timestamptz_utc'
+      type: string
+      format: date-time
+      description: |
+        Date and time the transaction was spent, in ISO8601 format.
+      example: '2020-06-01T13:14:54.804+00:00'
     corporate_card_id:
       type: string
       description: |
@@ -48,7 +51,6 @@ bank_feed_transaction_payload_in:
       example: EUR
     foreign_amount:
       type: number
-      format: double
       nullable: true
       description: |
         Amount of the transaction in its foreign currency, if applicable.
@@ -89,9 +91,10 @@ bank_feed_transaction_payload_in:
         Unique identifier of the user who assigned this card, if applicable.
       example: uswjwgnwwgo
     metadata:
-      type: object
+      anyOf:
+        - $ref: './fields.yaml#/any_type'
+        - $ref: './fields.yaml#/null_field'
       nullable: true
-      additionalProperties: true
       description: |
         Free-form additional metadata for the transaction, as provided by the bank feed.
       example:
