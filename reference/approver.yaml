@@ -822,6 +822,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/expenses/unlink_card_transaction:
+    post:
+      x-internal: true
+      tags:
+        - Expenses
+      summary: Unlink expense from card transaction
+      description: |
+        Unlinks an expense (or, for a split expense, all expenses in its split group) from its matched
+        corporate card transaction. A new, system-generated expense is created and linked to the card
+        transaction in its place; the original expense is returned unlinked.
+      operationId: approver_expenses_unlink_card_transaction_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/unlink_card_transaction_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/unlink_card_transaction_out'
+        '400':
+          description: |
+            Bad request. Also returned when the expense is not linked to any card transaction, or when
+            no expenses are found for its split group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: |
+            Not Found. Also returned when the expense's matched corporate card transaction cannot be
+            found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/reports/eject_expenses:
     post:
       x-internal: false
@@ -7899,6 +7963,37 @@ components:
                   Expense ID
                 example: txAcczJOQHGR
           - $ref: '#/components/schemas/expense_permissions_out'
+    unlink_card_transaction_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the expense to unlink from its matched corporate card transaction.
+          example: txm3L9soGEt2
+    unlink_card_transaction_out:
+      type: object
+      additionalProperties: false
+      required:
+        - user_created_expense
+        - auto_created_expense
+      properties:
+        user_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            The original expense, now unlinked from the corporate card transaction. This is the
+            expense that was submitted in the request.
+        auto_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            A new, system-generated expense created and linked in place of the original expense on
+            the corporate card transaction.
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
