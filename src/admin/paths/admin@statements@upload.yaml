@@ -34,7 +34,44 @@ post:
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/400.yaml'
+            oneOf:
+              - $ref: '../../components/schemas/400.yaml'
+              - $ref: '../../components/schemas/statements.yaml#/statement_upload_error_out'
+          examples:
+            invalid_usage:
+              summary: File id is incorrect or does not belong to the user/org
+              value:
+                message: File id is incorrect and no such file exists
+            statement_upload_exception:
+              summary: File failed multiple validations while parsing
+              value:
+                data:
+                  - title: Empty Header
+                    description: A column header is empty.
+                    action: Please add a value for each header.
+                    column_number: 2
+                    column_label: B
+                    column_name: null
+                    row_numbers:
+                      - 1
+                  - title: Columns Without Header
+                    description: Some columns in your file do not have names.
+                    action: Please add the missing column names.
+                    column_number: null
+                    column_label: null
+                    column_name: null
+                    row_numbers:
+                      - 4
+                  - title: Empty Row
+                    description: Row is empty.
+                    action: Please remove it.
+                    column_number: null
+                    column_label: null
+                    column_name: null
+                    row_numbers:
+                      - 3
+                error: StatementUploadException
+                message: Errors were found while processing your file.
     '401':
       description: Unauthorized request
       content:
