@@ -1,10 +1,7 @@
 get:
   tags:
-    - Dwolla Customers
-  summary: List active spender funding sources
-  description: |
-    Retrieve active non-balance funding sources for the authenticated spender.
-    At most one funding source is returned.
+    - Dwolla Funding Sources
+  summary: List active bank funding sources
   operationId: dwolla_spender_funding_sources_get
   responses:
     '200':
@@ -20,6 +17,7 @@ get:
             properties:
               data:
                 type: array
+                maxItems: 1
                 items:
                   type: object
                   additionalProperties: false
@@ -34,6 +32,9 @@ get:
                       type: string
                     status:
                       type: string
+                      enum:
+                        - verified
+                        - unverified
                     bank_account_type:
                       type: string
                       nullable: true
@@ -45,6 +46,8 @@ get:
                       nullable: true
               count:
                 type: integer
+                minimum: 0
+                maximum: 1
     '400':
       description: Bad request
       content:
@@ -68,16 +71,4 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            additionalProperties: false
-            required:
-              - data
-              - error
-              - message
-            properties:
-              data:
-                nullable: true
-              error:
-                type: string
-              message:
-                type: string
+            $ref: '../../components/schemas/404.yaml'
