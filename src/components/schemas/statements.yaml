@@ -1708,4 +1708,54 @@ unmatched_cards_out:
       type: boolean
       description: |
         Indicates whether every distinct card number found in the statement is unmatched.
+
+statement_upload_error_out:
+  type: object
+  additionalProperties: false
+  required:
+    - data
+    - error
+    - message
+  properties:
+    data:
+      type: array
+      nullable: true
+      description: |
+        List of validation errors found while parsing the uploaded statement file.
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          message:
+            type: string
+            description: |
+              Human readable description of the validation error.
+          row_number:
+            type: integer
+            nullable: true
+            description: |
+              1-indexed row number (including the header row) where the error was found.
+          column_number:
+            type: integer
+            nullable: true
+            description: |
+              1-indexed column number where the error was found.
+          column_label:
+            type: string
+            nullable: true
+            description: |
+              Excel-style column label (A, B, C, ...) where the error was found.
+          column_name:
+            type: string
+            nullable: true
+            description: |
+              Name of the column header where the error was found.
+    error:
+      type: string
+      enum:
+        - StatementUploadException
+    message:
+      type: string
+      description: |
+        Summary message describing that errors were found while processing the uploaded file.
       example: false
