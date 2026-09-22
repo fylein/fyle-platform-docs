@@ -13155,7 +13155,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/400'
+                oneOf:
+                  - $ref: '#/components/schemas/400'
+                  - $ref: '#/components/schemas/statement_upload_error_out'
+              examples:
+                invalid_usage:
+                  summary: File id is incorrect or does not belong to the user/org
+                  value:
+                    message: File id is incorrect and no such file exists
+                statement_upload_exception:
+                  summary: File failed multiple validations while parsing
+                  value:
+                    data:
+                      - column_label: B
+                        column_name: null
+                        column_number: 2
+                        message: A column header is empty. Please add a value for each header.
+                        row_number: 1
+                      - column_label: null
+                        column_name: null
+                        column_number: null
+                        message: Some columns in your file do not have names. Please add the missing column names.
+                        row_number: 4
+                      - column_label: null
+                        column_name: null
+                        column_number: null
+                        message: Row is empty. Please remove it.
+                        row_number: 3
+                    error: StatementUploadException
+                    message: Errors were found while processing your file. Please fix them and try again.
         '401':
           description: Unauthorized request
           content:
@@ -37590,6 +37618,56 @@ components:
           example: fidftadfdsdf
       required:
         - file_id
+    statement_upload_error_out:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - error
+        - message
+      properties:
+        data:
+          type: array
+          nullable: true
+          description: |
+            List of validation errors found while parsing the uploaded statement file.
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              message:
+                type: string
+                description: |
+                  Human readable description of the validation error.
+              row_number:
+                type: integer
+                nullable: true
+                description: |
+                  1-indexed row number (including the header row) where the error was found.
+              column_number:
+                type: integer
+                nullable: true
+                description: |
+                  1-indexed column number where the error was found.
+              column_label:
+                type: string
+                nullable: true
+                description: |
+                  Excel-style column label (A, B, C, ...) where the error was found.
+              column_name:
+                type: string
+                nullable: true
+                description: |
+                  Name of the column header where the error was found.
+        error:
+          type: string
+          enum:
+            - StatementUploadException
+        message:
+          type: string
+          description: |
+            Summary message describing that errors were found while processing the uploaded file.
+          example: false
     statement_mappings_out:
       type: object
       additionalProperties: false
@@ -38831,7 +38909,6 @@ components:
           type: boolean
           description: |
             Indicates whether every distinct card number found in the statement is unmatched.
-          example: false
     matching_cards_out:
       type: object
       required:
