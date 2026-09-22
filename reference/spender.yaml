@@ -59,6 +59,9 @@ tags:
   - name: Merchants
     description: |
       This API gives you access to merchants, primarily to help with autocomplete.
+  - name: SMS Merchant Exclusions
+    description: |
+      These APIs manage merchant patterns excluded from SMS notifications.
   - name: Mileage Rates
     description: |
       These APIs gives access to your organisation's Mileage Rates
@@ -96,6 +99,15 @@ tags:
   - name: Dwolla Customers
     description: |
       These APIs gives you access to manage Dwolla customer data.
+  - name: Device Tokens
+    description: |
+      These APIs gives you access to manage your mobile device tokens for push notifications.
+  - name: Users
+    description: |
+      These APIs gives you access to manage your user account.
+  - name: Spender Onboarding
+    description: |
+      These APIs gives you access to manage your spender onboarding progress.
 paths:
   /spender/budgets:
     get:
@@ -1269,6 +1281,277 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/employee_sms_merchant_exclusions:
+    get:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: List employee SMS merchant exclusions
+      description: Returns SMS merchant exclusions belonging to the authenticated employee.
+      operationId: spender_employee_sms_merchant_exclusions_get
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/org_id'
+        - $ref: '#/components/parameters/user_id'
+        - in: query
+          name: merchant_pattern
+          description: Merchant pattern with a supported filtering operator.
+          schema:
+            type: string
+            example: eq.ikea
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - in: query
+          name: offset
+          description: Number of records to skip.
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            maximum: 200
+            default: 200
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+        '400':
+          description: Invalid filter or pagination parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: Create or update an employee SMS merchant exclusion
+      description: Creates an employee-level exclusion when `id` is omitted or `null`, or updates the authenticated employee's exclusion identified by `id`.
+      operationId: spender_employee_sms_merchant_exclusions_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/sms_merchant_exclusion_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+        '400':
+          description: Invalid payload, blank merchant pattern, or an exclusion already present at employee or organisation level
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Employee SMS merchant exclusion not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/employee_sms_merchant_exclusions/delete:
+    post:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: Delete an employee SMS merchant exclusion
+      description: Deletes the authenticated employee's exclusion identified by `id` and returns the deleted record.
+      operationId: spender_employee_sms_merchant_exclusions_delete_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/sms_merchant_exclusion_delete_in'
+                reason:
+                  type: string
+                  description: Optional reason for deleting the exclusion.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_sms_merchant_exclusion_out'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Employee SMS merchant exclusion not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/sms_merchant_exclusions:
+    get:
+      x-internal: true
+      tags:
+        - SMS Merchant Exclusions
+      security:
+        - oauth2:
+            - '*'
+      summary: List organisation SMS merchant exclusions
+      description: Returns organisation-level merchant patterns that suppress SMS notifications for the authenticated employee.
+      operationId: spender_sms_merchant_exclusions_get
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/org_id'
+        - in: query
+          name: merchant_pattern
+          description: Merchant pattern with a supported filtering operator.
+          schema:
+            type: string
+            example: eq.uber
+        - $ref: '#/components/parameters/created_at'
+        - $ref: '#/components/parameters/updated_at'
+        - $ref: '#/components/parameters/order'
+        - in: query
+          name: offset
+          description: Number of records to skip.
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: limit
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            maximum: 200
+            default: 200
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/sms_merchant_exclusion_out'
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+        '400':
+          description: Invalid filter or pagination parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/subscriptions:
     post:
       x-internal: false
@@ -3761,6 +4044,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/employees/unverify_mobile:
+    post:
+      x-internal: true
+      tags:
+        - Employees
+      summary: Unverify mobile number
+      description: |
+        Marks the authenticated employee's mobile number as unverified.
+      operationId: employees_unverify_mobile_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/employee_settings:
     get:
       x-internal: false
@@ -3859,6 +4184,457 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/device_token:
+    get:
+      x-internal: true
+      tags:
+        - Device Tokens
+      summary: Get device token
+      description: |
+        Returns the device token registered for the authenticated user's mobile device. Returns an
+        empty object if no device token has been registered yet.
+      operationId: device_token_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/device_token_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+    post:
+      x-internal: true
+      tags:
+        - Device Tokens
+      summary: Create or update device token
+      description: |
+        Registers the device token for the authenticated user's mobile device. If a device token
+        already exists for the user, it is updated; otherwise a new one is created.
+      operationId: device_token_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/device_token_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/device_token_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/users:
+    post:
+      x-internal: true
+      tags:
+        - Users
+      summary: Update user profile
+      description: |
+        Allows the authenticated user to update their full name, and to set an initial password if one
+        has not been set yet. Once a password is set, use the change password action to update it.
+      operationId: users_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/user_update_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/user_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/users/change_password:
+    post:
+      x-internal: true
+      tags:
+        - Users
+      summary: Change password
+      description: |
+        Allows the authenticated user to change their password by providing their current password
+        for verification along with a new password.
+      operationId: users_change_password_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/change_password_in'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/users/password_required:
+    get:
+      x-internal: true
+      tags:
+        - Users
+      summary: Check if password is required
+      description: |
+        Returns whether the authenticated user is required to set a password (for example, because no
+        SSO integration is configured for their email), and whether a password has already been set.
+      operationId: users_password_required_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/password_required_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+  /spender/onboarding:
+    get:
+      x-internal: true
+      tags:
+        - Spender Onboarding
+      summary: Get spender onboarding state
+      description: |
+        Returns the authenticated spender's onboarding state and the configured/skipped
+        status of each onboarding step.
+      operationId: spender_onboarding_get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_onboarding_out'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: No onboarding was found for this spender
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/onboarding/process_step_show_welcome_modal:
+    post:
+      x-internal: true
+      tags:
+        - Spender Onboarding
+      summary: Process show welcome modal onboarding step
+      description: |
+        Marks the welcome modal onboarding step as complete for the authenticated spender.
+      operationId: spender_onboarding_process_step_show_welcome_modal_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_onboarding_step_show_welcome_modal_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_onboarding_step_show_welcome_modal_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '404':
+          description: No onboarding was found for this spender
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/onboarding/process_step_sms_opt_in:
+    post:
+      x-internal: true
+      tags:
+        - Spender Onboarding
+      summary: Process SMS opt-in onboarding step
+      description: |
+        Marks the SMS opt-in onboarding step as configured or skipped for the authenticated
+        spender. Exactly one of `is_configured` or `is_skipped` must be provided. This step is
+        only available for organisations with VISA, MasterCard, or AMEX card feed enrollment
+        settings enabled, and can only be processed once.
+      operationId: spender_onboarding_process_step_sms_opt_in_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_onboarding_step_sms_opt_in_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_onboarding_step_sms_opt_in_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: No onboarding was found for this spender
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+  /spender/onboarding/process_step_connect_cards:
+    post:
+      x-internal: true
+      tags:
+        - Spender Onboarding
+      summary: Process connect cards onboarding step
+      description: |
+        Marks the connect cards onboarding step as configured or skipped for the authenticated
+        spender. Exactly one of `is_configured` or `is_skipped` must be provided. This step is
+        only available for organisations with VISA or MasterCard card feed enrollment settings
+        enabled, and can be re-attempted after being skipped, but not after being configured.
+      operationId: spender_onboarding_process_step_connect_cards_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/spender_onboarding_step_connect_cards_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/spender_onboarding_step_connect_cards_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: No onboarding was found for this spender
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/virtual_cards:
     get:
       x-internal: false
@@ -5790,6 +6566,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /spender/expenses/unlink_card_transaction:
+    post:
+      x-internal: true
+      tags:
+        - Expenses
+      summary: Unlink expense from card transaction
+      description: |
+        Unlinks the authenticated spender's expense (or, for a split expense, all expenses in its split
+        group) from its matched corporate card transaction. A new, system-generated expense is created
+        and linked to the card transaction in its place; the original expense is returned unlinked.
+      operationId: spender_expenses_unlink_card_transaction_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/unlink_card_transaction_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/unlink_card_transaction_out'
+        '400':
+          description: |
+            Bad request. Also returned when the expense is not linked to any card transaction, or when
+            no expenses are found for its split group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: |
+            Not Found. Also returned when the expense's matched corporate card transaction cannot be
+            found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/feature_configs:
     get:
       x-internal: false
@@ -7667,6 +8507,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403'
+  /spender/dwolla/customers:
+    post:
+      tags:
+        - Dwolla Customers
+      summary: Create a receive-only Dwolla customer
+      description: |
+        Create a receive-only Dwolla customer for the authenticated spender.
+      operationId: dwolla_spender_customer_create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  properties: {}
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - external_id
+                    properties:
+                      external_id:
+                        type: string
+                        description: Unique identifier of the Dwolla customer.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /spender/expenses/export_configurations:
     get:
       x-internal: false
@@ -11968,6 +12874,81 @@ components:
           description: |
             Merchant name
           example: Uber
+    employee_sms_merchant_exclusion_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - user_id
+        - merchant_pattern
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: esmeNdvxUKg48b
+        org_id:
+          type: string
+          example: oriSOntNdZGd
+        user_id:
+          type: string
+          example: usplIdJBA5OP
+        merchant_pattern:
+          type: string
+          description: Merchant name or pattern excluded from SMS notifications for the employee.
+          example: ikea
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+    sms_merchant_exclusion_in:
+      type: object
+      required:
+        - merchant_pattern
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Existing exclusion ID. Omit this field or provide `null` to create an exclusion.
+          example: smeBKgVniE0mH
+        merchant_pattern:
+          type: string
+          minLength: 1
+          description: Non-blank merchant name or pattern to exclude from SMS notifications.
+          example: uber eats
+    sms_merchant_exclusion_delete_in:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: smeBKgVniE0mH
+    sms_merchant_exclusion_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - merchant_pattern
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          example: smeBKgVniE0mH
+        org_id:
+          type: string
+          example: oriSOntNdZGd
+        merchant_pattern:
+          type: string
+          description: Merchant name or pattern excluded from SMS notifications.
+          example: uber eats
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
     webhook_url:
       type: string
       description: |
@@ -17522,6 +18503,288 @@ components:
           type: string
           nullable: true
           description: Default vehicle type for mileage expenses
+    device_token_out:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the device token record.
+          example: ndtwjwgnwwgo
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        tokens:
+          type: array
+          items:
+            type: string
+          description: |
+            List of push notification device tokens for the authenticated user's mobile devices.
+          example:
+            - device_token_abc123
+    device_token_in:
+      type: object
+      additionalProperties: false
+      required:
+        - tokens
+      properties:
+        tokens:
+          type: array
+          items:
+            type: string
+          description: |
+            List of push notification device tokens for the authenticated user's mobile devices.
+          example:
+            - device_token_abc123
+    user_update_in:
+      type: object
+      additionalProperties: false
+      required:
+        - full_name
+      properties:
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Full name of the authenticated user.
+          example: John Doe
+        password:
+          type: string
+          nullable: true
+          description: |
+            Password to set for the authenticated user. Can only be used to set an initial password;
+            once a password is set, use the change password action to update it.
+          example: S3cur3P@ssw0rd
+    user_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - created_at
+        - updated_at
+        - email
+        - full_name
+        - email_verified_at
+        - is_email_verified
+        - is_onboarded
+        - password_changed_at
+        - signup_params
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        email:
+          $ref: '#/components/schemas/email'
+        full_name:
+          type: string
+          maxLength: 255
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
+          example: John Doe
+        email_verified_at:
+          $ref: '#/components/schemas/timestamptz_utc'
+        is_email_verified:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether the user's email address has been verified.
+          example: true
+        is_onboarded:
+          type: boolean
+          nullable: true
+          description: |
+            Indicates whether the user has completed onboarding.
+          example: true
+        password_changed_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies when the user's password was last changed. Null if the password has never been changed.
+        signup_params:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: |
+            Free-form parameters captured at signup time.
+          example: {}
+    change_password_in:
+      type: object
+      additionalProperties: false
+      required:
+        - current_password
+        - new_password
+      properties:
+        current_password:
+          type: string
+          description: |
+            The authenticated user's current password, used for verification.
+          example: OldP@ssw0rd
+        new_password:
+          type: string
+          description: |
+            The new password to set for the authenticated user. Must be different from the current password.
+          example: NewP@ssw0rd
+    password_required_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_password_required
+        - is_password_set
+      properties:
+        is_password_required:
+          type: boolean
+          description: |
+            Indicates whether the authenticated user is required to set a password, for example
+            because no SSO integration is configured for their email domain.
+          example: true
+        is_password_set:
+          type: boolean
+          description: |
+            Indicates whether the authenticated user already has a password set.
+          example: false
+    spender_onboarding_out:
+      type: object
+      additionalProperties: false
+      required:
+        - user_id
+        - org_id
+        - state
+        - step_connect_cards_is_configured
+        - step_connect_cards_is_skipped
+        - step_sms_opt_in_is_configured
+        - step_sms_opt_in_is_skipped
+        - step_show_welcome_modal_is_complete
+      properties:
+        user_id:
+          $ref: '#/components/schemas/user_id'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        state:
+          type: string
+          enum:
+            - YET_TO_START
+            - IN_PROGRESS
+            - COMPLETED
+          description: |
+            Overall state of the authenticated spender's onboarding.
+          example: IN_PROGRESS
+        step_connect_cards_is_configured:
+          type: boolean
+          description: |
+            Indicates whether the connect cards onboarding step has been configured.
+          example: true
+        step_connect_cards_is_skipped:
+          type: boolean
+          description: |
+            Indicates whether the connect cards onboarding step has been skipped.
+          example: false
+        step_sms_opt_in_is_configured:
+          type: boolean
+          description: |
+            Indicates whether the SMS opt-in onboarding step has been configured.
+          example: true
+        step_sms_opt_in_is_skipped:
+          type: boolean
+          description: |
+            Indicates whether the SMS opt-in onboarding step has been skipped.
+          example: false
+        step_show_welcome_modal_is_complete:
+          type: boolean
+          description: |
+            Indicates whether the welcome modal onboarding step has been completed.
+          example: true
+    spender_onboarding_step_show_welcome_modal_in:
+      type: object
+      additionalProperties: false
+      required:
+        - is_complete
+      properties:
+        is_complete:
+          type: boolean
+          description: |
+            Set to `true` to mark the welcome modal onboarding step as complete.
+          example: true
+    spender_onboarding_step_show_welcome_modal_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_complete
+      properties:
+        is_complete:
+          type: boolean
+          description: |
+            Indicates whether the welcome modal onboarding step has been completed.
+          example: true
+    spender_onboarding_step_sms_opt_in_in:
+      type: object
+      additionalProperties: false
+      properties:
+        is_configured:
+          type: boolean
+          description: |
+            Set to `true` to mark the SMS opt-in step as configured. Exactly one of
+            `is_configured` or `is_skipped` must be provided.
+          example: true
+        is_skipped:
+          type: boolean
+          description: |
+            Set to `true` to mark the SMS opt-in step as skipped. Exactly one of
+            `is_configured` or `is_skipped` must be provided.
+          example: false
+    spender_onboarding_step_sms_opt_in_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_configured
+        - is_skipped
+      properties:
+        is_configured:
+          type: boolean
+          description: |
+            Indicates whether the SMS opt-in onboarding step has been configured.
+          example: true
+        is_skipped:
+          type: boolean
+          description: |
+            Indicates whether the SMS opt-in onboarding step has been skipped.
+          example: false
+    spender_onboarding_step_connect_cards_in:
+      type: object
+      additionalProperties: false
+      properties:
+        is_configured:
+          type: boolean
+          description: |
+            Set to `true` to mark the connect cards step as configured. Exactly one of
+            `is_configured` or `is_skipped` must be provided.
+          example: true
+        is_skipped:
+          type: boolean
+          description: |
+            Set to `true` to mark the connect cards step as skipped. Exactly one of
+            `is_configured` or `is_skipped` must be provided.
+          example: false
+    spender_onboarding_step_connect_cards_out:
+      type: object
+      additionalProperties: false
+      required:
+        - is_configured
+        - is_skipped
+      properties:
+        is_configured:
+          type: boolean
+          description: |
+            Indicates whether the connect cards onboarding step has been configured.
+          example: true
+        is_skipped:
+          type: boolean
+          description: |
+            Indicates whether the connect cards onboarding step has been skipped.
+          example: false
     virtual_card_out:
       type: object
       properties:
@@ -20203,6 +21466,37 @@ components:
           nullable: false
           description: |
             Fields to be updated in the target expense.
+    unlink_card_transaction_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the expense to unlink from its matched corporate card transaction.
+          example: txm3L9soGEt2
+    unlink_card_transaction_out:
+      type: object
+      additionalProperties: false
+      required:
+        - user_created_expense
+        - auto_created_expense
+      properties:
+        user_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            The original expense, now unlinked from the corporate card transaction. This is the
+            expense that was submitted in the request.
+        auto_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            A new, system-generated expense created and linked in place of the original expense on
+            the corporate card transaction.
     any_type:
       anyOf:
         - type: string
@@ -24264,6 +25558,23 @@ components:
       schema:
         type: string
         example: updated_at.desc,id
+    org_id:
+      in: query
+      name: org_id
+      description: |
+        The unique id of the organization to which the object is associated.
+      schema:
+        type: string
+        example: org_id=eq.orwruogwnngg
+    user_id:
+      in: query
+      name: user_id
+      description: |
+        User IDs for filtering expenses.
+        Supported operator is `in`.
+      schema:
+        type: string
+        example: in.(us123,us456)
     expense_id:
       in: query
       name: expense_id
