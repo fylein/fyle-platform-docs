@@ -17303,6 +17303,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+    post:
+      tags: [Dwolla Customers]
+      summary: Create or retry the organization's Dwolla business customer
+      description: The server selects create or retry from stored and live customer state.
+      operationId: dwolla_customers_admin_post_v2
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [data]
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required: [first_name, last_name, email, address1, city, state, postal_code, business_classification, business_name, phone, website]
+                  properties:
+                    first_name: {type: string}
+                    last_name: {type: string}
+                    email: {type: string, format: email}
+                    address1: {type: string}
+                    address2: {type: string, nullable: true}
+                    city: {type: string}
+                    state: {type: string, pattern: '^[A-Z]{2}$'}
+                    postal_code: {type: string}
+                    business_classification: {type: string}
+                    business_type: {type: string, enum: [soleProprietorship, llc, corporation, partnership]}
+                    business_name: {type: string}
+                    doing_business_as: {type: string, nullable: true}
+                    date_of_birth: {type: string, format: date}
+                    ssn: {type: string}
+                    ein: {type: string, nullable: true}
+                    phone: {type: string}
+                    website: {type: string, format: uri}
+                    controller: {type: object, additionalProperties: true}
+      responses:
+        '200':
+          description: Business customer created, recovered, or retried
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required: [external_id, status]
+                    properties:
+                      external_id: {type: string}
+                      status: {type: string, enum: [unverified, verified, retry, document, suspended, deactivated]}
+        '400': {description: Invalid request or customer state}
+        '401': {description: Unauthorized request}
+        '403': {description: Forbidden}
+        '404': {description: Organization not found}
+  /admin/dwolla/customers/update_email:
+    post:
+      tags: [Dwolla Customers]
+      summary: Update the verified Dwolla business-customer email
+      operationId: dwolla_customers_update_email_admin_post
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [data]
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required: [email]
+                  properties:
+                    email: {type: string, format: email}
+      responses:
+        '200':
+          description: Email updated and synchronized from Dwolla
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required: [email]
+                    properties:
+                      email: {type: string, format: email}
+        '400': {description: Invalid request or customer state}
+        '401': {description: Unauthorized request}
+        '403': {description: Forbidden}
+        '404': {description: Organization or customer not found}
   /admin/dwolla_customers:
     get:
       x-internal: false
