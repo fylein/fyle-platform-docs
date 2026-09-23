@@ -1,0 +1,48 @@
+get:
+  tags:
+    - Dwolla Customers
+  summary: Check whether a Dwolla customer belongs to this cluster
+  description: Trusted internal endpoint used by fyle-routerapi. This endpoint does not call Dwolla.
+  operationId: dwolla_customer_exists_common_get
+  security: []
+  parameters:
+    - in: path
+      name: customer_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - in: header
+      name: X-ROUTER-TOKEN
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                required: [exists]
+                properties:
+                  exists:
+                    type: boolean
+    '400':
+      description: Invalid customer ID, query parameter, or duplicate customer rows
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Missing or invalid router token
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
