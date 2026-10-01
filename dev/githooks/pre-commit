@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+repository_root="$(git rev-parse --show-toplevel)"
+cd "$repository_root"
+
+if git diff --cached --quiet --diff-filter=ACMR -- 'src/**/*.yaml'; then
+  exit 0
+fi
+
+echo 'Linting OpenAPI operation visibility...'
+npx --yes @redocly/cli@2.51.2 lint --config redocly.visibility.yaml
