@@ -61,6 +61,242 @@ copilot_chat_delete_in:
         Unique identifier of the Copilot chat to delete.
       example: chAsf91e4r
 
+copilot_chat_message_filter_condition_out:
+  type: object
+  additionalProperties: false
+  required:
+    - field
+    - op
+    - value
+  properties:
+    field:
+      type: string
+    op:
+      type: string
+    value:
+      oneOf:
+        - type: string
+        - type: number
+        - type: array
+          items:
+            type: string
+
+copilot_chat_message_nested_filter_out:
+  type: object
+  description: A named group of field conditions, such as and, or, or not.
+  additionalProperties:
+    type: array
+    items:
+      $ref: '#/copilot_chat_message_filter_condition_out'
+
+copilot_chat_message_filter_out:
+  oneOf:
+    - $ref: '#/copilot_chat_message_filter_condition_out'
+    - $ref: '#/copilot_chat_message_nested_filter_out'
+
+copilot_chat_message_stack_bar_graph_axis_out:
+  type: object
+  additionalProperties: false
+  required:
+    - stack
+    - value
+  properties:
+    stack:
+      type: string
+    value:
+      type: number
+
+copilot_chat_message_order_out:
+  type: object
+  additionalProperties: false
+  required:
+    - field
+    - direction
+  properties:
+    field:
+      type: string
+    direction:
+      type: string
+      enum:
+        - asc
+        - desc
+
+copilot_chat_message_query_params_out:
+  type: object
+  additionalProperties: false
+  required:
+    - filters
+    - order
+    - resource
+  description: Parameters for opening the data behind an analytical answer. The limit is omitted when conversion fails.
+  properties:
+    filters:
+      type: array
+      items:
+        $ref: '#/copilot_chat_message_filter_out'
+      nullable: true
+    order:
+      type: array
+      items:
+        $ref: '#/copilot_chat_message_order_out'
+      nullable: true
+    limit:
+      type: integer
+      nullable: true
+    resource:
+      type: string
+      nullable: true
+      enum:
+        - expenses
+        - reports
+        - corporate_card_transactions
+        - corporate_cards
+        - null
+
+copilot_chat_message_empty_metadata_out:
+  type: object
+  additionalProperties: false
+  maxProperties: 0
+  description: Returned for user messages, error responses, and text insights without query parameters.
+
+copilot_chat_message_single_value_metadata_out:
+  type: object
+  additionalProperties: false
+  required:
+    - query_params
+  description: Returned for a nonzero single-value analytical insight when query parameters are available.
+  properties:
+    query_params:
+      $ref: '#/copilot_chat_message_query_params_out'
+
+copilot_chat_message_graph_metadata_out:
+  type: object
+  additionalProperties: false
+  required:
+    - type
+    - axis_info
+    - summary
+    - query_params
+  properties:
+    type:
+      type: string
+      enum:
+        - bar_graph
+        - line_graph
+        - scatter_graph
+        - stacked_bar_graph
+        - pie_chart
+    data_points:
+      type: object
+      additionalProperties: false
+      required:
+        - x_axis
+        - y_axis
+      properties:
+        x_axis:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: number
+        y_axis:
+          description: Scalar values or, for stacked bar graphs, arrays of stack/value objects.
+          oneOf:
+            - type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: number
+            - type: array
+              items:
+                type: array
+                items:
+                  $ref: '#/copilot_chat_message_stack_bar_graph_axis_out'
+    axis_info:
+      type: object
+      additionalProperties: false
+      required:
+        - x_axis
+        - y_axis
+      properties:
+        x_axis:
+          type: string
+          nullable: true
+        y_axis:
+          type: string
+          nullable: true
+    summary:
+      type: object
+      additionalProperties: false
+      required:
+        - heading
+        - content
+      properties:
+        heading:
+          type: string
+          nullable: true
+        content:
+          type: array
+          items:
+            type: string
+          nullable: true
+    query_params:
+      $ref: '#/copilot_chat_message_query_params_out'
+
+copilot_chat_message_support_metadata_out:
+  type: object
+  additionalProperties: false
+  required:
+    - type
+    - title
+    - content
+    - sources
+  properties:
+    type:
+      type: string
+      enum:
+        - support
+    title:
+      type: string
+    content:
+      type: array
+      nullable: true
+      items:
+        type: object
+        additionalProperties: false
+        required:
+          - heading
+          - text
+          - sub_points
+        properties:
+          heading:
+            type: string
+            nullable: true
+          text:
+            type: string
+            nullable: true
+          sub_points:
+            type: array
+            items:
+              type: string
+            nullable: true
+    sources:
+      type: array
+      nullable: true
+      items:
+        type: object
+        additionalProperties: false
+        required:
+          - heading
+          - link
+        properties:
+          heading:
+            type: string
+            nullable: true
+          link:
+            type: string
+            nullable: true
+
 copilot_chat_message_out:
   type: object
   additionalProperties: False
@@ -104,21 +340,34 @@ copilot_chat_message_out:
       type: string
       nullable: true
       description: |
-        Text content of the message.
+        Text content of a user message, single-value insight, or error response. Graph and support
+        responses have a null message and put their content in metadata.
       example: Top 3 spenders
     metadata:
-      type: object
-      additionalProperties: true
       description: |
-        Free-form metadata generated by Copilot for this message, such as graph data points.
-        Structure varies by query type.
-      example: {}
+        Response-specific content. Support and graph responses identify their type inside metadata;
+        single-value insights may contain query_params; text responses and user messages use {}.
+      anyOf:
+        - $ref: '#/copilot_chat_message_empty_metadata_out'
+        - $ref: '#/copilot_chat_message_single_value_metadata_out'
+        - $ref: '#/copilot_chat_message_graph_metadata_out'
+        - $ref: '#/copilot_chat_message_support_metadata_out'
     feedback:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       description: |
         Feedback recorded for this message, if any.
       example: {}
+      properties:
+        comment:
+          type: string
+          nullable: true
+        sentiment:
+          type: string
+          enum:
+            - positive
+            - negative
+          nullable: true
     created_at:
       $ref: './fields.yaml#/created_at'
     updated_at:

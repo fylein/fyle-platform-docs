@@ -6,7 +6,8 @@ get:
   description: |
     Returns the authenticated admin's own Copilot chat messages. This API supports very rich
     filtering on all response fields and pagination via query parameters. To understand how to use
-    these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering).
+    The metadata shape varies by message response type, as documented in the message schema.
   operationId: admin_copilot_messages_list
   parameters:
     - $ref: '../../components/parameters/q.yaml'
@@ -58,8 +59,9 @@ post:
   description: |
     Sends a message to Copilot. When `chat_id` is omitted, a new chat is created using `title` (which
     becomes required in that case) and the message is posted to it. Returns the Copilot-generated
-    response message. The exact `metadata` shape returned depends on the query type (for example,
-    graph or tabular data) and is not further constrained here.
+    response message. Graph and support responses put their content in `metadata` and return
+    `message: null`. Single-value insights return text and may include `metadata.query_params`.
+    Error responses and text insights without query parameters return empty metadata.
   operationId: admin_copilot_messages_post
   requestBody:
     required: true
@@ -86,6 +88,96 @@ post:
             properties:
               data:
                 $ref: '../../components/schemas/copilot.yaml#/copilot_chat_message_out'
+          examples:
+            single_value:
+              summary: Single-value insight with data query parameters
+              value:
+                data:
+                  id: msg6O3VP8XIFa
+                  chat_id: chAsf91e4r
+                  org_id: oriSOntNdZGd
+                  user_id: usx4eGq0uIPu
+                  author: SYSTEM
+                  message: Total spend was $1,250.
+                  metadata:
+                    query_params:
+                      filters:
+                        - field: spent_at
+                          op: gte
+                          value: '2023-04-01'
+                      order: null
+                      limit: null
+                      resource: expenses
+                  feedback: {}
+                  created_at: '2024-07-05T13:12:25.543648+00:00'
+                  updated_at: '2024-07-05T13:12:25.543648+00:00'
+            graph:
+              summary: Graph response
+              value:
+                data:
+                  id: msg6O3VP8XIFa
+                  chat_id: chAsf91e4r
+                  org_id: oriSOntNdZGd
+                  user_id: usx4eGq0uIPu
+                  author: SYSTEM
+                  message: null
+                  metadata:
+                    type: line_graph
+                    data_points:
+                      x_axis: ['2023-01', '2023-02']
+                      y_axis: [100, 200]
+                    axis_info:
+                      x_axis: Month
+                      y_axis: Spend
+                    summary:
+                      heading: Monthly spend
+                      content:
+                        - Spend increased in February.
+                    query_params:
+                      filters: []
+                      order: null
+                      limit: null
+                      resource: expenses
+                  feedback: {}
+                  created_at: '2024-07-05T13:12:25.543648+00:00'
+                  updated_at: '2024-07-05T13:12:25.543648+00:00'
+            support:
+              summary: Support response
+              value:
+                data:
+                  id: msg6O3VP8XIFa
+                  chat_id: chAsf91e4r
+                  org_id: oriSOntNdZGd
+                  user_id: usx4eGq0uIPu
+                  author: SYSTEM
+                  message: null
+                  metadata:
+                    type: support
+                    title: How to submit an expense
+                    content:
+                      - heading: Submit an expense
+                        text: Open Expenses and add a new expense.
+                        sub_points: []
+                    sources:
+                      - heading: Submit Expenses
+                        link: https://help.fylehq.com/en/articles/submit-expenses
+                  feedback: {}
+                  created_at: '2024-07-05T13:12:25.543648+00:00'
+                  updated_at: '2024-07-05T13:12:25.543648+00:00'
+            text_or_error:
+              summary: Text insight or fallback response
+              value:
+                data:
+                  id: msg6O3VP8XIFa
+                  chat_id: chAsf91e4r
+                  org_id: oriSOntNdZGd
+                  user_id: usx4eGq0uIPu
+                  author: SYSTEM
+                  message: No matching expenses were found.
+                  metadata: {}
+                  feedback: {}
+                  created_at: '2024-07-05T13:12:25.543648+00:00'
+                  updated_at: '2024-07-05T13:12:25.543648+00:00'
     '400':
       description: |
         Bad request. Also returned when `chat_id` does not match a chat owned by the authenticated
