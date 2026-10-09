@@ -418,7 +418,8 @@ paths:
                           y_axis: Spend
                         summary:
                           heading: Monthly spend
-                          content: Spend increased in February.
+                          content:
+                            - Spend increased in February.
                         query_params:
                           filters: []
                           order: null
@@ -17734,11 +17735,45 @@ components:
           example: chAsf91e4r
     copilot_chat_message_empty_metadata_out:
       type: object
+      additionalProperties: false
       maxProperties: 0
       description: Returned for user messages, error responses, and text insights without query parameters.
+    copilot_chat_message_filter_out:
+      type: object
+      additionalProperties: false
+      description: A field condition or a nested and/or/not group from the data API query parser.
+      properties:
+        field:
+          type: string
+        op:
+          type: string
+        value: {}
+        and:
+          type: array
+          items:
+            $ref: '#/components/schemas/copilot_chat_message_filter_out'
+        or:
+          type: array
+          items:
+            $ref: '#/components/schemas/copilot_chat_message_filter_out'
+        not:
+          type: array
+          items:
+            $ref: '#/components/schemas/copilot_chat_message_filter_out'
+    copilot_chat_message_order_out:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - direction
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
     copilot_chat_message_query_params_out:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required:
         - filters
         - order
@@ -17748,14 +17783,12 @@ components:
         filters:
           type: array
           items:
-            type: object
-            additionalProperties: true
+            $ref: '#/components/schemas/copilot_chat_message_filter_out'
           nullable: true
         order:
           type: array
           items:
-            type: object
-            additionalProperties: true
+            $ref: '#/components/schemas/copilot_chat_message_order_out'
           nullable: true
         limit:
           type: integer
@@ -17765,7 +17798,7 @@ components:
           nullable: true
     copilot_chat_message_single_value_metadata_out:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required:
         - query_params
       description: Returned for a nonzero single-value analytical insight when query parameters are available.
@@ -17774,7 +17807,7 @@ components:
           $ref: '#/components/schemas/copilot_chat_message_query_params_out'
     copilot_chat_message_graph_metadata_out:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required:
         - type
         - data_points
@@ -17789,7 +17822,7 @@ components:
             - line_graph
             - scatter_graph
             - stacked_bar_graph
-            - area_graph
+            - pie_chart
         data_points:
           type: object
           additionalProperties: false
@@ -17828,13 +17861,15 @@ components:
               type: string
               nullable: true
             content:
-              type: string
+              type: array
+              items:
+                type: string
               nullable: true
         query_params:
           $ref: '#/components/schemas/copilot_chat_message_query_params_out'
     copilot_chat_message_support_metadata_out:
       type: object
-      additionalProperties: true
+      additionalProperties: false
       required:
         - type
         - title
@@ -17942,10 +17977,20 @@ components:
             - $ref: '#/components/schemas/copilot_chat_message_support_metadata_out'
         feedback:
           type: object
-          additionalProperties: true
+          additionalProperties: false
           description: |
             Feedback recorded for this message, if any.
           example: {}
+          properties:
+            comment:
+              type: string
+              nullable: true
+            sentiment:
+              type: string
+              enum:
+                - positive
+                - negative
+              nullable: true
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
