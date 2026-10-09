@@ -40,6 +40,9 @@ tags:
   - name: Mileage Rates
     description: |
       This API gives you access to your organisation's Mileage Rates
+  - name: Organisations
+    description: |
+      This API gives you access to minimal organisations details with expenses assigned to you for approval.
   - name: Reports
     description: |
       This API gives you access to your organisation's Expense Reports
@@ -3112,6 +3115,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/orgs:
+    get:
+      x-internal: false
+      tags:
+        - Organisations
+      summary: List Organisations
+      operationId: orgs_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns organisations in the same organisation group as the current organisation
+        where the approver has expenses assigned to them. An organisation qualifies when
+        the approver has at least one non-disabled user approval.
+
+        Returns each organisation's ID and name by default. Filtering on ID and name, field selection,
+        sorting and pagination are supported.
+        To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering).
+        Approval delegates with the APPROVE scope can access this API.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_summary_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: orwruogwnngg
+                    name: Demo Account
+                  - id: orx9wL3mP2Qz
+                    name: Demo Subsidiary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
   /approver/accounts:
     get:
       x-internal: false
@@ -11429,6 +11502,18 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    org_summary_out:
+      type: object
+      additionalProperties: false
+      description: Organisation ID and name. Field selection can omit either property.
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
     account_out:
       type: object
       additionalProperties: false
