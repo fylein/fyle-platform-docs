@@ -36,6 +36,20 @@ You can check the version by running
     openapi lint src/accountant/openapi.yaml
     openapi lint src/super_admin/openapi.yaml    
 
+### Visibility linting ###
+
+Every OpenAPI operation must explicitly set `x-internal` to the boolean value
+`true` or `false`. Run the native Redocly visibility rule with:
+
+    npx --yes @redocly/cli@2.51.2 lint --config redocly.visibility.yaml
+
+To run the same rule before commits that contain staged OpenAPI source changes,
+configure this repository's tracked Git hooks once:
+
+    git config core.hooksPath dev/githooks
+
+The pre-commit hook skips commits that do not change YAML files under `src/`.
+
 ## Bundling ##
 
     openapi bundle -o reference/authorization.yaml src/authorization/openapi.yaml
@@ -74,4 +88,3 @@ The admin APIs will be available at port 4011, spender APIs in port 4012, approv
 
 Note that the mock server works off the bundled yaml files. So if you make some changes in development, please bundle
 the file. The mock server will reload automatically.
-
