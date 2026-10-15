@@ -28,6 +28,9 @@ tags:
   - name: Corporate Cards
     description: |
       This API gives you access to view Corporate Cards across organisations where user is approver.
+  - name: Departments
+    description: |
+      This API gives you access to departments across authorised organisations.
   - name: Expenses
     description: |
       These APIs give you access to expense data and expense fields.
@@ -3349,6 +3352,108 @@ paths:
                     percentage: 0.03
                     is_enabled: true
                     is_default: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
+  /approver/departments:
+    get:
+      x-internal: false
+      tags:
+        - Departments
+      summary: List departments
+      operationId: departments_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns departments from organisations in the same group as the approver's current
+        organisation where the approver has at least one non-disabled user expense approval.
+
+        Pass `org_id=eq.<expense_org_id>` to list departments for one authorised organisation.
+        Omit `org_id` to list departments across all authorised organisations for filters
+        in Team Expenses and Reports.
+
+        Filtering, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax. Approval delegates with the APPROVE scope can access this API.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by the expense's organisation; omit to return departments from all authorised organisations.
+          schema:
+            type: string
+            example: eq.orogUH5lw1QX
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/department_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: deptodb5SbYvEX
+                    org_id: orogUH5lw1QX
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
+                  - id: deptodb666YvEX
+                    org_id: orx9wL3mP2Qz
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Subsidiary sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
         '400':
           description: Bad request
           content:
@@ -11850,6 +11955,81 @@ components:
           example: false
         code:
           $ref: '#/components/schemas/code'
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id is provided by Sage Exp Mgmt to identify an object.
+        example: uswoirwlwwg
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
+    department_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - sub_department
+        - is_enabled
+        - code
+        - description
+        - department_head_user_ids
+        - doc_url
+        - department_head_users
+        - display_name
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://stoplight.io/
     account_out:
       type: object
       additionalProperties: false
