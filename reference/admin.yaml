@@ -24215,49 +24215,53 @@ components:
           description: |
             Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
+    expenses_stats_by_state_item_out:
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching expenses in this state
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching expenses in this state
+          example: 44545.4
+        state:
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
+          description: Expense state
+    expenses_stats_overall_out:
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
     expenses_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by expense state
           items:
-            type: object
-            required:
-              - count
-              - total_amount
-              - state
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching expenses in this state
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching expenses in this state
-                example: 44545.4
-              state:
-                allOf:
-                  - $ref: '#/components/schemas/expense_state'
-                description: Expense state
-        - type: object
-          title: Overall stats
-          description: Overall stats without state grouping
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching expenses
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching expenses
-              example: 45882.4
+            $ref: '#/components/schemas/expenses_stats_by_state_item_out'
+        - $ref: '#/components/schemas/expenses_stats_overall_out'
       example:
         - state: COMPLETE
           count: 343
@@ -25308,57 +25312,61 @@ components:
             Query param string similar to advance_requests GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
           example: id=in.('adr1263','adr1569')&group_by_state=eq.true
+    advance_requests_stats_by_state_item_out:
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching advance requests in this state.
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching advance requests in this state.
+          example: 44545.4
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVAL_PENDING
+            - APPROVED
+            - CANCELLED
+            - REJECTED
+            - PAID
+            - PULLED_BACK
+            - SENT_BACK
+          description: Advance request state.
+    advance_requests_stats_overall_out:
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping.
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching advance requests.
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching advance requests.
+          example: 45882.4
     advance_requests_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by advance request state
           items:
-            type: object
-            required:
-              - count
-              - total_amount
-              - state
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching advance requests in this state.
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching advance requests in this state.
-                example: 44545.4
-              state:
-                type: string
-                enum:
-                  - DRAFT
-                  - APPROVAL_PENDING
-                  - APPROVED
-                  - CANCELLED
-                  - REJECTED
-                  - PAID
-                  - PULLED_BACK
-                  - SENT_BACK
-                description: Advance request state.
-        - type: object
-          title: Overall stats
-          description: Overall stats without state grouping.
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching advance requests.
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching advance requests.
-              example: 45882.4
+            $ref: '#/components/schemas/advance_requests_stats_by_state_item_out'
+        - $ref: '#/components/schemas/advance_requests_stats_overall_out'
       example:
         - state: DRAFT
           count: 10
@@ -27129,110 +27137,114 @@ components:
             Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
           example: id=in.('rp123','rep1234')&group_by_state=eq.true
+    reports_stats_by_state_item_out:
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+        - failed_amount
+        - failed_count
+        - processing_amount
+        - processing_count
+        - reimbursable_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching reports in this state.
+          example: 5
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching reports in this state.
+          example: 2200
+        state:
+          type: string
+          enum:
+            - APPROVER_PENDING
+            - DRAFT
+            - PAYMENT_PROCESSING
+            - APPROVER_INQUIRY
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+          description: Report state.
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 200
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1500
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 3
+        reimbursable_amount:
+          type: number
+          nullable: false
+          description: Sum of reimbursable amounts for matching reports in this state.
+          example: 500
+    reports_stats_overall_out:
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping (response for older mobile app versions).
+      required:
+        - count
+        - total_amount
+        - processing_amount
+        - processing_count
+        - failed_amount
+        - failed_count
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching reports.
+          example: 1
+        total_amount:
+          type: number
+          nullable: false
+          description: Total sum of amounts for all matching reports.
+          example: 100
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state.
+          example: 101
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state.
+          example: 2
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state with ACH failures.
+          example: 101
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state with ACH failures.
+          example: 1
     reports_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by report state
           items:
-            type: object
-            required:
-              - count
-              - total_amount
-              - state
-              - failed_amount
-              - failed_count
-              - processing_amount
-              - processing_count
-              - reimbursable_amount
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching reports in this state.
-                example: 5
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching reports in this state.
-                example: 2200
-              state:
-                type: string
-                enum:
-                  - APPROVER_PENDING
-                  - DRAFT
-                  - PAYMENT_PROCESSING
-                  - APPROVER_INQUIRY
-                  - APPROVED
-                  - PAYMENT_PENDING
-                  - PAID
-                description: Report state.
-              failed_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 200
-              failed_count:
-                type: integer
-                nullable: true
-                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1
-              processing_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1500
-              processing_count:
-                type: integer
-                nullable: true
-                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 3
-              reimbursable_amount:
-                type: number
-                nullable: false
-                description: Sum of reimbursable amounts for matching reports in this state.
-                example: 500
-        - type: object
-          title: Overall stats
-          description: Overall stats without state grouping (response for older mobile app versions).
-          required:
-            - count
-            - total_amount
-            - processing_amount
-            - processing_count
-            - failed_amount
-            - failed_count
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching reports.
-              example: 1
-            total_amount:
-              type: number
-              nullable: false
-              description: Total sum of amounts for all matching reports.
-              example: 100
-            processing_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state.
-              example: 101
-            processing_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state.
-              example: 2
-            failed_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
-              example: 101
-            failed_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state with ACH failures.
-              example: 1
+            $ref: '#/components/schemas/reports_stats_by_state_item_out'
+        - $ref: '#/components/schemas/reports_stats_overall_out'
       example:
         - state: DRAFT
           count: 3
