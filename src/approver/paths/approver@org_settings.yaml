@@ -1,0 +1,76 @@
+get:
+  x-internal: true
+  tags:
+    - Organisation Settings
+  security:
+    - oauth2: ['*']
+  summary: Get organisation settings
+  operationId: approver_org_settings_get
+  description: |
+    Returns the full feature and workflow settings for the organisation that owns
+    the expense.
+
+    Pass exactly one `org_id=eq.<expense_org_id>` query parameter. The parameter is
+    required, and the response contains one settings object under `data`.
+
+    The authenticated user must have the APPROVER role. The requested organisation
+    must be in the same group as the approver's current organisation, and the approver
+    must have at least one non-disabled user expense approval in that organisation.
+
+    Approval delegates with the APPROVE scope can access this API using the
+    delegator's authorised organisations. An unauthorised organisation or a missing
+    settings record returns `404 Resource not found`.
+  parameters:
+    - in: query
+      name: org_id
+      required: true
+      description: |
+        The expense's organisation ID as a non-empty equality filter, for example
+        `eq.oriSOntNdZGd`. Supply this parameter once. Other operators, including
+        `in` and `neq`, are not supported.
+      schema:
+        type: string
+        minLength: 4
+        pattern: '^eq\..+$'
+        example: eq.oriSOntNdZGd
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/org_settings.yaml#/org_settings_out'
+    '400':
+      description: The org_id query parameter is missing, repeated, or is not a non-empty equality filter.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: The current user lacks the APPROVER role or the delegate lacks the required access scope.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: you don't have permissions to access this resource
+    '404':
+      description: The requested organisation is not authorised or its settings record was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
