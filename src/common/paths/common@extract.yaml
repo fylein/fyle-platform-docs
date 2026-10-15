@@ -1,0 +1,54 @@
+post:
+  x-internal: true
+  security:
+    - oauth2: ['*']
+  tags:
+    - Data Extraction
+  summary: Extract expense data from a receipt
+  description: |
+    Extracts expense fields (amount, currency, category, date, merchant and tax) from the given receipt file(s).
+
+    Each file is sent either as base64 `content`, as the `file_id` of a file already uploaded in the caller's org, or both.
+    Content without a `file_id` is stored as a new receipt file. When only `file_id`s are sent and a stored extraction
+    already exists for them, that result is returned without extracting again.
+  operationId: common_extract_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/expense_extract.yaml#/expense_extract_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/expense_extract.yaml#/expense_extract_out'
+    '400':
+      description: |
+        Bad request. The payload is invalid, a file's content is not valid base64, or a file exceeds the size limit.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common_error.yaml#/common_request_error_out'
+    '404':
+      description: A `file_id` does not exist in the caller's org.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/common_error.yaml#/common_invalid_usage_error_out'
+    '500':
+      description: Extraction failed, including when the receipt is a password-protected file.

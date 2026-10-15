@@ -1,77 +1,126 @@
-# expense_extract_out:
-#   type: object
-#   additionalProperties: false
-#   required:
-#     - amount
-#     - category
-#     - currency
-#     - spent_at
-#     - merchant
-#   properties:
-#     amount:
-#       type: number
-#       nullable: True
-#       description: |
-#         Extracted expense amount from receipt.
-#       example: 1500
-#     category:
-#       type: string
-#       nullable: True
-#       maxLength: 25
-#       description: |
-#         Extracted category of expense from receipt.
-#       example: Flight
-#     currency:
-#       type: string
-#       nullable: True
-#       maxLength: 3
-#       example: USD
-#       description: |
-#         Extracted currency from the given receipt. <br>
-#         ISO 4217 currency codes that are usually of three upper case letters.
-#         See "https://www.iban.com/currency-codes" for examples.
-#     spent_at:
-#       $ref: './fields.yaml#/timestamptz_utc'
-#     merchant:
-#       type: string
-#       nullable: True
-#       example: Uber
-#       maxLength: 255
-#       description: >
-#         Extracted string denoting the name of the vendor to which the expense was
-#         made.
+expense_extract_in:
+  type: object
+  additionalProperties: false
+  required:
+    - files
+  properties:
+    files:
+      type: array
+      minItems: 1
+      maxItems: 100
+      description: |
+        Receipt files to extract from. Each file needs `content`, `file_id`, or both.
+      items:
+        type: object
+        additionalProperties: false
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the receipt file.
+            example: receipt.pdf
+          content:
+            type: string
+            nullable: true
+            description: |
+              Base64 encoded file content, without a `data:...;base64,` prefix.
+              Sent without `file_id`, the file is stored as a new receipt file.
+            example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+          file_id:
+            type: string
+            nullable: true
+            description: |
+              ID of a file already uploaded in the caller's org. If `content` is also sent, it is used instead of
+              downloading the stored file.
+            example: fiGLwwPtYD8X
+    suggested_currency:
+      type: string
+      nullable: true
+      description: ISO 4217 currency code to prefer when the receipt's currency is ambiguous.
+      example: USD
+    can_use_ip_currency:
+      type: boolean
+      nullable: true
+      description: Whether the currency of the caller's IP address location may be used as a fallback.
+      example: true
+    meta:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: Optional context about where the receipt came from.
+      properties:
+        sender_email:
+          type: string
+          nullable: true
+          description: Email address the receipt was sent from, for emailed receipts.
+          example: receipts@uber.com
+        expense_date:
+          type: string
+          nullable: true
+          description: Date of the expense, if already known.
+          example: '2026-09-24'
 
-# expense_extract_in:
-#   type: object
-#   required:
-#     - files
-#   properties:
-#     files:
-#       type: array
-#       items:
-#         type: object
-#         required:
-#           - name
-#           - content
-#         properties:
-#           name:
-#             type: string
-#             maxLength: 255
-#             description: |
-#               Takes the name of the file which contains the receipt.
-#           content:
-#             type: string
-#             description: |
-#               This field takes the base64 encoded representation of the file.
-#             example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
-#     email_info:
-#       type: object
-#       description: |
-#         optional data about email.
-#       properties:
-#         subject:
-#           type: string
-#         sender_name:
-#           type: string
-#         sender_email:
-#           type: string
+expense_extract_out:
+  type: object
+  additionalProperties: false
+  required:
+    - extraction_method
+    - extracted_data
+  properties:
+    extraction_method:
+      type: string
+      nullable: true
+      description: |
+        How the data was extracted, such as `ML`, `Template: HTML` or `Template: PDF`.
+      example: ML
+    extracted_data:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+        - category
+        - spent_at
+        - merchant
+      properties:
+        amount:
+          type: number
+          nullable: true
+          description: Extracted total amount.
+          example: 1500.5
+        currency:
+          type: string
+          nullable: true
+          description: Extracted ISO 4217 currency code.
+          example: USD
+        category:
+          type: string
+          nullable: true
+          description: Extracted expense category.
+          example: Taxi
+        spent_at:
+          type: string
+          format: date
+          nullable: true
+          description: Extracted expense date.
+          example: '2026-09-24'
+        merchant:
+          type: string
+          nullable: true
+          description: Extracted merchant name.
+          example: Uber
+        tax:
+          type: object
+          nullable: true
+          additionalProperties: false
+          description: Extracted tax, or null when neither amount nor percentage was found.
+          properties:
+            amount:
+              type: number
+              nullable: true
+              example: 120
+            percentage:
+              type: number
+              nullable: true
+              example: 8.5

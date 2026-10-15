@@ -28,6 +28,9 @@ tags:
   - name: Corporate Cards
     description: |
       This API gives you access to view Corporate Cards across organisations where user is approver.
+  - name: Expenses
+    description: |
+      These APIs give you access to expense data and expense fields.
   - name: Per Diem Rates
     description: |
       This API gives you access to manage your organisation's Per Diem Rates
@@ -40,18 +43,25 @@ tags:
   - name: Mileage Rates
     description: |
       This API gives you access to your organisation's Mileage Rates
+  - name: Organisations
+    description: |
+      This API gives you access to minimal organisations details with expenses assigned to you for approval.
   - name: Reports
     description: |
       This API gives you access to your organisation's Expense Reports
   - name: Subscriptions
     description: |
       This API allows you to subscribe to different events.
+  - name: Tax Groups
+    description: |
+      This API gives you access to tax groups across authorised organisations.
   - name: Employees
     description: |
       These APIs gives you access to manage your organisation's Employees
 paths:
   /approver/reports:
     get:
+      x-internal: false
       tags:
         - Reports
       summary: List reports
@@ -92,6 +102,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Update Purpose
@@ -143,6 +154,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/reports/add_approver:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Add Approver
@@ -200,6 +212,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/partially_approve:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Approve reports
@@ -252,6 +265,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/partially_approve/bulk:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Approve reports bulk
@@ -308,6 +322,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/reports/send_back:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Send back report
@@ -365,6 +380,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/exports:
     get:
+      x-internal: false
       tags:
         - Reports
       summary: Get Reports Export
@@ -404,6 +420,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Create Reports Export
@@ -453,6 +470,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/expenses:
     get:
+      x-internal: false
       tags:
         - Expenses
       summary: List expenses
@@ -494,6 +512,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Update an expense
@@ -549,6 +568,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Update expenses in bulk
@@ -606,6 +626,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/attach_files/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Attach files to an expense in bulk
@@ -661,6 +682,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/permissions:
     post:
+      x-internal: false
       tags:
         - Expenses
         - Expense permissions
@@ -720,6 +742,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/permissions/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
         - Expense permissions
@@ -808,8 +831,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /approver/expenses/unlink_card_transaction:
+    post:
+      x-internal: true
+      tags:
+        - Expenses
+      summary: Unlink expense from card transaction
+      description: |
+        Unlinks an expense (or, for a split expense, all expenses in its split group) from its matched
+        corporate card transaction. A new, system-generated expense is created and linked to the card
+        transaction in its place; the original expense is returned unlinked.
+      operationId: approver_expenses_unlink_card_transaction_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/unlink_card_transaction_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/unlink_card_transaction_out'
+        '400':
+          description: |
+            Bad request. Also returned when the expense is not linked to any card transaction, or when
+            no expenses are found for its split group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: |
+            Not Found. Also returned when the expense's matched corporate card transaction cannot be
+            found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /approver/reports/eject_expenses:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Eject expenses from a report
@@ -862,6 +950,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/filters:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Create Report saved filters
@@ -910,6 +999,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/403'
     get:
+      x-internal: false
       tags:
         - Reports
       summary: List Report saved filters
@@ -951,6 +1041,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/reports/filters/delete:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Delete Report saved filter
@@ -1006,6 +1097,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/stats:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Reports Stats
@@ -1063,6 +1155,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/comments:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Comment on a report
@@ -1113,6 +1206,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/permissions:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Reports Permissions
@@ -1170,6 +1264,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/reports/round_off_amount:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Round off report amount
@@ -1219,6 +1314,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/subscriptions:
     post:
+      x-internal: false
       tags:
         - Subscriptions
       summary: Create a subscription
@@ -1277,6 +1373,7 @@ paths:
         REPORT.*:
           '{$request.body#/data/webhook_url}':
             post:
+              x-internal: false
               operationId: report_subscriptions_callback
               summary: Object that will be sent to the callback url
               requestBody:
@@ -1288,6 +1385,7 @@ paths:
                 '200':
                   description: OK
     get:
+      x-internal: false
       tags:
         - Subscriptions
       summary: List Approver Subscriptions
@@ -1334,6 +1432,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/advance_requests:
     get:
+      x-internal: false
       tags:
         - Advances
       summary: List advance requests
@@ -1380,6 +1479,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/advance_requests/stats:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Advances Requests Stats
@@ -1437,6 +1537,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/advance_requests/permissions:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Advance Request Permissions
@@ -1494,6 +1595,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/advance_requests/comments:
     post:
+      x-internal: false
       summary: Add comment to advance request
       operationId: advance_requests_comments_post
       description: |
@@ -1549,6 +1651,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/projects:
     get:
+      x-internal: false
       tags:
         - Projects
       summary: List projects
@@ -1589,6 +1692,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/categories:
     get:
+      x-internal: false
       tags:
         - Categories
       summary: List categories
@@ -1629,6 +1733,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/corporate_cards:
     get:
+      x-internal: false
       tags:
         - Corporate Cards
       summary: List corporate cards
@@ -1684,6 +1789,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/cost_centers:
     get:
+      x-internal: false
       tags:
         - Cost Centers
       summary: List cost centers
@@ -1724,6 +1830,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/per_diem_rates:
     get:
+      x-internal: false
       tags:
         - Per Diem Rates
       summary: List per diem rates
@@ -1764,6 +1871,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/merchants:
     get:
+      x-internal: false
       tags:
         - Merchants
       summary: List merchants
@@ -1811,6 +1919,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/mileage_rates:
     get:
+      x-internal: false
       tags:
         - Mileage Rates
       summary: List mileage rates
@@ -1851,6 +1960,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/expense_policy_states:
     get:
+      x-internal: false
       tags:
         - Expense Policies
       summary: Get policy states of Expenses
@@ -1919,6 +2029,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/check_mandatory_fields:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Check expense for missing mandatory fields
@@ -1972,6 +2083,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/check_mandatory_fields/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Check multiple expenses for missing mandatory fields in bulk
@@ -2030,6 +2142,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/check_policies/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Check multiple expenses for policy violations in bulk
@@ -2084,6 +2197,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/comments:
     get:
+      x-internal: false
       tags:
         - Expenses
       summary: List expense comments
@@ -2131,6 +2245,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/comments/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
         - Expense comments
@@ -2190,6 +2305,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/dismiss_duplicates/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Dismiss Duplicate expenses
@@ -2245,6 +2361,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/expenses/duplicate_sets:
     get:
+      x-internal: false
       tags:
         - Expenses
       summary: List expense duplicate sets
@@ -2286,6 +2403,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/expenses/stats:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Expenses Stats
@@ -2343,6 +2461,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/filters:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Create Expenses saved filters
@@ -2391,6 +2510,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/403'
     get:
+      x-internal: false
       tags:
         - Expenses
       summary: List Expenses saved filters
@@ -2432,6 +2552,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/expenses/filters/delete:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Delete Expenses saved filter
@@ -2487,6 +2608,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/exports:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Create Expenses Export
@@ -2536,6 +2658,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/expenses/split:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Split an expense
@@ -2593,6 +2716,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/split/check_policies:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Check for policy violations before splitting an expense
@@ -2653,6 +2777,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/split/check_mandatory_fields:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Check mandatory fields before splitting an expense
@@ -2712,6 +2837,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/files/bulk:
     post:
+      x-internal: false
       operationId: files_post_bulk
       tags:
         - Files
@@ -2785,6 +2911,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/files/generate_urls/bulk:
     post:
+      x-internal: false
       operationId: files_generate_urls_bulk_post
       tags:
         - Files
@@ -2856,6 +2983,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/files/delete/bulk:
     post:
+      x-internal: false
       operationId: files_delete
       tags:
         - Files
@@ -2906,6 +3034,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/files/download:
     get:
+      x-internal: false
       operationId: files_download_get
       tags:
         - Files
@@ -2952,6 +3081,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/employees:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List employees
@@ -2991,8 +3121,259 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /approver/orgs:
+    get:
+      x-internal: false
+      tags:
+        - Organisations
+      summary: List Organisations
+      operationId: orgs_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns organisations in the same organisation group as the current organisation
+        where the approver has expenses assigned to them. An organisation qualifies when
+        the approver has at least one non-disabled user approval.
+
+        Returns each organisation's ID and name by default. Filtering on ID and name, field selection,
+        sorting and pagination are supported.
+        To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering).
+        Approval delegates with the APPROVE scope can access this API.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_summary_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: orwruogwnngg
+                    name: Demo Account
+                  - id: orx9wL3mP2Qz
+                    name: Demo Subsidiary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
+  /approver/expense_fields:
+    get:
+      x-internal: false
+      tags:
+        - Expenses
+      summary: List expense fields
+      operationId: expense_fields_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns expense fields from organisations in the same group as the approver's current
+        organisation where the approver has at least one non-disabled user expense approval.
+
+        Pass `org_id=eq.<expense_org_id>` to list fields for one authorised organisation.
+        Omit `org_id` to list fields across all authorised organisations.
+
+        Filtering, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax. Approval delegates with the APPROVE scope can access this API.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by the expense's organisation; omit to return fields from all authorised organisations.
+          schema:
+            type: string
+            example: eq.or6AQaFIBXcU
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_field_out'
+              example:
+                count: 1
+                offset: 0
+                data:
+                  - id: 467389
+                    org_id: or6AQaFIBXcU
+                    created_at: '2026-04-13T11:29:43.409756+00:00'
+                    updated_at: '2026-09-17T05:12:24.916492+00:00'
+                    seq: 1
+                    field_name: Unit
+                    column_name: distance_unit
+                    type: SELECT
+                    options:
+                      - MILES
+                      - KM
+                    default_value: MILES
+                    placeholder: Enter distance unit
+                    category_ids:
+                      - 1075577
+                    is_enabled: true
+                    is_custom: false
+                    is_mandatory: true
+                    code: null
+                    parent_field_id: null
+                    display_order: null
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
+  /approver/tax_groups:
+    get:
+      x-internal: false
+      tags:
+        - Tax Groups
+      summary: List tax groups
+      operationId: tax_groups_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns tax groups from organisations in the same group as the approver's current
+        organisation where the approver has at least one non-disabled user expense approval.
+
+        Pass `org_id=eq.<expense_org_id>` to list tax groups for one authorised organisation.
+        Omit `org_id` to list tax groups across all authorised organisations.
+
+        Filtering, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax. Approval delegates with the APPROVE scope can access this API.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by the expense's organisation; omit to return tax groups from all authorised organisations.
+          schema:
+            type: string
+            example: eq.orogUH5lw1QX
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/tax_group_out'
+              example:
+                count: 1
+                offset: 0
+                data:
+                  - id: tgE7C7wKESne
+                    org_id: orogUH5lw1QX
+                    created_at: '2024-09-06T07:02:26.423917+00:00'
+                    updated_at: '2024-09-06T07:02:26.423917+00:00'
+                    code: null
+                    name: Tax tax tax
+                    percentage: 0.03
+                    is_enabled: true
+                    is_default: false
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
   /approver/accounts:
     get:
+      x-internal: false
       tags:
         - Accounts
       summary: List accounts
@@ -3034,6 +3415,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/employee_settings:
     get:
+      x-internal: false
       tags:
         - Employee Settings
       summary: Get Employee Settings
@@ -3088,6 +3470,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/advance_requests/attach_files/bulk:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Bulk attach files to advance requests
@@ -3149,6 +3532,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/advance_requests/add_approver:
     post:
+      x-internal: false
       summary: Add approver to advance request
       operationId: advance_requests_add_approver_post
       description: |
@@ -3219,6 +3603,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/advance_requests/reject:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Reject advance request
@@ -3290,6 +3675,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/advance_requests/approve/bulk:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Bulk approve advance requests
@@ -3339,6 +3725,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/advance_requests/inquire:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Inquire about advance request
@@ -3404,6 +3791,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access. 
   /approver/advance_requests/submit:
     post:
+      x-internal: false
       tags:
         - Advances
       summary: Submit an advance request
@@ -3471,6 +3859,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/advance_requests/custom_fields:
     get:
+      x-internal: false
       tags:
         - Advances
       summary: Get advance request custom fields
@@ -3514,6 +3903,7 @@ paths:
                       This error means current user does not have enough permissions to perform this operation. 
   /approver/advance_requests/generate_file_urls/bulk:
     post:
+      x-internal: false
       operationId: advance_requests_generate_file_urls_bulk_post
       tags:
         - Advances
@@ -3580,6 +3970,7 @@ paths:
                 $ref: '#/components/schemas/403'
   /approver/employee_overview/hierarchy:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List employees hierarchy view
@@ -3636,6 +4027,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/employee_overview:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List expense overview of employees under the current user hierarchy
@@ -3698,6 +4090,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/employee_overview/stats:
     post:
+      x-internal: false
       operationId: employee_overview_stats_post
       tags:
         - Employees
@@ -3776,6 +4169,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/employee_overview/expenses:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List expenses in hierarchy
@@ -3838,6 +4232,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/employee_overview/expenses/stats:
     post:
+      x-internal: false
       tags:
         - Employees
       summary: Expenses Stats of users in hierarchy
@@ -3895,6 +4290,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expenses/export_configurations:
     get:
+      x-internal: false
       tags:
         - Expenses
       summary: List expenses export configurations
@@ -3950,6 +4346,7 @@ paths:
                     description: |
                       This error means current user does not have enough permissions to perform this operation.
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Create or update an expense export configuration
@@ -4095,6 +4492,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/expenses/export_configurations/delete/bulk:
     post:
+      x-internal: false
       tags:
         - Expenses
       summary: Deletes expenses export configurations
@@ -4169,6 +4567,7 @@ paths:
                     example: InvalidUsage
   /approver/reports/export_configurations:
     get:
+      x-internal: false
       tags:
         - Reports
       summary: List reports export configurations
@@ -4224,6 +4623,7 @@ paths:
                     description: |
                       This error means current user does not have enough permissions to perform this operation.
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Create or update a report export configuration
@@ -4294,6 +4694,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /approver/reports/export_configurations/delete/bulk:
     post:
+      x-internal: false
       tags:
         - Reports
       summary: Deletes reports export configurations
@@ -5554,6 +5955,18 @@ components:
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
       example: sdfd2391
+    account_type:
+      type: string
+      description: |
+        The type of account.
+      enum:
+        - PERSONAL_CASH_ACCOUNT
+        - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        - PERSONAL_ADVANCE_ACCOUNT
+        - COMPANY_EXPENSE_ACCOUNT
+        - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+        - COMPANY_CATEGORY_ACCOUNT
+      example: PERSONAL_CASH_ACCOUNT
     account_out_embed:
       type: object
       required:
@@ -5565,14 +5978,8 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: acwbl222wlg
         type:
-          type: string
-          enum:
-            - PERSONAL_CASH_ACCOUNT
-            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-            - PERSONAL_ADVANCE_ACCOUNT
-            - COMPANY_EXPENSE_ACCOUNT
-            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
-            - COMPANY_CATEGORY_ACCOUNT
+          allOf:
+            - $ref: '#/components/schemas/account_type'
           example: PERSONAL_CASH_ACCOUNT
     mileage_rate_out_embed_for_expense:
       type: object
@@ -5677,7 +6084,7 @@ components:
           type: string
           nullable: true
           example: London
-        display_name:
+        display:
           type: string
           nullable: true
         country:
@@ -5785,6 +6192,20 @@ components:
       example:
         cf1: string1
         custom_field_2: Value 2
+    expense_state:
+      type: string
+      description: |
+        The state of the Expense.
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      example: COMPLETE
     report_out_embed:
       type: object
       nullable: true
@@ -5847,8 +6268,7 @@ components:
             - null
           nullable: true
         amount:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
+          allOf:
             - $ref: '#/components/schemas/amount'
           nullable: true
         last_paid_at:
@@ -5923,6 +6343,10 @@ components:
         - id
         - comment_type
         - comment_text
+        - created_at
+        - updated_at
+        - creator_user_id
+        - creator_user
       properties:
         id:
           allOf:
@@ -5937,6 +6361,14 @@ components:
         comment_text:
           type: string
           description: Text content of the policy comment
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -6424,6 +6856,10 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+        service_tax:
+          type: number
+          nullable: true
+          example: 2.5
     split_group_amount:
       type: number
       nullable: true
@@ -6753,6 +7189,7 @@ components:
         - approver_comments
         - verifier_comments
         - policy_checks
+        - c1_policy_violation_reasons
         - accounting_export_summary
         - report_last_paid_at
         - report_last_approved_at
@@ -7016,16 +7453,8 @@ components:
             has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-            - UNREPORTABLE
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -7242,6 +7671,13 @@ components:
             - This is a comment by verifier
         policy_checks:
           $ref: '#/components/schemas/policy_checks'
+        c1_policy_violation_reasons:
+          type: array
+          nullable: true
+          description: |
+            C1 policy violations on this expense.
+          items:
+            type: string
         accounting_export_summary:
           type: object
           description: |
@@ -7786,6 +8222,37 @@ components:
                   Expense ID
                 example: txAcczJOQHGR
           - $ref: '#/components/schemas/expense_permissions_out'
+    unlink_card_transaction_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            Unique identifier of the expense to unlink from its matched corporate card transaction.
+          example: txm3L9soGEt2
+    unlink_card_transaction_out:
+      type: object
+      additionalProperties: false
+      required:
+        - user_created_expense
+        - auto_created_expense
+      properties:
+        user_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            The original expense, now unlinked from the corporate card transaction. This is the
+            expense that was submitted in the request.
+        auto_created_expense:
+          allOf:
+            - $ref: '#/components/schemas/expense_out'
+          description: |
+            A new, system-generated expense created and linked in place of the original expense on
+            the corporate card transaction.
     report_action_with_expenses_ids_to_eject:
       type: object
       additionalProperties: false
@@ -10193,16 +10660,8 @@ components:
                 description: Sum of amounts for matching expenses in this state
                 example: 44545.4
               state:
-                type: string
-                enum:
-                  - COMPLETE
-                  - DRAFT
-                  - APPROVER_PENDING
-                  - APPROVED
-                  - PAYMENT_PENDING
-                  - PAYMENT_PROCESSING
-                  - PAID
-                  - UNREPORTABLE
+                allOf:
+                  - $ref: '#/components/schemas/expense_state'
                 description: Expense state
         - type: object
           title: Overall stats
@@ -11229,6 +11688,168 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    org_summary_out:
+      type: object
+      additionalProperties: false
+      description: Organisation ID and name. Field selection can omit either property.
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
+    category_ids:
+      type: array
+      description: |
+        List of category ids.
+      items:
+        type: integer
+        example: 16570
+    expense_field_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - seq
+        - field_name
+        - column_name
+        - type
+        - options
+        - default_value
+        - placeholder
+        - category_ids
+        - is_enabled
+        - is_custom
+        - is_mandatory
+        - code
+        - parent_field_id
+        - display_order
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        seq:
+          type: integer
+          example: 1
+        field_name:
+          type: string
+          description: |
+            This specifies the name of the expense field.
+          example: Vendor description
+        column_name:
+          type: string
+          description: |
+            This specifies the name of column to which this expense field mapped to.
+          example: Purpose
+        type:
+          type: string
+          description: |
+            This field specifies the type of the expense field.
+          example: SELECT
+        options:
+          type: array
+          items:
+            type: string
+          description: |
+            This specifies the option values of the expense field in case on SELECT or MULTI_SELECT type.
+          example:
+            - Chai
+            - Coffee
+        default_value:
+          type: string
+          nullable: true
+          description: |
+            This specifies the default value of the expense fields.
+          example: Coffee
+        placeholder:
+          type: string
+          nullable: true
+          description: |
+            This specifies the placeholder of the expense field.
+          example: Enter vendor
+        category_ids:
+          $ref: '#/components/schemas/category_ids'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_custom:
+          type: boolean
+          description: |
+            This field indicates if the expense field is custom or not.
+          example: false
+        is_mandatory:
+          type: boolean
+          description: |
+            This specifies if the expense field is mandatory or not.
+          example: true
+        code:
+          $ref: '#/components/schemas/code'
+        parent_field_id:
+          type: integer
+          nullable: true
+          description: |
+            This specifies the `id` of the parent expense field and denotes that the expense field is a dependent custom field. NOTE: `type` must be `DEPENDENT_SELECT`.
+          example: 1234
+        display_order:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: |
+            The 1-based position of an enabled, non-dependent custom expense field in the organization's custom order.
+          example: 1
+    tax_group_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - code
+        - name
+        - percentage
+        - is_enabled
+        - is_default
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: tgwfjbgqo32
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        name:
+          type: string
+          maxLength: 255
+          example: Engine
+          description: Represents the name of the tax_group.
+        percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 18
+          description: percentage of tax levied.
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indicates whether this tax group is the default for its percentage bucket.
+          example: false
+        code:
+          $ref: '#/components/schemas/code'
     account_out:
       type: object
       additionalProperties: false
