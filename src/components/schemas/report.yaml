@@ -1131,106 +1131,10 @@ reports_stats_out:
       title: "State-wise grouped stats"
       description: "Stats grouped by report state"
       items:
-        type: object
-        required:
-          - count
-          - total_amount
-          - state
-          - failed_amount
-          - failed_count
-          - processing_amount
-          - processing_count
-          - reimbursable_amount
-        properties:
-          count:
-            type: integer
-            nullable: false
-            description: "Number of matching reports in this state."
-            example: 5
-          total_amount:
-            type: number
-            nullable: false
-            description: "Sum of amounts for matching reports in this state."
-            example: 2200.0
-          state:
-            type: string
-            enum:
-              - APPROVER_PENDING
-              - DRAFT
-              - PAYMENT_PROCESSING
-              - APPROVER_INQUIRY
-              - APPROVED
-              - PAYMENT_PENDING
-              - PAID
-            description: "Report state."
-          failed_amount:
-            type: number
-            nullable: true
-            description: "Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state."
-            example: 200.0
-          failed_count:
-            type: integer
-            nullable: true
-            description: "Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state."
-            example: 1
-          processing_amount:
-            type: number
-            nullable: true
-            description: "Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state."
-            example: 1500.0
-          processing_count:
-            type: integer
-            nullable: true
-            description: "Count of processing reports, applicable only in PAYMENT_PROCESSING state."
-            example: 3
-          reimbursable_amount:
-            type: number
-            nullable: false
-            description: "Sum of reimbursable amounts for matching reports in this state."
-            example: 500.0
-    # NOTE: This is a hack to maintain backward compatibility with the existing response structure
+        $ref: '#/reports_stats_by_state_item_out'
+# NOTE: This is a hack to maintain backward compatibility with the existing response structure
     # TODO: @Dev to update the response once the hack is removed from platform-api
-    - type: object
-      title: "Overall stats"
-      description: "Overall stats without state grouping (response for older mobile app versions)."
-      required:
-        - count
-        - total_amount
-        - processing_amount
-        - processing_count
-        - failed_amount
-        - failed_count
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: "Total number of matching reports."
-          example: 1
-        total_amount:
-          type: number
-          nullable: false
-          description: "Total sum of amounts for all matching reports."
-          example: 100
-        processing_amount:
-          type: number
-          nullable: true
-          description: "Sum of reimbursable amounts for reports in processing state."
-          example: 101
-        processing_count:
-          type: integer
-          nullable: true
-          description: "Count of reports in processing state."
-          example: 2
-        failed_amount:
-          type: number
-          nullable: true
-          description: "Sum of reimbursable amounts for reports in processing state with ACH failures."
-          example: 101
-        failed_count:
-          type: integer
-          nullable: true
-          description: "Count of reports in processing state with ACH failures."
-          example: 1
+    - $ref: '#/reports_stats_overall_out'
   example:
     - state: "DRAFT"
       count: 3
@@ -1350,3 +1254,105 @@ report_delete_in:
   properties:
     id:
       $ref: './fields.yaml#/id_string'
+
+reports_stats_by_state_item_out:
+  type: object
+  required:
+    - count
+    - total_amount
+    - state
+    - failed_amount
+    - failed_count
+    - processing_amount
+    - processing_count
+    - reimbursable_amount
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Number of matching reports in this state."
+      example: 5
+    total_amount:
+      type: number
+      nullable: false
+      description: "Sum of amounts for matching reports in this state."
+      example: 2200.0
+    state:
+      type: string
+      enum:
+        - APPROVER_PENDING
+        - DRAFT
+        - PAYMENT_PROCESSING
+        - APPROVER_INQUIRY
+        - APPROVED
+        - PAYMENT_PENDING
+        - PAID
+      description: "Report state."
+    failed_amount:
+      type: number
+      nullable: true
+      description: "Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state."
+      example: 200.0
+    failed_count:
+      type: integer
+      nullable: true
+      description: "Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state."
+      example: 1
+    processing_amount:
+      type: number
+      nullable: true
+      description: "Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state."
+      example: 1500.0
+    processing_count:
+      type: integer
+      nullable: true
+      description: "Count of processing reports, applicable only in PAYMENT_PROCESSING state."
+      example: 3
+    reimbursable_amount:
+      type: number
+      nullable: false
+      description: "Sum of reimbursable amounts for matching reports in this state."
+      example: 500.0
+
+reports_stats_overall_out:
+  type: object
+  title: "Overall stats"
+  description: "Overall stats without state grouping (response for older mobile app versions)."
+  required:
+    - count
+    - total_amount
+    - processing_amount
+    - processing_count
+    - failed_amount
+    - failed_count
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Total number of matching reports."
+      example: 1
+    total_amount:
+      type: number
+      nullable: false
+      description: "Total sum of amounts for all matching reports."
+      example: 100
+    processing_amount:
+      type: number
+      nullable: true
+      description: "Sum of reimbursable amounts for reports in processing state."
+      example: 101
+    processing_count:
+      type: integer
+      nullable: true
+      description: "Count of reports in processing state."
+      example: 2
+    failed_amount:
+      type: number
+      nullable: true
+      description: "Sum of reimbursable amounts for reports in processing state with ACH failures."
+      example: 101
+    failed_count:
+      type: integer
+      nullable: true
+      description: "Count of reports in processing state with ACH failures."
+      example: 1

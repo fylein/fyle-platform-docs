@@ -231,53 +231,10 @@ advance_requests_stats_out:
       title: "State-wise grouped stats"
       description: "Stats grouped by advance request state"
       items:
-        type: object
-        required:
-          - count
-          - total_amount
-          - state
-        properties:
-          count:
-            type: integer
-            nullable: false
-            description: "Number of matching advance requests in this state."
-            example: 10
-          total_amount:
-            type: number
-            nullable: false
-            description: "Sum of amounts for matching advance requests in this state."
-            example: 44545.4
-          state:
-            type: string
-            enum:
-              - DRAFT
-              - APPROVAL_PENDING
-              - APPROVED
-              - CANCELLED
-              - REJECTED
-              - PAID
-              - PULLED_BACK
-              - SENT_BACK
-            description: "Advance request state."
+        $ref: '#/advance_requests_stats_by_state_item_out'
     # NOTE: This is a hack to maintain backward compatibility with the existing response structure 
     # TODO: @Dev to update the response once the hack is removed from platform-api 
-    - type: object
-      title: "Overall stats"
-      description: "Overall stats without state grouping."
-      required:
-        - count
-        - total_amount
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: "Total number of matching advance requests."
-          example: 353
-        total_amount:
-          type: number
-          nullable: false
-          description: "Sum of amounts for all matching advance requests."
-          example: 45882.4
+    - $ref: '#/advance_requests_stats_overall_out'
   example:
     - state: "DRAFT"
       count: 10
@@ -350,41 +307,8 @@ advance_requests_approver_stats_out:
       title: "Currency-wise grouped stats"
       description: "Stats grouped by advance request currency"
       items:
-        type: object
-        required:
-          - count
-          - total_amount
-          - currency
-        properties:
-          count:
-            type: integer
-            nullable: false
-            description: "Number of matching advance requests with this currency."
-            example: 10
-          total_amount:
-            type: number
-            nullable: false
-            description: "Sum of amounts for matching advance requests with this currency."
-            example: 44545.4
-          currency:
-            type: string
-    - type: object
-      title: "Overall stats"
-      description: "Overall stats without currency grouping."
-      required:
-        - count
-        - total_amount
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: "Total number of matching advance requests."
-          example: 353
-        total_amount:
-          type: number
-          nullable: false
-          description: "Sum of amounts for all matching advance requests."
-          example: 45882.4
+        $ref: '#/advance_requests_approver_stats_by_currency_item_out'
+    - $ref: '#/advance_requests_approver_stats_overall_out'
   example:
     - currency: "USD"
       count: 10
@@ -880,3 +804,91 @@ advance_request_generate_file_urls_in:
       description: List of file IDs to generate URLs for
       example:
         - fiH717IpzaTG
+
+advance_requests_approver_stats_by_currency_item_out:
+  type: object
+  required:
+    - count
+    - total_amount
+    - currency
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Number of matching advance requests with this currency."
+      example: 10
+    total_amount:
+      type: number
+      nullable: false
+      description: "Sum of amounts for matching advance requests with this currency."
+      example: 44545.4
+    currency:
+      type: string
+
+advance_requests_approver_stats_overall_out:
+  type: object
+  title: "Overall stats"
+  description: "Overall stats without currency grouping."
+  required:
+    - count
+    - total_amount
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Total number of matching advance requests."
+      example: 353
+    total_amount:
+      type: number
+      nullable: false
+      description: "Sum of amounts for all matching advance requests."
+      example: 45882.4
+
+advance_requests_stats_by_state_item_out:
+  type: object
+  required:
+    - count
+    - total_amount
+    - state
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Number of matching advance requests in this state."
+      example: 10
+    total_amount:
+      type: number
+      nullable: false
+      description: "Sum of amounts for matching advance requests in this state."
+      example: 44545.4
+    state:
+      type: string
+      enum:
+        - DRAFT
+        - APPROVAL_PENDING
+        - APPROVED
+        - CANCELLED
+        - REJECTED
+        - PAID
+        - PULLED_BACK
+        - SENT_BACK
+      description: "Advance request state."
+
+advance_requests_stats_overall_out:
+  type: object
+  title: "Overall stats"
+  description: "Overall stats without state grouping."
+  required:
+    - count
+    - total_amount
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: "Total number of matching advance requests."
+      example: 353
+    total_amount:
+      type: number
+      nullable: false
+      description: "Sum of amounts for all matching advance requests."
+      example: 45882.4

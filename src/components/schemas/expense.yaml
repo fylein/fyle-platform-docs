@@ -2210,45 +2210,10 @@ expenses_stats_out:
       title: "State-wise grouped stats"
       description: Stats grouped by expense state
       items:
-        type: object
-        required:
-          - count
-          - total_amount
-          - state
-        properties:
-          count:
-            type: integer
-            nullable: false
-            description: Number of matching expenses in this state
-            example: 10
-          total_amount:
-            type: number
-            nullable: false
-            description: Sum of amounts for matching expenses in this state
-            example: 44545.4
-          state:
-            allOf:
-              - $ref: './fields.yaml#/expense_state'
-            description: Expense state
-    # NOTE: This is a hack to maintain backward compatibility with the existing response structure
+        $ref: '#/expenses_stats_by_state_item_out'
+# NOTE: This is a hack to maintain backward compatibility with the existing response structure
     # TODO: @Dev to update the response once the hack is removed from platform-api
-    - type: object
-      title: "Overall stats"
-      description: Overall stats without state grouping
-      required:
-        - count
-        - total_amount
-      properties:
-        count:
-          type: integer
-          nullable: false
-          description: Total number of matching expenses
-          example: 353
-        total_amount:
-          type: number
-          nullable: false
-          description: Sum of amounts for all matching expenses
-          example: 45882.4
+    - $ref: '#/expenses_stats_overall_out'
   example:
     - state: "COMPLETE"
       count: 343
@@ -3221,3 +3186,44 @@ expense_policy_comment_out:
       $ref: './fields.yaml#/user_id'
     creator_user:
       $ref: './user.yaml#/user_out_embed'
+
+expenses_stats_by_state_item_out:
+  type: object
+  required:
+    - count
+    - total_amount
+    - state
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: Number of matching expenses in this state
+      example: 10
+    total_amount:
+      type: number
+      nullable: false
+      description: Sum of amounts for matching expenses in this state
+      example: 44545.4
+    state:
+      allOf:
+        - $ref: './fields.yaml#/expense_state'
+      description: Expense state
+
+expenses_stats_overall_out:
+  type: object
+  title: "Overall stats"
+  description: Overall stats without state grouping
+  required:
+    - count
+    - total_amount
+  properties:
+    count:
+      type: integer
+      nullable: false
+      description: Total number of matching expenses
+      example: 353
+    total_amount:
+      type: number
+      nullable: false
+      description: Sum of amounts for all matching expenses
+      example: 45882.4
