@@ -3602,11 +3602,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - commute_details
-                  properties:
-                    commute_details:
-                      $ref: '#/components/schemas/commute_details_in'
+                  $ref: '#/components/schemas/spender_commute_details_in'
       responses:
         '200':
           description: OK
@@ -3658,13 +3654,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_integer'
-                      description: Current commute details id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/spender_commute_details_delete_in'
       responses:
         '200':
           description: OK
@@ -3816,13 +3806,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_integer'
-                      description: Delegation id of spender and delegatee. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/spender_delegatees_delete_in'
       responses:
         '200':
           description: OK
@@ -5211,19 +5195,7 @@ paths:
               type: object
               properties:
                 data:
-                  type: object
-                  properties:
-                    expense_id:
-                      type: string
-                      description: ID of the expense to which this html file needs to be attached
-                      example: txdtyereJtR6
-                    html_content:
-                      type: string
-                      description: Base64 encoded representation of the HTML content
-                      example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
-                  required:
-                    - expense_id
-                    - html_content
+                  $ref: '#/components/schemas/file_upload_html_in'
               required:
                 - data
       responses:
@@ -8012,17 +7984,7 @@ paths:
                 - data
               properties:
                 data:
-                  type: object
-                  additionalProperties: false
-                  required:
-                    - email
-                  properties:
-                    email:
-                      allOf:
-                        - $ref: '#/components/schemas/email'
-                      description: |
-                        The email address to check for availability.
-                      example: test-xyz@test.in
+                  $ref: '#/components/schemas/secondary_email_check_in'
       responses:
         '200':
           description: OK
@@ -8078,17 +8040,7 @@ paths:
                 - data
               properties:
                 data:
-                  type: object
-                  additionalProperties: false
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: |
-                        The unique identifier of the secondary email to delete.
-                      example: seu2gy8ulk32
+                  $ref: '#/components/schemas/secondary_email_delete_in'
       responses:
         '200':
           description: OK
@@ -17429,6 +17381,12 @@ components:
             - KM
             - MILES
           example: MILES
+    spender_commute_details_in:
+      required:
+        - commute_details
+      properties:
+        commute_details:
+          $ref: '#/components/schemas/commute_details_in'
     spender_commute_details_out:
       type: object
       additionalProperties: false
@@ -17499,6 +17457,14 @@ components:
             $ref: '#/components/schemas/delegatees'
           description: |
             List of users who are delegatees for this employee.
+    spender_commute_details_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: Current commute details id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
     spender_delegatees_post_in:
       type: object
       additionalProperties: false
@@ -17613,6 +17579,14 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+    spender_delegatees_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: Delegation id of spender and delegatee. This id is provided by Sage Exp Mgmt to identify an object.
     spender_delegatees_delete_out:
       type: object
       additionalProperties: false
@@ -18773,6 +18747,20 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    file_upload_html_in:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: ID of the expense to which this html file needs to be attached
+          example: txdtyereJtR6
+        html_content:
+          type: string
+          description: Base64 encoded representation of the HTML content
+          example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+      required:
+        - expense_id
+        - html_content
     file_out_download_url:
       type: object
       additionalProperties: false
@@ -24374,6 +24362,30 @@ components:
           description: |
             The secondary email address to be added.
           example: secondary-test@test.in
+    secondary_email_check_in:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            The email address to check for availability.
+          example: test-xyz@test.in
+    secondary_email_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique identifier of the secondary email to delete.
+          example: seu2gy8ulk32
     advance_request_custom_field_out:
       type: object
       additionalProperties: false
