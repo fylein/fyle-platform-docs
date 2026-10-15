@@ -6830,13 +6830,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/personal_card_delete_in'
       responses:
         '200':
           description: OK
@@ -6980,13 +6974,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - personal_card_id
-                  properties:
-                    personal_card_id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/personal_card_transactions_fetch_in'
       responses:
         '200':
           description: OK
@@ -7084,20 +7072,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                    - expense_split_group_id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
-                      example: btxnAnsad23ms
-                    expense_split_group_id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
-                      example: txaisd2asdJ
+                  $ref: '#/components/schemas/personal_card_transaction_match_in'
       responses:
         '200':
           description: OK
@@ -10846,128 +10821,130 @@ components:
           description: |
             String denoting the email of the user who matched the card transaction to an expense.
           example: john.ooe@sage.com
+    matched_corporate_card_transaction_details_out_embed:
+      type: object
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@sage.com
     matched_corporate_card_transaction_out_embed_new:
       anyOf:
         - type: object
           additionalProperties: false
           properties: {}
           description: Empty object when no corporate card transaction is matched
-        - type: object
-          required:
-            - id
-            - corporate_card_id
-            - corporate_card_number
-          properties:
-            id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: btxnwownwrng
-            corporate_card_id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: bawownwrng
-            corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            corporate_card_nickname:
-              type: string
-              maxLength: 25
-              nullable: true
-              description: |
-                Unique nickname assigned to the card
-              example: Business Card
-            corporate_card_cardholder_name:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the card holder's name
-              example: John Cena
-            capitalone_virtual_card_last_four:
-              type: string
-              nullable: true
-              description: |
-                Last four digits of capitalone virtual card.
-              example: '4521'
-            masked_corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            bank_name:
-              nullable: true
-              $ref: '#/components/schemas/bank_name'
-            corporate_card_user_full_name:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/name_nullable'
-              maxLength: 255
-              description: |
-                String denoting the card holder's full name
-              example: John Doe
-            is_corporate_card_archived:
-              type: boolean
-              description: |
-                Signifies whether the corporate card is archived or not.
-              nullable: false
-            amount:
-              $ref: '#/components/schemas/amount'
-            currency:
-              $ref: '#/components/schemas/currency'
-            spent_at:
-              allOf:
-                - $ref: '#/components/schemas/spent_at'
-              description: |
-                Signifies spent date of a card transaction.
-                This date cannot be in future.
-            posted_at:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/timestamptz_utc'
-              description: |
-                Signifies post date of a card transaction.
-                This date cannot be in future.
-            status:
-              type: string
-              nullable: true
-              enum:
-                - PENDING
-                - POSTED
-                - null
-              example: PENDING
-              description: |
-                Signifies status of a card transaction.
-            description:
-              type: string
-              nullable: true
-              description: |
-                Holds the description of the card transaction
-              example: Team lunch
-            foreign_currency:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_currency'
-            foreign_amount:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_amount'
-            merchant:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/merchant'
-              description: |
-                String denoting the name of the vendor to which the card transaction was made.
-                Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
-            category:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the category of the card transaction
-                Note: This is not same as the category added in Sage Exp Mgmt but just a string
-              example: Travel
-            matched_by:
-              type: string
-              nullable: true
-              description: |
-                String denoting the email of the user who matched the card transaction to an expense.
-              example: john.ooe@sage.com
+        - $ref: '#/components/schemas/matched_corporate_card_transaction_details_out_embed'
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -21413,6 +21390,14 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
     personal_card_delete_out:
       type: object
       additionalProperties: false
@@ -21618,6 +21603,29 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_transactions_fetch_in:
+      required:
+        - personal_card_id
+      properties:
+        personal_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+    personal_card_transaction_match_in:
+      required:
+        - id
+        - expense_split_group_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+          example: btxnAnsad23ms
+        expense_split_group_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+          example: txaisd2asdJ
     personal_card_transaction_hide_in:
       type: object
       required:
