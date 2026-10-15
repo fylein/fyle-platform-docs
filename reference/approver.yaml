@@ -30,7 +30,7 @@ tags:
       This API gives you access to view Corporate Cards across organisations where user is approver.
   - name: Expenses
     description: |
-      These APIs give you access to expense data and expense fields.
+      These APIs give you access to expense data, expense fields and dependent expense field values.
   - name: Per Diem Rates
     description: |
       This API gives you access to manage your organisation's Per Diem Rates
@@ -3267,6 +3267,139 @@ paths:
                     display_order: null
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: The current user does not have permission to access this API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: you don't have permissions to access this resource
+  /approver/dependent_expense_field_values:
+    get:
+      x-internal: false
+      tags:
+        - Expenses
+      summary: List dependent expense field values
+      operationId: dependent_expense_field_values_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns dependent expense field values from organisations in the same group as the
+        approver's current organisation where the approver has at least one non-disabled
+        user expense approval.
+
+        Both `parent_expense_field_id` and `expense_field_id` are required query parameters.
+        Pass `org_id=eq.<expense_org_id>` to list matching values for one authorised organisation.
+        Omit `org_id` to list matching values across all authorised organisations.
+
+        Both enabled and disabled values are returned by default. Pass `is_enabled=eq.true`
+        to return only enabled values, or `is_enabled=eq.false` to return only disabled values.
+
+        Filtering, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax. Approval delegates with the APPROVE scope can access this API.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by the expense's organisation; omit to return matching values from all authorised organisations.
+          schema:
+            type: string
+            example: eq.oriSOntNdZGd
+        - in: query
+          name: parent_expense_field_id
+          required: true
+          description: Filter by the parent expense field's ID.
+          schema:
+            type: string
+            example: eq.1172712
+        - in: query
+          name: expense_field_id
+          required: true
+          description: Filter by the dependent expense field's ID.
+          schema:
+            type: string
+            example: eq.90
+        - in: query
+          name: parent_expense_field_value
+          required: false
+          description: Filter by the parent expense field's value.
+          schema:
+            type: string
+            example: eq.Project 1
+        - in: query
+          name: expense_field_value
+          required: false
+          description: Filter by the dependent expense field's value.
+          schema:
+            type: string
+            example: ilike.Cost Code%
+        - in: query
+          name: is_enabled
+          required: false
+          description: Filter by enabled status; omit to return both enabled and disabled values.
+          schema:
+            type: string
+            example: eq.true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/dependent_expense_field_values_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: 1001
+                    org_id: oriSOntNdZGd
+                    created_at: '2026-10-15T00:00:00+00:00'
+                    updated_at: '2026-10-15T00:00:00+00:00'
+                    parent_expense_field_id: 1172712
+                    parent_expense_field_value: Project 1
+                    expense_field_id: 90
+                    expense_field_value: Cost Code 1
+                    is_enabled: true
+                  - id: 1002
+                    org_id: oriSOntNdZGd
+                    created_at: '2026-10-15T00:00:00+00:00'
+                    updated_at: '2026-10-15T00:00:00+00:00'
+                    parent_expense_field_id: 1172712
+                    parent_expense_field_value: Project 1
+                    expense_field_id: 90
+                    expense_field_value: Cost Code 2
+                    is_enabled: false
+        '400':
+          description: Bad request, including a missing parent_expense_field_id or expense_field_id query parameter.
           content:
             application/json:
               schema:
@@ -11806,6 +11939,50 @@ components:
           description: |
             The 1-based position of an enabled, non-dependent custom expense field in the organization's custom order.
           example: 1
+    dependent_expense_field_values_out:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - org_id
+        - created_at
+        - updated_at
+        - parent_expense_field_id
+        - expense_field_id
+        - parent_expense_field_value
+        - expense_field_value
+        - is_enabled
+      properties:
+        id:
+          $ref: '#/components/schemas/id_integer'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        parent_expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the parent expense field.
+          example: 1234
+        expense_field_id:
+          type: integer
+          description: |
+            This specifies the `id` of the dependent expense field.
+          example: 5678
+        parent_expense_field_value:
+          type: string
+          description: |
+            This specifies the text value of the parent expense field.
+          example: Project 1
+        expense_field_value:
+          type: string
+          description: |
+            This specifies the text value of the dependent expense field.
+          example: Cost Code 1
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
     tax_group_out:
       type: object
       additionalProperties: false
