@@ -4,8 +4,27 @@ get:
     - Expenses
   summary: List expense fields
   operationId: expense_fields_list
+  security:
+    - oauth2:
+        - '*'
   description: |
-    This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    Returns expense fields from organisations in the same group as the approver's current
+    organisation where the approver has at least one non-disabled user expense approval.
+
+    Pass `org_id=eq.<expense_org_id>` to list fields for one authorised organisation.
+    Omit `org_id` to list fields across all authorised organisations.
+
+    Filtering, sorting and pagination are supported. See the
+    [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    for query syntax. Approval delegates with the APPROVE scope can access this API.
+  parameters:
+    - in: query
+      name: org_id
+      required: false
+      description: Filter by the expense's organisation; omit to return fields from all authorised organisations.
+      schema:
+        type: string
+        example: eq.or6AQaFIBXcU
   responses:
     '200':
       description: OK
@@ -27,6 +46,31 @@ get:
                 type: array
                 items:
                   $ref: ../../components/schemas/expense_field.yaml#/expense_field_out
+          example:
+            count: 1
+            offset: 0
+            data:
+              - id: 467389
+                org_id: or6AQaFIBXcU
+                created_at: '2026-04-13T11:29:43.409756+00:00'
+                updated_at: '2026-09-17T05:12:24.916492+00:00'
+                seq: 1
+                field_name: Unit
+                column_name: distance_unit
+                type: SELECT
+                options:
+                  - MILES
+                  - KM
+                default_value: MILES
+                placeholder: Enter distance unit
+                category_ids:
+                  - 1075577
+                is_enabled: true
+                is_custom: false
+                is_mandatory: true
+                code: null
+                parent_field_id: null
+                display_order: null
     '400':
       description: Bad request
       content:
@@ -39,3 +83,13 @@ get:
         application/json:
           schema:
             $ref: ../../components/schemas/401.yaml
+    '403':
+      description: The current user does not have permission to access this API.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: you don't have permissions to access this resource
