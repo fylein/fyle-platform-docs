@@ -18810,6 +18810,19 @@ components:
           maxLength: 255
           example: Engine
           description: Represents the name of the system category.
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+        - {}
     category_ids:
       type: array
       description: |
@@ -18876,7 +18889,7 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          $ref: '#/components/schemas/any_type'
           nullable: true
           description: |
             This specifies the default value of the expense fields.
@@ -18958,7 +18971,7 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          $ref: '#/components/schemas/any_type'
           description: |
             This specifies the default value of the expense fields.
           example: Coffee
@@ -21548,9 +21561,8 @@ components:
             List of columns to sort the export data by.
         date_format:
           type: string
-          nullable: true
           description: |
-            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
+            Date format to use for date fields in the export. This field is required and cannot be null.
           example: YYYY-MM-DD
     employees_export_configuration_out:
       type: object
@@ -21681,6 +21693,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -21735,6 +21750,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -27878,8 +27896,10 @@ components:
     reports_export_configuration_config:
       type: object
       additionalProperties: true
+      required:
+        - date_format
       properties:
-        is_column_header_included:
+        is_header_visible:
           type: boolean
           description: |
             Whether to include column headers in the export file.
@@ -27903,10 +27923,14 @@ components:
             List of columns to sort the export data by.
         date_format:
           type: string
-          nullable: true
           description: |
-            Date format to use for date fields in the export. This field is optional and can be null.
+            Date format to use for date fields in the export. This field is required and cannot be null.
           example: MM/DD/YYYY
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the export.
+          example: true
     reports_export_configuration_out:
       type: object
       additionalProperties: false
@@ -31904,6 +31928,7 @@ components:
             - ACTIVE
             - PREACTIVE
             - INACTIVE
+            - IN_PROGRESS
             - EXPIRED
             - DELETED
             - USED
@@ -40853,19 +40878,6 @@ components:
           description: |
             This field represents the total number of expense duplicate sets that match the criteria specified in the query_params within the body of the request.
           example: 45
-    any_type:
-      anyOf:
-        - type: string
-        - type: number
-        - type: integer
-        - type: boolean
-        - type: array
-          items:
-            $ref: '#/components/schemas/any_type'
-        - type: object
-          additionalProperties:
-            $ref: '#/components/schemas/any_type'
-        - {}
     feature_config_out:
       type: object
       additionalProperties: false
@@ -42706,10 +42718,6 @@ components:
           nullable: true
           description: |
             Status of micro-deposit verification
-          enum:
-            - pending
-            - verified
-            - failed
           example: verified
         micro_deposit_verification_attempts:
           type: integer
@@ -42808,10 +42816,6 @@ components:
           nullable: true
           description: |
             Status of micro-deposit verification
-          enum:
-            - pending
-            - verified
-            - failed
           example: verified
         micro_deposit_verification_attempts:
           type: integer
@@ -42949,9 +42953,8 @@ components:
             List of columns to sort the export data by. Maximum of 1 sort column is allowed.
         date_format:
           type: string
-          nullable: true
           description: |
-            Date format to use for date fields in the export. This field is required and can be null. Required for CSV and EXCEL export types.
+            Date format to use for date fields in the export. This field is required and cannot be null.
           example: YYYY-MM-DD
     corporate_card_transactions_export_configuration_out:
       type: object
