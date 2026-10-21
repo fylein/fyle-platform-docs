@@ -2904,7 +2904,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/file_out'
+                      $ref: '#/components/schemas/approver_file_out'
         '400':
           description: Bad request
           content:
@@ -11438,6 +11438,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -11453,7 +11456,13 @@ components:
           required:
             - user_id
             - org_id
+            - type
           properties:
+            type:
+              type: string
+              enum:
+                - RECEIPT
+              description: Approvers can create receipt files only.
             user_id:
               allOf:
                 - $ref: '#/components/schemas/id_string'
@@ -11497,6 +11506,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -11513,6 +11525,16 @@ components:
           description: |
             Link to upload contents of this file.
             Returns null if linked to an expense or advance request in approved or higher state.
+    approver_file_out:
+      allOf:
+        - $ref: '#/components/schemas/file_out'
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - RECEIPT
+              description: Approvers can create receipt files only.
     file_generate_urls_action_in:
       type: object
       required:
@@ -12011,6 +12033,19 @@ components:
           maxLength: 255
           description: Represents the name of the org.
           example: Demo Account
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+        - {}
     category_ids:
       type: array
       description: |
@@ -12077,7 +12112,9 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
           nullable: true
           description: |
             This specifies the default value of the expense fields.
@@ -13330,7 +13367,7 @@ components:
       type: object
       additionalProperties: true
       properties:
-        is_column_header_included:
+        is_header_visible:
           type: boolean
           description: |
             Whether to include column headers in the export file.
@@ -13358,6 +13395,11 @@ components:
           description: |
             Date format to use for date fields in the export. This field is optional and can be null.
           example: MM/DD/YYYY
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the export.
+          example: true
     reports_export_configuration_out:
       type: object
       additionalProperties: false
