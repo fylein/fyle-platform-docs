@@ -9370,6 +9370,21 @@ components:
             - 1221
           description: |
             List of project ids for which this category can be used. If project_ids is null, then this category can be used for any project.
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+    null_field:
+      type: string
+      nullable: true
     category_ids:
       type: array
       description: |
@@ -9436,7 +9451,9 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
           nullable: true
           description: |
             This specifies the default value of the expense fields.
@@ -10217,9 +10234,6 @@ components:
           type: number
           nullable: true
           example: 77.594566
-    null_field:
-      type: string
-      nullable: true
     expense_custom_field:
       type: object
       description: |
@@ -18664,6 +18678,7 @@ components:
             - ACTIVE
             - PREACTIVE
             - INACTIVE
+            - IN_PROGRESS
             - EXPIRED
             - DELETED
             - USED
@@ -18830,6 +18845,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -18873,6 +18891,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -21354,19 +21375,6 @@ components:
           description: |
             A new, system-generated expense created and linked in place of the original expense on
             the corporate card transaction.
-    any_type:
-      anyOf:
-        - type: string
-        - type: number
-        - type: integer
-        - type: boolean
-        - type: array
-          items:
-            $ref: '#/components/schemas/any_type'
-        - type: object
-          additionalProperties:
-            $ref: '#/components/schemas/any_type'
-        - {}
     feature_config_out:
       type: object
       additionalProperties: false
@@ -25290,7 +25298,7 @@ components:
       type: object
       additionalProperties: true
       properties:
-        is_column_header_included:
+        is_header_visible:
           type: boolean
           description: |
             Whether to include column headers in the export file.
@@ -25318,6 +25326,11 @@ components:
           description: |
             Date format to use for date fields in the export. This field is optional and can be null.
           example: MM/DD/YYYY
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the export.
+          example: true
     reports_export_configuration_out:
       type: object
       additionalProperties: false

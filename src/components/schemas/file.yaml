@@ -33,6 +33,9 @@ file_out:
       enum:
         - INTEGRATION
         - RECEIPT
+        - XLSX
+        - CSV
+        - PDF
       description: >
         Indicates whether this file original size or encrypted or its thumbnail
         image.
@@ -140,6 +143,9 @@ file_in:
       enum:
         - INTEGRATION
         - RECEIPT
+        - XLSX
+        - CSV
+        - PDF
       description: >
         Indicates whether this file original size or encrypted or its thumbnail
         image.
@@ -165,8 +171,13 @@ approver_file_in:
   allOf:
     - $ref: '#/file_in'
     - type: object
-      required: [ user_id, org_id]
+      required: [ user_id, org_id, type ]
       properties:
+        type:
+          type: string
+          enum:
+            - RECEIPT
+          description: Approvers can create receipt files only.
         user_id:
           allOf:
             - $ref: './fields.yaml#/id_string'
@@ -175,6 +186,17 @@ approver_file_in:
           allOf:
             - $ref: './fields.yaml#/id_string'
           example: 'ort677efgh98'
+
+approver_file_out:
+  allOf:
+    - $ref: '#/file_out'
+    - type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - RECEIPT
+          description: Approvers can create receipt files only.
 
 file_delete_action_in:
   type: object
