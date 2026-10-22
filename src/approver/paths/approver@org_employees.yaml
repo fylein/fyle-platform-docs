@@ -1,0 +1,97 @@
+get:
+  x-internal: false
+  tags:
+    - Employees
+  summary: List organisation employees
+  operationId: org_employees_list
+  security:
+    - oauth2:
+        - '*'
+  description: |
+    Returns all employees from organisations in the same group as the approver's current
+    organisation where the approver has at least one non-disabled user expense approval.
+
+    This API supplies employee filter values for Team Expenses and Reports.
+    Each employee includes `org_id` to identify their organisation.
+
+    Pass `org_id=eq.<org_id>` to list employees for one authorised organisation.
+    Omit `org_id` to list employees across all authorised organisations.
+    An unauthorised `org_id` returns an empty `data` array with `count: 0`.
+
+    Filtering on response fields, sorting and pagination are supported. See the
+    [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    for query syntax. Delegates with the APPROVE or ALL scope can access this API.
+  parameters:
+    - in: query
+      name: org_id
+      required: false
+      description: Filter by organisation; omit to return employees from all authorised organisations.
+      schema:
+        type: string
+        example: eq.orwruogwnngg
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+              - count
+              - offset
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/employee.yaml#/approver_org_employee_out
+          example:
+            count: 1
+            offset: 0
+            data:
+              - id: ouxNjRaFhue2
+                user_id: usdM767Q2gox
+                org_id: orwruogwnngg
+                email: john.doe@example.com
+                full_name: John Doe
+                roles:
+                  - FYLER
+                mobile: '+12131234567'
+                is_mobile_verified: true
+                sms_opt_out_source: null
+                commute_details:
+                  id: null
+                  home_location: null
+                  work_location: null
+                  distance: null
+                  distance_unit: null
+                is_enabled: true
+                has_accepted_invite: true
+                delegatees: []
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: The current user does not have permission to access this API.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: you don't have permissions to access this resource
