@@ -18,8 +18,9 @@ get:
     must have at least one non-disabled user expense approval in that organisation.
 
     Approval delegates with the APPROVE scope can access this API using the
-    delegator's authorised organisations. An unauthorised organisation or a missing
-    settings record returns `404 Resource not found`.
+    delegator's authorised organisations. An unauthorised organisation returns `403`
+    with a permission error. An authorised organisation with no settings record returns
+    `404 Resource not found`.
   parameters:
     - in: query
       name: org_id
@@ -59,7 +60,7 @@ get:
           schema:
             $ref: '../../components/schemas/401.yaml'
     '403':
-      description: The current user lacks the APPROVER role or the delegate lacks the required access scope.
+      description: The current user lacks the APPROVER role, the requested organisation is not authorised, or the delegate lacks the required access scope.
       content:
         application/json:
           schema:
@@ -67,9 +68,9 @@ get:
             properties:
               message:
                 type: string
-                example: you don't have permissions to access this resource
+                example: You do not have permission to access this organisation's settings
     '404':
-      description: The requested organisation is not authorised or its settings record was not found.
+      description: The requested organisation is authorised but its settings record was not found.
       content:
         application/json:
           schema:
