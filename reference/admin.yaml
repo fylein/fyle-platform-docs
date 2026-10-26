@@ -290,7 +290,8 @@ paths:
       description: |
         Returns the authenticated admin's own Copilot chat messages. This API supports very rich
         filtering on all response fields and pagination via query parameters. To understand how to use
-        these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering).
+        The metadata shape varies by message response type, as documented in the message schema.
       operationId: admin_copilot_messages_list
       parameters:
         - $ref: '#/components/parameters/q'
@@ -341,8 +342,9 @@ paths:
       description: |
         Sends a message to Copilot. When `chat_id` is omitted, a new chat is created using `title` (which
         becomes required in that case) and the message is posted to it. Returns the Copilot-generated
-        response message. The exact `metadata` shape returned depends on the query type (for example,
-        graph or tabular data) and is not further constrained here.
+        response message. Graph and support responses put their content in `metadata` and return
+        `message: null`. Single-value insights return text and may include `metadata.query_params`.
+        Error responses and text insights without query parameters return empty metadata.
       operationId: admin_copilot_messages_post
       requestBody:
         required: true
@@ -369,6 +371,100 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/copilot_chat_message_out'
+              examples:
+                single_value:
+                  summary: Single-value insight with data query parameters
+                  value:
+                    data:
+                      id: msg6O3VP8XIFa
+                      chat_id: chAsf91e4r
+                      org_id: oriSOntNdZGd
+                      user_id: usx4eGq0uIPu
+                      author: SYSTEM
+                      message: Total spend was $1,250.
+                      metadata:
+                        query_params:
+                          filters:
+                            - field: spent_at
+                              op: gte
+                              value: '2023-04-01'
+                          order: null
+                          limit: null
+                          resource: expenses
+                      feedback: {}
+                      created_at: '2024-07-05T13:12:25.543648+00:00'
+                      updated_at: '2024-07-05T13:12:25.543648+00:00'
+                graph:
+                  summary: Graph response
+                  value:
+                    data:
+                      id: msg6O3VP8XIFa
+                      chat_id: chAsf91e4r
+                      org_id: oriSOntNdZGd
+                      user_id: usx4eGq0uIPu
+                      author: SYSTEM
+                      message: null
+                      metadata:
+                        type: line_graph
+                        data_points:
+                          x_axis:
+                            - 2023-01
+                            - 2023-02
+                          y_axis:
+                            - 100
+                            - 200
+                        axis_info:
+                          x_axis: Month
+                          y_axis: Spend
+                        summary:
+                          heading: Monthly spend
+                          content:
+                            - Spend increased in February.
+                        query_params:
+                          filters: []
+                          order: null
+                          limit: null
+                          resource: expenses
+                      feedback: {}
+                      created_at: '2024-07-05T13:12:25.543648+00:00'
+                      updated_at: '2024-07-05T13:12:25.543648+00:00'
+                support:
+                  summary: Support response
+                  value:
+                    data:
+                      id: msg6O3VP8XIFa
+                      chat_id: chAsf91e4r
+                      org_id: oriSOntNdZGd
+                      user_id: usx4eGq0uIPu
+                      author: SYSTEM
+                      message: null
+                      metadata:
+                        type: support
+                        title: How to submit an expense
+                        content:
+                          - heading: Submit an expense
+                            text: Open Expenses and add a new expense.
+                            sub_points: []
+                        sources:
+                          - heading: Submit Expenses
+                            link: https://help.fylehq.com/en/articles/submit-expenses
+                      feedback: {}
+                      created_at: '2024-07-05T13:12:25.543648+00:00'
+                      updated_at: '2024-07-05T13:12:25.543648+00:00'
+                text_or_error:
+                  summary: Text insight or fallback response
+                  value:
+                    data:
+                      id: msg6O3VP8XIFa
+                      chat_id: chAsf91e4r
+                      org_id: oriSOntNdZGd
+                      user_id: usx4eGq0uIPu
+                      author: SYSTEM
+                      message: No matching expenses were found.
+                      metadata: {}
+                      feedback: {}
+                      created_at: '2024-07-05T13:12:25.543648+00:00'
+                      updated_at: '2024-07-05T13:12:25.543648+00:00'
         '400':
           description: |
             Bad request. Also returned when `chat_id` does not match a chat owned by the authenticated
@@ -575,6 +671,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -633,6 +730,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -839,6 +937,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -897,6 +996,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -1097,6 +1197,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -1156,6 +1257,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -1278,6 +1380,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1327,6 +1430,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -1476,6 +1580,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1533,6 +1638,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -1599,6 +1705,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1640,6 +1747,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1691,6 +1799,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -1736,6 +1845,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1787,6 +1897,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -1832,6 +1943,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -1881,6 +1993,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -2091,6 +2204,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2300,6 +2414,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2377,6 +2492,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2468,6 +2584,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -2540,6 +2657,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -2605,6 +2723,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2681,6 +2800,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2772,6 +2892,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -2844,6 +2965,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -2920,6 +3042,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -3106,6 +3229,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3163,6 +3287,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3205,6 +3330,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3253,6 +3379,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3316,6 +3443,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -3372,6 +3500,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -3421,6 +3550,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3506,6 +3636,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3552,6 +3683,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -3603,6 +3735,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3700,6 +3833,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -3796,6 +3930,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -3941,6 +4076,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -4020,6 +4156,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       message:
                         type: string
@@ -4044,6 +4181,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -4159,6 +4297,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -4430,6 +4569,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -4745,6 +4885,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -4785,6 +4926,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -4836,6 +4978,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -4892,6 +5035,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5013,6 +5157,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -5062,6 +5207,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5153,6 +5299,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5223,6 +5370,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -5405,6 +5553,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5449,6 +5598,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -5580,6 +5730,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5659,6 +5810,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       message:
                         type: string
@@ -5683,6 +5835,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -5872,6 +6025,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -5981,6 +6135,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -6212,6 +6367,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -6272,6 +6428,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -6327,6 +6484,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -6449,6 +6607,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -6545,6 +6704,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -6649,6 +6809,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -6771,6 +6932,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -6867,6 +7029,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -7083,6 +7246,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -7243,6 +7407,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -7334,6 +7499,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -7499,6 +7665,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -7556,6 +7723,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -7802,6 +7970,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -7864,6 +8033,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -7926,6 +8096,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -7998,6 +8169,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -8060,6 +8232,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -8432,6 +8605,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -8471,6 +8645,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -8522,6 +8697,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -8566,6 +8742,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -8620,6 +8797,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -8699,6 +8877,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       message:
                         type: string
@@ -8723,6 +8902,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -8757,6 +8937,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -8808,6 +8989,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -8871,6 +9053,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -8909,6 +9092,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -8957,6 +9141,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9012,6 +9197,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9069,6 +9255,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9126,6 +9313,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9183,6 +9371,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9240,6 +9429,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9297,6 +9487,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9354,6 +9545,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9411,6 +9603,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9469,6 +9662,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9484,6 +9678,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -9529,6 +9724,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -9582,6 +9778,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9634,6 +9831,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -9687,6 +9885,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9739,6 +9938,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -9790,6 +9990,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -9852,6 +10053,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -10081,6 +10283,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10166,6 +10369,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10222,6 +10426,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10284,6 +10489,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -10339,6 +10545,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -10388,6 +10595,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10444,6 +10652,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10506,6 +10715,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -10555,6 +10765,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10611,6 +10822,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10673,6 +10885,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -10722,6 +10935,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10778,6 +10992,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10834,6 +11049,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10890,6 +11106,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -10935,6 +11152,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -10988,6 +11206,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -11045,6 +11264,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -11102,6 +11322,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -11212,6 +11433,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11456,6 +11678,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11548,6 +11771,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11597,6 +11821,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -11658,6 +11883,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11721,6 +11947,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11784,6 +12011,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11847,6 +12075,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11910,6 +12139,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -11973,6 +12203,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -12236,6 +12467,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -12331,6 +12563,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -12376,6 +12609,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -12430,6 +12664,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13093,6 +13328,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -13145,6 +13381,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13196,6 +13433,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -13256,6 +13494,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13310,6 +13549,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13366,6 +13606,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13424,6 +13665,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13480,6 +13722,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13538,6 +13781,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13596,6 +13840,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13713,6 +13958,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -13946,68 +14192,12 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
                   data:
                     $ref: '#/components/schemas/statement_archived_cards_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
-  /admin/statements/archived_cards/ignore:
-    post:
-      x-internal: false
-      tags:
-        - Statements
-      summary: Ignore archived cards present in the statement
-      description: |
-        Ignores archived cards present in the statement
-      operationId: ignore_archived_cards
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/statement_archived_cards_ignore_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - data
-                properties:
-                  data:
-                    type: object
-                    description: Empty object on successfully ignoring archived cards
         '400':
           description: Bad request
           content:
@@ -14099,6 +14289,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -14425,6 +14616,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -14485,6 +14677,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -14550,6 +14743,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -14595,6 +14789,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -14615,7 +14810,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/401'
   /admin/expenses/duplicate_sets/stats:
-    get:
+    post:
       x-internal: false
       tags:
         - Expenses
@@ -14688,6 +14883,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -14747,6 +14943,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -14796,6 +14993,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -14856,6 +15054,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -14917,6 +15116,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -15012,6 +15212,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -15257,6 +15458,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -15276,6 +15478,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -15403,6 +15606,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -15492,6 +15696,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -15585,6 +15790,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -15780,6 +15986,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -15995,6 +16202,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -16081,6 +16289,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       error:
                         type: string
@@ -16144,6 +16353,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -16743,6 +16953,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -16881,6 +17092,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -17004,9 +17216,14 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
                   data:
                     $ref: '#/components/schemas/advance_request_custom_fields_out'
         '400':
@@ -17058,6 +17275,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -17205,6 +17423,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -17350,6 +17569,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -17429,6 +17649,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/bulk_error'
                   - type: object
+                    additionalProperties: false
                     properties:
                       message:
                         type: string
@@ -17453,6 +17674,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 properties:
                   message:
                     type: string
@@ -17637,6 +17859,232 @@ components:
           description: |
             Unique identifier of the Copilot chat to delete.
           example: chAsf91e4r
+    copilot_chat_message_empty_metadata_out:
+      type: object
+      additionalProperties: false
+      maxProperties: 0
+      description: Returned for user messages, error responses, and text insights without query parameters.
+    copilot_chat_message_filter_condition_out:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - op
+        - value
+      properties:
+        field:
+          type: string
+        op:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: array
+              items:
+                type: string
+    copilot_chat_message_nested_filter_out:
+      type: object
+      description: A named group of field conditions, such as and, or, or not.
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/copilot_chat_message_filter_condition_out'
+    copilot_chat_message_filter_out:
+      oneOf:
+        - $ref: '#/components/schemas/copilot_chat_message_filter_condition_out'
+        - $ref: '#/components/schemas/copilot_chat_message_nested_filter_out'
+    copilot_chat_message_order_out:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - direction
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
+          enum:
+            - asc
+            - desc
+    copilot_chat_message_query_params_out:
+      type: object
+      additionalProperties: false
+      required:
+        - filters
+        - order
+        - resource
+      description: Parameters for opening the data behind an analytical answer. The limit is omitted when conversion fails.
+      properties:
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/copilot_chat_message_filter_out'
+          nullable: true
+        order:
+          type: array
+          items:
+            $ref: '#/components/schemas/copilot_chat_message_order_out'
+          nullable: true
+        limit:
+          type: integer
+          nullable: true
+        resource:
+          type: string
+          nullable: true
+          enum:
+            - expenses
+            - reports
+            - corporate_card_transactions
+            - corporate_cards
+            - null
+    copilot_chat_message_single_value_metadata_out:
+      type: object
+      additionalProperties: false
+      required:
+        - query_params
+      description: Returned for a nonzero single-value analytical insight when query parameters are available.
+      properties:
+        query_params:
+          $ref: '#/components/schemas/copilot_chat_message_query_params_out'
+    copilot_chat_message_stack_bar_graph_axis_out:
+      type: object
+      additionalProperties: false
+      required:
+        - stack
+        - value
+      properties:
+        stack:
+          type: string
+        value:
+          type: number
+    copilot_chat_message_graph_metadata_out:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - axis_info
+        - summary
+        - query_params
+      properties:
+        type:
+          type: string
+          enum:
+            - bar_graph
+            - line_graph
+            - scatter_graph
+            - stacked_bar_graph
+            - pie_chart
+        data_points:
+          type: object
+          additionalProperties: false
+          required:
+            - x_axis
+            - y_axis
+          properties:
+            x_axis:
+              type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: number
+            y_axis:
+              description: Scalar values or, for stacked bar graphs, arrays of stack/value objects.
+              oneOf:
+                - type: array
+                  items:
+                    oneOf:
+                      - type: string
+                      - type: number
+                - type: array
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/copilot_chat_message_stack_bar_graph_axis_out'
+        axis_info:
+          type: object
+          additionalProperties: false
+          required:
+            - x_axis
+            - y_axis
+          properties:
+            x_axis:
+              type: string
+              nullable: true
+            y_axis:
+              type: string
+              nullable: true
+        summary:
+          type: object
+          additionalProperties: false
+          required:
+            - heading
+            - content
+          properties:
+            heading:
+              type: string
+              nullable: true
+            content:
+              type: array
+              items:
+                type: string
+              nullable: true
+        query_params:
+          $ref: '#/components/schemas/copilot_chat_message_query_params_out'
+    copilot_chat_message_support_metadata_out:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - title
+        - content
+        - sources
+      properties:
+        type:
+          type: string
+          enum:
+            - support
+        title:
+          type: string
+        content:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - heading
+              - text
+              - sub_points
+            properties:
+              heading:
+                type: string
+                nullable: true
+              text:
+                type: string
+                nullable: true
+              sub_points:
+                type: array
+                items:
+                  type: string
+                nullable: true
+        sources:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - heading
+              - link
+            properties:
+              heading:
+                type: string
+                nullable: true
+              link:
+                type: string
+                nullable: true
     copilot_chat_message_out:
       type: object
       additionalProperties: false
@@ -17680,21 +18128,34 @@ components:
           type: string
           nullable: true
           description: |
-            Text content of the message.
+            Text content of a user message, single-value insight, or error response. Graph and support
+            responses have a null message and put their content in metadata.
           example: Top 3 spenders
         metadata:
-          type: object
-          additionalProperties: true
           description: |
-            Free-form metadata generated by Copilot for this message, such as graph data points.
-            Structure varies by query type.
-          example: {}
+            Response-specific content. Support and graph responses identify their type inside metadata;
+            single-value insights may contain query_params; text responses and user messages use {}.
+          anyOf:
+            - $ref: '#/components/schemas/copilot_chat_message_empty_metadata_out'
+            - $ref: '#/components/schemas/copilot_chat_message_single_value_metadata_out'
+            - $ref: '#/components/schemas/copilot_chat_message_graph_metadata_out'
+            - $ref: '#/components/schemas/copilot_chat_message_support_metadata_out'
         feedback:
           type: object
-          additionalProperties: true
+          additionalProperties: false
           description: |
             Feedback recorded for this message, if any.
           example: {}
+          properties:
+            comment:
+              type: string
+              nullable: true
+            sentiment:
+              type: string
+              enum:
+                - positive
+                - negative
+              nullable: true
         created_at:
           $ref: '#/components/schemas/created_at'
         updated_at:
@@ -18045,6 +18506,7 @@ components:
       properties:
         data:
           type: object
+          additionalProperties: false
           required:
             - delete_count
             - projects
@@ -18170,6 +18632,7 @@ components:
       properties:
         data:
           type: object
+          additionalProperties: false
           properties:
             delete_count:
               type: integer
@@ -18319,6 +18782,7 @@ components:
       properties:
         data:
           type: object
+          additionalProperties: false
           required:
             - delete_count
             - categories
@@ -18346,6 +18810,21 @@ components:
           maxLength: 255
           example: Engine
           description: Represents the name of the system category.
+    any_type:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: array
+          items:
+            $ref: '#/components/schemas/any_type'
+        - type: object
+          additionalProperties:
+            $ref: '#/components/schemas/any_type'
+    null_field:
+      type: string
+      nullable: true
     category_ids:
       type: array
       description: |
@@ -18412,7 +18891,9 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
           nullable: true
           description: |
             This specifies the default value of the expense fields.
@@ -18494,11 +18975,13 @@ components:
             - Chai
             - Coffee
         default_value:
-          type: string
+          anyOf:
+            - $ref: '#/components/schemas/any_type'
+            - $ref: '#/components/schemas/null_field'
+          nullable: true
           description: |
             This specifies the default value of the expense fields.
           example: Coffee
-          nullable: true
         placeholder:
           type: string
           nullable: true
@@ -18991,6 +19474,7 @@ components:
       properties:
         data:
           type: object
+          additionalProperties: false
           required:
             - delete_count
             - per_diem_rates
@@ -19187,6 +19671,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             required:
               - rate
               - limit
@@ -19374,6 +19859,7 @@ components:
       properties:
         data:
           type: object
+          additionalProperties: false
           required:
             - delete_count
             - mileage_rates
@@ -19521,9 +20007,6 @@ components:
           type: string
           nullable: true
           example: Outbound Sales
-    null_field:
-      type: string
-      nullable: true
     timestamptz_utc:
       type: string
       format: date-time
@@ -20407,6 +20890,7 @@ components:
             Configuration for the export.
     employees_exports_out:
       type: object
+      additionalProperties: false
       required:
         - created_at
         - updated_at
@@ -21082,7 +21566,7 @@ components:
           type: string
           nullable: true
           description: |
-            Date format to use for date fields in the export. This field is optional and can be null. Required for CSV and EXCEL export types.
+            Date format to use for date fields in the export. This field is required and can be null.
           example: YYYY-MM-DD
     employees_export_configuration_out:
       type: object
@@ -21213,6 +21697,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -21267,6 +21754,9 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
+            - XLSX
+            - CSV
+            - PDF
           description: |
             Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
@@ -21425,6 +21915,7 @@ components:
             - $ref: '#/components/schemas/schedule_config_date_when'
     automate_report_submission_out:
       type: object
+      additionalProperties: false
       required:
         - id
         - description
@@ -21435,6 +21926,14 @@ components:
         - creator_user_id
         - creator_user
       properties:
+        creator_type:
+          type: string
+          description: Type of actor that created the automation.
+        next_at:
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          nullable: true
+          description: Next scheduled submission time.
         id:
           $ref: '#/components/schemas/id_string'
         description:
@@ -21667,6 +22166,7 @@ components:
       example: PERSONAL_CASH_ACCOUNT
     account_out_embed:
       type: object
+      additionalProperties: false
       required:
         - id
         - type
@@ -21980,6 +22480,7 @@ components:
             List of report_approval objects
     file_out_embed:
       type: object
+      additionalProperties: false
       required:
         - id
         - name
@@ -22204,6 +22705,7 @@ components:
       example: Uber
     matched_corporate_card_transaction_out_embed:
       type: object
+      additionalProperties: false
       nullable: true
       required:
         - id
@@ -23347,6 +23849,7 @@ components:
             type: string
         accounting_export_summary:
           type: object
+          additionalProperties: false
           description: |
             Summary of accounting export for this expense.
           properties:
@@ -23944,6 +24447,7 @@ components:
           description: Stats grouped by expense state
           items:
             type: object
+            additionalProperties: false
             required:
               - count
               - total_amount
@@ -23964,6 +24468,7 @@ components:
                   - $ref: '#/components/schemas/expense_state'
                 description: Expense state
         - type: object
+          additionalProperties: false
           title: Overall stats
           description: Overall stats without state grouping
           required:
@@ -24436,6 +24941,7 @@ components:
           example: tx0agOdICdbV
     expense_permissions_out:
       type: object
+      additionalProperties: false
       required:
         - can_delete
         - can_edit
@@ -24444,6 +24950,8 @@ components:
         - can_assign
         - can_add_to_report
       properties:
+        id:
+          $ref: '#/components/schemas/id_string'
         can_delete:
           type: boolean
           description: |
@@ -24656,6 +25164,7 @@ components:
             the corporate card transaction.
     advance_out_embed:
       type: object
+      additionalProperties: false
       nullable: true
       required:
         - id
@@ -24664,6 +25173,8 @@ components:
         - advance_request_id
         - seq_num
       properties:
+        code:
+          $ref: '#/components/schemas/code'
         id:
           type: string
           maxLength: 255
@@ -25037,6 +25548,7 @@ components:
           description: Stats grouped by advance request state
           items:
             type: object
+            additionalProperties: false
             required:
               - count
               - total_amount
@@ -25065,6 +25577,7 @@ components:
                   - SENT_BACK
                 description: Advance request state.
         - type: object
+          additionalProperties: false
           title: Overall stats
           description: Overall stats without state grouping.
           required:
@@ -25253,6 +25766,7 @@ components:
           example: approver@example.com
     advance_request_out_embed:
       type: object
+      additionalProperties: false
       nullable: true
       required:
         - id
@@ -25507,6 +26021,7 @@ components:
           example: id=in.('adv1263', 'adv1569')
     advances_stats_out:
       type: object
+      additionalProperties: false
       required:
         - count
         - total_amount
@@ -25725,6 +26240,7 @@ components:
           example: id=in.('adr1263', 'adr1569')
     advance_refunds_stats_out:
       type: object
+      additionalProperties: false
       required:
         - count
         - total_amount
@@ -25980,6 +26496,7 @@ components:
       type: array
       items:
         type: object
+        additionalProperties: false
         required:
           - last_reminded_at
           - type
@@ -26149,6 +26666,7 @@ components:
           example: uswjwgnwwgo
     reimbursement_out_minimal:
       type: object
+      additionalProperties: false
       nullable: true
       required:
         - id
@@ -26408,6 +26926,7 @@ components:
             List of comments on the report
         accounting_export_summary:
           type: object
+          additionalProperties: false
           description: |
             Summary of accounting export for this report.
           properties:
@@ -26750,7 +27269,7 @@ components:
         - reimbursable_amount
         - reimbursable_report_ids
         - closable_report_ids
-      additionalProperties: true
+      additionalProperties: false
       properties:
         selected_reimbursable_amount:
           allOf:
@@ -26858,6 +27377,7 @@ components:
           description: Stats grouped by report state
           items:
             type: object
+            additionalProperties: false
             required:
               - count
               - total_amount
@@ -26915,6 +27435,7 @@ components:
                 description: Sum of reimbursable amounts for matching reports in this state.
                 example: 500
         - type: object
+          additionalProperties: false
           title: Overall stats
           description: Overall stats without state grouping (response for older mobile app versions).
           required:
@@ -26925,6 +27446,9 @@ components:
             - failed_amount
             - failed_count
           properties:
+            reimbursable_amount:
+              type: number
+              description: Total reimbursable amount for matching reports.
             count:
               type: integer
               nullable: false
@@ -27377,7 +27901,7 @@ components:
       type: object
       additionalProperties: true
       properties:
-        is_column_header_included:
+        is_header_visible:
           type: boolean
           description: |
             Whether to include column headers in the export file.
@@ -27405,6 +27929,11 @@ components:
           description: |
             Date format to use for date fields in the export. This field is optional and can be null.
           example: MM/DD/YYYY
+        include_receipts:
+          type: boolean
+          description: |
+            Whether to include receipts in the export.
+          example: true
     reports_export_configuration_out:
       type: object
       additionalProperties: false
@@ -27520,6 +28049,7 @@ components:
           $ref: '#/components/schemas/id_string'
     corporate_card_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -27790,6 +28320,7 @@ components:
           example: user_id=eq.null
     corporate_card_stats_out:
       type: object
+      additionalProperties: false
       required:
         - count
         - transactions_count
@@ -28178,6 +28709,7 @@ components:
           example: Bank Feed
     corporate_card_duplicate_suggestion_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -28244,6 +28776,7 @@ components:
         - id
     corporate_card_archive_suggestion_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -28578,6 +29111,7 @@ components:
           $ref: '#/components/schemas/text_detail'
     corporate_card_transaction_list_out:
       type: object
+      additionalProperties: false
       properties:
         id:
           allOf:
@@ -28883,7 +29417,22 @@ components:
         - corporate_card_id
     corporate_card_transaction_post_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of the Capital One virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -29113,6 +29662,7 @@ components:
           example: amount=gt.0&amount=lt.1000&created_at=gt.2021-01-01T00:00:00.000Z&created_at=lt.2021-12-31T23:59:59.999Z
     corporate_card_transactions_stats_out:
       type: object
+      additionalProperties: false
       required:
         - count
         - debit_amount
@@ -29147,6 +29697,7 @@ components:
         - id
     corporate_card_transactions_delete_summary_out:
       type: object
+      additionalProperties: false
       required:
         - delete_count
         - delete_amount
@@ -29243,7 +29794,22 @@ components:
         - user_id
     corporate_card_transaction_assign_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of the Capital One virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -29478,7 +30044,22 @@ components:
         - id
     corporate_card_transaction_unassign_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of the Capital One virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -29695,7 +30276,22 @@ components:
         - is_exported
     corporate_card_transaction_mark_personal_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of the Capital One virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -29904,7 +30500,22 @@ components:
         - is_exported
     corporate_card_transaction_unmark_personal_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: Last four digits of the Capital One virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -30114,7 +30725,18 @@ components:
         - is_exported
     corporate_card_transaction_ignore_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -30580,7 +31202,18 @@ components:
         - expense_ids
     corporate_card_transaction_match_out:
       type: object
+      additionalProperties: false
       properties:
+        transaction_status:
+          type: string
+          enum:
+            - POSTED
+            - PENDING
+          description: Whether the bank transaction is posted or pending.
+        bank_transaction_number:
+          type: string
+          nullable: true
+          description: External bank reference number for Amex transactions.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -31258,7 +31891,16 @@ components:
           nullable: true
     virtual_card_out:
       type: object
+      additionalProperties: false
       properties:
+        funding_card_last_five:
+          type: string
+          nullable: true
+          description: Last five digits of the funding card.
+        monthly_limit:
+          type: number
+          nullable: true
+          description: Monthly spending limit of the virtual card.
         id:
           allOf:
             - $ref: '#/components/schemas/id_string'
@@ -31289,6 +31931,7 @@ components:
             - ACTIVE
             - PREACTIVE
             - INACTIVE
+            - IN_PROGRESS
             - EXPIRED
             - DELETED
             - USED
@@ -31360,6 +32003,7 @@ components:
         - id
     virtual_cards_get_current_balance_out:
       type: object
+      additionalProperties: false
       properties:
         current_amount:
           type: number
@@ -31370,6 +32014,7 @@ components:
         - current_amount
     virtual_cards_show_card_details_out:
       type: object
+      additionalProperties: false
       properties:
         full_card_number:
           type: string
@@ -31653,6 +32298,7 @@ components:
             List of comments on the report
         accounting_export_summary:
           type: object
+          additionalProperties: false
           description: |
             Summary of accounting export for this report.
           properties:
@@ -31866,6 +32512,7 @@ components:
           example: 100
     employee_account_summary_out:
       type: object
+      additionalProperties: false
       required:
         - id
         - created_at
@@ -32080,6 +32727,7 @@ components:
       example: 2022-02
     spend_overview_summary_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - amount
@@ -32101,6 +32749,7 @@ components:
       example: -4.95
     spend_overview_by_merchant_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - merchant_name
@@ -32124,6 +32773,7 @@ components:
       example: Westeros / Casterly rocks
     spend_overview_by_project_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - project_id
@@ -32150,6 +32800,7 @@ components:
       example: Wildlings / Thenns
     spend_overview_by_category_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - category_id
@@ -32176,6 +32827,7 @@ components:
       example: Knights / Kingsguard
     spend_overview_by_department_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - department_id
@@ -32196,6 +32848,7 @@ components:
           $ref: '#/components/schemas/spend_overview_change_percentage'
     spend_overview_by_user_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - user_id
@@ -32219,6 +32872,7 @@ components:
           $ref: '#/components/schemas/spend_overview_change_percentage'
     spend_overview_by_corporate_card_data_out:
       type: object
+      additionalProperties: false
       nullable: false
       required:
         - card_id
@@ -32570,6 +33224,7 @@ components:
           description: End date of the current budget interval
         budget_creator:
           type: object
+          additionalProperties: false
           properties:
             id:
               $ref: '#/components/schemas/id_string'
@@ -33251,6 +33906,23 @@ components:
         enable_individual_per_diem_rates:
           type: boolean
           nullable: true
+    org_settings_activity_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - allowed
+        - enabled
+        - keys
+      properties:
+        allowed:
+          type: boolean
+        enabled:
+          type: boolean
+        keys:
+          type: array
+          items:
+            type: string
+          nullable: true
     org_settings_tally_settings_out:
       type: object
       additionalProperties: false
@@ -33521,6 +34193,105 @@ components:
         transaction_mandatory_fields:
           type: object
           additionalProperties: true
+          required:
+            - category
+            - cost_center
+            - flight_travel_class
+            - hotel_check_in
+            - hotel_check_out
+            - hotel_city
+            - project
+            - purpose
+            - train_travel_class
+            - vendor
+          properties:
+            category:
+              type: boolean
+              nullable: true
+            cost_center:
+              type: boolean
+              nullable: true
+            flight_travel_class:
+              type: boolean
+              nullable: true
+            hotel_check_in:
+              type: boolean
+              nullable: true
+            hotel_check_out:
+              type: boolean
+              nullable: true
+            hotel_city:
+              type: boolean
+              nullable: true
+            project:
+              type: boolean
+              nullable: true
+            purpose:
+              type: boolean
+              nullable: true
+            train_travel_class:
+              type: boolean
+              nullable: true
+            vendor:
+              type: boolean
+              nullable: true
+          nullable: true
+    org_settings_org_user_mandatory_fields_out:
+      type: object
+      additionalProperties: false
+      required:
+        - approver1
+        - approver2
+        - approver3
+        - bank_details
+        - business_unit
+        - department
+        - employee_id
+        - joining_dt
+        - level
+        - location
+        - mobile
+        - sub_department
+        - title
+      properties:
+        approver1:
+          type: boolean
+          nullable: true
+        approver2:
+          type: boolean
+          nullable: true
+        approver3:
+          type: boolean
+          nullable: true
+        bank_details:
+          type: boolean
+          nullable: true
+        business_unit:
+          type: boolean
+          nullable: true
+        department:
+          type: boolean
+          nullable: true
+        employee_id:
+          type: boolean
+          nullable: true
+        joining_dt:
+          type: boolean
+          nullable: true
+        level:
+          type: boolean
+          nullable: true
+        location:
+          type: boolean
+          nullable: true
+        mobile:
+          type: boolean
+          nullable: true
+        sub_department:
+          type: boolean
+          nullable: true
+        title:
+          type: boolean
           nullable: true
     org_settings_user_fields_settings_out:
       type: object
@@ -33538,8 +34309,10 @@ components:
           nullable: true
         org_user_mandatory_fields:
           type: object
-          additionalProperties: true
           nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_org_user_mandatory_fields_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
     org_settings_logo_settings_out:
       type: object
       additionalProperties: false
@@ -33696,13 +34469,29 @@ components:
         advance_request_mandatory_fields:
           type: object
           additionalProperties: true
+          required:
+            - activity
+          properties:
+            activity:
+              type: boolean
+              nullable: true
           nullable: true
+    org_settings_expense_feature_settings_out:
+      type: object
+      additionalProperties: false
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
     org_settings_partial_save_expense_settings_out:
       type: object
       additionalProperties: false
       required:
         - enabled
       properties:
+        allowed:
+          type: boolean
         enabled:
           type: boolean
     org_settings_expense_settings_out:
@@ -33717,8 +34506,10 @@ components:
           nullable: true
         split_expense_settings:
           type: object
-          additionalProperties: true
           nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_expense_feature_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
         partial_save_expense_settings:
           $ref: '#/components/schemas/org_settings_partial_save_expense_settings_out'
     org_settings_integrations_settings_out:
@@ -34522,8 +35313,10 @@ components:
             - $ref: '#/components/schemas/org_settings_null_out'
         activity_settings:
           type: object
-          additionalProperties: true
           nullable: true
+          anyOf:
+            - $ref: '#/components/schemas/org_settings_activity_settings_out'
+            - $ref: '#/components/schemas/org_settings_null_out'
         accounting_export_settings:
           type: object
           nullable: true
@@ -36384,6 +37177,8 @@ components:
         expense_custom_fields_op:
           nullable: true
           type: object
+          additionalProperties:
+            type: string
           description: |
             Operator for the expense_custom_fields.
           properties:
@@ -36517,6 +37312,8 @@ components:
         employee_custom_fields_op:
           nullable: true
           type: object
+          additionalProperties:
+            type: string
           description: |
             Operator for the employee_custom_fields.
           properties:
@@ -37519,6 +38316,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             required:
               - ids
               - duplicate_line_item_statement_id
@@ -37964,7 +38762,13 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             properties:
+              currency:
+                $ref: '#/components/schemas/currency'
+              statement_line_item_id:
+                type: string
+                description: ID of the statement line item.
               description:
                 type: string
                 description: |
@@ -38171,6 +38975,7 @@ components:
         - statement_mapping
     summary_out:
       type: object
+      additionalProperties: false
       required:
         - id
         - status
@@ -38376,6 +39181,7 @@ components:
           example: 12
     reconciliation_summary_out:
       type: object
+      additionalProperties: false
       required:
         - reconciliation_summary
       properties:
@@ -38676,6 +39482,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             properties:
               card_number:
                 type: string
@@ -38834,6 +39641,7 @@ components:
           example: false
     matching_cards_out:
       type: object
+      additionalProperties: false
       required:
         - statement_card_number
         - matching_cards
@@ -38847,6 +39655,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             required:
               - id
               - card_number
@@ -38888,6 +39697,7 @@ components:
                 nullable: false
     rtf_missing_transaction_from_statement_out:
       type: object
+      additionalProperties: false
       required:
         - error
         - missing_rtf_transactions
@@ -38906,6 +39716,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             required:
               - amount
               - bank_name
@@ -39152,6 +39963,7 @@ components:
         - reconciliation_method
     rtf_stats_out:
       type: object
+      additionalProperties: false
       required:
         - last_uploaded_at
         - rtf_confidence
@@ -39302,6 +40114,7 @@ components:
           type: array
           items:
             type: object
+            additionalProperties: false
             required:
               - id
               - card_number
@@ -39335,21 +40148,6 @@ components:
                 description: |
                   Timestamp when the card was archived in Sage Exp Mgmt
                 nullable: true
-    statement_archived_cards_ignore_in:
-      allOf:
-        - $ref: '#/components/schemas/statement_archived_cards_in'
-        - type: object
-          properties:
-            archived_card_ids:
-              type: array
-              items:
-                type: string
-              description: |
-                List of archived card ids to be ignored in the statement.
-              example:
-                - bawownwrng
-          required:
-            - archived_card_ids
     expense_rule_if_out:
       type: object
       additionalProperties: false
@@ -39725,6 +40523,7 @@ components:
       additionalProperties: false
       items:
         type: object
+        additionalProperties: false
         required:
           - id
           - missing_amount
@@ -39934,6 +40733,7 @@ components:
       additionalProperties: false
       items:
         type: object
+        additionalProperties: false
         properties:
           id:
             allOf:
@@ -40071,6 +40871,7 @@ components:
           example: ''
     expenses_duplicate_sets_stats_out:
       type: object
+      additionalProperties: false
       required:
         - count
       properties:
@@ -40080,19 +40881,6 @@ components:
           description: |
             This field represents the total number of expense duplicate sets that match the criteria specified in the query_params within the body of the request.
           example: 45
-    any_type:
-      anyOf:
-        - type: string
-        - type: number
-        - type: integer
-        - type: boolean
-        - type: array
-          items:
-            $ref: '#/components/schemas/any_type'
-        - type: object
-          additionalProperties:
-            $ref: '#/components/schemas/any_type'
-        - {}
     feature_config_out:
       type: object
       additionalProperties: false
@@ -40689,6 +41477,7 @@ components:
           description: Purpose or description of this split line.
         matched_corporate_card_transaction:
           type: object
+          additionalProperties: false
           nullable: true
           description: Matched corporate card transaction details for this expense, if any.
           properties:
@@ -40794,6 +41583,7 @@ components:
           description: Purpose or description of the expense.
         matched_corporate_card_transaction:
           type: object
+          additionalProperties: false
           nullable: true
           description: Matched corporate card transaction details for this expense, if any.
           properties:
@@ -42176,7 +42966,7 @@ components:
           type: string
           nullable: true
           description: |
-            Date format to use for date fields in the export. This field is required and can be null. Required for CSV and EXCEL export types.
+            Date format to use for date fields in the export. This field is required and can be null.
           example: YYYY-MM-DD
     corporate_card_transactions_export_configuration_out:
       type: object
