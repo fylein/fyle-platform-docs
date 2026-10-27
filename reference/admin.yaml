@@ -17459,6 +17459,88 @@ paths:
         '401': {description: Unauthorized request}
         '403': {description: Forbidden}
         '404': {description: Organization or customer not found}
+  /admin/dwolla/customers/documents:
+    post:
+      tags: [Dwolla]
+      summary: Upload a Dwolla business-customer verification document
+      operationId: dwolla_customer_documents_admin_post
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [data]
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - verification_target
+                    - document_type
+                    - file_name
+                    - file_content_b64
+                  properties:
+                    verification_target:
+                      type: string
+                      enum: [individual, controller, business, dba]
+                    document_type:
+                      type: string
+                      enum: [passport, license, id_card, other]
+                    file_name:
+                      type: string
+                    file_content_b64:
+                      type: string
+                      format: byte
+      responses:
+        '200':
+          description: Document uploaded and verified against the scoped customer
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required: [status]
+                    properties:
+                      status:
+                        type: string
+                        enum: [pending, reviewed]
+        '400':
+          description: Invalid document, target, provider state, or response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, error, message]
+                properties:
+                  data: {nullable: true}
+                  error: {type: string}
+                  message: {type: string}
+        '404':
+          description: Scoped Dwolla customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/dwolla_customers:
     get:
       x-internal: false
