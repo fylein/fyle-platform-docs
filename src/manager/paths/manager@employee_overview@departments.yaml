@@ -1,0 +1,134 @@
+get:
+  x-internal: false
+  tags:
+    - Departments
+  summary: List departments in hierarchy organizations
+  operationId: employee_overview_departments_list
+  security:
+    - oauth2:
+        - '*'
+  description: |
+    Returns departments from organizations containing direct or indirect reportees
+    of the current user. An organization is eligible when at least one employee
+    other than the current user is in that user's approval hierarchy.
+
+    Provides Department filter options for the Employee Overview employee and
+    expense views. All departments in eligible organizations can be returned.
+
+    The current user must have the APPROVER role, and the employee hierarchy
+    overview feature must be enabled for the current organization.
+
+    Pass `org_id=eq.<org_id>` to list departments for one eligible organization.
+    Omit `org_id` to list departments across all eligible organizations.
+    Filtering by an organization outside this set returns an empty list with
+    `count: 0`. Users without reportees also receive an empty list.
+
+    Both enabled and disabled departments are returned by default. Pass
+    `is_enabled=eq.true` to return only enabled departments, or
+    `is_enabled=eq.false` to return only disabled departments.
+
+    Filtering, field selection, sorting and pagination are supported. See the
+    [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+    for query syntax.
+  parameters:
+    - in: query
+      name: org_id
+      required: false
+      description: Filter by organization; omit to return departments from all eligible organizations.
+      schema:
+        type: string
+        example: eq.orogUH5lw1QX
+    - $ref: ../../components/parameters/is_enabled.yaml
+    - in: query
+      name: limit
+      required: false
+      description: Maximum number of departments to return. Defaults to 200.
+      schema:
+        type: integer
+        default: 200
+        maximum: 200
+        example: 20
+    - in: query
+      name: offset
+      required: false
+      description: Number of departments to skip before returning results. Defaults to 0.
+      schema:
+        type: integer
+        default: 0
+        example: 0
+    - $ref: ../../components/parameters/order.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+              - count
+              - offset
+            properties:
+              count:
+                $ref: ../../components/schemas/count.yaml
+              offset:
+                $ref: ../../components/schemas/offset.yaml
+              data:
+                type: array
+                items:
+                  $ref: ../../components/schemas/department.yaml#/department_out
+          example:
+            count: 2
+            offset: 0
+            data:
+              - id: deptodb5SbYvEX
+                org_id: orogUH5lw1QX
+                created_at: '2026-03-07T15:59:57.832991+00:00'
+                updated_at: '2026-03-07T15:59:57.832991+00:00'
+                name: Sales
+                sub_department: null
+                display_name: Sales
+                is_enabled: true
+                code: null
+                description: Sales department
+                department_head_user_ids: []
+                department_head_users: []
+                doc_url: null
+              - id: deptodb666YvEX
+                org_id: orx9wL3mP2Qz
+                created_at: '2026-03-07T15:59:57.832991+00:00'
+                updated_at: '2026-03-07T15:59:57.832991+00:00'
+                name: Sales
+                sub_department: null
+                display_name: Sales
+                is_enabled: true
+                code: null
+                description: Subsidiary sales department
+                department_head_user_ids: []
+                department_head_users: []
+                doc_url: null
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Employee hierarchy overview is disabled or the current user does not have the APPROVER role.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                enum:
+                  - Employee hierarchy overview is not enabled for this org
+                  - You don't have permissions to access this resource
