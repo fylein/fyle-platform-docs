@@ -306,6 +306,7 @@ preview_from_statement_in:
           description: |
             Specifies the mapping of transaction date on the statement.
           example: txn date
+          nullable: true
         transaction_id_column:
           type: string
           description: |
@@ -317,16 +318,19 @@ preview_from_statement_in:
           description: |
             Specifies the mapping of amount on the statement.
           example: amount
+          nullable: true
         card_number_column:
           type: string
           description: |
             Specifies the mapping of card number on the statement.
           example: account number
+          nullable: true
         merchant_column:
           type: string
           description: |
             Specifies the mapping of merchant on the statement.
           example: Amazon
+          nullable: true
         foreign_amount_column:
           type: string
           description: |
@@ -350,33 +354,31 @@ preview_from_statement_in:
           description: |
             Specifies the bank name of the statement
           example: American Express
+          nullable: true
         is_debit_positive:
           type: boolean
           description: |
             Specifies the representation of the the amount in the statement, if true then the amount represented by |
             positive sign are debits, and if false then the amount represented by negative sign are debits.
           example: true
+          nullable: true
         name:
           type: string
           description: |
             Specifies the mapping name.
           example: USD
-          nullable: true
         card_network:
           type: string
           description: |
             Specifies the credit card network used by the card
           example: VISA
           nullable: true
-      required:
-        - transaction_date_column
-        - amount_column
-        - card_number_column
-        - merchant_column
-        - bank_name
-        - is_debit_positive
+      description: |
+        Column mapping used to preview the statement. All the columns are optional, so a partially filled mapping can be
+        previewed. Only the mapped columns are parsed, the rest of the fields are returned as null.
     ignored_line_item_ids:
       type: array
+      nullable: true
       items:
         type: string
       description: >
@@ -389,13 +391,19 @@ preview_from_statement_in:
         Card number from statement can be passed to get transactions only from specific card
       example: xxx5-4543
     start_date:
-      $ref: './fields.yaml#/timestamptz_utc'
+      type: string
+      format: date
+      nullable: true
       description: |
         Start date of the statement period
+      example: '2022-02-01'
     end_date:
-      $ref: './fields.yaml#/timestamptz_utc'
+      type: string
+      format: date
+      nullable: true
       description: |
         End date of the statement period
+      example: '2022-02-28'
   required:
     - id
     - statement_mapping
@@ -952,7 +960,6 @@ rtf_missing_transaction_from_statement_out:
         additionalProperties: false
         required:
           - amount
-          - bank_name
           - card_number
           - currency
           - description
@@ -963,19 +970,13 @@ rtf_missing_transaction_from_statement_out:
           - statement_line_item_id
           - transaction_date
           - transaction_id
-          - transaction_type
           - unique_id
         properties:
           amount:
-            type: string
+            type: number
             description: |
               Specifies the amount on the statement.
             example: 30
-          bank_name:
-            type: string
-            description: |
-              Specifies the bank name of the statement
-            example: American Express
           card_number:
             type: string
             description: |
@@ -993,7 +994,7 @@ rtf_missing_transaction_from_statement_out:
             nullable: true
             example: description
           foreign_amount:
-            type: string
+            type: number
             description: |
               Specifies the foreign amount on the statement.
             nullable: true
@@ -1028,12 +1029,7 @@ rtf_missing_transaction_from_statement_out:
             description: |
               Specifies the transaction id / unique id on the statement.
             nullable: true
-            example: USD
-          transaction_type:
-            type: string
-            description: |
-              Specifies the transaction type of the transactions on the statement (credit / debit).
-            example: debit
+            example: TXN1234
           unique_id:
             type: string
             description: |
@@ -1088,6 +1084,12 @@ rtf_stats_out:
 
 preview_out:
   properties:
+    validation_failures:
+      type: array
+      description: |
+        Errors found while processing statement
+      items:
+        $ref: '#/statement_validation_failure_out'
     no_of_debit:
       type: integer
       description: |
@@ -1122,37 +1124,36 @@ preview_out:
               Specifies the description of the transaction on the statement.
             nullable: true
             example: description
-          bank_name:
-            type: string
-            description: |
-              Specifies the bank name of the statement
-            example: American Express
           merchant:
             type: string
             description: |
               Specifies the merchant of the statement
+            nullable: true
             example: Amazon
           transaction_date:
             $ref: './fields.yaml#/timestamptz_utc'
             description: |
               Specifies the transaction date on the statement.
           amount:
-            type: string
+            type: number
             description: |
               Specifies the amount on the statement.
+            nullable: true
             example: 30
           card_number:
             type: string
             description: |
               Specifies the card number on the statement.
+            nullable: true
             example: xxxx-3343
           unique_id:
             type: string
             description: |
               Specifies the unique code / transaction id on the statement.
             example: ed0b2aa913c54b3f903a5030208e1872
+            nullable: true
           foreign_amount:
-            type: string
+            type: number
             description: |
               Specifies the foreign amount on the statement.
             nullable: true
@@ -1168,12 +1169,7 @@ preview_out:
             description: |
               Specifies the transaction id / unique id on the statement.
             nullable: true
-            example: USD
-          transaction_type:
-            type: string
-            description: |
-              Specifies the transaction type of the transactions on the statement (credit / debit).
-            example: debit
+            example: TXN1234
           post_date:
             $ref: './fields.yaml#/timestamptz_utc'
             description: |
@@ -1181,17 +1177,19 @@ preview_out:
             nullable: true
         required:
           - description
-          - bank_name
           - merchant
           - transaction_date
           - amount
           - card_number
+          - currency
+          - statement_line_item_id
           - unique_id
           - foreign_amount
           - foreign_currency
           - transaction_id
           - post_date
   required:
+    - validation_failures
     - transactions
     - no_of_debit
     - no_of_credit
@@ -1709,6 +1707,45 @@ unmatched_cards_out:
       description: |
         Indicates whether every distinct card number found in the statement is unmatched.
 
+statement_validation_failure_out:
+  type: object
+  additionalProperties: false
+  properties:
+    title:
+      type: string
+      description: |
+        Short, human readable name of the validation error.
+    description:
+      type: string
+      description: |
+        Human readable description of the validation error.
+    action:
+      type: string
+      description: |
+        Suggested action the user can take to resolve the validation error.
+    row_numbers:
+      type: array
+      nullable: true
+      items:
+        type: integer
+      description: |
+        1-indexed row numbers (including the header row) where the error was found. Multiple rows with the same error type and column are grouped together.
+    column_number:
+      type: integer
+      nullable: true
+      description: |
+        1-indexed column number where the error was found.
+    column_label:
+      type: string
+      nullable: true
+      description: |
+        Excel-style column label (A, B, C, ...) where the error was found.
+    column_name:
+      type: string
+      nullable: true
+      description: |
+        Name of the column header where the error was found.
+
 statement_upload_error_out:
   type: object
   additionalProperties: false
@@ -1721,51 +1758,15 @@ statement_upload_error_out:
       type: array
       nullable: true
       description: |
-        List of validation errors found while parsing the uploaded statement file.
+        List of validation errors found while parsing the statement file.
       items:
-        type: object
-        additionalProperties: false
-        properties:
-          title:
-            type: string
-            description: |
-              Short, human readable name of the validation error.
-          description:
-            type: string
-            description: |
-              Human readable description of the validation error.
-          action:
-            type: string
-            description: |
-              Suggested action the user can take to resolve the validation error.
-          row_numbers:
-            type: array
-            nullable: true
-            items:
-              type: integer
-            description: |
-              1-indexed row numbers (including the header row) where the error was found. Multiple rows with the same error type and column are grouped together.
-          column_number:
-            type: integer
-            nullable: true
-            description: |
-              1-indexed column number where the error was found.
-          column_label:
-            type: string
-            nullable: true
-            description: |
-              Excel-style column label (A, B, C, ...) where the error was found.
-          column_name:
-            type: string
-            nullable: true
-            description: |
-              Name of the column header where the error was found.
+        $ref: '#/statement_validation_failure_out'
     error:
       type: string
       enum:
-        - StatementUploadException
+        - SpreadsheetException
     message:
       type: string
       description: |
-        Summary message describing that errors were found while processing the uploaded file.
-      example: false
+        Summary message describing that errors were found while processing the file.
+      example: Errors were found while processing your file.
