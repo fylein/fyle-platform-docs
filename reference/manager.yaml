@@ -12,10 +12,13 @@ servers:
     description: US Region Server
   - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
-tags: []
+tags:
+  - name: Departments
+    description: Department filter options for Employee Overview.
 paths:
   /manager/employee_overview/expense_comments:
     get:
+      x-internal: false
       operationId: employee_overview_expense_comments_get
       tags:
         - Employees
@@ -31,6 +34,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -80,6 +84,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview/files/generate_urls/bulk:
     post:
+      x-internal: false
       operationId: employee_overview_files_generate_urls_bulk_post
       tags:
         - Employees
@@ -157,6 +162,7 @@ paths:
                       This error means current user does not have enough permissions to perform this operation.
   /manager/employee_overview/expense_policy_states:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: Get policy states of Expenses
@@ -232,6 +238,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview/hierarchy:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List employees hierarchy view
@@ -245,6 +252,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                 properties:
@@ -288,6 +296,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List expense overview of employees under the current user hierarchy
@@ -301,6 +310,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -350,6 +360,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview/stats:
     post:
+      x-internal: false
       operationId: employee_hierarchy_overview_stats_post
       tags:
         - Employees
@@ -428,6 +439,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview/employees:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List employees in hierarchy
@@ -484,8 +496,135 @@ paths:
                     type: string
                     description: |
                       This error means either the employee hierarchy overview feature is not enabled for the organization or the user does not have APPROVER role.
+  /manager/employee_overview/departments:
+    get:
+      x-internal: true
+      tags:
+        - Departments
+      summary: List departments in hierarchy organizations
+      operationId: employee_overview_departments_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns departments from organizations containing direct or indirect reportees
+        of the current user. An organization is eligible when at least one employee
+        other than the current user is in that user's approval hierarchy.
+
+        Provides Department filter options for the Employee Overview employee and
+        expense views. All departments in eligible organizations can be returned.
+
+        The current user must have the APPROVER role, and the employee hierarchy
+        overview feature must be enabled for the current organization.
+
+        Filtering, field selection, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by organization; omit to return departments from all eligible organizations.
+          schema:
+            type: string
+            example: eq.orogUH5lw1QX
+        - $ref: '#/components/parameters/is_enabled'
+        - in: query
+          name: limit
+          required: false
+          description: Maximum number of departments to return. Defaults to 200.
+          schema:
+            type: integer
+            default: 200
+            maximum: 200
+            example: 20
+        - in: query
+          name: offset
+          required: false
+          description: Number of departments to skip before returning results. Defaults to 0.
+          schema:
+            type: integer
+            default: 0
+            example: 0
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/department_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: deptodb5SbYvEX
+                    org_id: orogUH5lw1QX
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
+                  - id: deptodb666YvEX
+                    org_id: orx9wL3mP2Qz
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Subsidiary sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Employee hierarchy overview is disabled or the current user does not have the APPROVER role.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Employee hierarchy overview is not enabled for this org
+                      - You don't have permissions to access this resource
   /manager/employee_overview/expenses:
     get:
+      x-internal: false
       tags:
         - Employees
       summary: List expenses in hierarchy
@@ -499,6 +638,7 @@ paths:
             application/json:
               schema:
                 type: object
+                additionalProperties: false
                 required:
                   - data
                   - count
@@ -548,6 +688,7 @@ paths:
                       This error means the requested resource was not found or the requester doesn't have sufficient access.
   /manager/employee_overview/expenses/stats:
     post:
+      x-internal: false
       tags:
         - Employees
       summary: Expenses Stats of users in hierarchy
@@ -652,6 +793,24 @@ components:
       schema:
         type: string
         example: Ritas
+    is_enabled:
+      in: query
+      name: is_enabled
+      description: |
+        This param is used to filter records by
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    order:
+      in: query
+      name: order
+      description: |
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
+      schema:
+        type: string
+        example: updated_at.desc,id
   schemas:
     '400':
       type: object
@@ -1472,7 +1631,7 @@ components:
           type: string
           nullable: true
           example: London
-        display_name:
+        display:
           type: string
           nullable: true
         country:
@@ -2097,6 +2256,81 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id is provided by Sage Exp Mgmt to identify an object.
+        example: uswoirwlwwg
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
+    department_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - sub_department
+        - is_enabled
+        - code
+        - description
+        - department_head_user_ids
+        - doc_url
+        - department_head_users
+        - display_name
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://stoplight.io/
     currency:
       type: string
       description: |
@@ -2121,8 +2355,21 @@ components:
       description: |
         This id is provided by Sage Exp Mgmt to identify an object.
       example: 1234
+    account_type:
+      type: string
+      description: |
+        The type of account.
+      enum:
+        - PERSONAL_CASH_ACCOUNT
+        - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
+        - PERSONAL_ADVANCE_ACCOUNT
+        - COMPANY_EXPENSE_ACCOUNT
+        - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
+        - COMPANY_CATEGORY_ACCOUNT
+      example: PERSONAL_CASH_ACCOUNT
     account_out_embed:
       type: object
+      additionalProperties: false
       required:
         - id
         - type
@@ -2132,14 +2379,8 @@ components:
             - $ref: '#/components/schemas/id_string'
           example: acwbl222wlg
         type:
-          type: string
-          enum:
-            - PERSONAL_CASH_ACCOUNT
-            - PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT
-            - PERSONAL_ADVANCE_ACCOUNT
-            - COMPANY_EXPENSE_ACCOUNT
-            - COMPANY_CORPORATE_CREDIT_CARD_ACCOUNT
-            - COMPANY_CATEGORY_ACCOUNT
+          allOf:
+            - $ref: '#/components/schemas/account_type'
           example: PERSONAL_CASH_ACCOUNT
     mileage_rate_out_embed_for_expense:
       type: object
@@ -2274,6 +2515,20 @@ components:
         Expense custom fields
       items:
         $ref: '#/components/schemas/expense_custom_field'
+    expense_state:
+      type: string
+      description: |
+        The state of the Expense.
+      enum:
+        - COMPLETE
+        - DRAFT
+        - PAID
+        - PAYMENT_PROCESSING
+        - APPROVER_PENDING
+        - PAYMENT_PENDING
+        - APPROVED
+        - UNREPORTABLE
+      example: COMPLETE
     report_approval_out_embed:
       type: object
       additionalProperties: false
@@ -2381,8 +2636,7 @@ components:
             - null
           nullable: true
         amount:
-          anyOf:
-            - $ref: '#/components/schemas/null_field'
+          allOf:
             - $ref: '#/components/schemas/amount'
           nullable: true
         last_paid_at:
@@ -2424,6 +2678,7 @@ components:
             List of report_approval objects
     file_out_embed:
       type: object
+      additionalProperties: false
       required:
         - id
         - name
@@ -2457,6 +2712,10 @@ components:
         - id
         - comment_type
         - comment_text
+        - created_at
+        - updated_at
+        - creator_user_id
+        - creator_user
       properties:
         id:
           allOf:
@@ -2471,6 +2730,14 @@ components:
         comment_text:
           type: string
           description: Text content of the policy comment
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        creator_user_id:
+          $ref: '#/components/schemas/user_id'
+        creator_user:
+          $ref: '#/components/schemas/user_out_embed'
     expense_verification_out_embed:
       type: object
       additionalProperties: false
@@ -2650,6 +2917,7 @@ components:
       example: Uber
     matched_corporate_card_transaction_out_embed:
       type: object
+      additionalProperties: false
       nullable: true
       required:
         - id
@@ -2969,6 +3237,10 @@ components:
           type: string
           nullable: true
           example: '2020-07-20'
+        service_tax:
+          type: number
+          nullable: true
+          example: 2.5
     split_group_amount:
       type: number
       nullable: true
@@ -3298,6 +3570,7 @@ components:
         - approver_comments
         - verifier_comments
         - policy_checks
+        - c1_policy_violation_reasons
         - accounting_export_summary
         - report_last_paid_at
         - report_last_approved_at
@@ -3561,16 +3834,8 @@ components:
             has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
-          type: string
-          enum:
-            - COMPLETE
-            - DRAFT
-            - PAID
-            - PAYMENT_PROCESSING
-            - APPROVER_PENDING
-            - PAYMENT_PENDING
-            - APPROVED
-            - UNREPORTABLE
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
           description: The state of the Expense.
         state_display_name:
           type: string
@@ -3787,8 +4052,16 @@ components:
             - This is a comment by verifier
         policy_checks:
           $ref: '#/components/schemas/policy_checks'
+        c1_policy_violation_reasons:
+          type: array
+          nullable: true
+          description: |
+            C1 policy violations on this expense.
+          items:
+            type: string
         accounting_export_summary:
           type: object
+          additionalProperties: false
           description: |
             Summary of accounting export for this expense.
           properties:

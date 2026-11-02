@@ -795,6 +795,70 @@ spender_employee_out:
         List of users who are delegatees for this employee.
 
 
+approver_org_employee_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - user_id
+    - org_id
+    - email
+    - full_name
+    - roles
+    - commute_details
+    - mobile
+    - is_mobile_verified
+    - sms_opt_out_source
+    - is_enabled
+    - has_accepted_invite
+    - delegatees
+  properties:
+    id:
+      $ref: ./fields.yaml#/id_string
+    user_id:
+      $ref: ./fields.yaml#/user_id
+    org_id:
+      $ref: ./fields.yaml#/org_id
+    email:
+      $ref: ./fields.yaml#/email
+    full_name:
+      $ref: ./fields.yaml#/user_full_name
+    roles:
+      type: array
+      items:
+        $ref: ./fields.yaml#/role
+    commute_details:
+      $ref: ./fields.yaml#/commute_details
+    mobile:
+      type: string
+      nullable: true
+      example: '+12131234567'
+      description: Mobile number of the employee.
+    is_mobile_verified:
+      type: boolean
+      nullable: true
+      description: Whether the employee's mobile number is verified.
+      example: false
+    sms_opt_out_source:
+      type: string
+      nullable: true
+      maxLength: 255
+      description: Whether the employee opted out of SMS through the web app or SMS.
+      example: WEB_APP
+    is_enabled:
+      allOf:
+        - $ref: ./fields.yaml#/is_enabled
+      description: Whether the employee is enabled in the organisation.
+    has_accepted_invite:
+      $ref: ./fields.yaml#/has_accepted_invite
+    delegatees:
+      type: array
+      nullable: true
+      items:
+        $ref: ./fields.yaml#/delegatees
+      description: List of users who are delegatees for this employee.
+
+
 employees_upload_in:
   type: object
   properties:
@@ -1673,3 +1737,36 @@ employees_stats_out:
         type: integer
         description: Count of employees with the given role
         example: 10
+
+common_employee_mobile_verification_in:
+  type: object
+  additionalProperties: false
+  required:
+    - mobile_number
+  properties:
+    mobile_number:
+      type: string
+      description: Mobile number to check.
+      example: '+1234567890'
+
+common_employee_mobile_verification_out:
+  type: object
+  additionalProperties: false
+  required:
+    - is_mobile_number_verified
+  properties:
+    is_mobile_number_verified:
+      type: boolean
+      description: Whether the mobile number is verified for an employee.
+      example: true
+
+common_employee_approver_allowed_out:
+  type: object
+  additionalProperties: false
+  required:
+    - is_approver_allowed
+  properties:
+    is_approver_allowed:
+      type: boolean
+      description: Whether the user can be selected as an approver.
+      example: true

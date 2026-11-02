@@ -100,6 +100,7 @@ expense_out:
     - approver_comments
     - verifier_comments
     - policy_checks
+    - c1_policy_violation_reasons
     - accounting_export_summary
     - report_last_paid_at
     - report_last_approved_at
@@ -363,16 +364,8 @@ expense_out:
         has been already added to Sage Exp Mgmt or not.
       example: 'wgjwgo3ihwljnlsww'
     state:
-      type: string
-      enum:
-        - COMPLETE
-        - DRAFT
-        - PAID
-        - PAYMENT_PROCESSING
-        - APPROVER_PENDING
-        - PAYMENT_PENDING
-        - APPROVED
-        - UNREPORTABLE
+      allOf:
+        - $ref: './fields.yaml#/expense_state'
       description: The state of the Expense.
     state_display_name:
       type: string
@@ -596,8 +589,16 @@ expense_out:
         - 'This is a comment by verifier'
     policy_checks:
       $ref: './fields.yaml#/policy_checks'
+    c1_policy_violation_reasons:
+      type: array
+      nullable: true
+      description: |
+        C1 policy violations on this expense.
+      items:
+        type: string
     accounting_export_summary:
       type: object
+      additionalProperties: false
       description: |
         Summary of accounting export for this expense.
       properties:
@@ -1565,6 +1566,7 @@ expense_out_with_department_name:
 
 expense_out_embed:
   type: object
+  additionalProperties: false
   required:
     - id
     - currency
@@ -1628,16 +1630,8 @@ matched_expense_out_embed:
       nullable: true
       example: Team lunch
     state:
-      type: string
-      enum:
-        - COMPLETE
-        - DRAFT
-        - PAID
-        - PAYMENT_PROCESSING
-        - APPROVER_PENDING
-        - PAYMENT_PENDING
-        - APPROVED
-        - UNREPORTABLE
+      allOf:
+        - $ref: './fields.yaml#/expense_state'
       description: The state of the Expense.
     seq_num:
       type: string
@@ -1663,6 +1657,7 @@ matched_expense_out_embed:
 
 matched_corporate_card_transaction_out_embed:
   type: object
+  additionalProperties: false
   nullable: true
   required:
     - id
@@ -2166,6 +2161,7 @@ expense_check_policies_bulk_out:
   additionalProperties: False
   items:
     type: object
+    additionalProperties: false
     properties:
       id:
         allOf:
@@ -2219,6 +2215,7 @@ expenses_stats_out:
       description: Stats grouped by expense state
       items:
         type: object
+        additionalProperties: false
         required:
           - count
           - total_amount
@@ -2235,20 +2232,13 @@ expenses_stats_out:
             description: Sum of amounts for matching expenses in this state
             example: 44545.4
           state:
-            type: string
-            enum:
-              - COMPLETE
-              - DRAFT
-              - APPROVER_PENDING
-              - APPROVED
-              - PAYMENT_PENDING
-              - PAYMENT_PROCESSING
-              - PAID
-              - UNREPORTABLE
+            allOf:
+              - $ref: './fields.yaml#/expense_state'
             description: Expense state
     # NOTE: This is a hack to maintain backward compatibility with the existing response structure
     # TODO: @Dev to update the response once the hack is removed from platform-api
     - type: object
+      additionalProperties: false
       title: "Overall stats"
       description: Overall stats without state grouping
       required:
@@ -2480,6 +2470,7 @@ expense_check_mandatory_fields_bulk_out:
   additionalProperties: false
   items:
     type: object
+    additionalProperties: false
     required:
       - id
       - missing_amount
@@ -2926,6 +2917,7 @@ expense_permissions_in:
 
 expense_permissions_out:
   type: object
+  additionalProperties: false
   required:
     - can_delete
     - can_edit
@@ -2934,6 +2926,8 @@ expense_permissions_out:
     - can_assign
     - can_add_to_report
   properties:
+    id:
+      $ref: './fields.yaml#/id_string'
     can_delete:
       type: boolean
       description: |
@@ -3131,6 +3125,39 @@ expenses_merge_in:
       description: |
         Fields to be updated in the target expense.
 
+unlink_card_transaction_in:
+  type: object
+  additionalProperties: False
+  required:
+    - id
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      description: |
+        Unique identifier of the expense to unlink from its matched corporate card transaction.
+      example: txm3L9soGEt2
+
+unlink_card_transaction_out:
+  type: object
+  additionalProperties: False
+  required:
+    - user_created_expense
+    - auto_created_expense
+  properties:
+    user_created_expense:
+      allOf:
+        - $ref: '#/expense_out'
+      description: |
+        The original expense, now unlinked from the corporate card transaction. This is the
+        expense that was submitted in the request.
+    auto_created_expense:
+      allOf:
+        - $ref: '#/expense_out'
+      description: |
+        A new, system-generated expense created and linked in place of the original expense on
+        the corporate card transaction.
+
 expense_policy_comment_out_embed:
   type: object
   additionalProperties: false
@@ -3138,6 +3165,10 @@ expense_policy_comment_out_embed:
     - id
     - comment_type
     - comment_text
+    - created_at
+    - updated_at
+    - creator_user_id
+    - creator_user
   properties:
     id:
       allOf:
@@ -3152,3 +3183,51 @@ expense_policy_comment_out_embed:
     comment_text:
       type: string
       description: Text content of the policy comment
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed'
+
+expense_policy_comment_out:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - expense_id
+    - org_id
+    - comment_type
+    - comment_text
+    - created_at
+    - updated_at
+    - creator_user_id
+    - creator_user
+  properties:
+    id:
+      allOf:
+        - $ref: './fields.yaml#/id_string'
+      example: epc1a2f3farmk
+    expense_id:
+      $ref: './fields.yaml#/id_string'
+    org_id:
+      $ref: './fields.yaml#/org_id'
+    comment_type:
+      type: string
+      enum:
+        - LOST_RECEIPT_REASON
+        - POLICY_VIOLATION_REASON
+      description: Type of the policy comment
+    comment_text:
+      type: string
+      description: Text content of the policy comment
+    created_at:
+      $ref: './fields.yaml#/created_at'
+    updated_at:
+      $ref: './fields.yaml#/updated_at'
+    creator_user_id:
+      $ref: './fields.yaml#/user_id'
+    creator_user:
+      $ref: './user.yaml#/user_out_embed'

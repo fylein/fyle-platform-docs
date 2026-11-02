@@ -1,0 +1,132 @@
+get:
+  x-internal: true
+  tags:
+    - SMS Merchant Exclusions
+  security:
+    - oauth2: ['*']
+  summary: List employee SMS merchant exclusions
+  description: Returns SMS merchant exclusions belonging to the authenticated employee.
+  operationId: spender_employee_sms_merchant_exclusions_get
+  parameters:
+    - $ref: '../../components/parameters/id.yaml'
+    - $ref: '../../components/parameters/org_id.yaml'
+    - $ref: '../../components/parameters/user_id.yaml'
+    - in: query
+      name: merchant_pattern
+      description: Merchant pattern with a supported filtering operator.
+      schema:
+        type: string
+        example: eq.ikea
+    - $ref: '../../components/parameters/created_at.yaml'
+    - $ref: '../../components/parameters/updated_at.yaml'
+    - $ref: '../../components/parameters/order.yaml'
+    - in: query
+      name: offset
+      description: Number of records to skip.
+      schema:
+        type: integer
+        default: 0
+    - in: query
+      name: limit
+      description: Maximum number of records to return.
+      schema:
+        type: integer
+        maximum: 200
+        default: 200
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+              - count
+              - offset
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '../../components/schemas/sms_merchant_exclusion.yaml#/employee_sms_merchant_exclusion_out'
+              count:
+                $ref: '../../components/schemas/count.yaml'
+              offset:
+                $ref: '../../components/schemas/offset.yaml'
+    '400':
+      description: Invalid filter or pagination parameters
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+
+post:
+  x-internal: true
+  tags:
+    - SMS Merchant Exclusions
+  security:
+    - oauth2: ['*']
+  summary: Create or update an employee SMS merchant exclusion
+  description: Creates an employee-level exclusion when `id` is omitted or `null`, or updates the authenticated employee's exclusion identified by `id`.
+  operationId: spender_employee_sms_merchant_exclusions_post
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - data
+          properties:
+            data:
+              $ref: '../../components/schemas/sms_merchant_exclusion.yaml#/sms_merchant_exclusion_in'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required:
+              - data
+            properties:
+              data:
+                $ref: '../../components/schemas/sms_merchant_exclusion.yaml#/employee_sms_merchant_exclusion_out'
+    '400':
+      description: Invalid payload, blank merchant pattern, or an exclusion already present at employee or organisation level
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/403.yaml'
+    '404':
+      description: Employee SMS merchant exclusion not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
