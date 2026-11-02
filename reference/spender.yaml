@@ -4886,7 +4886,11 @@ paths:
         - Files
       summary: Create a file
       description: |
-        Create a file.
+        Create file metadata. Set `X-Fyle-File-Streaming-Supported` to `true` to
+        receive platform-api upload and download URLs. If the header is omitted or
+        `false`, the response contains S3 presigned URLs for compatibility.
+      parameters:
+        - $ref: '#/components/parameters/file_streaming_supported'
       requestBody:
         required: true
         content:
@@ -4944,7 +4948,11 @@ paths:
         - Files
       summary: Bulk create files
       description: |
-        Create files in bulk.
+        Create file metadata in bulk. Set `X-Fyle-File-Streaming-Supported` to
+        `true` to receive platform-api upload and download URLs. If the header is
+        omitted or `false`, the response contains S3 presigned URLs for compatibility.
+      parameters:
+        - $ref: '#/components/parameters/file_streaming_supported'
       requestBody:
         required: true
         content:
@@ -5018,9 +5026,15 @@ paths:
         - Files
       summary: Generate download and upload URLs
       description: |
-        Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
-        need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
-        The upload URL will be null if the file is linked to an expense or advance request in approved or higher state.
+        Generate upload and download URLs for a file. In platform streaming mode,
+        `requires_signed_url: true` returns a newly generated Fyle auth-service
+        signed download URL that is valid for five minutes. If the option is
+        `false` or omitted, the direct platform-api download URL is returned.
+        Signing changes only `download_url`; `upload_url` remains unchanged and is
+        null when the file is locked. Without the streaming header, the API returns
+        S3 presigned URLs for compatibility and does not apply Fyle URL signing.
+      parameters:
+        - $ref: '#/components/parameters/file_streaming_supported'
       operationId: files_generate_urls_post
       requestBody:
         required: true
@@ -5073,9 +5087,14 @@ paths:
         - Files
       summary: Bulk generate download and upload URLs
       description: |
-        Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
-        need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
-        The upload URL will be null if the file is linked to an expense or advance request in approved or higher state.
+        Generate upload and download URLs for multiple files. In platform streaming
+        mode, each item can independently request a newly generated Fyle
+        auth-service signed download URL with a five-minute validity. Signing
+        changes only `download_url`; `upload_url` remains unchanged and is null for
+        locked files. Without the streaming header, the API returns S3 presigned
+        URLs for compatibility and does not apply Fyle URL signing.
+      parameters:
+        - $ref: '#/components/parameters/file_streaming_supported'
       requestBody:
         required: true
         content:
@@ -5092,7 +5111,9 @@ paths:
                     $ref: '#/components/schemas/file_generate_urls_action_in'
                   example:
                     - id: sdfd2391
+                      requires_signed_url: false
                     - id: sdfd2392
+                      requires_signed_url: false
       responses:
         '200':
           description: OK
@@ -5112,13 +5133,13 @@ paths:
                       - id: sdfd2391
                         name: uber_expenses_vmrpw.pdf
                         content_type: application/pdf
-                        download_url: https://aaa.bbb.cc/x232sds
-                        upload_url: https://aaa.bbb.cc/x232sds
+                        download_url: https://us1.fylehq.com/platform/v1/spender/files/download?id=sdfd2391
+                        upload_url: https://us1.fylehq.com/platform/v1/spender/files/upload?id=sdfd2391
                       - id: sdfd2392
                         name: lyft_expenses_vmrpw.pdf
                         content_type: application/pdf
-                        download_url: https://aaa.bbb.cc/x22ddsds
-                        upload_url: https://aaa.bbb.cc/x22ddsds
+                        download_url: https://us1.fylehq.com/platform/v1/spender/files/download?id=sdfd2392
+                        upload_url: https://us1.fylehq.com/platform/v1/spender/files/upload?id=sdfd2392
         '400':
           description: Bad request
           content:
@@ -5196,7 +5217,8 @@ paths:
         - Files
       summary: Download a file
       description: |
-        Generates a download URL for a file and redirects client to that URL.
+        Authorizes files owned by the spender or attached to the spender's expense
+        or advance request, then redirects the client to the file download URL.
       parameters:
         - in: query
           name: id
@@ -19224,12 +19246,15 @@ components:
         download_url:
           type: string
           description: |
-            Link to download this file
+            Opaque URL used to download this file. This is a platform-api URL when
+            file streaming is requested and an S3 presigned URL in compatibility mode.
         upload_url:
           nullable: true
           type: string
           description: |
-            Link to upload contents of this file.
+            Opaque URL used to upload the contents of this file. This is a
+            platform-api URL when file streaming is requested and an S3 presigned
+            URL in compatibility mode.
             Returns null if linked to an expense or advance request in approved or higher state.
     file_generate_urls_action_in:
       type: object
@@ -19243,7 +19268,15 @@ components:
           nullable: false
           default: false
           description: |
-            Whether the download URL should be signed by the Fyle auth service.
+            Whether `download_url` should be signed by the Fyle auth service.
+            This applies only when `X-Fyle-File-Streaming-Supported` is `true`.
+            If `true`, each request returns a newly generated signed Fyle download
+            URL with a five-minute validity. If `false` or omitted, the response
+            contains the direct platform-api download URL. This option does not
+            change `upload_url`.
+      example:
+        id: fiH717IpzaTG
+        requires_signed_url: false
     file_generate_urls_action_out:
       type: object
       additionalProperties: false
@@ -19267,13 +19300,16 @@ components:
         download_url:
           type: string
           description: |
-            Link to download this file
+            Opaque URL used to download this file. Depending on the request, this
+            can be a direct platform-api URL, a signed Fyle URL, or an S3 presigned URL.
         upload_url:
           nullable: true
           type: string
           description: |
-            Link to upload contents of this file.
-            Returns null if linked to an expense or advance request in approved or higher state.
+            Opaque URL used to upload the contents of this file. Requesting a signed
+            download URL does not change this value. Returns null for manager
+            responses or if the file is linked to an expense or advance request in
+            approved or higher state.
     file_delete_action_in:
       type: object
       required:
@@ -25952,6 +25988,18 @@ components:
       schema:
         type: string
         example: in.(us123,us456)
+    file_streaming_supported:
+      name: X-Fyle-File-Streaming-Supported
+      in: header
+      required: false
+      description: |
+        Set to `true` to receive platform-api file transfer URLs. If this header is
+        omitted or set to `false`, file metadata and generate-URL APIs return S3
+        presigned URLs for compatibility with older clients.
+      schema:
+        type: boolean
+        default: false
+      example: true
     expense_id:
       in: query
       name: expense_id
