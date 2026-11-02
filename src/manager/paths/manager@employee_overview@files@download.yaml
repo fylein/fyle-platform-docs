@@ -1,0 +1,48 @@
+get:
+  x-internal: false
+  operationId: employee_overview_files_download_get
+  tags:
+    - Employees
+  summary: Download a file belonging to an employee in the current user's hierarchy
+  description: |
+    Validates that the requested file belongs to an employee in the current
+    approver's hierarchy and redirects the client to the file download URL.
+  parameters:
+    - in: query
+      name: id
+      required: true
+      description: ID of the file to download.
+      schema:
+        type: string
+        example: fiNhunGsCQJb
+  responses:
+    '302':
+      description: Redirect to the file download URL
+      headers:
+        Location:
+          schema:
+            type: string
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/400.yaml
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/401.yaml
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/403.yaml
+    '404':
+      description: File not found or not accessible through the current user's hierarchy
+      content:
+        application/json:
+          schema:
+            $ref: ../../components/schemas/404.yaml

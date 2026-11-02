@@ -46,12 +46,15 @@ file_out:
     download_url:
       type: string
       description: |
-        Link to download this file
+        Opaque URL used to download this file. This is a platform-api URL when
+        file streaming is requested and an S3 presigned URL in compatibility mode.
     upload_url:
       nullable: true
       type: string
       description: |
-        Link to upload contents of this file.
+        Opaque URL used to upload the contents of this file. This is a
+        platform-api URL when file streaming is requested and an S3 presigned
+        URL in compatibility mode.
         Returns null if linked to an expense or advance request in approved or higher state.
 
 
@@ -62,6 +65,20 @@ file_generate_urls_action_in:
   properties:
     id:
       $ref: './fields.yaml#/id_string'
+    requires_signed_url:
+      type: boolean
+      nullable: false
+      default: false
+      description: |
+        Whether `download_url` should be signed by the Fyle auth service.
+        This applies only when `X-Fyle-File-Streaming-Supported` is `true`.
+        If `true`, each request returns a newly generated signed Fyle download
+        URL with a five-minute validity. If `false` or omitted, the response
+        contains the direct platform-api download URL. This option does not
+        change `upload_url`.
+  example:
+    id: fiH717IpzaTG
+    requires_signed_url: false
 
 
 file_generate_urls_action_out:
@@ -87,13 +104,16 @@ file_generate_urls_action_out:
     download_url:
       type: string
       description: |
-        Link to download this file
+        Opaque URL used to download this file. Depending on the request, this
+        can be a direct platform-api URL, a signed Fyle URL, or an S3 presigned URL.
     upload_url:
       nullable: true
       type: string
       description: |
-        Link to upload contents of this file.
-        Returns null if linked to an expense or advance request in approved or higher state.
+        Opaque URL used to upload the contents of this file. Requesting a signed
+        download URL does not change this value. Returns null for manager
+        responses or if the file is linked to an expense or advance request in
+        approved or higher state.
 
 
 file_out_embed:
