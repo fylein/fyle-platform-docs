@@ -5,8 +5,15 @@ post:
     - Advances
   summary: Bulk generate download and upload URLs for advance request files
   description: |
-    Generate temporary signed URLs for downloading and uploading files associated with advance requests.
-    The upload URL will be null if the file is linked to an expense or advance request in approved or higher state.
+    Generate upload and download URLs for files associated with advance
+    requests. In platform streaming mode, each action can request newly
+    generated Fyle auth-service signed download URLs with a five-minute
+    validity. Signing changes only `download_url`; `upload_url` remains
+    unchanged and is null for locked files. Without the streaming header, the
+    API returns S3 presigned URLs for compatibility and does not apply Fyle URL
+    signing.
+  parameters:
+    - $ref: ../../components/parameters/file_streaming_supported.yaml
   requestBody:
     required: true
     content:
@@ -25,6 +32,7 @@ post:
                 - id: areqWQsueRHdy
                   file_ids:
                     - fiH717IpzaTG
+                  requires_signed_url: false
   responses:
     '200':
       description: OK
@@ -44,8 +52,8 @@ post:
                   - id: fiH717IpzaTG
                     name: foodreceipt.png
                     content_type: image/png
-                    download_url: https://s3.ap-south-1.amazonaws.com/fyle-storage-mumbai-3/2025-07-21/orLr77tpLxsk/receipts/fiH717IpzaTG.foodreceipt.png
-                    upload_url: https://s3.ap-south-1.amazonaws.com/fyle-storage-mumbai-3/2025-07-21/orLr77tpLxsk/receipts/fiH717IpzaTG.foodreceipt.png
+                    download_url: https://us1.fylehq.com/platform/v1/approver/files/download?id=fiH717IpzaTG
+                    upload_url: https://us1.fylehq.com/platform/v1/approver/files/upload?id=fiH717IpzaTG
     '400':
       description: Bad request
       content:
@@ -63,4 +71,4 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../../components/schemas/403.yaml 
+            $ref: ../../components/schemas/403.yaml

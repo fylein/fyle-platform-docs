@@ -3,12 +3,17 @@ post:
   operationId: employee_overview_files_generate_urls_bulk_post
   tags:
     - Employees
-  summary: Bulk generate download and upload URLs for files under the current user's hierarchy
+  summary: Bulk generate download URLs for files under the current user's hierarchy
   description: |
-    Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
-    need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
-    This API validates that all requested files belong to users in the approver's hierarchy,
-    then generates upload and download URLs for those files.
+    Validate that all requested files belong to users in the current approver's
+    hierarchy and generate download URLs for those files. Manager responses
+    always contain `upload_url: null`. In platform streaming mode, each item can
+    independently request a newly generated Fyle auth-service signed download
+    URL with a five-minute validity. Without the streaming header, the API
+    returns S3 presigned download URLs for compatibility and does not apply Fyle
+    URL signing.
+  parameters:
+    - $ref: ../../components/parameters/file_streaming_supported.yaml
   requestBody:
     required: true
     content:
@@ -25,7 +30,9 @@ post:
                 $ref: ../../components/schemas/file.yaml#/file_generate_urls_action_in
               example:
                 - id: fi123819sa
+                  requires_signed_url: false
                 - id: fi876833tu
+                  requires_signed_url: false
   responses:
     '200':
       description: OK
@@ -45,13 +52,13 @@ post:
                   - id: sdfd2391
                     name: uber_expenses_vmrpw.pdf
                     content_type: application/pdf
-                    download_url: https://aaa.bbb.cc/x232sds
-                    upload_url: https://aaa.bbb.cc/x232sds
+                    download_url: https://us1.fylehq.com/platform/v1/manager/employee_overview/files/download?id=sdfd2391
+                    upload_url: null
                   - id: sdfd2392
                     name: lyft_expenses_vmrpw.pdf
                     content_type: application/pdf
-                    download_url: https://aaa.bbb.cc/x22ddsds
-                    upload_url: https://aaa.bbb.cc/x2sdssds
+                    download_url: https://us1.fylehq.com/platform/v1/manager/employee_overview/files/download?id=sdfd2392
+                    upload_url: null
     '400':
       description: Bad request
       content:
