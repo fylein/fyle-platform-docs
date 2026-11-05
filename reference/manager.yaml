@@ -15,6 +15,8 @@ servers:
 tags:
   - name: Departments
     description: Department filter options for Employee Overview.
+  - name: Organisations
+    description: Organization IDs and names for Employee Overview filter options.
 paths:
   /manager/employee_overview/expense_comments:
     get:
@@ -598,6 +600,131 @@ paths:
                     department_head_user_ids: []
                     department_head_users: []
                     doc_url: null
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Employee hierarchy overview is disabled or the current user does not have the APPROVER role.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Employee hierarchy overview is not enabled for this org
+                      - You don't have permissions to access this resource
+  /manager/employee_overview/orgs:
+    get:
+      x-internal: false
+      tags:
+        - Organisations
+      summary: List organizations in the approval hierarchy
+      operationId: employee_overview_orgs_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns organizations containing direct or indirect reportees of the current
+        user. An organization is eligible when at least one employee other than the
+        current user is in that user's approval hierarchy. Each eligible organization
+        is returned once.
+
+        Returns each organization's ID and name to display alongside filter options
+        in Employee Overview.
+
+        The current user must have the APPROVER role, and the employee hierarchy
+        overview feature must be enabled for the current organization.
+
+        Filtering on ID and name, field selection, sorting and pagination are
+        supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax.
+      parameters:
+        - in: query
+          name: id
+          required: false
+          description: Filter by organization ID.
+          schema:
+            type: string
+            example: eq.orwruogwnngg
+        - in: query
+          name: name
+          required: false
+          description: Filter by organization name using the standard query operators.
+          schema:
+            type: string
+            example: ilike.Demo%
+        - in: query
+          name: select
+          required: false
+          description: Comma-separated response fields to return. Defaults to id,name.
+          schema:
+            type: string
+            example: id,name
+        - in: query
+          name: order
+          required: false
+          description: Comma-separated sort fields. Use id or name with an optional .asc or .desc suffix.
+          schema:
+            type: string
+            example: name.asc,id.asc
+        - in: query
+          name: limit
+          required: false
+          description: Maximum number of organizations to return. Defaults to 200.
+          schema:
+            type: integer
+            default: 200
+            maximum: 200
+            example: 20
+        - in: query
+          name: offset
+          required: false
+          description: Number of organizations to skip before returning results. Defaults to 0.
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/org_summary_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: orwruogwnngg
+                    name: Demo Account
+                  - id: orx9wL3mP2Qz
+                    name: Demo Subsidiary
         '400':
           description: Bad request
           content:
@@ -2331,6 +2458,18 @@ components:
           description: |
             Link to an external document that would be shared with employees
           example: https://stoplight.io/
+    org_summary_out:
+      type: object
+      additionalProperties: false
+      description: Organisation ID and name. Field selection can omit either property.
+      properties:
+        id:
+          $ref: '#/components/schemas/org_id'
+        name:
+          type: string
+          maxLength: 255
+          description: Represents the name of the org.
+          example: Demo Account
     currency:
       type: string
       description: |
