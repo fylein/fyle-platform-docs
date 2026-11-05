@@ -1,0 +1,29 @@
+name: OpenAPI visibility lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**/*.yaml'
+      - 'redocly.visibility.yaml'
+      - 'dev/githooks/pre-commit'
+      - '.github/workflows/visibility-lint.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  visibility-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Lint operation visibility
+        run: npx --yes @redocly/cli@2.51.2 lint --config redocly.visibility.yaml
