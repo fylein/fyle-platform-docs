@@ -13583,63 +13583,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
-  /admin/statements/reconciliation_summary:
-    post:
-      x-internal: false
-      tags:
-        - Statements
-      summary: Reconciliation Summary of uploaded statement
-      description: |
-        This API provides comparison summary of reconciliation using TRANSACTION_DATE and POST_DATE method.
-      operationId: post_reconciliation_summary
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  $ref: '#/components/schemas/reconciliation_summary_from_statement_in'
-              required:
-                - data
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/reconciliation_summary_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
   /admin/statements/reconcile:
     post:
       x-internal: false
@@ -13647,7 +13590,7 @@ paths:
         - Statements
       summary: Reconcile uploaded statement
       description: |
-        This API starts the reconciliation process for an uploaded bank statement. Provide the reconciliation method (TRANSACTION_DATE or POST_DATE), statement mapping configuration, and the periods you want to reconcile. The reconciliation will be processed in the background, and you can check the status through the reconciliation entries.
+        This API starts the reconciliation process for an uploaded bank statement. Provide the statement mapping configuration and the periods you want to reconcile. The reconciliation method (TRANSACTION_DATE or POST_DATE) is chosen automatically based on which one matches more expenses. The reconciliation will be processed in the background, and you can check the status through the reconciliation entries.
       operationId: post_reconcile_statement
       requestBody:
         required: true
@@ -38951,167 +38894,6 @@ components:
             If this period is created as bridging entry because of change in reconciliation type, then this field
             will indicate such change.
           example: STATEMENT_CYCLE_TO_CALENDAR_MONTH
-    reconciliation_summary_from_statement_in:
-      type: object
-      properties:
-        id:
-          allOf:
-            - $ref: '#/components/schemas/id_string'
-          example: stmtadfdsdf
-        statement_mapping:
-          type: object
-          properties:
-            description_column:
-              type: string
-              description: |
-                Specifies the mapping of description column on the statement
-              nullable: true
-              example: description
-            transaction_date_column:
-              type: string
-              description: |
-                Specifies the mapping of transaction date on the statement.
-              example: txn date
-            transaction_id_column:
-              type: string
-              description: |
-                Specifies the mapping of transaction id / unique id on the statement.
-              example: reference number
-              nullable: true
-            amount_column:
-              type: string
-              description: |
-                Specifies the mapping of amount on the statement.
-              example: amount
-            card_number_column:
-              type: string
-              description: |
-                Specifies the mapping of card number on the statement.
-              example: account number
-            merchant_column:
-              type: string
-              description: |
-                Specifies the mapping of merchant on the statement.
-              example: Amazon
-            foreign_amount_column:
-              type: string
-              description: |
-                Specifies the mapping of foreign amount on the statement.
-              example: foreign amount
-              nullable: true
-            foreign_currency_column:
-              type: string
-              description: |
-                Specifies the mapping of foreign currency on the statement.
-              example: foreign currency
-              nullable: true
-            post_date_column:
-              type: string
-              description: |
-                Specifies the header name of the post date column in the statement.
-              example: post date
-              nullable: true
-            bank_name:
-              type: string
-              description: |
-                Specifies the bank name of the statement
-              example: American Express
-            is_debit_positive:
-              type: boolean
-              description: |
-                Specifies the representation of the the amount in the statement, if true then the amount represented by |
-                positive sign are debits, and if false then the amount represented by negative sign are debits.
-              example: true
-            name:
-              type: string
-              description: |
-                Specifies the mapping name.
-              example: USD
-              nullable: true
-            card_network:
-              type: string
-              description: |
-                Specifies the credit card network used by the card
-              example: VISA
-              nullable: true
-          required:
-            - transaction_date_column
-            - amount_column
-            - card_number_column
-            - merchant_column
-            - bank_name
-            - is_debit_positive
-        ignored_line_item_ids:
-          type: array
-          items:
-            type: string
-          description: |
-            This specifies list of statement line items to be ignored in the statement.
-          example:
-            - stlisfdfadssd
-        start_date:
-          $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            Start date of the statement period
-          nullable: true
-        end_date:
-          $ref: '#/components/schemas/timestamptz_utc'
-          description: |
-            End date of the statement period
-          nullable: true
-        card_mapping:
-          $ref: '#/components/schemas/card_mapping_in'
-        reconciliation_entry_ids:
-          type: array
-          description: IDs of reconciliation entry selecting periods for which reconciliation is to be done
-          items:
-            type: string
-          example:
-            - recexxxxxx
-        ignore_archived_cards:
-          type: boolean
-          nullable: true
-          description: |
-            Controls how transactions associated with archived cards are handled during statement processing:
-            If true, transactions associated with archived cards are ignored.
-            If false, the archived cards are unarchived, and their associated transactions are processed.
-      required:
-        - id
-        - statement_mapping
-        - reconciliation_entry_ids
-    _reconciliation_summary_object:
-      type: object
-      required:
-        - expense_count
-        - is_recommended
-        - reconciliation_method
-        - statement_transaction_count
-      properties:
-        expense_count:
-          description: Number of expense matches found
-          type: number
-          example: 11
-        is_recommended:
-          description: Whether this reconciliation_method recommended to use for reconciliation over other or not
-          type: boolean
-          example: true
-        reconciliation_method:
-          type: string
-          example: TRANSACTION_DATE
-        statement_transaction_count:
-          description: Total statement transaction
-          type: number
-          example: 12
-    reconciliation_summary_out:
-      type: object
-      additionalProperties: false
-      required:
-        - reconciliation_summary
-      properties:
-        reconciliation_summary:
-          type: array
-          items:
-            $ref: '#/components/schemas/_reconciliation_summary_object'
     reconcile_from_statement_in:
       type: object
       properties:
@@ -39226,14 +39008,6 @@ components:
             End date of the statement period
         card_mapping:
           $ref: '#/components/schemas/card_mapping_in'
-        reconciliation_method:
-          type: string
-          description: |
-            Specifies the reconciliation method to be used for the statement.
-          example: TRANSACTION_DATE
-          enum:
-            - POST_DATE
-            - TRANSACTION_DATE
         reconciliation_entry_ids:
           type: array
           description: IDs of reconciliation entry selecting periods for which reconciliation is to be done
@@ -39251,7 +39025,6 @@ components:
       required:
         - id
         - statement_mapping
-        - reconciliation_method
         - reconciliation_entry_ids
     unassigned_cards_from_statement_in:
       type: object
