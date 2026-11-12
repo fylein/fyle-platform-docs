@@ -2,25 +2,761 @@ openapi: 3.0.3
 info:
   version: '1.0'
   title: Manager APIs
-  description: >
-    These APIs are generally used to integrate Sage Exp Mgmt with accounting or
-    HRMS systems. 
+  description: |
+    These APIs are generally used to integrate Sage Exp Mgmt with accounting or HRMS systems. 
   contact:
     name: Platform Beta
     email: support@fylehq.com
 servers:
-  - url: 'https://us1.fylehq.com/platform/v1'
+  - url: https://us1.fylehq.com/platform/v1
     description: US Region Server
-  - url: 'https://in1.fylehq.com/platform/v1'
+  - url: https://in1.fylehq.com/platform/v1
     description: India Region Server
+tags:
+  - name: Departments
+    description: Department filter options for Employee Overview.
+paths:
+  /manager/employee_overview/expense_comments:
+    get:
+      x-internal: false
+      operationId: employee_overview_expense_comments_get
+      tags:
+        - Employees
+      summary: Get employee overview expense comments
+      description: |
+        This API returns expense comments of an expense.
+      parameters:
+        - $ref: '#/components/parameters/expense_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_comments_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/files/generate_urls/bulk:
+    post:
+      x-internal: false
+      operationId: employee_overview_files_generate_urls_bulk_post
+      tags:
+        - Employees
+      summary: Bulk generate download and upload URLs for files under the current user's hierarchy
+      description: |
+        Once a file is created, its contents may need to be uploaded (or downloaded). To upload (or download) contents, you'll
+        need to generate a temporary signed URL. This API accomplishes that. The signed URL is valid for 5 mins.
+        This API validates that all requested files belong to users in the approver's hierarchy,
+        then generates upload and download URLs for those files.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/file_generate_urls_action_in'
+                  example:
+                    - id: fi123819sa
+                    - id: fi876833tu
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/file_generate_urls_action_out'
+                    example:
+                      - id: sdfd2391
+                        name: uber_expenses_vmrpw.pdf
+                        content_type: application/pdf
+                        download_url: https://aaa.bbb.cc/x232sds
+                        upload_url: https://aaa.bbb.cc/x232sds
+                      - id: sdfd2392
+                        name: lyft_expenses_vmrpw.pdf
+                        content_type: application/pdf
+                        download_url: https://aaa.bbb.cc/x22ddsds
+                        upload_url: https://aaa.bbb.cc/x2sdssds
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+  /manager/employee_overview/expense_policy_states:
+    get:
+      x-internal: false
+      tags:
+        - Employees
+      summary: Get policy states of Expenses
+      description: |
+        Get policy states of Expenses
+      operationId: expense_policy_states_get
+      parameters:
+        - in: query
+          name: expense_id
+          description: |
+            The id of the expense for which you are querying the policy states.<br>
+            Supported operators are `eq`.<br>
+            expense_id=eq."id" <br>
+          schema:
+            type: string
+            example: eq."txSdfsytrqw"
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_policy_states_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/hierarchy:
+    get:
+      x-internal: false
+      tags:
+        - Employees
+      summary: List employees hierarchy view
+      description: |
+        This API returns a hierarchical list of employees reporting to the user calling this API. Each employee includes their position in the hierarchy (depth) and their primary approver.
+      operationId: manager_hierarchy_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_hierarchy_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview:
+    get:
+      x-internal: false
+      tags:
+        - Employees
+      summary: List expense overview of employees under the current user hierarchy
+      description: |
+        This API returns a list of employees in the organization hierarchy under the current approver with their expense statistics and overview information.
+      operationId: employee_hierarchy_overview_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_overview_out'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  count:
+                    $ref: '#/components/schemas/count'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorised request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/stats:
+    post:
+      x-internal: false
+      operationId: employee_hierarchy_overview_stats_post
+      tags:
+        - Employees
+      summary: Get employee overview statistics
+      description: |
+        This API returns statistical information about employees in the hierarchy, including total count and total amount.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    query_params:
+                      type: string
+                      nullable: false
+                      description: Required query parameters for filtering
+                      example: department_id=123
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_overview_stats_out'
+                example:
+                  data:
+                    count: 1130
+                    total_amount: 30003
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/employees:
+    get:
+      x-internal: false
+      tags:
+        - Employees
+      summary: List employees in hierarchy
+      operationId: employee_overview_employees_list
+      description: |
+        This API returns a list of employees in the organization hierarchy under the current approver. 
+        The API supports rich filtering on all response fields and pagination via query parameters. 
+        To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+
+        **Note:** This API requires the employee hierarchy overview feature to be enabled for the organization and the user must have APPROVER role.
+      parameters:
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/employee_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means either the employee hierarchy overview feature is not enabled for the organization or the user does not have APPROVER role.
+  /manager/employee_overview/departments:
+    get:
+      x-internal: true
+      tags:
+        - Departments
+      summary: List departments in hierarchy organizations
+      operationId: employee_overview_departments_list
+      security:
+        - oauth2:
+            - '*'
+      description: |
+        Returns departments from organizations containing direct or indirect reportees
+        of the current user. An organization is eligible when at least one employee
+        other than the current user is in that user's approval hierarchy.
+
+        Provides Department filter options for the Employee Overview employee and
+        expense views. All departments in eligible organizations can be returned.
+
+        The current user must have the APPROVER role, and the employee hierarchy
+        overview feature must be enabled for the current organization.
+
+        Filtering, field selection, sorting and pagination are supported. See the
+        [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+        for query syntax.
+      parameters:
+        - in: query
+          name: org_id
+          required: false
+          description: Filter by organization; omit to return departments from all eligible organizations.
+          schema:
+            type: string
+            example: eq.orogUH5lw1QX
+        - $ref: '#/components/parameters/is_enabled'
+        - in: query
+          name: limit
+          required: false
+          description: Maximum number of departments to return. Defaults to 200.
+          schema:
+            type: integer
+            default: 200
+            maximum: 200
+            example: 20
+        - in: query
+          name: offset
+          required: false
+          description: Number of departments to skip before returning results. Defaults to 0.
+          schema:
+            type: integer
+            default: 0
+            example: 0
+        - $ref: '#/components/parameters/order'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/department_out'
+              example:
+                count: 2
+                offset: 0
+                data:
+                  - id: deptodb5SbYvEX
+                    org_id: orogUH5lw1QX
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
+                  - id: deptodb666YvEX
+                    org_id: orx9wL3mP2Qz
+                    created_at: '2026-03-07T15:59:57.832991+00:00'
+                    updated_at: '2026-03-07T15:59:57.832991+00:00'
+                    name: Sales
+                    sub_department: null
+                    display_name: Sales
+                    is_enabled: true
+                    code: null
+                    description: Subsidiary sales department
+                    department_head_user_ids: []
+                    department_head_users: []
+                    doc_url: null
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Employee hierarchy overview is disabled or the current user does not have the APPROVER role.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - Employee hierarchy overview is not enabled for this org
+                      - You don't have permissions to access this resource
+  /manager/employee_overview/expenses:
+    get:
+      x-internal: false
+      tags:
+        - Employees
+      summary: List expenses in hierarchy
+      description: |
+        This API gets expenses of employees that are under the current user's hierarchy.
+      operationId: employee_hierarchy_overview_expenses_list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/expense_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means the requested resource was not found or the requester doesn't have sufficient access.
+  /manager/employee_overview/expenses/stats:
+    post:
+      x-internal: false
+      tags:
+        - Employees
+      summary: Expenses Stats of users in hierarchy
+      description: |
+        This API gets expenses stats of employees that are under the current user's hierarchy.
+      operationId: employee_hierarchy_overview_expenses_stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  $ref: '#/components/schemas/expenses_stats_in'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/employee_overview_expense_stats_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: |
+                      This error means current user does not have enough permissions to perform this operation.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
 components:
   securitySchemes:
     oauth2:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: 'https://app.fylehq.com/app/developers/oauth/authorize'
-          tokenUrl: 'https://accounts.fylehq.com/oauth/token'
+          authorizationUrl: https://app.fylehq.com/app/developers/oauth/authorize
+          tokenUrl: https://accounts.fylehq.com/oauth/token
           scopes:
             '*': Grant all actions
   parameters:
@@ -35,9 +771,8 @@ components:
     limit:
       in: query
       name: limit
-      description: >
-        A limit on the number of objects to be returned. Allowed values are from
-        1 to 200.
+      description: |
+        A limit on the number of objects to be returned. Allowed values are from 1 to 200.
       schema:
         type: integer
         example: 20
@@ -58,6 +793,24 @@ components:
       schema:
         type: string
         example: Ritas
+    is_enabled:
+      in: query
+      name: is_enabled
+      description: |
+        This param is used to filter records by
+        Supported operators are `eq`.<br>
+      schema:
+        type: string
+        example: eq.true
+    order:
+      in: query
+      name: order
+      description: |
+        use comma separated column names for sorting the results. <br>
+        For sorting in descending order, use `column_name.desc`
+      schema:
+        type: string
+        example: updated_at.desc,id
   schemas:
     '400':
       type: object
@@ -74,10 +827,8 @@ components:
           enum:
             - invalid token
           type: string
-          description: >
-            This error means that the input access token is either not issued by
-            Sage Exp Mgmt or has expired.
-
+          description: |
+            This error means that the input access token is either not issued by Sage Exp Mgmt or has expired.
             You need to generate a new access token.
     '404':
       type: object
@@ -86,25 +837,19 @@ components:
           enum:
             - Resource not found
           type: string
-          description: >
-            This error means the requested resource was not found or the
-            requester doesn't have sufficient access.
+          description: |
+            This error means the requested resource was not found or the requester doesn't have sufficient access.
     count:
       type: integer
       description: |
         The total number of objects that can be requested.
       example: 10000
     offset:
-      description: >
+      description: |
         offset is used to skip that many number of objects before counting. <br>
-
         For example, if there are 2000 objects, <br>
-
-        The first request will have offset as 0 and limit as 200 to return first
-        200 objects. <br>
-
-        The second request will have offset as 200 and limit as 200 to return
-        next 200 objects. <br>
+        The first request will have offset as 0 and limit as 200 to return first 200 objects. <br>
+        The second request will have offset as 200 and limit as 200 to return next 200 objects. <br>
       type: integer
       example: 10
     id_string:
@@ -128,11 +873,9 @@ components:
       type: string
       maxLength: 127
       example: john.doe@example.com
-      description: >
+      description: |
         An immutable field that represents the email address of the employee.
-
-        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC
-        822.</a>
+        Must be compliant with <a href='https://www.ietf.org/rfc/rfc822.txt'>RFC 822.</a>
     user_out_embed_nullable:
       type: object
       nullable: true
@@ -151,23 +894,20 @@ components:
         full_name:
           type: string
           maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
           example: John Doe
     created_at:
       type: string
       format: date-time
-      description: >
-        Signifies when this object was created in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      description: |
+        Signifies when this object was created in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
     updated_at:
       type: string
       format: date-time
-      description: >
-        Signifies when this object was updated in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      description: |
+        Signifies when this object was updated in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-11T13:14:55.201598+00:00'
     org_id:
       type: string
@@ -277,11 +1017,9 @@ components:
         upload_url:
           nullable: true
           type: string
-          description: >
+          description: |
             Link to upload contents of this file.
-
-            Returns null if linked to an expense or advance request in approved
-            or higher state.
+            Returns null if linked to an expense or advance request in approved or higher state.
     description:
       type: string
       nullable: true
@@ -296,36 +1034,28 @@ components:
         id:
           type: string
           example: tpr1234abcd
-          description: >-
-            This represents the id of the expense policy rule that is violated
-            for this expense.
+          description: This represents the id of the expense policy rule that is violated for this expense.
         description:
           anyOf:
             - $ref: '#/components/schemas/description'
-          description: >
-            This represents the description of the expense policy rule that is
-            violated for this expense.
+          description: |
+            This represents the description of the expense policy rule that is violated for this expense.
           example: Receipt is mandatory for expense above $50
         action_show_warning:
           type: boolean
-          description: >
-            A true value here means that policy calculation suggests showing a
-            warning when the user attempts to create an expense that violates
-            this expense policy rule.
+          description: |
+            A true value here means that policy calculation suggests showing a warning when the user attempts to create an expense that violates this expense policy rule.
           example: true
         policy_violation_reason_required:
           type: boolean
-          description: >
-            A true value here means that entering a policy violation reason is
-            mandatory for this policy rule.
+          description: |
+            A true value here means that entering a policy violation reason is mandatory for this policy rule.
           example: false
         action_make_unreportable:
           type: boolean
           nullable: false
-          description: >
-            A true value here means that policy calculation suggests making the
-            expense unreportable when the user attempts to create an expense
-            that violates this expense policy rule.
+          description: |
+            A true value here means that policy calculation suggests making the expense unreportable when the user attempts to create an expense that violates this expense policy rule.
           example: true
     amount:
       type: number
@@ -375,15 +1105,10 @@ components:
         - limit_end_date
         - params
       nullable: true
-      description: >
-        An expense may be violating an expense policy rule due to a group of
-        other expenses.
-
-        These query params can be used to fetch those expenses because of which
-        this expense is causing a violation. <br>
-
-        Below params should be ANDed to get the correct list of violating
-        expenses.
+      description: |
+        An expense may be violating an expense policy rule due to a group of other expenses.
+        These query params can be used to fetch those expenses because of which this expense is causing a violation. <br>
+        Below params should be ANDed to get the correct list of violating expenses.
       properties:
         limit_start_date:
           type: string
@@ -417,19 +1142,16 @@ components:
           type: array
           items:
             type: string
-          description: >
-            List of approver ids that the policy calculation suggests adding to
-            report that contains this expense.
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
           example:
             - usBdsdfscl
             - usLSsdfwqt
         approver_policy_order:
           type: integer
           nullable: true
-          description: >
-            This represents the order of the approver policy related to this
-            individual desired state record.
-
+          description: |
+            This represents the order of the approver policy related to this individual desired state record.
             If the policy does not add any approver, this field will be null.
           example: 1
         approver_source:
@@ -444,12 +1166,9 @@ components:
             - EMAIL_APPROVER
             - null
           nullable: true
-          description: >
-            This represents the type of approver(source) that was added by the
-            approver policy related to this individual
-
-            desired state record. If the policy does not add any approver, this
-            field will be null.
+          description: |
+            This represents the type of approver(source) that was added by the approver policy related to this individual
+            desired state record. If the policy does not add any approver, this field will be null.
           example: PROJECT_APPROVER_1
         run_status:
           nullable: false
@@ -458,37 +1177,22 @@ components:
             - VIOLATED_ACTION_SUCCESS
             - VIOLATED_ACTION_FAILURE
             - UNVIOLATED
-          description: >
-            This represent the status of policy computation for an expense
-            against the policy. If the state is
-
-            `UNVIOLATED`, it means that the expense is not violating the policy.
-            If the state is `VIOLATION_ACTION_SUCCESS`,
-
-            it means that expense is violating the policy and action stated in
-            the object will be applied to
-
-            expense. However, if the state is `VIOLATION_ACTION_FAILURE`, it
-            means that the policy is violated for the
-
-            expense but since some approver was missing or not setup properly,
-            it will fail to take action
-
+          description: |
+            This represent the status of policy computation for an expense against the policy. If the state is
+            `UNVIOLATED`, it means that the expense is not violating the policy. If the state is `VIOLATION_ACTION_SUCCESS`,
+            it means that expense is violating the policy and action stated in the object will be applied to
+            expense. However, if the state is `VIOLATION_ACTION_FAILURE`, it means that the policy is violated for the
+            expense but since some approver was missing or not setup properly, it will fail to take action
             on the expense
           example: SUCCESS
         run_result:
           type: array
           items:
             type: string
-          description: >
-            List of human-readable action summaries that the policy calculation
-            suggests for this expense. Note that, in
-
-            case some approver was not setup properly for the given violation,
-            this array will contain description of
-
-            missing approvers. For example, Department approver, Project head,
-            etc.
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense. Note that, in
+            case some approver was not setup properly for the given violation, this array will contain description of
+            missing approvers. For example, Department approver, Project head, etc.
           example:
             - flag the expense
             - cap the amount
@@ -535,9 +1239,8 @@ components:
           example: txabsdfSYqd
         flag:
           type: boolean
-          description: >
-            A true value here means, that as per policy calculation this expense
-            should be flagged.
+          description: |
+            A true value here means, that as per policy calculation this expense should be flagged.
           example: true
         amount:
           nullable: true
@@ -550,33 +1253,28 @@ components:
         unreportable:
           type: boolean
           nullable: false
-          description: >
-            A true value here means, that as per policy calculation this expense
-            should be made unreportable.
+          description: |
+            A true value here means, that as per policy calculation this expense should be made unreportable.
           example: true
         is_receipt_mandatory:
           type: boolean
-          description: >
-            A true value here means, that as per policy calculation this expense
-            requires receipt.
+          description: |
+            A true value here means, that as per policy calculation this expense requires receipt.
           example: true
         add_approver_user_ids:
           nullable: true
           type: array
           items:
             type: string
-          description: >
-            List of approver ids that the policy calculation suggests adding to
-            report that contains this expense.
+          description: |
+            List of approver ids that the policy calculation suggests adding to report that contains this expense.
           example:
             - usBdsdfscl
             - usLSsdfwqt
         remove_employee_approver1:
           type: boolean
-          description: >
-            A true value here means, that as per policy calculation, the
-            employee's first approver should be removed from the report that
-            contains this expense.
+          description: |
+            A true value here means, that as per policy calculation, the employee's first approver should be removed from the report that contains this expense.
           example: true
         run_status:
           nullable: false
@@ -591,9 +1289,8 @@ components:
           type: array
           items:
             type: string
-          description: >
-            List of human-readable action summaries that the policy calculation
-            suggests for this expense.
+          description: |
+            List of human-readable action summaries that the policy calculation suggests for this expense.
           example:
             - flag the expense
             - cap the amount
@@ -624,9 +1321,8 @@ components:
       example: uswjwgnwwgo
     has_accepted_invite:
       type: boolean
-      description: >
-        This boolean field represents whether the employee has accepted the
-        current org's invite by verifying his/her email or not.
+      description: |
+        This boolean field represents whether the employee has accepted the current org's invite by verifying his/her email or not.
       example: true
     employee_hierarchy_out:
       type: object
@@ -672,16 +1368,14 @@ components:
           nullable: true
     is_enabled:
       type: boolean
-      description: >
-        This indicates if the resource is enabled for use within the
-        organisation.
+      description: |
+        This indicates if the resource is enabled for use within the organisation.
       example: true
     org_name:
       type: string
       maxLength: 255
-      description: >
-        This represents the name of the organization. This should be unique for
-        all organizations
+      description: |
+        This represents the name of the organization. This should be unique for all organizations
       example: foo123
     employee_overview_out:
       type: object
@@ -833,24 +1527,21 @@ components:
         full_name:
           type: string
           maxLength: 255
-          description: >
-            Represents the full name of the Employee. Must be at least 3
-            characters.
+          description: |
+            Represents the full name of the Employee. Must be at least 3 characters.
           example: John Doe
     code:
       type: string
       nullable: true
       maxLength: 255
-      description: >
-        This represents a code that is typically used for syncing with other
-        systems.
+      description: |
+        This represents a code that is typically used for syncing with other systems.
       example: C1234
     name:
       type: string
       maxLength: 255
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
+      description: |
+        This represents the name of the resource. This should be unique in an organization
       example: foo123
     department_out_employee_embed:
       type: object
@@ -878,19 +1569,15 @@ components:
       type: string
       format: date-time
       nullable: true
-      description: >-
-        Date-time in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T13:14:54.804+00:00'
     joined_at:
       anyOf:
         - $ref: '#/components/schemas/null_field'
         - $ref: '#/components/schemas/timestamptz_utc'
       nullable: true
-      description: >
-        Date and time when the user joined the organization. Date-time will be
-        in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      description: |
+        Date and time when the user joined the organization. Date-time will be in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
     level_out_embed:
       type: object
       additionalProperties: false
@@ -906,9 +1593,8 @@ components:
         band:
           type: string
           nullable: true
-          description: >
-            Band in which this level belongs to, you can group multiple levels
-            into a single band.
+          description: |
+            Band in which this level belongs to, you can group multiple levels into a single band.
           example: Associate
       required:
         - id
@@ -955,7 +1641,7 @@ components:
         formatted_address:
           type: string
           nullable: true
-          example: '221 Baker St, Marylebone, London, United Kingdom'
+          example: 221 Baker St, Marylebone, London, United Kingdom
         latitude:
           type: number
           nullable: true
@@ -1001,18 +1687,12 @@ components:
         $ref: '#/components/schemas/custom_field'
     flattened_custom_field:
       type: object
-      description: >
-        Custom fields in object format with keys as the name of the custom field
-        and value as the value of the custom field. This is done to make it
-        easier to query the custom fields.
+      description: |
+        Custom fields in object format with keys as the name of the custom field and value as the value of the custom field. This is done to make it easier to query the custom fields.
 
+        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened to `{"custom_field_1": "Value 1"}`
 
-        Example: `[{"name": "Custom Field 1", "value": "Value 1"}]` is flattened
-        to `{"custom_field_1": "Value 1"}`
-
-
-        NOTE: Key name is converted to snake case and spaces are replaced with
-        underscores.
+        NOTE: Key name is converted to snake case and spaces are replaced with underscores.
       nullable: false
       additionalProperties: true
       properties:
@@ -1069,12 +1749,9 @@ components:
         display_name:
           type: string
           example: Fast and Furious / Formula One
-          description: >
-            This is a combination of name and sub_project separated by a / and
-            spaces.
-
-            In case if no sub_project is present it is same as name of the
-            project.
+          description: |
+            This is a combination of name and sub_project separated by a / and spaces.
+            In case if no sub_project is present it is same as name of the project.
     cost_center_out_embed:
       type: object
       nullable: true
@@ -1133,16 +1810,14 @@ components:
       maxLength: 11
       description: |
         IFSC code of the bank account of the Employee
-      pattern: '^[A-Z]{4}0[A-Z0-9]{6}$'
+      pattern: ^[A-Z]{4}0[A-Z0-9]{6}$
     phone_number:
       type: string
       example: '+12131234567'
       maxLength: 16
-      description: >
-        phone number is represented by +CC MMMMMM... where CC is the country
-        code, and is one to three digits, and MMMMMM... is the area code (where
-        applicable) and subscriber number Max 12 digits
-      pattern: '/^(\+\d{1,3}[- ]?)?\d{10}$/'
+      description: |
+        phone number is represented by +CC MMMMMM... where CC is the country code, and is one to three digits, and MMMMMM... is the area code (where applicable) and subscriber number Max 12 digits
+      pattern: /^(\+\d{1,3}[- ]?)?\d{10}$/
     locale:
       type: object
       nullable: true
@@ -1260,9 +1935,8 @@ components:
         end_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
-          description: >
-            Date and time till which the delegation is active. If null,
-            delegation is active indefinitely.
+          description: |
+            Date and time till which the delegation is active. If null, delegation is active indefinitely.
           nullable: true
         scopes:
           allOf:
@@ -1304,10 +1978,8 @@ components:
         display_name:
           type: string
           example: Engine / Turbo charged
-          description: >
-            This is a combination of name and sub_category separated by a / and
-            spaces. In case if no sub_category is present it is same as name of
-            the category.
+          description: |
+            This is a combination of name and sub_category separated by a / and spaces. In case if no sub_category is present it is same as name of the category.
     employee_out:
       type: object
       additionalProperties: false
@@ -1376,12 +2048,9 @@ components:
           maxLength: 255
           nullable: true
           example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         department_id:
           $ref: '#/components/schemas/fk_string'
         department:
@@ -1444,17 +2113,15 @@ components:
           example:
             - 2222
             - 1221
-          description: >
-            List of cost center ids that this employee is allowed to access. []
-            (empty array) means access to all cost centers.
+          description: |
+            List of cost center ids that this employee is allowed to access. [] (empty array) means access to all cost centers.
         cost_centers:
           type: array
           nullable: false
           items:
             $ref: '#/components/schemas/cost_center_out_embed'
-          description: >
-            List of cost_ enters that this employee is allowed to access. []
-            (empty array) means access to all cost centers.
+          description: |
+            List of cost_ enters that this employee is allowed to access. [] (empty array) means access to all cost centers.
         per_diem_rate_ids:
           type: array
           nullable: false
@@ -1523,9 +2190,8 @@ components:
           items:
             $ref: '#/components/schemas/bank_ifsc'
           example: null
-          description: >
-            IFSC code of the bank account of the Employee. Must be a 11 digit
-            alphanumeric code.
+          description: |
+            IFSC code of the bank account of the Employee. Must be a 11 digit alphanumeric code.
         mobile:
           type: string
           nullable: true
@@ -1552,21 +2218,18 @@ components:
             added:
               nullable: true
               type: boolean
-              description: >
-                This field indicates whether employee has added a bank account
-                to receive ACH reimbursements.
+              description: |
+                This field indicates whether employee has added a bank account to receive ACH reimbursements.
             verified:
               nullable: true
               type: boolean
-              description: >
-                This field indicates whether employee's bank account, added to
-                receive ACH reimbursements, is verified.
+              description: |
+                This field indicates whether employee's bank account, added to receive ACH reimbursements, is verified.
             suspended:
               nullable: true
               type: boolean
-              description: >
-                This field indicates whether employee's ACH account is
-                suspended.
+              description: |
+                This field indicates whether employee's ACH account is suspended.
           description: |
             ACH account details of the employee.
         delegatees:
@@ -1593,26 +2256,98 @@ components:
             $ref: '#/components/schemas/category_out_embed'
           description: |
             List of categories that this employee is allowed to access.
+    department_head_user_ids:
+      type: array
+      nullable: false
+      maxItems: 1
+      items:
+        type: string
+        nullable: true
+        maxLength: 15
+        description: |
+          This id is provided by Sage Exp Mgmt to identify an object.
+        example: uswoirwlwwg
+      example:
+        - uswoirwlwwg
+      description: |
+        List of IDs of users who are head of the department.
+    department_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - name
+        - sub_department
+        - is_enabled
+        - code
+        - description
+        - department_head_user_ids
+        - doc_url
+        - department_head_users
+        - display_name
+      properties:
+        id:
+          $ref: '#/components/schemas/id_string'
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        is_enabled:
+          $ref: '#/components/schemas/is_enabled'
+        name:
+          allOf:
+            - $ref: '#/components/schemas/name'
+          example: Sales
+        code:
+          $ref: '#/components/schemas/code'
+        description:
+          $ref: '#/components/schemas/description'
+        sub_department:
+          type: string
+          nullable: true
+          example: Outbound Sales
+        department_head_user_ids:
+          $ref: '#/components/schemas/department_head_user_ids'
+        department_head_users:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/user_out_embed'
+          description: |
+            List of users who are head of the department.
+        display_name:
+          type: string
+          example: Sales / Outbound Sales
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
+        doc_url:
+          type: string
+          nullable: true
+          description: |
+            Link to an external document that would be shared with employees
+          example: https://stoplight.io/
     currency:
       type: string
-      description: >
-        The three-letter currency code following ISO standard <a
-        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
       example: USD
-      pattern: '([A-Z]{3})'
+      pattern: ([A-Z]{3})
     foreign_currency:
       type: string
       nullable: true
-      description: >
-        The three-letter currency code following ISO standard <a
-        href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
+      description: |
+        The three-letter currency code following ISO standard <a href='https://www.iso.org/iso-4217-currency-codes.html'>ISO 4217</a>.
       example: GBP
     foreign_amount:
       type: number
       nullable: true
-      description: >
-        Amount value of the object, in original currency i.e the currency in
-        which the object was initially created.
+      description: |
+        Amount value of the object, in original currency i.e the currency in which the object was initially created.
       example: 3768
     fk_integer:
       type: integer
@@ -1676,9 +2411,7 @@ components:
             - PERSONAL
             - COMPANY
             - null
-          description: >-
-            Vehicle ownership for advanced mileage rates. `null` for basic
-            mileage rates.
+          description: Vehicle ownership for advanced mileage rates. `null` for basic mileage rates.
         vehicle_category:
           type: string
           nullable: true
@@ -1687,9 +2420,7 @@ components:
             - MOTORCYCLE
             - BICYCLE
             - null
-          description: >-
-            Vehicle category for advanced mileage rates. `null` for basic
-            mileage rates.
+          description: Vehicle category for advanced mileage rates. `null` for basic mileage rates.
         fuel_type:
           type: string
           nullable: true
@@ -1704,9 +2435,7 @@ components:
           type: object
           nullable: true
           additionalProperties: false
-          description: >-
-            Engine capacity band for petrol, diesel, and LPG advanced car rates.
-            An empty object for basic mileage rates.
+          description: Engine capacity band for petrol, diesel, and LPG advanced car rates. An empty object for basic mileage rates.
           properties:
             from:
               type: string
@@ -1726,9 +2455,7 @@ components:
             - HOME
             - PUBLIC
             - null
-          description: >-
-            Charging location for advanced electric car mileage rates. `null`
-            otherwise.
+          description: Charging location for advanced electric car mileage rates. `null` otherwise.
     expense_custom_field:
       type: object
       description: |
@@ -1736,12 +2463,10 @@ components:
       properties:
         id:
           type: integer
-          description: >
+          description: |
             Expense field ID of the custom field.
 
-
-            NOTE: This field may not be present for older expense custom fields
-            created without the "id" field.
+            NOTE: This field may not be present for older expense custom fields created without the "id" field.
           example: 1337
         name:
           type: string
@@ -1816,30 +2541,25 @@ components:
           allOf:
             - $ref: '#/components/schemas/id_string'
           nullable: true
-          description: >
-            The user ID of the approver. This is null when approver_type is
-            SYSTEM (auto-approval).
+          description: |
+            The user ID of the approver. This is null when approver_type is SYSTEM (auto-approval).
           example: usge49ielgel
         approver_type:
           type: string
           enum:
             - USER
             - SYSTEM
-          description: >
+          description: |
             Type of approver.
-
             - USER: A human approver identified by approver_user_id
-
-            - SYSTEM: Automatic approval by the system (auto-approval feature).
-            When approver_type is SYSTEM, approver_user_id is null.
+            - SYSTEM: Automatic approval by the system (auto-approval feature). When approver_type is SYSTEM, approver_user_id is null.
           example: USER
         approver_user:
           allOf:
             - $ref: '#/components/schemas/user_out_embed'
           nullable: true
-          description: >
-            The user object of the approver. This is null when approver_type is
-            SYSTEM.
+          description: |
+            The user object of the approver. This is null when approver_type is SYSTEM.
         state:
           type: string
           enum:
@@ -1850,12 +2570,9 @@ components:
             State of this report_approval
         approver_order:
           type: integer
-          description: >
-            This number inidicates the order of the approver in the approval
-            sequence for the report.
-
-            The approver with the lowest approver_order is the first approver in
-            the sequence.
+          description: |
+            This number inidicates the order of the approver in the approval sequence for the report.
+            The approver with the lowest approver_order is the first approver in the sequence.
           example: 1
     report_out_embed:
       type: object
@@ -1942,17 +2659,14 @@ components:
             - $ref: '#/components/schemas/id_string'
           nullable: true
           maxLength: 255
-          description: >
-            An unique ID, generated by Sage Exp Mgmt, for identifying the
-            Reimbursement.
+          description: |
+            An unique ID, generated by Sage Exp Mgmt, for identifying the Reimbursement.
           example: reimntGt9ju6qP
         reimbursement_seq_num:
           type: string
           nullable: true
-          description: >
-            A unique, organization wide identifier for a particular
-            reimbursement.<br>
-
+          description: |
+            A unique, organization wide identifier for a particular reimbursement.<br>
             This id is always prefixed with `P/`.
           example: P/2020/11/29
         approvals:
@@ -1985,9 +2699,8 @@ components:
           enum:
             - INTEGRATION
             - RECEIPT
-          description: >
-            Indicates whether this file original size or encrypted or its
-            thumbnail image.
+          description: |
+            Indicates whether this file original size or encrypted or its thumbnail image.
           example: RECEIPT
         content_type:
           type: string
@@ -2041,10 +2754,8 @@ components:
     employee_id:
       type: string
       maxLength: 255
-      description: >
-        This id provided by Sage Exp Mgmt to uniquely identify an employee
-        within an organization.
-
+      description: |
+        This id provided by Sage Exp Mgmt to uniquely identify an employee within an organization.
         This id is always prefixed with `ou`.
       example: outGt9ju6qP
     department_id:
@@ -2078,10 +2789,8 @@ components:
         display_name:
           type: string
           example: Sales / Outbound Sales
-          description: >
-            This is a combination of name and sub_department separated by a /
-            and spaces. In case if no sub_department is present it is same as
-            name of the department.
+          description: |
+            This is a combination of name and sub_department separated by a / and spaces. In case if no sub_department is present it is same as name of the department.
     employee_out_embed_for_expense:
       type: object
       additionalProperties: false
@@ -2111,12 +2820,9 @@ components:
           maxLength: 255
           nullable: true
           example: E84122
-          description: >
-            This field refers to any string that the client programs can use to
-            refer to an employee's unique id.
-
-            This could be any field such as an UUID from an Active Directory
-            server or employee id in a HRMS system.
+          description: |
+            This field refers to any string that the client programs can use to refer to an employee's unique id.
+            This could be any field such as an UUID from an Active Directory server or employee id in a HRMS system.
         org_id:
           $ref: '#/components/schemas/org_id'
         org_name:
@@ -2170,9 +2876,8 @@ components:
             Mobile number of the employee
         joined_at:
           $ref: '#/components/schemas/joined_at'
-      description: >
-        NOTE: The data of this field is not realtime. It will get updated later
-        even if `employee_id` is already up-to-date.
+      description: |
+        NOTE: The data of this field is not realtime. It will get updated later even if `employee_id` is already up-to-date.
     card_number:
       type: string
       description: |
@@ -2188,17 +2893,14 @@ components:
       type: string
       maxLength: 255
       nullable: true
-      description: >
-        This represents the name of the resource. This should be unique in an
-        organization
+      description: |
+        This represents the name of the resource. This should be unique in an organization
       example: foo123
     timestamptz_pst:
       type: string
       format: date-time
       nullable: true
-      description: >-
-        Date-time in [ISO8601
-        format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+      description: Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
       example: '2020-06-01T01:18:19.292-08:00'
     spent_at:
       allOf:
@@ -2330,28 +3032,139 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/merchant'
-          description: >
-            String denoting the name of the vendor to which the card transaction
-            was made.
-
-            Note: This is not same as the merchant added in Sage Exp Mgmt but
-            just a string
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
         category:
           type: string
           maxLength: 255
           nullable: true
-          description: >
+          description: |
             String denoting the category of the card transaction
-
-            Note: This is not same as the category added in Sage Exp Mgmt but
-            just a string
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
           example: Travel
         matched_by:
           type: string
           nullable: true
-          description: >
-            String denoting the email of the user who matched the card
-            transaction to an expense.
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@sage.com
+    matched_corporate_card_transaction_details_out_embed:
+      type: object
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
           example: john.ooe@sage.com
     matched_corporate_card_transaction_out_embed_new:
       anyOf:
@@ -2359,128 +3172,7 @@ components:
           additionalProperties: false
           properties: {}
           description: Empty object when no corporate card transaction is matched
-        - type: object
-          required:
-            - id
-            - corporate_card_id
-            - corporate_card_number
-          properties:
-            id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: btxnwownwrng
-            corporate_card_id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: bawownwrng
-            corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            corporate_card_nickname:
-              type: string
-              maxLength: 25
-              nullable: true
-              description: |
-                Unique nickname assigned to the card
-              example: Business Card
-            corporate_card_cardholder_name:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the card holder's name
-              example: John Cena
-            capitalone_virtual_card_last_four:
-              type: string
-              nullable: true
-              description: |
-                Last four digits of capitalone virtual card.
-              example: '4521'
-            masked_corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            bank_name:
-              nullable: true
-              $ref: '#/components/schemas/bank_name'
-            corporate_card_user_full_name:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/name_nullable'
-              maxLength: 255
-              description: |
-                String denoting the card holder's full name
-              example: John Doe
-            is_corporate_card_archived:
-              type: boolean
-              description: |
-                Signifies whether the corporate card is archived or not.
-              nullable: false
-            amount:
-              $ref: '#/components/schemas/amount'
-            currency:
-              $ref: '#/components/schemas/currency'
-            spent_at:
-              allOf:
-                - $ref: '#/components/schemas/spent_at'
-              description: |
-                Signifies spent date of a card transaction.
-                This date cannot be in future.
-            posted_at:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/timestamptz_utc'
-              description: |
-                Signifies post date of a card transaction.
-                This date cannot be in future.
-            status:
-              type: string
-              nullable: true
-              enum:
-                - PENDING
-                - POSTED
-                - null
-              example: PENDING
-              description: |
-                Signifies status of a card transaction.
-            description:
-              type: string
-              nullable: true
-              description: |
-                Holds the description of the card transaction
-              example: Team lunch
-            foreign_currency:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_currency'
-            foreign_amount:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_amount'
-            merchant:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/merchant'
-              description: >
-                String denoting the name of the vendor to which the card
-                transaction was made.
-
-                Note: This is not same as the merchant added in Sage Exp Mgmt
-                but just a string
-            category:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: >
-                String denoting the category of the card transaction
-
-                Note: This is not same as the category added in Sage Exp Mgmt
-                but just a string
-              example: Travel
-            matched_by:
-              type: string
-              nullable: true
-              description: >
-                String denoting the email of the user who matched the card
-                transaction to an expense.
-              example: john.ooe@sage.com
+        - $ref: '#/components/schemas/matched_corporate_card_transaction_details_out_embed'
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -2502,18 +3194,15 @@ components:
         amount:
           type: boolean
           nullable: false
-          description: >
-            This field shows whether the amount field is present in the expense
-            or not
+          description: |
+            This field shows whether the amount field is present in the expense or not
         currency:
           type: boolean
           nullable: false
-          description: >
-            This field shows whether the currency field is present in the
-            expense or not
-      description: >
-        This object contains all the fields which are mandatory bu tare missing
-        in the expense.
+          description: |
+            This field shows whether the currency field is present in the expense or not
+      description: |
+        This object contains all the fields which are mandatory bu tare missing in the expense.
     activity_details:
       type: object
       nullable: true
@@ -2572,15 +3261,13 @@ components:
       properties:
         parent_expense_field_id:
           type: integer
-          description: >
-            This id provided by Sage Exp Mgmt to identify the parent expense
-            field.
+          description: |
+            This id provided by Sage Exp Mgmt to identify the parent expense field.
           example: 123
         dependent_expense_field_id:
           type: integer
-          description: >
-            This id provided by Sage Exp Mgmt to identify the dependent expense
-            field.
+          description: |
+            This id provided by Sage Exp Mgmt to identify the dependent expense field.
           example: 123
         dependent_expense_field_value_id:
           type: integer
@@ -2618,9 +3305,8 @@ components:
           type: string
           maxLength: 255
           nullable: true
-          description: >
-            String denoting the name of the merchant to which the Expense was
-            made.
+          description: |
+            String denoting the name of the merchant to which the Expense was made.
           example: Amazon
         is_billable:
           $ref: '#/components/schemas/is_billable'
@@ -2674,29 +3360,24 @@ components:
           example: 5
     policy_checks:
       type: object
-      description: >
+      description: |
         Policy checks details.
-
-        NOTE: The data of this field is not realtime. It will get updated later
-        even if rest of fields are already up-to-date.
+        NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
       properties:
         is_amount_limit_applied:
           type: boolean
-          description: >
-            A true value here means, that as per policy calculation this expense
-            amount is capped based on the policy calculation.
+          description: |
+            A true value here means, that as per policy calculation this expense amount is capped based on the policy calculation.
           example: true
         are_approvers_added:
           type: boolean
-          description: >
-            A true value here means, approvers are added to the expense based on
-            the policy calculation.
+          description: |
+            A true value here means, approvers are added to the expense based on the policy calculation.
           example: true
         is_flagged_ever:
           type: boolean
-          description: >
-            A true value here means, that as per policy calculation this expense
-            is flagged.
+          description: |
+            A true value here means, that as per policy calculation this expense is flagged.
           example: true
         violations:
           type: array
@@ -2736,7 +3417,7 @@ components:
         formatted_address:
           type: string
           nullable: false
-          example: '221 Baker St, Marylebone, London, United Kingdom'
+          example: 221 Baker St, Marylebone, London, United Kingdom
         latitude:
           type: number
           nullable: false
@@ -2754,9 +3435,8 @@ components:
         - home_location
         - work_location
       nullable: true
-      description: >
-        Commute details of the employee. This is used to deduct daily commute
-        from the employee's mileage expenses.
+      description: |
+        Commute details of the employee. This is used to deduct daily commute from the employee's mileage expenses.
       properties:
         id:
           allOf:
@@ -2925,46 +3605,32 @@ components:
             This date cannot be in future.
         source:
           type: string
-          description: >
+          description: |
             The name of the client app which is creating the expense.
-
             if its a thrid party app, it prefixed with TPA_.
-
-            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If
-            not
-
+            Ex - If you pass SLACK_APP, it will be saved as TPA_SLACK_APP. If not
             passed, source is saved as TPA.
           example: SLACK_APP
         merchant:
           type: string
           maxLength: 255
           nullable: true
-          description: >
-            String denoting the name of the merchant to which the Expense was
-            made.
+          description: |
+            String denoting the name of the merchant to which the Expense was made.
           example: Uber
         currency:
           $ref: '#/components/schemas/currency'
         amount:
           type: number
           nullable: true
-          description: >
+          description: |
             The amount for which the expense was/will-be fyled.
+            The amount will be in the currency that the organization's home currency.<br>
 
-            The amount will be in the currency that the organization's home
-            currency.<br>
+            Note that, this field is calculated from admin_amount, policy_amount, claim_amount.
 
-
-            Note that, this field is calculated from admin_amount,
-            policy_amount, claim_amount.
-
-
-            if admin_amount is present then this value will be same
-            admin_amount.
-
-            if policy_amount is present then this value will be same
-            policy_amount.
-
+            if admin_amount is present then this value will be same admin_amount.
+            if policy_amount is present then this value will be same policy_amount.
             else this should be same as claim_amount.
           example: 1500
         claim_amount:
@@ -3041,9 +3707,8 @@ components:
           type: number
           nullable: true
           readOnly: true
-          description: >
-            System-derived tax amount for the expense amount and the selected
-            tax group's rate.
+          description: |
+            System-derived tax amount for the expense amount and the selected tax group's rate.
         is_billable:
           type: boolean
           nullable: true
@@ -3081,9 +3746,7 @@ components:
             - PERSONAL
             - COMPANY
             - null
-          description: >-
-            Selected vehicle ownership for an advanced mileage expense. `null`
-            for a basic mileage expense.
+          description: Selected vehicle ownership for an advanced mileage expense. `null` for a basic mileage expense.
         selected_vehicle_category:
           type: string
           nullable: true
@@ -3092,9 +3755,7 @@ components:
             - MOTORCYCLE
             - BICYCLE
             - null
-          description: >-
-            Selected vehicle category for an advanced mileage expense. `null`
-            for a basic mileage expense.
+          description: Selected vehicle category for an advanced mileage expense. `null` for a basic mileage expense.
         passenger_count:
           type: integer
           nullable: true
@@ -3103,9 +3764,7 @@ components:
           type: number
           nullable: true
           readOnly: true
-          description: >-
-            Passenger mileage rate snapshot applied to this expense. `null` when
-            passenger mileage does not apply.
+          description: Passenger mileage rate snapshot applied to this expense. `null` when passenger mileage does not apply.
         passenger_amount:
           type: number
           nullable: true
@@ -3131,21 +3790,17 @@ components:
         per_diem_num_days:
           type: number
           nullable: true
-          description: >
-            Specific to per diem related expenses, number of days for which per
-            diem claim is made.
+          description: |
+            Specific to per diem related expenses, number of days for which per diem claim is made.
           example: 2
         started_at:
           $ref: '#/components/schemas/timestamptz_utc'
         ended_at:
           $ref: '#/components/schemas/timestamptz_utc'
         travel_classes:
-          description: >
-            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi`
-            category.
-
-            index 0 holds onward journey class, index 1 holds return journey
-            travel class.
+          description: |
+            This field is applicable only for `Flight`, `Train`, `Bus`, `Taxi` category.
+            index 0 holds onward journey class, index 1 holds return journey travel class.
           type: array
           minItems: 0
           maxItems: 2
@@ -3160,13 +3815,9 @@ components:
           description: |
             This field is applicable for only `Hotel` category.
         locations:
-          description: >
+          description: |
             This field will be present for travel related categories.
-
-            For travel between Place A to Place B, this array will contain two
-            items, From location at array index 0 and To location at array index
-            1.
-
+            For travel between Place A to Place B, this array will contain two items, From location at array index 0 and To location at array index 1.
             For travel between Place A to Place c and stopping at Place B, this
           type: array
           minItems: 0
@@ -3180,10 +3831,8 @@ components:
         code:
           type: string
           nullable: true
-          description: >
-            Id given by external systems like Gmail. To identify whether that
-            entity
-
+          description: |
+            Id given by external systems like Gmail. To identify whether that entity
             has been already added to Sage Exp Mgmt or not.
           example: wgjwgo3ihwljnlsww
         state:
@@ -3222,10 +3871,8 @@ components:
             - USER
             - SYSTEM
             - null
-          description: >
-            Indicates whether the expense was added to the report it belongs to
-            by a user or the system. If the expense is not a part of any report,
-            this field will be null.
+          description: |
+            Indicates whether the expense was added to the report it belongs to by a user or the system. If the expense is not a part of any report, this field will be null.
           example: USER
         report:
           $ref: '#/components/schemas/report_out_embed'
@@ -3243,22 +3890,18 @@ components:
         is_receipt_mandatory:
           type: boolean
           nullable: true
-          description: >
-            Determines whether a receipt is missing for this expense when it is
-            required.
+          description: |
+            Determines whether a receipt is missing for this expense when it is required.
         is_exported:
           type: boolean
           nullable: true
-          description: >
-            Determines whether this expense has been exported to external
-            accounting system or not.
+          description: |
+            Determines whether this expense has been exported to external accounting system or not.
         last_exported_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
           nullable: true
-          description: >-
-            signifies when this expense was exported to an external accounting
-            system.
+          description: signifies when this expense was exported to an external accounting system.
         file_ids:
           type: array
           items:
@@ -3301,51 +3944,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/id_string'
-          description: >
-            Holds the corporate card transaction ids which are matched to this
-            expense
+          description: |
+            Holds the corporate card transaction ids which are matched to this expense
 
-
-            **NOTE**: This array field is planned for deprecation in future.
-            Please consider using the field
-            `matched_corporate_card_transaction_id` instead, as this array
-            always contains a single value.
+            **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction_id` instead, as this array always contains a single value.
           example:
             - btxnwownwrng
         matched_corporate_card_transactions:
           type: array
           items:
             $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed'
-          description: >
-            Holds the corporate card transactions which are matched to this
-            expense.
+          description: |
+            Holds the corporate card transactions which are matched to this expense.
+            NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_ids` is already up-to-date.
 
-            NOTE: The data of this field is not realtime. It will get updated
-            later even if `matched_corporate_card_transaction_ids` is already
-            up-to-date.
-
-
-            **NOTE**: This array field is planned for deprecation in future.
-            Please consider using the field `matched_corporate_card_transaction`
-            instead, as this array always contains a single value.
+            **NOTE**: This array field is planned for deprecation in future. Please consider using the field `matched_corporate_card_transaction` instead, as this array always contains a single value.
         matched_corporate_card_transaction_id:
           type: string
           nullable: true
-          description: >
-            Holds the corporate card transaction id which is matched to this
-            expense
+          description: |
+            Holds the corporate card transaction id which is matched to this expense
           example: btxnwownwrng
         matched_corporate_card_transaction:
           allOf:
-            - $ref: >-
-                #/components/schemas/matched_corporate_card_transaction_out_embed_new
-          description: >
-            Holds the corporate card transaction which is matched to this
-            expense.
-
-            NOTE: The data of this field is not realtime. It will get updated
-            later even if `matched_corporate_card_transaction_id` is already
-            up-to-date.
+            - $ref: '#/components/schemas/matched_corporate_card_transaction_out_embed_new'
+          description: |
+            Holds the corporate card transaction which is matched to this expense.
+            NOTE: The data of this field is not realtime. It will get updated later even if `matched_corporate_card_transaction_id` is already up-to-date.
         last_settled_at:
           allOf:
             - $ref: '#/components/schemas/timestamptz_utc'
@@ -3363,16 +3988,12 @@ components:
         is_manually_flagged:
           type: boolean
           nullable: true
-          description: >-
-            This fields marks whether a given expense is manually flagged or
-            not.
+          description: This fields marks whether a given expense is manually flagged or not.
           example: true
         is_policy_flagged:
           type: boolean
           nullable: true
-          description: >-
-            This fields marks whether a given expense is flagged by policy or
-            not.
+          description: This fields marks whether a given expense is flagged by policy or not.
           example: true
         split_group_id:
           type: string
@@ -3386,17 +4007,15 @@ components:
         is_physical_bill_submitted:
           type: boolean
           nullable: true
-          description: >
-            This fields marks if physical has been collected for the given
-            expense.
+          description: |
+            This fields marks if physical has been collected for the given expense.
           example: true
         physical_bill_submitted_at:
           type: string
           format: date-time
           example: '2020-06-11T13:14:55.201598+00:00'
-          description: >
-            Signifies if and when the physical bill for this report was
-            submitted.
+          description: |
+            Signifies if and when the physical bill for this report was submitted.
           nullable: true
         expense_rule_id:
           type: string
@@ -3417,22 +4036,18 @@ components:
           $ref: '#/components/schemas/tax_group'
         approver_comments:
           type: array
-          description: >
+          description: |
             Comments added by approvers.
-
-            NOTE: The data of this field is not realtime. It will get updated
-            later even if rest of fields are already up-to-date.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
             - This is a comment by approver
         verifier_comments:
           type: array
-          description: >
+          description: |
             Comments added by verifiers.
-
-            NOTE: The data of this field is not realtime. It will get updated
-            later even if rest of fields are already up-to-date.
+            NOTE: The data of this field is not realtime. It will get updated later even if rest of fields are already up-to-date.
           items:
             type: string
           example:
@@ -3472,7 +4087,7 @@ components:
             url:
               type: string
               description: URL Endpoint for exported / failed expense
-              example: 'https://app.example.com/expense/txwownwrng'
+              example: https://app.example.com/expense/txwownwrng
             tpa_id:
               type: string
               nullable: false
@@ -3515,9 +4130,8 @@ components:
         commute_details_id:
           type: integer
           nullable: true
-          description: >
-            Commute details id of the expense. This id is provided by Sage Exp
-            Mgmt to identify a commute details.
+          description: |
+            Commute details id of the expense. This id is provided by Sage Exp Mgmt to identify a commute details.
           example: 1234
         commute_details:
           $ref: '#/components/schemas/commute_details'
@@ -3536,9 +4150,7 @@ components:
         report_auto_approval_state:
           type: string
           nullable: true
-          description: >-
-            Indicates the auto approval evaluation status of the expense's
-            report.
+          description: Indicates the auto approval evaluation status of the expense's report.
           enum:
             - PENDING
             - NOT_ELIGIBLE
@@ -3551,10 +4163,9 @@ components:
         query_params:
           nullable: false
           type: string
-          description: >
-            Query param string similar to expenses GET call. Use
-            group_by_state=eq.true to get state-wise grouping of stats.
-          example: 'id=in.(''tx1263'', ''tx1569'')&group_by_state=eq.true'
+          description: |
+            Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
+          example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
     employee_overview_expense_stats_out:
       type: object
       additionalProperties: false
@@ -3570,653 +4181,3 @@ components:
           type: number
           description: Total amount across all employees in the hierarchy
           example: 30003
-tags: []
-paths:
-  /manager/employee_overview/expense_comments:
-    get:
-      x-internal: false
-      operationId: employee_overview_expense_comments_get
-      tags:
-        - Employees
-      summary: Get employee overview expense comments
-      description: |
-        This API returns expense comments of an expense.
-      parameters:
-        - $ref: '#/components/parameters/expense_id'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                  - count
-                  - offset
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_comments_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview/files/generate_urls/bulk:
-    post:
-      x-internal: false
-      operationId: employee_overview_files_generate_urls_bulk_post
-      tags:
-        - Employees
-      summary: >-
-        Bulk generate download and upload URLs for files under the current
-        user's hierarchy
-      description: >
-        Once a file is created, its contents may need to be uploaded (or
-        downloaded). To upload (or download) contents, you'll
-
-        need to generate a temporary signed URL. This API accomplishes that. The
-        signed URL is valid for 5 mins.
-
-        This API validates that all requested files belong to users in the
-        approver's hierarchy,
-
-        then generates upload and download URLs for those files.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/file_generate_urls_action_in'
-                  example:
-                    - id: fi123819sa
-                    - id: fi876833tu
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/file_generate_urls_action_out'
-                    example:
-                      - id: sdfd2391
-                        name: uber_expenses_vmrpw.pdf
-                        content_type: application/pdf
-                        download_url: 'https://aaa.bbb.cc/x232sds'
-                        upload_url: 'https://aaa.bbb.cc/x232sds'
-                      - id: sdfd2392
-                        name: lyft_expenses_vmrpw.pdf
-                        content_type: application/pdf
-                        download_url: 'https://aaa.bbb.cc/x22ddsds'
-                        upload_url: 'https://aaa.bbb.cc/x2sdssds'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-  /manager/employee_overview/expense_policy_states:
-    get:
-      x-internal: false
-      tags:
-        - Employees
-      summary: Get policy states of Expenses
-      description: |
-        Get policy states of Expenses
-      operationId: expense_policy_states_get
-      parameters:
-        - in: query
-          name: expense_id
-          description: >
-            The id of the expense for which you are querying the policy
-            states.<br>
-
-            Supported operators are `eq`.<br>
-
-            expense_id=eq."id" <br>
-          schema:
-            type: string
-            example: eq."txSdfsytrqw"
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                  - count
-                  - offset
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_policy_states_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview/hierarchy:
-    get:
-      x-internal: false
-      tags:
-        - Employees
-      summary: List employees hierarchy view
-      description: >
-        This API returns a hierarchical list of employees reporting to the user
-        calling this API. Each employee includes their position in the hierarchy
-        (depth) and their primary approver.
-      operationId: manager_hierarchy_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/employee_hierarchy_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview:
-    get:
-      x-internal: false
-      tags:
-        - Employees
-      summary: List expense overview of employees under the current user hierarchy
-      description: >
-        This API returns a list of employees in the organization hierarchy under
-        the current approver with their expense statistics and overview
-        information.
-      operationId: employee_hierarchy_overview_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                  - count
-                  - offset
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/employee_overview_out'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  count:
-                    $ref: '#/components/schemas/count'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorised request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview/stats:
-    post:
-      x-internal: false
-      operationId: employee_hierarchy_overview_stats_post
-      tags:
-        - Employees
-      summary: Get employee overview statistics
-      description: >
-        This API returns statistical information about employees in the
-        hierarchy, including total count and total amount.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  type: object
-                  additionalProperties: false
-                  properties:
-                    query_params:
-                      type: string
-                      nullable: false
-                      description: Required query parameters for filtering
-                      example: department_id=123
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/employee_overview_stats_out'
-                example:
-                  data:
-                    count: 1130
-                    total_amount: 30003
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview/employees:
-    get:
-      x-internal: false
-      tags:
-        - Employees
-      summary: List employees in hierarchy
-      operationId: employee_overview_employees_list
-      description: >
-        This API returns a list of employees in the organization hierarchy under
-        the current approver. 
-
-        The API supports rich filtering on all response fields and pagination
-        via query parameters. 
-
-        To understand how to use these parameters, please see the [Guide to Data
-        APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
-
-
-        **Note:** This API requires the employee hierarchy overview feature to
-        be enabled for the organization and the user must have APPROVER role.
-      parameters:
-        - $ref: '#/components/parameters/q'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                  - count
-                  - offset
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/employee_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means either the employee hierarchy overview
-                      feature is not enabled for the organization or the user
-                      does not have APPROVER role.
-  /manager/employee_overview/expenses:
-    get:
-      x-internal: false
-      tags:
-        - Employees
-      summary: List expenses in hierarchy
-      description: >
-        This API gets expenses of employees that are under the current user's
-        hierarchy.
-      operationId: employee_hierarchy_overview_expenses_list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                  - count
-                  - offset
-                properties:
-                  count:
-                    $ref: '#/components/schemas/count'
-                  offset:
-                    $ref: '#/components/schemas/offset'
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/expense_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means the requested resource was not found or
-                      the requester doesn't have sufficient access.
-  /manager/employee_overview/expenses/stats:
-    post:
-      x-internal: false
-      tags:
-        - Employees
-      summary: Expenses Stats of users in hierarchy
-      description: >
-        This API gets expenses stats of employees that are under the current
-        user's hierarchy.
-      operationId: employee_hierarchy_overview_expenses_stats
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required:
-                - data
-              properties:
-                data:
-                  $ref: '#/components/schemas/expenses_stats_in'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required:
-                  - data
-                properties:
-                  data:
-                    $ref: '#/components/schemas/employee_overview_expense_stats_out'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400'
-        '401':
-          description: Unauthorized request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    description: >
-                      This error means current user does not have enough
-                      permissions to perform this operation.
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/404'
