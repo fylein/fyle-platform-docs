@@ -3159,7 +3159,7 @@ paths:
                 $ref: '#/components/schemas/401'
   /approver/org_employees:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Employees
       summary: List organisation employees
@@ -3257,7 +3257,7 @@ paths:
                     example: you don't have permissions to access this resource
   /approver/orgs:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Organisations
       summary: List Organisations
@@ -3406,7 +3406,7 @@ paths:
                 $ref: '#/components/schemas/404'
   /approver/expense_fields:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Expenses
       summary: List expense fields
@@ -3502,7 +3502,7 @@ paths:
                     example: you don't have permissions to access this resource
   /approver/dependent_expense_field_values:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Expenses
       summary: List dependent expense field values
@@ -3635,7 +3635,7 @@ paths:
                     example: you don't have permissions to access this resource
   /approver/tax_groups:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Tax Groups
       summary: List tax groups
@@ -3719,7 +3719,7 @@ paths:
                     example: you don't have permissions to access this resource
   /approver/departments:
     get:
-      x-internal: false
+      x-internal: true
       tags:
         - Departments
       summary: List departments
@@ -7139,128 +7139,130 @@ components:
           description: |
             String denoting the email of the user who matched the card transaction to an expense.
           example: john.ooe@sage.com
+    matched_corporate_card_transaction_details_out_embed:
+      type: object
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@sage.com
     matched_corporate_card_transaction_out_embed_new:
       anyOf:
         - type: object
           additionalProperties: false
           properties: {}
           description: Empty object when no corporate card transaction is matched
-        - type: object
-          required:
-            - id
-            - corporate_card_id
-            - corporate_card_number
-          properties:
-            id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: btxnwownwrng
-            corporate_card_id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: bawownwrng
-            corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            corporate_card_nickname:
-              type: string
-              maxLength: 25
-              nullable: true
-              description: |
-                Unique nickname assigned to the card
-              example: Business Card
-            corporate_card_cardholder_name:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the card holder's name
-              example: John Cena
-            capitalone_virtual_card_last_four:
-              type: string
-              nullable: true
-              description: |
-                Last four digits of capitalone virtual card.
-              example: '4521'
-            masked_corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            bank_name:
-              nullable: true
-              $ref: '#/components/schemas/bank_name'
-            corporate_card_user_full_name:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/name_nullable'
-              maxLength: 255
-              description: |
-                String denoting the card holder's full name
-              example: John Doe
-            is_corporate_card_archived:
-              type: boolean
-              description: |
-                Signifies whether the corporate card is archived or not.
-              nullable: false
-            amount:
-              $ref: '#/components/schemas/amount'
-            currency:
-              $ref: '#/components/schemas/currency'
-            spent_at:
-              allOf:
-                - $ref: '#/components/schemas/spent_at'
-              description: |
-                Signifies spent date of a card transaction.
-                This date cannot be in future.
-            posted_at:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/timestamptz_utc'
-              description: |
-                Signifies post date of a card transaction.
-                This date cannot be in future.
-            status:
-              type: string
-              nullable: true
-              enum:
-                - PENDING
-                - POSTED
-                - null
-              example: PENDING
-              description: |
-                Signifies status of a card transaction.
-            description:
-              type: string
-              nullable: true
-              description: |
-                Holds the description of the card transaction
-              example: Team lunch
-            foreign_currency:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_currency'
-            foreign_amount:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_amount'
-            merchant:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/merchant'
-              description: |
-                String denoting the name of the vendor to which the card transaction was made.
-                Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
-            category:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the category of the card transaction
-                Note: This is not same as the category added in Sage Exp Mgmt but just a string
-              example: Travel
-            matched_by:
-              type: string
-              nullable: true
-              description: |
-                String denoting the email of the user who matched the card transaction to an expense.
-              example: john.ooe@sage.com
+        - $ref: '#/components/schemas/matched_corporate_card_transaction_details_out_embed'
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -8845,115 +8847,119 @@ components:
             Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
           example: id=in.('rp123','rep1234')&group_by_state=eq.true
+    reports_stats_by_state_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+        - failed_amount
+        - failed_count
+        - processing_amount
+        - processing_count
+        - reimbursable_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching reports in this state.
+          example: 5
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching reports in this state.
+          example: 2200
+        state:
+          type: string
+          enum:
+            - APPROVER_PENDING
+            - DRAFT
+            - PAYMENT_PROCESSING
+            - APPROVER_INQUIRY
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+          description: Report state.
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 200
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1500
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 3
+        reimbursable_amount:
+          type: number
+          nullable: false
+          description: Sum of reimbursable amounts for matching reports in this state.
+          example: 500
+    reports_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping (response for older mobile app versions).
+      required:
+        - count
+        - total_amount
+        - processing_amount
+        - processing_count
+        - failed_amount
+        - failed_count
+      properties:
+        reimbursable_amount:
+          type: number
+          description: Total reimbursable amount for matching reports.
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching reports.
+          example: 1
+        total_amount:
+          type: number
+          nullable: false
+          description: Total sum of amounts for all matching reports.
+          example: 100
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state.
+          example: 101
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state.
+          example: 2
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state with ACH failures.
+          example: 101
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state with ACH failures.
+          example: 1
     reports_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by report state
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - state
-              - failed_amount
-              - failed_count
-              - processing_amount
-              - processing_count
-              - reimbursable_amount
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching reports in this state.
-                example: 5
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching reports in this state.
-                example: 2200
-              state:
-                type: string
-                enum:
-                  - APPROVER_PENDING
-                  - DRAFT
-                  - PAYMENT_PROCESSING
-                  - APPROVER_INQUIRY
-                  - APPROVED
-                  - PAYMENT_PENDING
-                  - PAID
-                description: Report state.
-              failed_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 200
-              failed_count:
-                type: integer
-                nullable: true
-                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1
-              processing_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1500
-              processing_count:
-                type: integer
-                nullable: true
-                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 3
-              reimbursable_amount:
-                type: number
-                nullable: false
-                description: Sum of reimbursable amounts for matching reports in this state.
-                example: 500
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without state grouping (response for older mobile app versions).
-          required:
-            - count
-            - total_amount
-            - processing_amount
-            - processing_count
-            - failed_amount
-            - failed_count
-          properties:
-            reimbursable_amount:
-              type: number
-              description: Total reimbursable amount for matching reports.
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching reports.
-              example: 1
-            total_amount:
-              type: number
-              nullable: false
-              description: Total sum of amounts for all matching reports.
-              example: 100
-            processing_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state.
-              example: 101
-            processing_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state.
-              example: 2
-            failed_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
-              example: 101
-            failed_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state with ACH failures.
-              example: 1
+            $ref: '#/components/schemas/reports_stats_by_state_item_out'
+        - $ref: '#/components/schemas/reports_stats_overall_out'
       example:
         - state: DRAFT
           count: 3
@@ -9533,49 +9539,53 @@ components:
             Query param string similar to advance_requests GET call. Use group_by_currency=eq.true to get currency-wise grouping of stats.
           nullable: false
           example: id=in.('adr1263','adr1569')&group_by_currency=eq.true
+    advance_requests_approver_stats_by_currency_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - currency
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching advance requests with this currency.
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching advance requests with this currency.
+          example: 44545.4
+        currency:
+          type: string
+    advance_requests_approver_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without currency grouping.
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching advance requests.
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching advance requests.
+          example: 45882.4
     advance_requests_approver_stats_out:
       oneOf:
         - type: array
           title: Currency-wise grouped stats
           description: Stats grouped by advance request currency
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - currency
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching advance requests with this currency.
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching advance requests with this currency.
-                example: 44545.4
-              currency:
-                type: string
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without currency grouping.
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching advance requests.
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching advance requests.
-              example: 45882.4
+            $ref: '#/components/schemas/advance_requests_approver_stats_by_currency_item_out'
+        - $ref: '#/components/schemas/advance_requests_approver_stats_overall_out'
       example:
         - currency: USD
           count: 10
@@ -11126,51 +11136,55 @@ components:
           description: |
             Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
+    expenses_stats_by_state_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching expenses in this state
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching expenses in this state
+          example: 44545.4
+        state:
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
+          description: Expense state
+    expenses_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
     expenses_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by expense state
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - state
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching expenses in this state
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching expenses in this state
-                example: 44545.4
-              state:
-                allOf:
-                  - $ref: '#/components/schemas/expense_state'
-                description: Expense state
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without state grouping
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching expenses
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching expenses
-              example: 45882.4
+            $ref: '#/components/schemas/expenses_stats_by_state_item_out'
+        - $ref: '#/components/schemas/expenses_stats_overall_out'
       example:
         - state: COMPLETE
           count: 343
