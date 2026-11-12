@@ -77,6 +77,9 @@ tags:
   - name: Reports
     description: |
       This API gives you access to your Expense Reports data.
+  - name: Reminders
+    description: |
+      This API gives you access to Reminders data.
   - name: Schedules
     description: |
       This API let you create Scheduled jobs. 
@@ -1775,6 +1778,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401'
+  /spender/reminders:
+    get:
+      tags:
+        - Reminders
+      summary: List Reminders
+      operationId: reminders_list
+      description: |
+        Returns reminders configured by organisation's admins.
+        This API supports very rich filtering on all response fields and pagination via query parameters. To understand how to use these parameters, please see the [Guide to Data APIs](https://docs.fylehq.com/docs/fyle-platform-docs/ZG9jOjI3Mzk2NTM3-guide-to-data-ap-is#filtering)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - count
+                  - offset
+                properties:
+                  count:
+                    $ref: '#/components/schemas/count'
+                  offset:
+                    $ref: '#/components/schemas/offset'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/reminder_out'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden. The authenticated user does not have the FYLER role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
   /spender/reports:
     post:
       x-internal: false
@@ -3639,11 +3690,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - commute_details
-                  properties:
-                    commute_details:
-                      $ref: '#/components/schemas/commute_details_in'
+                  $ref: '#/components/schemas/spender_commute_details_in'
       responses:
         '200':
           description: OK
@@ -3695,13 +3742,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_integer'
-                      description: Current commute details id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/spender_commute_details_delete_in'
       responses:
         '200':
           description: OK
@@ -3853,13 +3894,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_integer'
-                      description: Delegation id of spender and delegatee. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/spender_delegatees_delete_in'
       responses:
         '200':
           description: OK
@@ -5252,19 +5287,7 @@ paths:
               type: object
               properties:
                 data:
-                  type: object
-                  properties:
-                    expense_id:
-                      type: string
-                      description: ID of the expense to which this html file needs to be attached
-                      example: txdtyereJtR6
-                    html_content:
-                      type: string
-                      description: Base64 encoded representation of the HTML content
-                      example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
-                  required:
-                    - expense_id
-                    - html_content
+                  $ref: '#/components/schemas/file_upload_html_in'
               required:
                 - data
       responses:
@@ -6885,13 +6908,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/personal_card_delete_in'
       responses:
         '200':
           description: OK
@@ -7035,13 +7052,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - personal_card_id
-                  properties:
-                    personal_card_id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+                  $ref: '#/components/schemas/personal_card_transactions_fetch_in'
       responses:
         '200':
           description: OK
@@ -7139,20 +7150,7 @@ paths:
                 - data
               properties:
                 data:
-                  required:
-                    - id
-                    - expense_split_group_id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
-                      example: btxnAnsad23ms
-                    expense_split_group_id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
-                      example: txaisd2asdJ
+                  $ref: '#/components/schemas/personal_card_transaction_match_in'
       responses:
         '200':
           description: OK
@@ -7501,30 +7499,7 @@ paths:
               type: object
               properties:
                 data:
-                  type: object
-                  properties:
-                    expense_id:
-                      type: string
-                      description: The expense ID
-                    expense_policy_comments:
-                      type: array
-                      items:
-                        type: object
-                        required:
-                          - comment_type
-                          - comment_text
-                        properties:
-                          comment_type:
-                            type: string
-                            description: The comment type
-                          comment_text:
-                            type: string
-                            description: The comment text
-                            nullable: true
-                  required:
-                    - expense_id
-                    - expense_policy_comments
-                  additionalProperties: false
+                  $ref: '#/components/schemas/expense_policy_comments_upsert_in'
               required:
                 - data
               additionalProperties: false
@@ -7546,19 +7521,7 @@ paths:
                   - data
                 properties:
                   data:
-                    type: object
-                    properties:
-                      expense_id:
-                        type: string
-                        description: The expense ID
-                      expense_policy_comments:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/expense_policy_comment_out'
-                    required:
-                      - expense_id
-                      - expense_policy_comments
-                    additionalProperties: false
+                    $ref: '#/components/schemas/expense_policy_comments_upsert_out'
               example:
                 data:
                   expense_id: txGCcvnhUbrP
@@ -8070,17 +8033,7 @@ paths:
                 - data
               properties:
                 data:
-                  type: object
-                  additionalProperties: false
-                  required:
-                    - email
-                  properties:
-                    email:
-                      allOf:
-                        - $ref: '#/components/schemas/email'
-                      description: |
-                        The email address to check for availability.
-                      example: test-xyz@test.in
+                  $ref: '#/components/schemas/secondary_email_check_in'
       responses:
         '200':
           description: OK
@@ -8136,17 +8089,7 @@ paths:
                 - data
               properties:
                 data:
-                  type: object
-                  additionalProperties: false
-                  required:
-                    - id
-                  properties:
-                    id:
-                      allOf:
-                        - $ref: '#/components/schemas/id_string'
-                      description: |
-                        The unique identifier of the secondary email to delete.
-                      example: seu2gy8ulk32
+                  $ref: '#/components/schemas/secondary_email_delete_in'
       responses:
         '200':
           description: OK
@@ -11347,128 +11290,130 @@ components:
           description: |
             String denoting the email of the user who matched the card transaction to an expense.
           example: john.ooe@sage.com
+    matched_corporate_card_transaction_details_out_embed:
+      type: object
+      required:
+        - id
+        - corporate_card_id
+        - corporate_card_number
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: btxnwownwrng
+        corporate_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          example: bawownwrng
+        corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        corporate_card_nickname:
+          type: string
+          maxLength: 25
+          nullable: true
+          description: |
+            Unique nickname assigned to the card
+          example: Business Card
+        corporate_card_cardholder_name:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the card holder's name
+          example: John Cena
+        capitalone_virtual_card_last_four:
+          type: string
+          nullable: true
+          description: |
+            Last four digits of capitalone virtual card.
+          example: '4521'
+        masked_corporate_card_number:
+          $ref: '#/components/schemas/card_number'
+        bank_name:
+          nullable: true
+          $ref: '#/components/schemas/bank_name'
+        corporate_card_user_full_name:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/name_nullable'
+          maxLength: 255
+          description: |
+            String denoting the card holder's full name
+          example: John Doe
+        is_corporate_card_archived:
+          type: boolean
+          description: |
+            Signifies whether the corporate card is archived or not.
+          nullable: false
+        amount:
+          $ref: '#/components/schemas/amount'
+        currency:
+          $ref: '#/components/schemas/currency'
+        spent_at:
+          allOf:
+            - $ref: '#/components/schemas/spent_at'
+          description: |
+            Signifies spent date of a card transaction.
+            This date cannot be in future.
+        posted_at:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/timestamptz_utc'
+          description: |
+            Signifies post date of a card transaction.
+            This date cannot be in future.
+        status:
+          type: string
+          nullable: true
+          enum:
+            - PENDING
+            - POSTED
+            - null
+          example: PENDING
+          description: |
+            Signifies status of a card transaction.
+        description:
+          type: string
+          nullable: true
+          description: |
+            Holds the description of the card transaction
+          example: Team lunch
+        foreign_currency:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_currency'
+        foreign_amount:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/foreign_amount'
+        merchant:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/merchant'
+          description: |
+            String denoting the name of the vendor to which the card transaction was made.
+            Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
+        category:
+          type: string
+          maxLength: 255
+          nullable: true
+          description: |
+            String denoting the category of the card transaction
+            Note: This is not same as the category added in Sage Exp Mgmt but just a string
+          example: Travel
+        matched_by:
+          type: string
+          nullable: true
+          description: |
+            String denoting the email of the user who matched the card transaction to an expense.
+          example: john.ooe@sage.com
     matched_corporate_card_transaction_out_embed_new:
       anyOf:
         - type: object
           additionalProperties: false
           properties: {}
           description: Empty object when no corporate card transaction is matched
-        - type: object
-          required:
-            - id
-            - corporate_card_id
-            - corporate_card_number
-          properties:
-            id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: btxnwownwrng
-            corporate_card_id:
-              allOf:
-                - $ref: '#/components/schemas/id_string'
-              example: bawownwrng
-            corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            corporate_card_nickname:
-              type: string
-              maxLength: 25
-              nullable: true
-              description: |
-                Unique nickname assigned to the card
-              example: Business Card
-            corporate_card_cardholder_name:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the card holder's name
-              example: John Cena
-            capitalone_virtual_card_last_four:
-              type: string
-              nullable: true
-              description: |
-                Last four digits of capitalone virtual card.
-              example: '4521'
-            masked_corporate_card_number:
-              $ref: '#/components/schemas/card_number'
-            bank_name:
-              nullable: true
-              $ref: '#/components/schemas/bank_name'
-            corporate_card_user_full_name:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/name_nullable'
-              maxLength: 255
-              description: |
-                String denoting the card holder's full name
-              example: John Doe
-            is_corporate_card_archived:
-              type: boolean
-              description: |
-                Signifies whether the corporate card is archived or not.
-              nullable: false
-            amount:
-              $ref: '#/components/schemas/amount'
-            currency:
-              $ref: '#/components/schemas/currency'
-            spent_at:
-              allOf:
-                - $ref: '#/components/schemas/spent_at'
-              description: |
-                Signifies spent date of a card transaction.
-                This date cannot be in future.
-            posted_at:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/timestamptz_utc'
-              description: |
-                Signifies post date of a card transaction.
-                This date cannot be in future.
-            status:
-              type: string
-              nullable: true
-              enum:
-                - PENDING
-                - POSTED
-                - null
-              example: PENDING
-              description: |
-                Signifies status of a card transaction.
-            description:
-              type: string
-              nullable: true
-              description: |
-                Holds the description of the card transaction
-              example: Team lunch
-            foreign_currency:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_currency'
-            foreign_amount:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/foreign_amount'
-            merchant:
-              nullable: true
-              allOf:
-                - $ref: '#/components/schemas/merchant'
-              description: |
-                String denoting the name of the vendor to which the card transaction was made.
-                Note: This is not same as the merchant added in Sage Exp Mgmt but just a string
-            category:
-              type: string
-              maxLength: 255
-              nullable: true
-              description: |
-                String denoting the category of the card transaction
-                Note: This is not same as the category added in Sage Exp Mgmt but just a string
-              example: Travel
-            matched_by:
-              type: string
-              nullable: true
-              description: |
-                String denoting the email of the user who matched the card transaction to an expense.
-              example: john.ooe@sage.com
+        - $ref: '#/components/schemas/matched_corporate_card_transaction_details_out_embed'
     missing_mandatory_fields:
       type: object
       nullable: false
@@ -13878,6 +13823,179 @@ components:
           type: string
           nullable: true
           example: report.created
+    reminder_type:
+      type: string
+      enum:
+        - FYLE_EXPENSES
+        - REPORT_EXPENSES
+        - APPROVE_REPORTS
+        - VERIFY_EMPLOYEES
+        - MATCH_CORPORATE_CARD_TRANSACTIONS
+        - APPROVE_ADVANCE_REQUESTS
+        - RESUBMIT_ADVANCE_REQUESTS
+        - MATCH_ADVANCES
+        - VERIFY_EMPLOYEES
+        - ADD_CORPORATE_CARDS
+        - CONNECT_VISA_RTF
+        - VERIFY_VISA_CARD
+        - CONNECT_MASTERCARD_RTF
+        - PROCESS_REPORTS
+        - VERIFY_REPORTS
+        - ADD_BANK_ACCOUNT_EMPLOYEES
+        - COMPLETE_EXPENSES
+        - RESUBMIT_REPORTS
+        - SMS_OPT_IN
+      maxLength: 255
+      description: Represents the type of reminder.
+      example: FYLE_EXPENSES
+    reminder_schedule_config:
+      description: description of weekly/monthly schedule for sending scheduled reminder
+      type: object
+      nullable: true
+      properties:
+        type:
+          nullable: false
+          type: string
+          example: cron
+          enum:
+            - cron
+        when:
+          type: object
+          additionalProperties: false
+          properties:
+            year:
+              type: string
+              example: '*'
+              description: cron expression (string, e.g. "*" for every year)
+            month:
+              oneOf:
+                - type: number
+                  example: 1
+                  description: Month of the year (number, e.g. 1)
+                - type: string
+                  example: '*/2'
+                  description: cron expression (e.g. '*/2' for every alternate month)
+            day:
+              oneOf:
+                - type: number
+                  example: 15
+                  description: Day of month (number, e.g. 15)
+                - type: string
+                  example: last
+                  description: cron expression (string, e.g. "last")
+            day_of_week:
+              oneOf:
+                - type: string
+                  enum:
+                    - mon
+                    - tue
+                    - wed
+                    - thu
+                    - fri
+                    - sat
+                    - sun
+                  example: mon
+                  description: Single weekday name (e.g. "mon")
+                - type: string
+                  pattern: ^[1-7](?:,[1-7])*$
+                  example: 1,3,5
+                  description: comma-separated day numbers (e.g. "1,3,5" for mon,wed,fri)
+            week:
+              oneOf:
+                - type: number
+                  example: 2
+                  description: Week of the month (number, e.g. 2)
+                - type: string
+                  example: '*/1'
+                  description: cron expression (e.g. '*/1' for every week, '*/2' for every alternate week)
+            hour:
+              type: number
+              example: 22
+              description: hour of the day in 24-hr format (0-23)
+            minute:
+              type: number
+              example: 42
+              description: minute of the hour (0-59)
+    reminder_receiver_user_ids:
+      type: array
+      nullable: true
+      items:
+        type: string
+        nullable: false
+        description: |
+          This id is provided by Sage Exp Mgmt to identify an object.
+        example: uswoirwlwwg
+      example:
+        - uswoirwlwwg
+        - uswlgwkgw42
+      description: |
+        List of IDs of users to whom this reminder will be sent.
+    reminder_out:
+      type: object
+      additionalProperties: false
+      required:
+        - created_at
+        - updated_at
+        - id
+        - org_id
+        - type
+        - message
+        - schedule_config
+        - add_to_calendar
+        - receiver_user_ids
+        - send_mobile_notification
+        - last_reminded_at
+        - next_reminder_at
+      properties:
+        id:
+          type: string
+          maxLength: 20
+          description: |
+            This id provided by Sage Exp Mgmt to identify an object.
+          example: remindRsjf2WmGd2
+        org_id:
+          $ref: '#/components/schemas/org_id'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+        updated_at:
+          $ref: '#/components/schemas/updated_at'
+        type:
+          $ref: '#/components/schemas/reminder_type'
+        message:
+          type: string
+          description: |
+            The custom message which the admin wants to send alongside the reminder
+          example: Please submit your expenses before 25th of this month
+        schedule_config:
+          $ref: '#/components/schemas/reminder_schedule_config'
+        last_reminded_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Signifies the time when this reminder was sent. In case of scheduled reminders, signifies when the last reminder was sent. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2021-06-01T13:14:54.804+00:00'
+        next_reminder_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Only valid for scheduled reminders. Signifies the time when the next reminder will be sent according to the schedule_config. Date-time in [ISO8601 format](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+          example: '2021-06-01T13:14:54.804+00:00'
+        add_to_calendar:
+          type: boolean
+          nullable: false
+          default: false
+          description: |
+            Determines whether this reminder will be added as an event in the google calendar of receiver.
+          example: true
+        send_mobile_notification:
+          type: boolean
+          nullable: false
+          default: false
+          description: |
+            Determines whether this reminder will be used to send mobile notification
+          example: true
+        receiver_user_ids:
+          $ref: '#/components/schemas/reminder_receiver_user_ids'
     report_source:
       type: string
       enum:
@@ -13985,115 +14103,119 @@ components:
             Query param string similar to reports GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
           example: id=in.('rp123','rep1234')&group_by_state=eq.true
+    reports_stats_by_state_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+        - failed_amount
+        - failed_count
+        - processing_amount
+        - processing_count
+        - reimbursable_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching reports in this state.
+          example: 5
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching reports in this state.
+          example: 2200
+        state:
+          type: string
+          enum:
+            - APPROVER_PENDING
+            - DRAFT
+            - PAYMENT_PROCESSING
+            - APPROVER_INQUIRY
+            - APPROVED
+            - PAYMENT_PENDING
+            - PAID
+          description: Report state.
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 200
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 1500
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
+          example: 3
+        reimbursable_amount:
+          type: number
+          nullable: false
+          description: Sum of reimbursable amounts for matching reports in this state.
+          example: 500
+    reports_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping (response for older mobile app versions).
+      required:
+        - count
+        - total_amount
+        - processing_amount
+        - processing_count
+        - failed_amount
+        - failed_count
+      properties:
+        reimbursable_amount:
+          type: number
+          description: Total reimbursable amount for matching reports.
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching reports.
+          example: 1
+        total_amount:
+          type: number
+          nullable: false
+          description: Total sum of amounts for all matching reports.
+          example: 100
+        processing_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state.
+          example: 101
+        processing_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state.
+          example: 2
+        failed_amount:
+          type: number
+          nullable: true
+          description: Sum of reimbursable amounts for reports in processing state with ACH failures.
+          example: 101
+        failed_count:
+          type: integer
+          nullable: true
+          description: Count of reports in processing state with ACH failures.
+          example: 1
     reports_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by report state
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - state
-              - failed_amount
-              - failed_count
-              - processing_amount
-              - processing_count
-              - reimbursable_amount
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching reports in this state.
-                example: 5
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching reports in this state.
-                example: 2200
-              state:
-                type: string
-                enum:
-                  - APPROVER_PENDING
-                  - DRAFT
-                  - PAYMENT_PROCESSING
-                  - APPROVER_INQUIRY
-                  - APPROVED
-                  - PAYMENT_PENDING
-                  - PAID
-                description: Report state.
-              failed_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 200
-              failed_count:
-                type: integer
-                nullable: true
-                description: Count of ACH-failed reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1
-              processing_amount:
-                type: number
-                nullable: true
-                description: Sum of reimbursable amount for processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 1500
-              processing_count:
-                type: integer
-                nullable: true
-                description: Count of processing reports, applicable only in PAYMENT_PROCESSING state.
-                example: 3
-              reimbursable_amount:
-                type: number
-                nullable: false
-                description: Sum of reimbursable amounts for matching reports in this state.
-                example: 500
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without state grouping (response for older mobile app versions).
-          required:
-            - count
-            - total_amount
-            - processing_amount
-            - processing_count
-            - failed_amount
-            - failed_count
-          properties:
-            reimbursable_amount:
-              type: number
-              description: Total reimbursable amount for matching reports.
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching reports.
-              example: 1
-            total_amount:
-              type: number
-              nullable: false
-              description: Total sum of amounts for all matching reports.
-              example: 100
-            processing_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state.
-              example: 101
-            processing_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state.
-              example: 2
-            failed_amount:
-              type: number
-              nullable: true
-              description: Sum of reimbursable amounts for reports in processing state with ACH failures.
-              example: 101
-            failed_count:
-              type: integer
-              nullable: true
-              description: Count of reports in processing state with ACH failures.
-              example: 1
+            $ref: '#/components/schemas/reports_stats_by_state_item_out'
+        - $ref: '#/components/schemas/reports_stats_overall_out'
       example:
         - state: DRAFT
           count: 3
@@ -14943,59 +15065,63 @@ components:
             Query param string similar to advance_requests GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           nullable: false
           example: id=in.('adr1263','adr1569')&group_by_state=eq.true
+    advance_requests_stats_by_state_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching advance requests in this state.
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching advance requests in this state.
+          example: 44545.4
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - APPROVAL_PENDING
+            - APPROVED
+            - CANCELLED
+            - REJECTED
+            - PAID
+            - PULLED_BACK
+            - SENT_BACK
+          description: Advance request state.
+    advance_requests_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping.
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching advance requests.
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching advance requests.
+          example: 45882.4
     advance_requests_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by advance request state
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - state
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching advance requests in this state.
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching advance requests in this state.
-                example: 44545.4
-              state:
-                type: string
-                enum:
-                  - DRAFT
-                  - APPROVAL_PENDING
-                  - APPROVED
-                  - CANCELLED
-                  - REJECTED
-                  - PAID
-                  - PULLED_BACK
-                  - SENT_BACK
-                description: Advance request state.
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without state grouping.
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching advance requests.
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching advance requests.
-              example: 45882.4
+            $ref: '#/components/schemas/advance_requests_stats_by_state_item_out'
+        - $ref: '#/components/schemas/advance_requests_stats_overall_out'
       example:
         - state: DRAFT
           count: 10
@@ -18006,6 +18132,12 @@ components:
             - KM
             - MILES
           example: MILES
+    spender_commute_details_in:
+      required:
+        - commute_details
+      properties:
+        commute_details:
+          $ref: '#/components/schemas/commute_details_in'
     spender_commute_details_out:
       type: object
       additionalProperties: false
@@ -18076,6 +18208,14 @@ components:
             $ref: '#/components/schemas/delegatees'
           description: |
             List of users who are delegatees for this employee.
+    spender_commute_details_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: Current commute details id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
     spender_delegatees_post_in:
       type: object
       additionalProperties: false
@@ -18190,6 +18330,14 @@ components:
           description: |
             Represents the full name of the Employee.
           example: John Doe
+    spender_delegatees_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_integer'
+          description: Delegation id of spender and delegatee. This id is provided by Sage Exp Mgmt to identify an object.
     spender_delegatees_delete_out:
       type: object
       additionalProperties: false
@@ -19368,6 +19516,20 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/id_string'
+    file_upload_html_in:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: ID of the expense to which this html file needs to be attached
+          example: txdtyereJtR6
+        html_content:
+          type: string
+          description: Base64 encoded representation of the HTML content
+          example: JVBERi0xLjQKMSAwIG9iago8PAovVGl0bGUgKP7/KQovQ3JlYX...
+      required:
+        - expense_id
+        - html_content
     file_out_download_url:
       type: object
       additionalProperties: false
@@ -21173,51 +21335,55 @@ components:
           description: |
             Query param string similar to expenses GET call. Use group_by_state=eq.true to get state-wise grouping of stats.
           example: id=in.('tx1263', 'tx1569')&group_by_state=eq.true
+    expenses_stats_by_state_item_out:
+      additionalProperties: false
+      type: object
+      required:
+        - count
+        - total_amount
+        - state
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Number of matching expenses in this state
+          example: 10
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for matching expenses in this state
+          example: 44545.4
+        state:
+          allOf:
+            - $ref: '#/components/schemas/expense_state'
+          description: Expense state
+    expenses_stats_overall_out:
+      additionalProperties: false
+      type: object
+      title: Overall stats
+      description: Overall stats without state grouping
+      required:
+        - count
+        - total_amount
+      properties:
+        count:
+          type: integer
+          nullable: false
+          description: Total number of matching expenses
+          example: 353
+        total_amount:
+          type: number
+          nullable: false
+          description: Sum of amounts for all matching expenses
+          example: 45882.4
     expenses_stats_out:
       oneOf:
         - type: array
           title: State-wise grouped stats
           description: Stats grouped by expense state
           items:
-            type: object
-            additionalProperties: false
-            required:
-              - count
-              - total_amount
-              - state
-            properties:
-              count:
-                type: integer
-                nullable: false
-                description: Number of matching expenses in this state
-                example: 10
-              total_amount:
-                type: number
-                nullable: false
-                description: Sum of amounts for matching expenses in this state
-                example: 44545.4
-              state:
-                allOf:
-                  - $ref: '#/components/schemas/expense_state'
-                description: Expense state
-        - type: object
-          additionalProperties: false
-          title: Overall stats
-          description: Overall stats without state grouping
-          required:
-            - count
-            - total_amount
-          properties:
-            count:
-              type: integer
-              nullable: false
-              description: Total number of matching expenses
-              example: 353
-            total_amount:
-              type: number
-              nullable: false
-              description: Sum of amounts for all matching expenses
-              example: 45882.4
+            $ref: '#/components/schemas/expenses_stats_by_state_item_out'
+        - $ref: '#/components/schemas/expenses_stats_overall_out'
       example:
         - state: COMPLETE
           count: 343
@@ -22004,6 +22170,14 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_delete_in:
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
     personal_card_delete_out:
       type: object
       additionalProperties: false
@@ -22211,6 +22385,29 @@ components:
           $ref: '#/components/schemas/created_at'
         updated_at:
           $ref: '#/components/schemas/updated_at'
+    personal_card_transactions_fetch_in:
+      required:
+        - personal_card_id
+      properties:
+        personal_card_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+    personal_card_transaction_match_in:
+      required:
+        - id
+        - expense_split_group_id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+          example: btxnAnsad23ms
+        expense_split_group_id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: Personal card id of the spender. This id is provided by Sage Exp Mgmt to identify an object.
+          example: txaisd2asdJ
     personal_card_transaction_hide_in:
       type: object
       required:
@@ -24685,6 +24882,33 @@ components:
           anyOf:
             - $ref: '#/components/schemas/org_settings_fyler_ccc_flow_settings_out'
             - $ref: '#/components/schemas/org_settings_null_out'
+    expense_policy_comment_in:
+      type: object
+      required:
+        - comment_type
+        - comment_text
+      properties:
+        comment_type:
+          type: string
+          description: The comment type
+        comment_text:
+          type: string
+          description: The comment text
+          nullable: true
+    expense_policy_comments_upsert_in:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: The expense ID
+        expense_policy_comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_comment_in'
+      required:
+        - expense_id
+        - expense_policy_comments
+      additionalProperties: false
     expense_policy_comment_out:
       type: object
       additionalProperties: false
@@ -24724,6 +24948,20 @@ components:
           $ref: '#/components/schemas/user_id'
         creator_user:
           $ref: '#/components/schemas/user_out_embed'
+    expense_policy_comments_upsert_out:
+      type: object
+      properties:
+        expense_id:
+          type: string
+          description: The expense ID
+        expense_policy_comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/expense_policy_comment_out'
+      required:
+        - expense_id
+        - expense_policy_comments
+      additionalProperties: false
     advance_request_submit_in:
       allOf:
         - $ref: '#/components/schemas/advance_request_in_base'
@@ -24970,6 +25208,30 @@ components:
           description: |
             The secondary email address to be added.
           example: secondary-test@test.in
+    secondary_email_check_in:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+      properties:
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          description: |
+            The email address to check for availability.
+          example: test-xyz@test.in
+    secondary_email_delete_in:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/id_string'
+          description: |
+            The unique identifier of the secondary email to delete.
+          example: seu2gy8ulk32
     advance_request_custom_field_out:
       type: object
       additionalProperties: false
