@@ -119,10 +119,129 @@ tags:
   - name: Dwolla Customers
     description: |
       This API gives you access to manage Dwolla customer data for your organization.
+  - name: Dwolla
+    description: |
+      This API gives you access to manage Dwolla customer data for your organization.
   - name: Copilot
     description: |
       These APIs gives you access to manage your Copilot chats and messages.
 paths:
+  /admin/dwolla/customers/documents:
+    post:
+      tags:
+        - Dwolla
+      summary: Upload a Dwolla business-customer verification document
+      description: |
+        Uploads a verification document for the authenticated Admin's organization.
+        The customer must be a business customer in document status, with the
+        matching verification link available in Dwolla. Individual verification
+        is unsupported, including for sole proprietorships.
+
+        Controller verification requires an LLC, corporation, or partnership.
+        US controllers may use passport, license, or id_card; non-US controllers
+        must use passport. Business and DBA verification require other.
+
+        Supply a base filename and non-empty, strictly base64-encoded JPEG or PNG
+        content. PDF is allowed only for business or DBA verification. File type
+        is checked from its signature, not its extension. The decoded file must
+        not exceed 10 MB, and the customer must have fewer than four documents.
+        Verification flags are updated by subsequent webhooks, not this endpoint.
+      operationId: dwolla_customer_documents_admin_post
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - verification_target
+                    - document_type
+                    - file_name
+                    - file_content_b64
+                  properties:
+                    verification_target:
+                      type: string
+                      enum:
+                        - controller
+                        - business
+                        - dba
+                    document_type:
+                      type: string
+                      enum:
+                        - passport
+                        - license
+                        - id_card
+                        - other
+                    file_name:
+                      type: string
+                    file_content_b64:
+                      type: string
+                      format: byte
+      responses:
+        '200':
+          description: Document uploaded and verified against the scoped customer
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - status
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - pending
+                          - reviewed
+        '400':
+          description: Invalid document, target, provider state, or response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - error
+                  - message
+                properties:
+                  data:
+                    nullable: true
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Scoped Dwolla customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/copilot/chats:
     get:
       x-internal: true
