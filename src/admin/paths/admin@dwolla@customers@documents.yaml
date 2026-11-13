@@ -1,6 +1,21 @@
 post:
-  tags: [Dwolla]
+  tags: [Dwolla Customers]
   summary: Upload a Dwolla business-customer verification document
+  description: |
+    Uploads a verification document for the authenticated Admin's organization.
+    The customer must be a business customer in document status, with the
+    matching verification link available in Dwolla. Individual verification
+    is unsupported, including for sole proprietorships.
+
+    Controller verification requires an LLC, corporation, or partnership.
+    US controllers may use passport, license, or id_card; non-US controllers
+    must use passport. Business and DBA verification require other.
+
+    Supply a base filename and non-empty, strictly base64-encoded JPEG or PNG
+    content. PDF is allowed only for business or DBA verification. File type
+    is checked from its signature, not its extension. The decoded file must
+    not exceed 10 MB, and the customer must have fewer than four documents.
+    Verification flags are updated by subsequent webhooks, not this endpoint.
   operationId: dwolla_customer_documents_admin_post
   parameters: []
   requestBody:
@@ -23,7 +38,7 @@ post:
               properties:
                 verification_target:
                   type: string
-                  enum: [individual, controller, business, dba]
+                  enum: [controller, business, dba]
                 document_type:
                   type: string
                   enum: [passport, license, id_card, other]
