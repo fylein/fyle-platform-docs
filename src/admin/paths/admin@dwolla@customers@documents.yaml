@@ -1,0 +1,91 @@
+get:
+  tags: [Dwolla]
+  summary: List Dwolla business-customer verification documents
+  description: |
+    Lists verification documents for the authenticated Admin's organization.
+    The business customer is resolved from the authenticated organization; no
+    customer identifier is accepted from the client. A customer that has no
+    documents returns an empty data array and count 0.
+  operationId: dwolla_customer_documents_admin_get
+  parameters: []
+  responses:
+    '200':
+      description: Customer documents
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data, count]
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - type
+                    - status
+                    - document_verification_status
+                    - failure_reason
+                    - all_failure_reasons
+                  properties:
+                    type:
+                      type: string
+                      enum: [passport, license, id_card, other]
+                    status:
+                      type: string
+                      enum: [pending, reviewed]
+                    document_verification_status:
+                      type: string
+                      enum: [pending, accepted, rejected]
+                    failure_reason:
+                      type: string
+                      nullable: true
+                    all_failure_reasons:
+                      type: array
+                      items:
+                        type: object
+                        additionalProperties: false
+                        required: [code, description]
+                        properties:
+                          code:
+                            type: string
+                          description:
+                            type: string
+              count:
+                type: integer
+                minimum: 0
+    '400':
+      description: Invalid query, duplicate customer, or malformed provider response
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data, error, message]
+            properties:
+              data:
+                nullable: true
+              error:
+                type: string
+              message:
+                type: string
+    '404':
+      description: Scoped Dwolla business customer not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
