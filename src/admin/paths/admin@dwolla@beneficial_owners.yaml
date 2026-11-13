@@ -1,0 +1,128 @@
+get:
+  tags: [Dwolla Beneficial Owners]
+  summary: Get the organization's Dwolla beneficial owner
+  description: |
+    Returns the beneficial owner associated with the authenticated Admin's
+    Dwolla business customer. The customer is resolved from the authenticated
+    organization; customer and beneficial-owner identifiers are not accepted.
+
+    A sole proprietorship and a controlled business with no beneficial owner
+    return `data: null`.
+  operationId: dwolla_beneficial_owners_admin_get
+  parameters: []
+  responses:
+    '200':
+      description: Beneficial-owner state
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                type: object
+                nullable: true
+                additionalProperties: false
+                required:
+                  - first_name
+                  - last_name
+                  - date_of_birth
+                  - ssn
+                  - passport_number
+                  - passport_country
+                  - address1
+                  - address2
+                  - address3
+                  - city
+                  - state_province_region
+                  - postal_code
+                  - country
+                properties:
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+                  date_of_birth:
+                    type: string
+                    format: date
+                  ssn:
+                    type: string
+                    nullable: true
+                  passport_number:
+                    type: string
+                    nullable: true
+                  passport_country:
+                    type: string
+                    nullable: true
+                  address1:
+                    type: string
+                  address2:
+                    type: string
+                    nullable: true
+                  address3:
+                    type: string
+                    nullable: true
+                  city:
+                    type: string
+                  state_province_region:
+                    type: string
+                  postal_code:
+                    type: string
+                  country:
+                    type: string
+          examples:
+            owner:
+              summary: Controlled business with one beneficial owner
+              value:
+                data:
+                  first_name: Jane
+                  last_name: Owner
+                  date_of_birth: '1980-01-31'
+                  ssn: '123456789'
+                  passport_number: null
+                  passport_country: null
+                  address1: 100 Main St
+                  address2: null
+                  address3: null
+                  city: Des Moines
+                  state_province_region: IA
+                  postal_code: '50266'
+                  country: US
+            no_owner:
+              summary: Sole proprietorship or controlled business without an owner
+              value:
+                data: null
+    '400':
+      description: Invalid query, customer state, owner cardinality, or provider response
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data, error, message]
+            properties:
+              data:
+                nullable: true
+              error:
+                type: string
+              message:
+                type: string
+    '404':
+      description: Scoped Dwolla business customer not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
