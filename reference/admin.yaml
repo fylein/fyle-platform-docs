@@ -121,7 +121,7 @@ tags:
       This API gives you access to manage Dwolla customer data for your organization.
   - name: Dwolla
     description: |
-      This API gives you access to manage Dwolla customer data for your organization.
+      This API gives you access to the new Dwolla API surface.
   - name: Copilot
     description: |
       These APIs gives you access to manage your Copilot chats and messages.
@@ -273,6 +273,7 @@ paths:
                         type: string
               examples:
                 owner:
+                  summary: Controlled business with one beneficial owner
                   value:
                     data:
                       first_name: Jane
@@ -289,6 +290,7 @@ paths:
                       postal_code: '50266'
                       country: US
                 no_owner:
+                  summary: Sole proprietorship or controlled business without an owner
                   value:
                     data: null
         '400':
@@ -334,10 +336,12 @@ paths:
       description: |
         Creates or retries the beneficial owner for the authenticated Admin's
         Dwolla business customer, or recovers certification for an existing
-        verified owner. The server selects the customer, owner, and action.
+        verified owner. The customer, owner, and action are selected by the server
+        from organization-scoped database state and live Dwolla state.
 
         US owners must supply a full nine-digit SSN. Non-US owners must omit SSN
-        and supply passport details. Resource identifiers are not accepted.
+        and supply passport details. Customer and owner identifiers are not
+        accepted.
       operationId: dwolla_beneficial_owners_admin_post
       parameters: []
       requestBody:
@@ -368,10 +372,12 @@ paths:
                     date_of_birth:
                       type: string
                       format: date
+                      description: The owner must be at least 18 years old.
                     ssn:
                       type: string
                       nullable: true
-                      pattern: '^\d{9}$'
+                      pattern: ^\d{9}$
+                      description: Required for US owners; must contain all nine digits.
                     passport:
                       type: object
                       nullable: true
@@ -385,7 +391,7 @@ paths:
                           minLength: 1
                         country:
                           type: string
-                          pattern: '^[A-Z]{2}$'
+                          pattern: ^[A-Z]{2}$
                     address:
                       type: object
                       additionalProperties: false
@@ -416,9 +422,10 @@ paths:
                           minLength: 1
                         country:
                           type: string
-                          pattern: '^[A-Z]{2}$'
+                          pattern: ^[A-Z]{2}$
             examples:
               us_owner:
+                summary: US beneficial owner
                 value:
                   data:
                     first_name: Jane
@@ -435,6 +442,7 @@ paths:
                       postal_code: '50266'
                       country: US
               non_us_owner:
+                summary: Non-US beneficial owner
                 value:
                   data:
                     first_name: Priya
