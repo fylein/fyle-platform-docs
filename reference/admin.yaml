@@ -522,6 +522,122 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404'
+  /admin/dwolla/beneficial_owners/documents:
+    post:
+      tags:
+        - Dwolla
+      summary: Upload a document for the organization's Dwolla beneficial owner
+      description: |
+        Uploads an identity document for the single beneficial owner of the
+        authenticated Admin's Dwolla business customer when Dwolla reports that
+        the owner is awaiting a document.
+
+        US beneficial owners may submit a passport, driver's license, or identity
+        card. Non-US beneficial owners may submit only a passport. Files must be
+        non-empty JPEG or PNG content, no larger than 10 MB, and the file name must
+        be a base name without path separators. Customer and beneficial-owner
+        identifiers are resolved by the server and are not accepted in the request.
+      operationId: dwolla_beneficial_owner_documents_admin_post
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - data
+              properties:
+                data:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - document_type
+                    - file_name
+                    - file_content_b64
+                  properties:
+                    document_type:
+                      type: string
+                      enum:
+                        - passport
+                        - license
+                        - id_card
+                    file_name:
+                      type: string
+                      minLength: 1
+                      description: Base file name without directory components.
+                    file_content_b64:
+                      type: string
+                      format: byte
+                      minLength: 1
+                      description: 'Base64-encoded JPEG or PNG content, up to 10 MB decoded.'
+            example:
+              data:
+                document_type: passport
+                file_name: identity.png
+                file_content_b64: iVBORw0KGgp0ZXN0
+      responses:
+        '201':
+          description: Document uploaded and verified against the scoped owner
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - status
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - pending
+                          - reviewed
+              example:
+                data:
+                  status: pending
+        '400':
+          description: 'Invalid file, unsupported owner state, or invalid document state'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - data
+                  - error
+                  - message
+                properties:
+                  data:
+                    nullable: true
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Scoped Dwolla business customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
   /admin/copilot/chats:
     get:
       x-internal: true
