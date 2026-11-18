@@ -1,0 +1,310 @@
+get:
+  tags: [Dwolla]
+  summary: Get the organization's Dwolla beneficial owner
+  description: |
+    Returns the beneficial owner associated with the authenticated Admin's
+    Dwolla business customer. The customer is resolved from the authenticated
+    organization; customer and beneficial-owner identifiers are not accepted.
+
+    A sole proprietorship and a controlled business with no beneficial owner
+    return `data: null`.
+  operationId: dwolla_beneficial_owners_admin_get
+  parameters: []
+  responses:
+    '200':
+      description: Beneficial-owner state
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                type: object
+                nullable: true
+                additionalProperties: false
+                required:
+                  - first_name
+                  - last_name
+                  - date_of_birth
+                  - ssn
+                  - passport_number
+                  - passport_country
+                  - address1
+                  - address2
+                  - address3
+                  - city
+                  - state_province_region
+                  - postal_code
+                  - country
+                properties:
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+                  date_of_birth:
+                    type: string
+                    format: date
+                  ssn:
+                    type: string
+                    nullable: true
+                  passport_number:
+                    type: string
+                    nullable: true
+                  passport_country:
+                    type: string
+                    nullable: true
+                  address1:
+                    type: string
+                  address2:
+                    type: string
+                    nullable: true
+                  address3:
+                    type: string
+                    nullable: true
+                  city:
+                    type: string
+                  state_province_region:
+                    type: string
+                  postal_code:
+                    type: string
+                  country:
+                    type: string
+          examples:
+            owner:
+              summary: Controlled business with one beneficial owner
+              value:
+                data:
+                  first_name: Jane
+                  last_name: Owner
+                  date_of_birth: '1980-01-31'
+                  ssn: '123456789'
+                  passport_number: null
+                  passport_country: null
+                  address1: 100 Main St
+                  address2: null
+                  address3: null
+                  city: Des Moines
+                  state_province_region: IA
+                  postal_code: '50266'
+                  country: US
+            no_owner:
+              summary: Sole proprietorship or controlled business without an owner
+              value:
+                data: null
+    '400':
+      description: Invalid query, customer state, owner cardinality, or provider response
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data, error, message]
+            properties:
+              data:
+                nullable: true
+              error:
+                type: string
+              message:
+                type: string
+    '404':
+      description: Scoped Dwolla business customer not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
+
+post:
+  tags: [Dwolla]
+  summary: Create, retry, or certify a Dwolla beneficial owner
+  description: |
+    Creates or retries the beneficial owner for the authenticated Admin's
+    Dwolla business customer, or recovers certification for an existing
+    verified owner. The customer, owner, and action are selected by the server
+    from organization-scoped database state and live Dwolla state.
+
+    US owners must supply a full nine-digit SSN. Non-US owners must omit SSN
+    and supply passport details. Customer and owner identifiers are not
+    accepted.
+  operationId: dwolla_beneficial_owners_admin_post
+  parameters: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: false
+          required: [data]
+          properties:
+            data:
+              type: object
+              additionalProperties: false
+              required:
+                - first_name
+                - last_name
+                - date_of_birth
+                - address
+              properties:
+                first_name:
+                  type: string
+                  minLength: 1
+                last_name:
+                  type: string
+                  minLength: 1
+                date_of_birth:
+                  type: string
+                  format: date
+                  description: The owner must be at least 18 years old.
+                ssn:
+                  type: string
+                  nullable: true
+                  pattern: '^\d{9}$'
+                  description: Required for US owners; must contain all nine digits.
+                passport:
+                  type: object
+                  nullable: true
+                  additionalProperties: false
+                  required: [number, country]
+                  properties:
+                    number:
+                      type: string
+                      minLength: 1
+                    country:
+                      type: string
+                      pattern: '^[A-Z]{2}$'
+                address:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - address1
+                    - city
+                    - state_province_region
+                    - postal_code
+                    - country
+                  properties:
+                    address1:
+                      type: string
+                      minLength: 1
+                    address2:
+                      type: string
+                      nullable: true
+                    address3:
+                      type: string
+                      nullable: true
+                    city:
+                      type: string
+                      minLength: 1
+                    state_province_region:
+                      type: string
+                      minLength: 1
+                    postal_code:
+                      type: string
+                      minLength: 1
+                    country:
+                      type: string
+                      pattern: '^[A-Z]{2}$'
+        examples:
+          us_owner:
+            summary: US beneficial owner
+            value:
+              data:
+                first_name: Jane
+                last_name: Owner
+                date_of_birth: '1980-01-31'
+                ssn: '123456789'
+                passport: null
+                address:
+                  address1: 100 Main St
+                  address2: null
+                  address3: null
+                  city: Des Moines
+                  state_province_region: IA
+                  postal_code: '50266'
+                  country: US
+          non_us_owner:
+            summary: Non-US beneficial owner
+            value:
+              data:
+                first_name: Priya
+                last_name: Sharma
+                date_of_birth: '1980-01-31'
+                ssn: null
+                passport:
+                  number: P1234567
+                  country: IN
+                address:
+                  address1: 12 Residency Road
+                  address2: null
+                  address3: null
+                  city: Bengaluru
+                  state_province_region: KA
+                  postal_code: '560001'
+                  country: IN
+  responses:
+    '200':
+      description: Final Dwolla beneficial-ownership status
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data]
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [uncertified, recertify, certified]
+          example:
+            data:
+              status: certified
+    '400':
+      description: Invalid request or unsupported customer/owner state
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/400.yaml'
+    '401':
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/401.yaml'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [data, error, message]
+            properties:
+              data:
+                nullable: true
+              error:
+                type: string
+              message:
+                type: string
+    '404':
+      description: Scoped Dwolla business customer not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/404.yaml'
