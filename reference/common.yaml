@@ -37,6 +37,7 @@ tags:
 paths:
   /common/customers/exists:
     post:
+      x-internal: true
       tags:
         - Dwolla
       summary: Check whether a Dwolla customer belongs to this cluster
@@ -47,6 +48,7 @@ paths:
         - in: header
           name: X-ROUTER-TOKEN
           required: true
+          description: Router JWT used to authenticate the internal request.
           schema:
             type: string
       requestBody:
@@ -69,9 +71,12 @@ paths:
                       type: string
                       format: uuid
                       description: Dwolla customer UUID stored in DwollaCustomer.external_id.
+            example:
+              data:
+                customer_id: 5d628148-62e8-4b4c-a76e-b3e72f3fb458
       responses:
         '200':
-          description: OK
+          description: Customer ownership check completed
           content:
             application/json:
               schema:
@@ -88,6 +93,17 @@ paths:
                     properties:
                       exists:
                         type: boolean
+              examples:
+                customer_exists:
+                  summary: Customer belongs to this cluster
+                  value:
+                    data:
+                      exists: true
+                customer_does_not_exist:
+                  summary: Customer does not belong to this cluster
+                  value:
+                    data:
+                      exists: false
         '400':
           description: Invalid request payload or duplicate customer rows
           content:
